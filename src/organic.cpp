@@ -1,12 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <chrono>
 
 #include "../include/RtAudio.h"
 
+#include "../include/constants.h"
 #include "../include/audiosource.h"
-
-#define SAMPLE_RATE 44100
 
 struct AudioData
 {
@@ -48,7 +48,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
     
     AudioData* data = (AudioData*)userData;
 
-    for (int i = 0; i < frames * 2; i++)
+    for (int i = 0; i < frames * Constants::CHANNELS; i++)
     {
         buffer[i] = 0;
     }
@@ -58,7 +58,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
         source->fillBuffer(buffer, frames, data->phase);
     }
 
-    data->phase = (data->phase + frames) % SAMPLE_RATE;
+    data->phase = (data->phase + frames) % Constants::SAMPLE_RATE;
 
     return 0;
 }
@@ -77,17 +77,16 @@ int main(int argc, char** argv)
     RtAudio::StreamParameters parameters;
 
     parameters.deviceId = audio.getDefaultOutputDevice();
-    parameters.nChannels = 2;
+    parameters.nChannels = Constants::CHANNELS;
     parameters.firstChannel = 0;
 
-    unsigned int sampleRate = SAMPLE_RATE;
-    unsigned int bufferFrames = 256;
+    unsigned int bufferFrames = Constants::BUFFER_LENGTH;
 
     AudioData data;
 
-    data.sources.push_back(new TestAudioSource(sampleRate));
+    data.sources.push_back(new SineAudioSource(220, 1, 50, 300, 0, 0));
 
-    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, sampleRate, &bufferFrames, &processAudio, (void*)&data))
+    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, Constants::SAMPLE_RATE, &bufferFrames, &processAudio, (void*)&data))
     {
         error(audio.getErrorText());
     }
@@ -97,9 +96,35 @@ int main(int argc, char** argv)
         errorAndDestroy(audio.getErrorText(), audio);
     }
 
-    char input;
+    std::chrono::high_resolution_clock clock;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
 
-    std::cin.get(input);
+    bool retrigger;
+
+    while (true)
+    {
+        long long time = std::chrono::duration_cast<std::chrono::milliseconds>(clock.now() - start).count();
+
+        if (time % 500 == 0 && retrigger)
+        {
+            for (AudioSource* source : data.sources)
+            {
+                source->trigger(time);
+            }
+
+            retrigger = false;
+        }
+
+        else if (time % 500 > 0)
+        {
+            retrigger = true;
+        }
+
+        for (AudioSource* source : data.sources)
+        {
+            source->update(time);
+        }
+    }
 
     if (audio.isStreamRunning())
     {

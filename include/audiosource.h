@@ -1,28 +1,51 @@
 #pragma once
 
-#include <math.h>
+#include "constants.h"
 
-#define TWO_PI (M_PI * 2)
+struct Envelope
+{
+    Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release);
+
+    unsigned int attack;
+    unsigned int decay;
+    double sustain;
+    unsigned int release;
+};
 
 class AudioSource
 {
 
 public:
-    AudioSource(unsigned int sampleRate) : sampleRate(sampleRate) {};
+    AudioSource(double volume, unsigned int attack, unsigned int decay, double sustain, unsigned int release);
 
     virtual void fillBuffer(double* buffer, unsigned int bufferLength, unsigned int phase) = 0;
+    
+    void trigger(long long time);
+    void update(long long time);
+    void release(long long time);
 
 protected:
-    unsigned int sampleRate;
+    double volume;
+    double amplitude = 0;
+    double peak;
+
+    Envelope envelope;
+
+    long long start = 0;
+
+    bool hold = false;
 
 };
 
-class TestAudioSource : public AudioSource
+class SineAudioSource : public AudioSource
 {
 
 public:
-    TestAudioSource(unsigned int sampleRate) : AudioSource(sampleRate) {};
-    
+    SineAudioSource(double frequency, double volume, unsigned int attack, unsigned int decay, double sustain, unsigned int release);
+
     void fillBuffer(double* buffer, unsigned int bufferLength, unsigned int phase) override;
+
+private:
+    double frequency;
 
 };
