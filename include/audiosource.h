@@ -1,39 +1,60 @@
 #pragma once
 
+#include <vector>
+
 #include "constants.h"
 
-struct Envelope
+class Envelope
 {
-    Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release);
 
+public:
+    Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release, double maxAmplitude);
+
+    void start(long long time);
+    void stop(long long time);
+    void update(long long time);
+    void setValue(double* value);
+
+private:
     unsigned int attack;
     unsigned int decay;
     double sustain;
     unsigned int release;
+
+    double maxAmplitude;
+    double amplitude;
+    double peak;
+
+    long long startTime;
+    long long stopTime;
+
+    bool hold;
+
+};
+
+struct EnvelopeLink
+{
+    Envelope* envelope;
+
+    double* value;
 };
 
 class AudioSource
 {
 
 public:
-    AudioSource(double volume, unsigned int attack, unsigned int decay, double sustain, unsigned int release);
+    AudioSource(double volume);
 
     virtual void fillBuffer(double* buffer, unsigned int bufferLength, unsigned int phase) = 0;
+
+    void addEnvelope(Envelope* envelope, double* value);
     
-    void trigger(long long time);
     void update(long long time);
-    void release(long long time);
 
-protected:
     double volume;
-    double amplitude = 0;
-    double peak;
 
-    Envelope envelope;
-
-    long long start = 0;
-
-    bool hold = false;
+private:
+    std::vector<EnvelopeLink> envelopes;
 
 };
 
@@ -41,11 +62,10 @@ class SineAudioSource : public AudioSource
 {
 
 public:
-    SineAudioSource(double frequency, double volume, unsigned int attack, unsigned int decay, double sustain, unsigned int release);
+    SineAudioSource(double frequency, double volume);
 
     void fillBuffer(double* buffer, unsigned int bufferLength, unsigned int phase) override;
 
-private:
     double frequency;
 
 };

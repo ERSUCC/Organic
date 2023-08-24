@@ -84,7 +84,13 @@ int main(int argc, char** argv)
 
     AudioData data;
 
-    data.sources.push_back(new SineAudioSource(220, 1, 50, 300, 0, 0));
+    SineAudioSource* test = new SineAudioSource(220, 1);
+    
+    Envelope* envelope = new Envelope(500, 0, 1, 500, 1);
+
+    test->addEnvelope(envelope, &test->volume);
+
+    data.sources.push_back(test);
 
     if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, Constants::SAMPLE_RATE, &bufferFrames, &processAudio, (void*)&data))
     {
@@ -99,26 +105,13 @@ int main(int argc, char** argv)
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
 
-    bool retrigger;
+    envelope->start(0);
 
     while (true)
     {
         long long time = std::chrono::duration_cast<std::chrono::milliseconds>(clock.now() - start).count();
 
-        if (time % 500 == 0 && retrigger)
-        {
-            for (AudioSource* source : data.sources)
-            {
-                source->trigger(time);
-            }
-
-            retrigger = false;
-        }
-
-        else if (time % 500 > 0)
-        {
-            retrigger = true;
-        }
+        envelope->update(time);
 
         for (AudioSource* source : data.sources)
         {

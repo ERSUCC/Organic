@@ -1,39 +1,45 @@
 #include "../include/audiosource.h"
 
-Envelope::Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release) : attack(attack), decay(decay), sustain(sustain), release(release) {}
+Envelope::Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release, double maxAmplitude) :
+    attack(attack), decay(decay), sustain(sustain), release(release), maxAmplitude(maxAmplitude) {}
 
-AudioSource::AudioSource(double volume, unsigned int attack, unsigned int decay, double sustain, unsigned int release) : volume(volume), envelope(attack, decay, sustain, release) {}
-
-void AudioSource::trigger(long long time)
+void Envelope::start(long long time)
 {
     amplitude = 0;
-    start = time;
+    startTime = time;
     hold = true;
 }
 
-void AudioSource::update(long long time)
+void Envelope::stop(long long time)
+{
+    peak = amplitude;
+    stopTime = time;
+    hold = false;
+}
+
+void Envelope::update(long long time)
 {
     if (hold)
     {
-        if (time - start < envelope.attack)
+        if (time - startTime < attack)
         {
-            amplitude = volume * (time - start) / envelope.attack;
+            amplitude = maxAmplitude * (time - startTime) / attack;
         }
 
-        else if (time - start - envelope.attack < envelope.decay)
+        else if (time - startTime - attack < decay)
         {
-            amplitude = envelope.sustain + volume * (1 - envelope.sustain) * (1 - (double)(time - start - envelope.attack) / envelope.decay);
+            amplitude = sustain + maxAmplitude * (1 - sustain) * (1 - (double)(time - startTime - attack) / decay);
         }
 
         else
         {
-            amplitude = volume * envelope.sustain;
+            amplitude = maxAmplitude * sustain;
         }
     }
 
     else if (amplitude > 0)
     {
-        amplitude = peak * (1 - (double)(time - start) / envelope.release);
+        amplitude = peak * (1 - (double)(time - stopTime) / release);
     }
 
     else
@@ -42,21 +48,33 @@ void AudioSource::update(long long time)
     }
 }
 
-void AudioSource::release(long long time)
+void Envelope::setValue(double* value)
 {
-    peak = amplitude;
-    start = time;
-    hold = false;
+    *value = amplitude;
 }
 
-SineAudioSource::SineAudioSource(double frequency, double volume, unsigned int attack, unsigned int decay, double sustain, unsigned int release) :
-    AudioSource(volume, attack, decay, sustain, release), frequency(frequency) {}
+AudioSource::AudioSource(double volume) : volume(volume) {}
+
+void AudioSource::addEnvelope(Envelope* envelope, double* value)
+{
+    envelopes.push_back({ envelope, value });
+}
+
+void AudioSource::update(long long time)
+{
+    for (EnvelopeLink link : envelopes)
+    {
+        link.envelope->setValue(link.value);
+    }
+}
+
+SineAudioSource::SineAudioSource(double frequency, double volume) : AudioSource(volume), frequency(frequency) {}
 
 void SineAudioSource::fillBuffer(double* buffer, unsigned int bufferLength, unsigned int phase)
 {
     for (int i = 0; i < bufferLength; i++)
     {
-        double value = 0.5 * amplitude * sin(Constants::TWO_PI * frequency * (phase + i) / Constants::SAMPLE_RATE);
+        double value = 0.5 * volume * sin(Constants::TWO_PI * frequency * (phase + i) / Constants::SAMPLE_RATE);
 
         for (int j = 0; j < Constants::CHANNELS; j++)
         {
