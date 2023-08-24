@@ -10,8 +10,6 @@
 
 struct AudioData
 {
-    unsigned int phase = 0;
-
     std::vector<AudioSource*> sources;
 };
 
@@ -55,10 +53,8 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
     for (AudioSource* source : data->sources)
     {
-        source->fillBuffer(buffer, frames, data->phase);
+        source->fillBuffer(buffer, frames);
     }
-
-    data->phase = (data->phase + frames) % Constants::SAMPLE_RATE;
 
     return 0;
 }
@@ -85,12 +81,19 @@ int main(int argc, char** argv)
     AudioData data;
 
     SineAudioSource* test = new SineAudioSource(220, 1);
-    
-    Envelope* envelope = new Envelope(500, 0, 1, 500, 1);
-
-    test->addEnvelope(envelope, &test->volume);
 
     data.sources.push_back(test);
+
+    std::vector<Envelope*> envelopes;
+
+    Envelope* one = new Envelope(500, 0, 1, 500, 1);
+    Envelope* two = new Envelope(500, 0, 1, 500, 220);
+
+    one->connectValue(&test->volume);
+    two->connectValue(&test->frequency);
+
+    envelopes.push_back(one);
+    envelopes.push_back(two);
 
     if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, Constants::SAMPLE_RATE, &bufferFrames, &processAudio, (void*)&data))
     {
@@ -105,17 +108,13 @@ int main(int argc, char** argv)
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
 
-    envelope->start(0);
-
     while (true)
     {
         long long time = std::chrono::duration_cast<std::chrono::milliseconds>(clock.now() - start).count();
 
-        envelope->update(time);
-
-        for (AudioSource* source : data.sources)
+        for (Envelope* envelope : envelopes)
         {
-            source->update(time);
+            envelope->update(time);
         }
     }
 

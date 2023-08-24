@@ -1,7 +1,15 @@
 #include "../include/audiosource.h"
 
 Envelope::Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release, double maxAmplitude) :
-    attack(attack), decay(decay), sustain(sustain), release(release), maxAmplitude(maxAmplitude) {}
+    attack(attack), decay(decay), sustain(sustain), release(release), maxAmplitude(maxAmplitude)
+{
+    start(0);
+}
+
+void Envelope::connectValue(double* value)
+{
+    connectedValues.push_back(value);
+}
 
 void Envelope::start(long long time)
 {
@@ -46,39 +54,32 @@ void Envelope::update(long long time)
     {
         amplitude = 0;
     }
-}
 
-void Envelope::setValue(double* value)
-{
-    *value = amplitude;
+    for (double* value : connectedValues)
+    {
+        *value = amplitude;
+    }
 }
 
 AudioSource::AudioSource(double volume) : volume(volume) {}
 
-void AudioSource::addEnvelope(Envelope* envelope, double* value)
-{
-    envelopes.push_back({ envelope, value });
-}
-
-void AudioSource::update(long long time)
-{
-    for (EnvelopeLink link : envelopes)
-    {
-        link.envelope->setValue(link.value);
-    }
-}
-
 SineAudioSource::SineAudioSource(double frequency, double volume) : AudioSource(volume), frequency(frequency) {}
 
-void SineAudioSource::fillBuffer(double* buffer, unsigned int bufferLength, unsigned int phase)
+void SineAudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
 {
+    phaseDelta = Constants::TWO_PI * frequency / Constants::SAMPLE_RATE;
+
     for (int i = 0; i < bufferLength; i++)
     {
-        double value = 0.5 * volume * sin(Constants::TWO_PI * frequency * (phase + i) / Constants::SAMPLE_RATE);
+        double value = volume * sin(phase) / Constants::CHANNELS;
 
         for (int j = 0; j < Constants::CHANNELS; j++)
         {
             buffer[i * Constants::CHANNELS + j] += value;
         }
+
+        phase += phaseDelta;
     }
+
+    phase = fmod(phase, Constants::TWO_PI);
 }
