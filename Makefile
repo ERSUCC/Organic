@@ -1,8 +1,24 @@
 CC = g++
-CPPFLAGS = -std=c++11
+CFLAGS = -std=c++11
+
+ifeq ($(OS), Windows_NT)
+	RTLIB = rtaudiowindows
+else
+	UNAME := $(shell uname -s)
+	
+	ifeq ($(UNAME), Darwin)
+		RTLIB = rtaudio
+	endif
+	ifeq ($(UNAME), Linux)
+		RTLIB = rtaudiolinux
+	endif
+endif
 
 organic: audiosource
-	$(CC) $(CPPFLAGS) src/organic.cpp -l rtaudio bin/audiosource -o bin/organic
+	$(CC) $(CFLAGS) src/organic.cpp -l $(RTLIB) bin/audiosource -o bin/organic
 
 audiosource:
-	$(CC) -c $(CPPFLAGS) src/audiosource.cpp -o bin/audiosource
+	$(CC) -c $(CFLAGS) src/audiosource.cpp -o bin/audiosource
+
+clean:
+	rm bin.*
