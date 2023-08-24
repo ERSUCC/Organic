@@ -19,6 +19,3 @@ organic: audiosource
 
 audiosource:
 	$(CC) -c $(CFLAGS) src/audiosource.cpp -o bin/audiosource
-
-clean:
-	rm bin.*
