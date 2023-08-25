@@ -56,12 +56,17 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
         source->fillBuffer(buffer, frames);
     }
 
+    for (int i = 0; i < frames * Constants::CHANNELS; i++)
+    {
+        buffer[i] *= Constants::MASTER_VOLUME;
+    }
+
     return 0;
 }
 
 int main(int argc, char** argv)
 {
-    RtAudio audio(RtAudio::Api::MACOSX_CORE, rtAudioError);
+    RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
 
     std::vector<unsigned int> ids = audio.getDeviceIds();
 
@@ -70,6 +75,25 @@ int main(int argc, char** argv)
         error("Error: No audio device detected.");
     }
 
+    std::vector<Envelope*> envelopes;
+
+    Envelope* pitch = new Envelope(1000, 0, 261.63, 0, 196, 261.63);
+    Envelope* pitch2 = new Envelope(1000, 0, 130.81, 0, 196, 130.81);
+
+    envelopes.push_back(pitch);
+    envelopes.push_back(pitch2);
+
+    AudioData data;
+
+    SquareAudioSource* square = new SquareAudioSource(1, 220);
+    SquareAudioSource* square2 = new SquareAudioSource(1, 220);
+
+    pitch->connectValue(&square->frequency);
+    pitch2->connectValue(&square2->frequency);
+
+    data.sources.push_back(square);
+    data.sources.push_back(square2);
+
     RtAudio::StreamParameters parameters;
 
     parameters.deviceId = audio.getDefaultOutputDevice();
@@ -77,23 +101,6 @@ int main(int argc, char** argv)
     parameters.firstChannel = 0;
 
     unsigned int bufferFrames = Constants::BUFFER_LENGTH;
-
-    AudioData data;
-
-    SineAudioSource* test = new SineAudioSource(220, 1);
-
-    data.sources.push_back(test);
-
-    std::vector<Envelope*> envelopes;
-
-    Envelope* one = new Envelope(500, 0, 1, 500, 1);
-    Envelope* two = new Envelope(500, 0, 1, 500, 220);
-
-    one->connectValue(&test->volume);
-    two->connectValue(&test->frequency);
-
-    envelopes.push_back(one);
-    envelopes.push_back(two);
 
     if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, Constants::SAMPLE_RATE, &bufferFrames, &processAudio, (void*)&data))
     {

@@ -8,4 +8,5 @@ struct Constants
     static constexpr unsigned int CHANNELS = 2;
     static constexpr unsigned int BUFFER_LENGTH = 128;
     static constexpr double TWO_PI = M_PI * 2;
+    static constexpr double MASTER_VOLUME = 0.1;
 };

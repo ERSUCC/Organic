@@ -1,7 +1,9 @@
 #include "../include/audiosource.h"
 
-Envelope::Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release, double maxAmplitude) :
-    attack(attack), decay(decay), sustain(sustain), release(release), maxAmplitude(maxAmplitude)
+AdjustableProperty::AdjustableProperty(double value) : value(value) {}
+
+Envelope::Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release, double floor, double ceiling) :
+    attack(attack), decay(decay), sustain(sustain), release(release), floor(floor), ceiling(ceiling)
 {
     start(0);
 }
@@ -13,7 +15,7 @@ void Envelope::connectValue(double* value)
 
 void Envelope::start(long long time)
 {
-    amplitude = 0;
+    amplitude = floor;
     startTime = time;
     hold = true;
 }
@@ -31,28 +33,23 @@ void Envelope::update(long long time)
     {
         if (time - startTime < attack)
         {
-            amplitude = maxAmplitude * (time - startTime) / attack;
+            amplitude = floor + (ceiling - floor) * (time - startTime) / attack;
         }
 
         else if (time - startTime - attack < decay)
         {
-            amplitude = sustain + maxAmplitude * (1 - sustain) * (1 - (double)(time - startTime - attack) / decay);
+            amplitude = ceiling - (ceiling - sustain) * (double)(time - startTime - attack) / decay;
         }
 
         else
         {
-            amplitude = maxAmplitude * sustain;
+            amplitude = sustain;
         }
-    }
-
-    else if (amplitude > 0)
-    {
-        amplitude = peak * (1 - (double)(time - stopTime) / release);
     }
 
     else
     {
-        amplitude = 0;
+        amplitude = fmax(floor, peak * (1 - (double)(time - stopTime) / release));
     }
 
     for (double* value : connectedValues)
@@ -63,15 +60,15 @@ void Envelope::update(long long time)
 
 AudioSource::AudioSource(double volume) : volume(volume) {}
 
-SineAudioSource::SineAudioSource(double frequency, double volume) : AudioSource(volume), frequency(frequency) {}
+OscillatorAudioSource::OscillatorAudioSource(double volume, double frequency) : AudioSource(volume), frequency(frequency) {}
 
-void SineAudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
+void OscillatorAudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
 {
     phaseDelta = Constants::TWO_PI * frequency / Constants::SAMPLE_RATE;
 
     for (int i = 0; i < bufferLength; i++)
     {
-        double value = volume * sin(phase) / Constants::CHANNELS;
+        double value = volume * getValue() / Constants::CHANNELS;
 
         for (int j = 0; j < Constants::CHANNELS; j++)
         {
@@ -82,4 +79,30 @@ void SineAudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
     }
 
     phase = fmod(phase, Constants::TWO_PI);
+}
+
+SineAudioSource::SineAudioSource(double volume, double frequency) : OscillatorAudioSource(volume, frequency) {}
+
+double SineAudioSource::getValue()
+{
+    return sin(phase);
+}
+
+SquareAudioSource::SquareAudioSource(double volume, double frequency) : OscillatorAudioSource(volume, frequency) {}
+
+double SquareAudioSource::getValue()
+{
+    if (sin(phase) > 0)
+    {
+        return 1;
+    }
+
+    return -1;
+}
+
+SawAudioSource::SawAudioSource(double volume, double frequency) : OscillatorAudioSource(volume, frequency) {}
+
+double SawAudioSource::getValue()
+{
+    return fmod(phase, Constants::TWO_PI) / M_PI - 1;
 }

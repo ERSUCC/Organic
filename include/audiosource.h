@@ -8,7 +8,7 @@ class Envelope
 {
 
 public:
-    Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release, double maxAmplitude);
+    Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release, double floor, double ceiling);
 
     void connectValue(double* value);
 
@@ -22,9 +22,10 @@ private:
     double sustain;
     unsigned int release;
 
-    double maxAmplitude;
     double amplitude;
     double peak;
+    double floor;
+    double ceiling;
 
     long long startTime;
     long long stopTime;
@@ -47,18 +48,49 @@ public:
 
 };
 
-class SineAudioSource : public AudioSource
+class OscillatorAudioSource : public AudioSource
 {
 
 public:
-    SineAudioSource(double frequency, double volume);
+    OscillatorAudioSource(double volume, double frequency);
 
     void fillBuffer(double* buffer, unsigned int bufferLength) override;
 
+    virtual double getValue() = 0;
+
     double frequency;
 
-private:
     double phase = 0;
     double phaseDelta;
+
+};
+
+class SineAudioSource : public OscillatorAudioSource
+{
+
+public:
+    SineAudioSource(double volume, double frequency);
+
+    double getValue() override;
+
+};
+
+class SquareAudioSource : public OscillatorAudioSource
+{
+
+public:
+    SquareAudioSource(double volume, double frequency);
+
+    double getValue() override;
+
+};
+
+class SawAudioSource : public OscillatorAudioSource
+{
+
+public:
+    SawAudioSource(double volume, double frequency);
+
+    double getValue() override;
 
 };
