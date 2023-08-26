@@ -2,16 +2,19 @@
 
 Event::Event(std::function<void(double)> event, double startTime) : event(event), startTime(startTime) {}
 
+bool Event::ready(double time)
+{
+    return time - startTime >= next;
+}
+
 void Event::cancel()
 {
     discard = true;
 }
 
-DelayedEvent::DelayedEvent(std::function<void(double)> event, double startTime, double delay) : Event(event, startTime), delay(delay) {}
-
-bool DelayedEvent::ready(double time)
+DelayedEvent::DelayedEvent(std::function<void(double)> event, double startTime, double delay) : Event(event, startTime)
 {
-    return time - startTime >= delay;
+    next = delay;
 }
 
 void DelayedEvent::perform(double time)
@@ -21,11 +24,9 @@ void DelayedEvent::perform(double time)
     cancel();
 }
 
-IntervalEvent::IntervalEvent(std::function<void(double)> event, double startTime, double interval) : Event(event, startTime), interval(interval), next(0) {}
-
-bool IntervalEvent::ready(double time)
+IntervalEvent::IntervalEvent(std::function<void(double)> event, double startTime, double interval) : Event(event, startTime), interval(interval)
 {
-    return time - startTime >= next;
+    next = 0;
 }
 
 void IntervalEvent::perform(double time)

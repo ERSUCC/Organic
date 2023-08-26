@@ -3,6 +3,7 @@
 #include <string>
 #include <chrono>
 #include <queue>
+#include <random>
 
 #include "../include/RtAudio.h"
 
@@ -59,6 +60,9 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
 int main(int argc, char** argv)
 {
+    std::mt19937 rng(std::chrono::high_resolution_clock().now().time_since_epoch().count());
+    std::uniform_real_distribution<> udist;
+
     RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
 
     std::vector<unsigned int> ids = audio.getDeviceIds();
@@ -70,8 +74,9 @@ int main(int argc, char** argv)
 
     std::vector<ParameterController*> parameterControllers;
 
-    LFO* pan = new LFO(-1, 1, 50);
+    LFO* pan = new LFO(-1, 1, 100);
     Sweep* volume = new Sweep(1, 0, 2000);
+    Sweep* pitch = new Sweep(220, 440, 2000);
     Sweep* rate = new Sweep(-1, 0, 2000);
     Sweep* rate2 = new Sweep(1, 0, 2000);
 
@@ -79,6 +84,7 @@ int main(int argc, char** argv)
 
     parameterControllers.push_back(pan);
     parameterControllers.push_back(volume);
+    parameterControllers.push_back(pitch);
     parameterControllers.push_back(rate);
     parameterControllers.push_back(rate2);
 
@@ -88,19 +94,34 @@ int main(int argc, char** argv)
 
     pan->connectParameter(&square->pan);
     volume->connectParameter(&square->volume);
+    pitch->connectParameter(&square->frequency);
     rate->connectParameter(&pan->floor);
     rate2->connectParameter(&pan->ceiling);
 
+    Saw* saw = new Saw(1, 0, 0);
+
     data.sources.push_back(square);
+    data.sources.push_back(saw);
 
-    std::priority_queue<Event*, std::vector<Event*>, std::greater<Event*>> eventQueue;
+    auto cmp = [](Event* left, Event* right)
+    {
+        return left->next > right->next;
+    };
 
-    eventQueue.push(new IntervalEvent([volume, rate, rate2](double time)
+    std::priority_queue<Event*, std::vector<Event*>, decltype(cmp)> eventQueue(cmp);
+
+    eventQueue.push(new IntervalEvent([=](double time)
     {
         volume->start(time);
+        pitch->start(time);
         rate->start(time);
         rate2->start(time);
-    }, 0, 4000));
+    }, 0, 2000));
+
+    eventQueue.push(new IntervalEvent([saw, &udist, &rng](double time)
+    {
+        saw->frequency.value = udist(rng) * 100 + 100;
+    }, 0, 125));
 
     RtAudio::StreamParameters parameters;
 
