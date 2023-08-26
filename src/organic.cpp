@@ -7,6 +7,7 @@
 
 #include "../include/constants.h"
 #include "../include/audiosource.h"
+#include "../include/parameter.h"
 
 struct AudioData
 {
@@ -18,16 +19,6 @@ void error(const std::string& message)
     std::cout << message << "\n";
 
     exit(0);
-}
-
-void errorAndDestroy(const std::string& message, RtAudio audio)
-{
-    if (audio.isStreamOpen())
-    {
-        audio.closeStream();
-    }
-
-    error(message);
 }
 
 void rtAudioError(RtAudioErrorType type, const std::string& message)
@@ -75,21 +66,21 @@ int main(int argc, char** argv)
         error("Error: No audio device detected.");
     }
 
-    std::vector<Envelope*> envelopes;
+    std::vector<ParameterController*> parameterControllers;
 
-    Envelope* pitch = new Envelope(1000, 0, 261.63, 0, 196, 261.63);
-    Envelope* pitch2 = new Envelope(1000, 0, 130.81, 0, 196, 130.81);
+    Sweep* pitch = new Sweep(196, 261.63, 10000);
+    Sweep* pitch2 = new Sweep(196, 130.81, 10000);
 
-    envelopes.push_back(pitch);
-    envelopes.push_back(pitch2);
+    parameterControllers.push_back(pitch);
+    parameterControllers.push_back(pitch2);
 
     AudioData data;
 
-    SquareAudioSource* square = new SquareAudioSource(1, 220);
-    SquareAudioSource* square2 = new SquareAudioSource(1, 220);
+    SquareAudioSource* square = new SquareAudioSource(1, 0, 0);
+    SquareAudioSource* square2 = new SquareAudioSource(1, 0, 0);
 
-    pitch->connectValue(&square->frequency);
-    pitch2->connectValue(&square2->frequency);
+    pitch->connectParameter(&square->frequency);
+    pitch2->connectParameter(&square2->frequency);
 
     data.sources.push_back(square);
     data.sources.push_back(square2);
@@ -98,7 +89,6 @@ int main(int argc, char** argv)
 
     parameters.deviceId = audio.getDefaultOutputDevice();
     parameters.nChannels = Constants::CHANNELS;
-    parameters.firstChannel = 0;
 
     unsigned int bufferFrames = Constants::BUFFER_LENGTH;
 
@@ -109,19 +99,27 @@ int main(int argc, char** argv)
 
     if (audio.startStream())
     {
-        errorAndDestroy(audio.getErrorText(), audio);
+        if (audio.isStreamOpen())
+        {
+            audio.closeStream();
+        }
+
+        error(audio.getErrorText());
     }
 
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
 
+    pitch->start(0);
+    pitch2->start(0);
+
     while (true)
     {
-        long long time = std::chrono::duration_cast<std::chrono::milliseconds>(clock.now() - start).count();
+        double time = (clock.now() - start).count() / 1000000.0;
 
-        for (Envelope* envelope : envelopes)
+        for (ParameterController* parameterController : parameterControllers)
         {
-            envelope->update(time);
+            parameterController->update(time);
         }
     }
 

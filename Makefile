@@ -1,8 +1,11 @@
 CC = g++
 CFLAGS = -std=c++11
 
-organic: audiosource
-	$(CC) $(CFLAGS) src/organic.cpp -l rtaudio bin/audiosource -o bin/organic
+organic: audiosource parameter
+	$(CC) $(CFLAGS) src/organic.cpp -l rtaudio bin/audiosource bin/parameter -o bin/organic
 
 audiosource:
 	$(CC) -c $(CFLAGS) src/audiosource.cpp -o bin/audiosource
+
+parameter:
+	$(CC) -c $(CFLAGS) src/parameter.cpp -o bin/parameter
