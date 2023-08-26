@@ -1,7 +1,5 @@
 #include "../include/parameter.h"
 
-#include <iostream>
-
 Parameter::Parameter(double value) : value(value) {}
 
 void ParameterController::connectParameter(Parameter* parameter)
@@ -103,5 +101,5 @@ LFO::LFO(double floor, double ceiling, double rate) : floor(floor), ceiling(ceil
 
 double LFO::getValue(double time)
 {
-    return floor.value + (ceiling.value - floor.value) * (-cos(Constants::TWO_PI * (time - startTime) / rate) / 2 + 0.5);
+    return floor.value + (ceiling.value - floor.value) * (-cos(Config::TWO_PI * (time - startTime) / rate) / 2 + 0.5);
 }

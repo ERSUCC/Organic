@@ -6,7 +6,7 @@
 
 #include "../include/RtAudio.h"
 
-#include "../include/constants.h"
+#include "../include/config.h"
 #include "../include/audiosource.h"
 #include "../include/parameter.h"
 #include "../include/event.h"
@@ -39,7 +39,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
     
     AudioData* data = (AudioData*)userData;
 
-    for (int i = 0; i < frames * Constants::CHANNELS; i++)
+    for (int i = 0; i < frames * Config::CHANNELS; i++)
     {
         buffer[i] = 0;
     }
@@ -49,9 +49,9 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
         source->fillBuffer(buffer, frames);
     }
 
-    for (int i = 0; i < frames * Constants::CHANNELS; i++)
+    for (int i = 0; i < frames * Config::CHANNELS; i++)
     {
-        buffer[i] *= Constants::MASTER_VOLUME;
+        buffer[i] *= Config::MASTER_VOLUME;
     }
 
     return 0;
@@ -105,11 +105,11 @@ int main(int argc, char** argv)
     RtAudio::StreamParameters parameters;
 
     parameters.deviceId = audio.getDefaultOutputDevice();
-    parameters.nChannels = Constants::CHANNELS;
+    parameters.nChannels = Config::CHANNELS;
 
-    unsigned int bufferFrames = Constants::BUFFER_LENGTH;
+    unsigned int bufferFrames = Config::BUFFER_LENGTH;
 
-    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, Constants::SAMPLE_RATE, &bufferFrames, &processAudio, (void*)&data))
+    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, Config::SAMPLE_RATE, &bufferFrames, &processAudio, (void*)&data))
     {
         error(audio.getErrorText());
     }

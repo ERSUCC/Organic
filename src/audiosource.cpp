@@ -6,11 +6,11 @@ Oscillator::Oscillator(double volume, double pan, double frequency) : AudioSourc
 
 void Oscillator::fillBuffer(double* buffer, unsigned int bufferLength)
 {
-    phaseDelta = Constants::TWO_PI * frequency.value / Constants::SAMPLE_RATE;
+    phaseDelta = Config::TWO_PI * frequency.value / Config::SAMPLE_RATE;
 
     for (int i = 0; i < bufferLength; i++)
     {
-        if (Constants::CHANNELS == 1)
+        if (Config::CHANNELS == 1)
         {
             buffer[i] += volume.value * getValue();
         }
@@ -26,7 +26,7 @@ void Oscillator::fillBuffer(double* buffer, unsigned int bufferLength)
         phase += phaseDelta;
     }
 
-    phase = fmod(phase, Constants::TWO_PI);
+    phase = fmod(phase, Config::TWO_PI);
 }
 
 Sine::Sine(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
@@ -52,5 +52,5 @@ Saw::Saw(double volume, double pan, double frequency) : Oscillator(volume, pan, 
 
 double Saw::getValue()
 {
-    return fmod(phase, Constants::TWO_PI) / M_PI - 1;
+    return fmod(phase, Config::TWO_PI) / M_PI - 1;
 }
