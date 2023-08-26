@@ -54,16 +54,18 @@ Sweep::Sweep(double first, double second, double length) : first(first), second(
 
 double Sweep::getValue(double time)
 {
-    if (first < second)
+    if (time - startTime >= length)
     {
-        return fmin(second, first + (second - first) * (time - startTime) / length);
+        stop(time);
+
+        return second.value;
     }
 
-    return fmax(second, first + (second - first) * (time - startTime) / length);
+    return first.value + (second.value - first.value) * (time - startTime) / length;
 }
 
-Envelope::Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release, double floor, double ceiling) :
-    attack(attack), decay(decay), sustain(sustain), release(release), floor(floor), ceiling(ceiling) {}
+Envelope::Envelope(double floor, double ceiling, unsigned int attack, unsigned int decay, double sustain, unsigned int release) :
+    floor(floor), ceiling(ceiling), attack(attack), decay(decay), sustain(sustain), release(release) {}
 
 double Envelope::getValue(double time)
 {
@@ -71,19 +73,26 @@ double Envelope::getValue(double time)
     {
         if (time - startTime < attack)
         {
-            return floor + (ceiling - floor) * (time - startTime) / attack;
+            return floor.value + (ceiling.value - floor.value) * (time - startTime) / attack;
         }
 
         else if (time - startTime - attack < decay)
         {
-            return ceiling - (ceiling - sustain) * (time - startTime - attack) / decay;
+            return ceiling.value - (ceiling.value - sustain.value) * (time - startTime - attack) / decay;
         }
 
         else
         {
-            return sustain;
+            return sustain.value;
         }
     }
 
-    return fmax(floor, peak * (1 - (time - releaseTime) / release));
+    return fmax(floor.value, peak * (1 - (time - releaseTime) / release));
+}
+
+LFO::LFO(double floor, double ceiling, double rate) : floor(floor), ceiling(ceiling), rate(rate) {}
+
+double LFO::getValue(double time)
+{
+    return floor.value + (ceiling.value - floor.value) * (-cos(Constants::TWO_PI * (time - startTime) / rate) / 2 + 0.5);
 }

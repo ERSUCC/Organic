@@ -2,9 +2,9 @@
 
 AudioSource::AudioSource(double volume, double pan) : volume(volume), pan(pan) {}
 
-OscillatorAudioSource::OscillatorAudioSource(double volume, double pan, double frequency) : AudioSource(volume, pan), frequency(frequency) {}
+Oscillator::Oscillator(double volume, double pan, double frequency) : AudioSource(volume, pan), frequency(frequency) {}
 
-void OscillatorAudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
+void Oscillator::fillBuffer(double* buffer, unsigned int bufferLength)
 {
     phaseDelta = Constants::TWO_PI * frequency.value / Constants::SAMPLE_RATE;
 
@@ -12,15 +12,15 @@ void OscillatorAudioSource::fillBuffer(double* buffer, unsigned int bufferLength
     {
         if (Constants::CHANNELS == 1)
         {
-            buffer[i] += getValue();
+            buffer[i] += volume.value * getValue();
         }
 
         else
         {
             double value = getValue();
 
-            buffer[i * 2] += (value - pan) / 2;
-            buffer[i * 2 + 1] += (value + pan) / 2;
+            buffer[i * 2] += volume.value * value * (1 - pan.value) / 2;
+            buffer[i * 2 + 1] += volume.value * value * (pan.value + 1) / 2;
         }
 
         phase += phaseDelta;
@@ -29,16 +29,16 @@ void OscillatorAudioSource::fillBuffer(double* buffer, unsigned int bufferLength
     phase = fmod(phase, Constants::TWO_PI);
 }
 
-SineAudioSource::SineAudioSource(double volume, double pan, double frequency) : OscillatorAudioSource(volume, pan, frequency) {}
+Sine::Sine(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
 
-double SineAudioSource::getValue()
+double Sine::getValue()
 {
     return sin(phase);
 }
 
-SquareAudioSource::SquareAudioSource(double volume, double pan, double frequency) : OscillatorAudioSource(volume, pan, frequency) {}
+Square::Square(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
 
-double SquareAudioSource::getValue()
+double Square::getValue()
 {
     if (sin(phase) > 0)
     {
@@ -48,9 +48,9 @@ double SquareAudioSource::getValue()
     return -1;
 }
 
-SawAudioSource::SawAudioSource(double volume, double pan, double frequency) : OscillatorAudioSource(volume, pan, frequency) {}
+Saw::Saw(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
 
-double SawAudioSource::getValue()
+double Saw::getValue()
 {
     return fmod(phase, Constants::TWO_PI) / M_PI - 1;
 }

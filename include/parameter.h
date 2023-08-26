@@ -2,6 +2,8 @@
 
 #include <unordered_set>
 
+#include "constants.h"
+
 struct Parameter
 {
     Parameter(double value);
@@ -11,10 +13,8 @@ struct Parameter
     bool connected = false;
 };
 
-class ParameterController
+struct ParameterController
 {
-
-public:
     void connectParameter(Parameter* parameter);
     void disconnectParameter(Parameter* parameter);
 
@@ -24,49 +24,53 @@ public:
 
     virtual double getValue(double time) = 0;
 
-protected:
     double startTime;
 
     bool running;
 
     std::unordered_set<Parameter*> connectedParameters;
-
 };
 
-class Sweep : public ParameterController
+struct Sweep : public ParameterController
 {
-
-public:
     Sweep(double first, double second, double length);
 
     double getValue(double time) override;
 
-private:
-    double first;
-    double second;
-    double length;
+    Parameter first;
+    Parameter second;
 
+    double length;
 };
 
-class Envelope : public ParameterController
+struct Envelope : public ParameterController
 {
-
-public:
-    Envelope(unsigned int attack, unsigned int decay, double sustain, unsigned int release, double floor, double ceiling);
+    Envelope(double floor, double ceiling, unsigned int attack, unsigned int decay, double sustain, unsigned int release);
 
     double getValue(double time) override;
 
-private:
+    Parameter floor;
+    Parameter ceiling;
+    Parameter sustain;
+
     double attack;
     double decay;
-    double sustain;
     double release;
-    double floor;
-    double ceiling;
     double peak;
 
     bool hold;
 
     double releaseTime;
+};
 
+struct LFO : public ParameterController
+{
+    LFO(double floor, double ceiling, double rate);
+
+    double getValue(double time) override;
+
+    Parameter floor;
+    Parameter ceiling;
+
+    double rate;
 };

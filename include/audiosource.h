@@ -3,24 +3,19 @@
 #include "constants.h"
 #include "parameter.h"
 
-class AudioSource
+struct AudioSource
 {
-
-public:
     AudioSource(double volume, double pan);
 
     virtual void fillBuffer(double* buffer, unsigned int bufferLength) = 0;
 
-    double volume;
-    double pan;
-
+    Parameter volume;
+    Parameter pan;
 };
 
-class OscillatorAudioSource : public AudioSource
+struct Oscillator : public AudioSource
 {
-
-public:
-    OscillatorAudioSource(double volume, double pan, double frequency);
+    Oscillator(double volume, double pan, double frequency);
 
     void fillBuffer(double* buffer, unsigned int bufferLength) override;
 
@@ -30,35 +25,25 @@ public:
 
     double phase = 0;
     double phaseDelta;
-
 };
 
-class SineAudioSource : public OscillatorAudioSource
+struct Sine : public Oscillator
 {
-
-public:
-    SineAudioSource(double volume, double pan, double frequency);
+    Sine(double volume, double pan, double frequency);
 
     double getValue() override;
-
 };
 
-class SquareAudioSource : public OscillatorAudioSource
+struct Square : public Oscillator
 {
-
-public:
-    SquareAudioSource(double volume, double pan, double frequency);
+    Square(double volume, double pan, double frequency);
 
     double getValue() override;
-
 };
 
-class SawAudioSource : public OscillatorAudioSource
+struct Saw : public Oscillator
 {
-
-public:
-    SawAudioSource(double volume, double pan, double frequency);
+    Saw(double volume, double pan, double frequency);
 
     double getValue() override;
-
 };

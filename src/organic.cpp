@@ -68,22 +68,19 @@ int main(int argc, char** argv)
 
     std::vector<ParameterController*> parameterControllers;
 
-    Sweep* pitch = new Sweep(196, 261.63, 10000);
-    Sweep* pitch2 = new Sweep(196, 130.81, 10000);
+    Sweep* volume = new Sweep(1, 0, 300);
 
-    parameterControllers.push_back(pitch);
-    parameterControllers.push_back(pitch2);
+    volume->start(0);
+
+    parameterControllers.push_back(volume);
 
     AudioData data;
 
-    SquareAudioSource* square = new SquareAudioSource(1, 0, 0);
-    SquareAudioSource* square2 = new SquareAudioSource(1, 0, 0);
+    Square* square = new Square(1, 0, 220);
 
-    pitch->connectParameter(&square->frequency);
-    pitch2->connectParameter(&square2->frequency);
+    volume->connectParameter(&square->volume);
 
     data.sources.push_back(square);
-    data.sources.push_back(square2);
 
     RtAudio::StreamParameters parameters;
 
@@ -109,9 +106,6 @@ int main(int argc, char** argv)
 
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
-
-    pitch->start(0);
-    pitch2->start(0);
 
     while (true)
     {
