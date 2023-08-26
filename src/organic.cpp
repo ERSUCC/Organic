@@ -2,12 +2,14 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <queue>
 
 #include "../include/RtAudio.h"
 
 #include "../include/constants.h"
 #include "../include/audiosource.h"
 #include "../include/parameter.h"
+#include "../include/event.h"
 
 struct AudioData
 {
@@ -68,19 +70,37 @@ int main(int argc, char** argv)
 
     std::vector<ParameterController*> parameterControllers;
 
-    Sweep* volume = new Sweep(1, 0, 300);
+    LFO* pan = new LFO(-1, 1, 50);
+    Sweep* volume = new Sweep(1, 0, 2000);
+    Sweep* rate = new Sweep(-1, 0, 2000);
+    Sweep* rate2 = new Sweep(1, 0, 2000);
 
-    volume->start(0);
+    pan->start(0);
 
+    parameterControllers.push_back(pan);
     parameterControllers.push_back(volume);
+    parameterControllers.push_back(rate);
+    parameterControllers.push_back(rate2);
 
     AudioData data;
 
     Square* square = new Square(1, 0, 220);
 
+    pan->connectParameter(&square->pan);
     volume->connectParameter(&square->volume);
+    rate->connectParameter(&pan->floor);
+    rate2->connectParameter(&pan->ceiling);
 
     data.sources.push_back(square);
+
+    std::priority_queue<Event*, std::vector<Event*>, std::greater<Event*>> eventQueue;
+
+    eventQueue.push(new IntervalEvent([volume, rate, rate2](double time)
+    {
+        volume->start(time);
+        rate->start(time);
+        rate2->start(time);
+    }, 0, 4000));
 
     RtAudio::StreamParameters parameters;
 
@@ -110,6 +130,20 @@ int main(int argc, char** argv)
     while (true)
     {
         double time = (clock.now() - start).count() / 1000000.0;
+
+        while (!eventQueue.empty() && eventQueue.top()->ready(time))
+        {
+            Event* event = eventQueue.top();
+
+            eventQueue.pop();
+
+            event->perform(time);
+
+            if (!event->discard)
+            {
+                eventQueue.push(event);
+            }
+        }
 
         for (ParameterController* parameterController : parameterControllers)
         {

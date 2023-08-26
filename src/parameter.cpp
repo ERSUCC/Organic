@@ -1,5 +1,7 @@
 #include "../include/parameter.h"
 
+#include <iostream>
+
 Parameter::Parameter(double value) : value(value) {}
 
 void ParameterController::connectParameter(Parameter* parameter)
@@ -87,7 +89,14 @@ double Envelope::getValue(double time)
         }
     }
 
-    return fmax(floor.value, peak * (1 - (time - releaseTime) / release));
+    if (time - releaseTime >= release)
+    {
+        stop(time);
+
+        return floor.value;
+    }
+
+    return peak * (1 - (time - releaseTime) / release);
 }
 
 LFO::LFO(double floor, double ceiling, double rate) : floor(floor), ceiling(ceiling), rate(rate) {}
