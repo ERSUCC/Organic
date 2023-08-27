@@ -24,9 +24,9 @@ void DelayedEvent::perform(double time)
     cancel();
 }
 
-IntervalEvent::IntervalEvent(std::function<void(double)> event, double startTime, double interval) : Event(event, startTime), interval(interval)
+IntervalEvent::IntervalEvent(std::function<void(double)> event, double startTime, double delay, double interval) : Event(event, startTime), interval(interval)
 {
-    next = 0;
+    next = delay;
 }
 
 void IntervalEvent::perform(double time)

@@ -27,7 +27,7 @@ struct DelayedEvent : public Event
 
 struct IntervalEvent : public Event
 {
-    IntervalEvent(std::function<void(double)> event, double startTime, double interval);
+    IntervalEvent(std::function<void(double)> event, double startTime, double delay, double interval);
 
     void perform(double time) override;
 

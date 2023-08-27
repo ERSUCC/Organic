@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 
     AudioData data;
 
-    Square* square = new Square(1, 0, 0);
+    Square* square = new Square(0, 0, 0);
 
     seq->connectParameter(&square->frequency);
     pluck->connectParameter(&square->volume);
@@ -118,12 +118,12 @@ int main(int argc, char** argv)
     {
         seq->next(time);
         pluck->start(time);
-    }, 100, 100));
+    }, 0, 100, 100));
 
     eventQueue.push(new IntervalEvent([=](double time)
     {
         seq2->next(time);
-    }, 300, 300));
+    }, 0, 1200, 1200));
 
     RtAudio::StreamParameters parameters;
 
