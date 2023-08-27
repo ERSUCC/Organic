@@ -1,6 +1,8 @@
 #pragma once
 
 #include <unordered_set>
+#include <vector>
+#include <random>
 
 #include "config.h"
 
@@ -39,8 +41,7 @@ struct Sweep : public ParameterController
 
     Parameter first;
     Parameter second;
-
-    double length;
+    Parameter length;
 };
 
 struct Envelope : public ParameterController
@@ -73,4 +74,34 @@ struct LFO : public ParameterController
     Parameter ceiling;
 
     double rate;
+};
+
+struct Sequence : public ParameterController
+{
+    virtual void next(double time) = 0;
+};
+
+struct FiniteSequence : public Sequence
+{
+    enum Order
+    {
+        Forwards,
+        Backwards,
+        PingPong,
+        Random
+    };
+
+    FiniteSequence(std::vector<double> values, Order order);
+
+    double getValue(double time) override;
+    void next(double time) override;
+
+    std::vector<double> values;
+
+    int current = 0;
+    int direction = 1;
+
+    Order order;
+
+    std::uniform_int_distribution<> udist;
 };

@@ -60,9 +60,6 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
 int main(int argc, char** argv)
 {
-    std::mt19937 rng(std::chrono::high_resolution_clock().now().time_since_epoch().count());
-    std::uniform_real_distribution<> udist;
-
     RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
 
     std::vector<unsigned int> ids = audio.getDeviceIds();
@@ -74,34 +71,41 @@ int main(int argc, char** argv)
 
     std::vector<ParameterController*> parameterControllers;
 
-    LFO* pan = new LFO(-1, 1, 100);
-    Sweep* volume = new Sweep(1, 0, 2000);
-    Sweep* pitch = new Sweep(220, 440, 2000);
-    Sweep* rate = new Sweep(-1, 0, 2000);
-    Sweep* rate2 = new Sweep(1, 0, 2000);
+    FiniteSequence* seq = new FiniteSequence(std::vector<double> {
+        130.81, 146.83, 164.81, 185, 207.65, 233.08, 261.63
+    }, FiniteSequence::Order::PingPong);
+    FiniteSequence* seq2 = new FiniteSequence(std::vector<double> {
+        130.81, 146.83, 164.81, 185, 207.65, 233.08, 261.63
+    }, FiniteSequence::Order::Forwards);
+    Sweep* pluck = new Sweep(1, 0, 0);
+    LFO* length = new LFO(200, 50, 9600);
 
-    pan->start(0);
+    length->connectParameter(&pluck->length);
 
-    parameterControllers.push_back(pan);
-    parameterControllers.push_back(volume);
-    parameterControllers.push_back(pitch);
-    parameterControllers.push_back(rate);
-    parameterControllers.push_back(rate2);
+    parameterControllers.push_back(seq);
+    parameterControllers.push_back(seq2);
+    parameterControllers.push_back(pluck);
+    parameterControllers.push_back(length);
 
     AudioData data;
 
-    Square* square = new Square(1, 0, 220);
+    Square* square = new Square(1, 0, 0);
 
-    pan->connectParameter(&square->pan);
-    volume->connectParameter(&square->volume);
-    pitch->connectParameter(&square->frequency);
-    rate->connectParameter(&pan->floor);
-    rate2->connectParameter(&pan->ceiling);
+    seq->connectParameter(&square->frequency);
+    pluck->connectParameter(&square->volume);
 
-    Saw* saw = new Saw(1, 0, 0);
+    seq->start(0);
+    pluck->start(0);
+    length->start(0);
+
+    Sine* bass = new Sine(1, 0, 0);
+
+    seq2->connectParameter(&bass->frequency);
+
+    seq2->start(0);
 
     data.sources.push_back(square);
-    data.sources.push_back(saw);
+    data.sources.push_back(bass);
 
     auto cmp = [](Event* left, Event* right)
     {
@@ -112,16 +116,14 @@ int main(int argc, char** argv)
 
     eventQueue.push(new IntervalEvent([=](double time)
     {
-        volume->start(time);
-        pitch->start(time);
-        rate->start(time);
-        rate2->start(time);
-    }, 0, 2000));
+        seq->next(time);
+        pluck->start(time);
+    }, 100, 100));
 
-    eventQueue.push(new IntervalEvent([saw, &udist, &rng](double time)
+    eventQueue.push(new IntervalEvent([=](double time)
     {
-        saw->frequency.value = udist(rng) * 100 + 100;
-    }, 0, 125));
+        seq2->next(time);
+    }, 300, 300));
 
     RtAudio::StreamParameters parameters;
 

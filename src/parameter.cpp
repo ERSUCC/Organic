@@ -54,14 +54,14 @@ Sweep::Sweep(double first, double second, double length) : first(first), second(
 
 double Sweep::getValue(double time)
 {
-    if (time - startTime >= length)
+    if (time - startTime >= length.value)
     {
         stop(time);
 
         return second.value;
     }
 
-    return first.value + (second.value - first.value) * (time - startTime) / length;
+    return first.value + (second.value - first.value) * (time - startTime) / length.value;
 }
 
 Envelope::Envelope(double floor, double ceiling, unsigned int attack, unsigned int decay, double sustain, unsigned int release) :
@@ -102,4 +102,59 @@ LFO::LFO(double floor, double ceiling, double rate) : floor(floor), ceiling(ceil
 double LFO::getValue(double time)
 {
     return floor.value + (ceiling.value - floor.value) * (-cos(Config::TWO_PI * (time - startTime) / rate) / 2 + 0.5);
+}
+
+FiniteSequence::FiniteSequence(std::vector<double> values, Order order) : values(values), order(order)
+{
+    udist = std::uniform_int_distribution<>(0, values.size() - 1);
+
+    if (order == Order::Backwards)
+    {
+        current = values.size() - 1;
+    }
+}
+
+double FiniteSequence::getValue(double time)
+{
+    return values[current];
+}
+
+void FiniteSequence::next(double time)
+{
+    switch (order)
+    {
+        case Forwards:
+            current = (current + 1) % values.size();
+
+            break;
+
+        case Backwards:
+        {
+            current -= 1;
+
+            if (current < 0)
+            {
+                current = values.size() - 1;
+            }
+
+            break;
+        }
+
+        case PingPong:
+        {
+            if ((direction == -1 && current <= 0) || current >= values.size() - 1)
+            {
+                direction *= -1;
+            }
+
+            current += direction;
+
+            break;
+        }
+
+        case Random:
+            current = udist(Config::RNG);
+
+            break;
+    }
 }
