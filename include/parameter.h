@@ -33,6 +33,19 @@ struct ParameterController
     std::unordered_set<Parameter*> connectedParameters;
 };
 
+struct ControllerManager
+{
+    void addController(ParameterController* controller);
+    void removeController(ParameterController* controller);
+
+    void connectParameter(ParameterController* controller, Parameter* parameter);
+    void disconnectParameter(ParameterController* controller, Parameter* parameter);
+
+    void updateControllers(double time);
+
+    std::vector<ParameterController*> controllers;
+};
+
 struct Sweep : public ParameterController
 {
     Sweep(double first, double second, double length);

@@ -50,6 +50,34 @@ void ParameterController::stop(double time)
     running = false;
 }
 
+void ControllerManager::addController(ParameterController* controller)
+{
+    controllers.push_back(controller);
+}
+
+void ControllerManager::removeController(ParameterController* controller)
+{
+    controllers.erase(std::find(controllers.begin(), controllers.end(), controller));
+}
+
+void ControllerManager::connectParameter(ParameterController* controller, Parameter* parameter)
+{
+    controller->connectParameter(parameter);
+}
+
+void ControllerManager::disconnectParameter(ParameterController* controller, Parameter* parameter)
+{
+    controller->disconnectParameter(parameter);
+}
+
+void ControllerManager::updateControllers(double time)
+{
+    for (ParameterController* controller : controllers)
+    {
+        controller->update(time);
+    }
+}
+
 Sweep::Sweep(double first, double second, double length) : first(first), second(second), length(length) {}
 
 double Sweep::getValue(double time)

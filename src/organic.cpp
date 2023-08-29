@@ -37,9 +37,9 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
     }
 
     double* buffer = (double*)output;
-    
-    AudioData* data = (AudioData*)userData;
 
+    AudioData* data = (AudioData*)userData;
+    
     for (int i = 0; i < frames * Config::CHANNELS; i++)
     {
         buffer[i] = 0;
@@ -69,38 +69,39 @@ int main(int argc, char** argv)
         error("Error: No audio device detected.");
     }
 
-    std::vector<ParameterController*> parameterControllers;
+    ControllerManager* controllerManager = new ControllerManager();
 
     FiniteSequence* seq = new FiniteSequence(std::vector<double> {
         130.81, 146.83, 164.81, 185, 207.65, 233.08, 261.63
     }, FiniteSequence::Order::PingPong);
     FiniteSequence* seq2 = new FiniteSequence(std::vector<double> {
         130.81, 146.83, 164.81, 185, 207.65, 233.08, 261.63
-    }, FiniteSequence::Order::Forwards);
+    }, FiniteSequence::Order::Random);
     Sweep* pluck = new Sweep(1, 0, 0);
     LFO* length = new LFO(200, 50, 9600);
 
-    length->connectParameter(&pluck->length);
+    controllerManager->addController(seq);
+    controllerManager->addController(seq2);
+    controllerManager->addController(pluck);
+    controllerManager->addController(length);
 
-    parameterControllers.push_back(seq);
-    parameterControllers.push_back(seq2);
-    parameterControllers.push_back(pluck);
-    parameterControllers.push_back(length);
+    controllerManager->connectParameter(length, &pluck->length);
+
+    length->start(0);
 
     AudioData data;
 
-    Square* square = new Square(0, 0, 0);
+    Square* square = new Square(1, 0, 0);
 
-    seq->connectParameter(&square->frequency);
-    pluck->connectParameter(&square->volume);
+    controllerManager->connectParameter(seq, &square->frequency);
+    controllerManager->connectParameter(pluck, &square->volume);
 
     seq->start(0);
     pluck->start(0);
-    length->start(0);
 
     Sine* bass = new Sine(1, 0, 0);
 
-    seq2->connectParameter(&bass->frequency);
+    controllerManager->connectParameter(seq2, &bass->frequency);
 
     seq2->start(0);
 
@@ -123,7 +124,7 @@ int main(int argc, char** argv)
     eventQueue.push(new IntervalEvent([=](double time)
     {
         seq2->next(time);
-    }, 0, 1200, 1200));
+    }, 0, 600, 600));
 
     RtAudio::StreamParameters parameters;
 
@@ -168,10 +169,7 @@ int main(int argc, char** argv)
             }
         }
 
-        for (ParameterController* parameterController : parameterControllers)
-        {
-            parameterController->update(time);
-        }
+        controllerManager->updateControllers(time);
     }
 
     if (audio.isStreamRunning())
