@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <queue>
 
 struct Event
 {
@@ -32,4 +33,20 @@ struct IntervalEvent : public Event
     void perform(double time) override;
 
     double interval;
+};
+
+struct EventQueue
+{
+    void addEvent(Event* event);
+
+    void performEvents(double time);
+
+private:
+    struct cmp
+    {
+        bool operator()(Event* left, Event* right);
+    };
+
+    std::priority_queue<Event*, std::vector<Event*>, cmp> events;
+
 };

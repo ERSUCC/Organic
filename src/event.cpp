@@ -35,3 +35,30 @@ void IntervalEvent::perform(double time)
 
     next += interval;
 }
+
+void EventQueue::addEvent(Event* event)
+{
+    events.push(event);
+}
+
+void EventQueue::performEvents(double time)
+{
+    while (!events.empty() && events.top()->ready(time))
+    {
+        Event* event = events.top();
+
+        events.pop();
+
+        event->perform(time);
+
+        if (!event->discard)
+        {
+            addEvent(event);
+        }
+    }
+}
+
+bool EventQueue::cmp::operator()(Event* left, Event* right)
+{
+    return left->next > right->next;
+}

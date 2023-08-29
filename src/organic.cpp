@@ -108,20 +108,15 @@ int main(int argc, char** argv)
     data.sources.push_back(square);
     data.sources.push_back(bass);
 
-    auto cmp = [](Event* left, Event* right)
-    {
-        return left->next > right->next;
-    };
+    EventQueue* eventQueue = new EventQueue();
 
-    std::priority_queue<Event*, std::vector<Event*>, decltype(cmp)> eventQueue(cmp);
-
-    eventQueue.push(new IntervalEvent([=](double time)
+    eventQueue->addEvent(new IntervalEvent([=](double time)
     {
         seq->next(time);
         pluck->start(time);
     }, 0, 100, 100));
 
-    eventQueue.push(new IntervalEvent([=](double time)
+    eventQueue->addEvent(new IntervalEvent([=](double time)
     {
         seq2->next(time);
     }, 0, 600, 600));
@@ -151,24 +146,13 @@ int main(int argc, char** argv)
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
 
+    double time = 0;
+
     while (true)
     {
-        double time = (clock.now() - start).count() / 1000000.0;
+        time = (clock.now() - start).count() / 1000000.0;
 
-        while (!eventQueue.empty() && eventQueue.top()->ready(time))
-        {
-            Event* event = eventQueue.top();
-
-            eventQueue.pop();
-
-            event->perform(time);
-
-            if (!event->discard)
-            {
-                eventQueue.push(event);
-            }
-        }
-
+        eventQueue->performEvents(time);
         controllerManager->updateControllers(time);
     }
 
