@@ -19,22 +19,6 @@ struct Event
     bool discard = false;
 };
 
-struct DelayedEvent : public Event
-{
-    DelayedEvent(std::function<void(double)> event, double startTime, double delay);
-
-    void perform(double time) override;
-};
-
-struct IntervalEvent : public Event
-{
-    IntervalEvent(std::function<void(double)> event, double startTime, double delay, double interval);
-
-    void perform(double time) override;
-
-    double interval;
-};
-
 struct EventQueue
 {
     void addEvent(Event* event);
@@ -49,4 +33,20 @@ private:
 
     std::priority_queue<Event*, std::vector<Event*>, cmp> events;
 
+};
+
+struct DelayedEvent : public Event
+{
+    DelayedEvent(std::function<void(double)> event, double startTime, double delay);
+
+    void perform(double time) override;
+};
+
+struct IntervalEvent : public Event
+{
+    IntervalEvent(std::function<void(double)> event, double startTime, double delay, double interval);
+
+    void perform(double time) override;
+
+    double interval;
 };

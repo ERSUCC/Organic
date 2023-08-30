@@ -3,23 +3,29 @@
 #include <unordered_set>
 #include <vector>
 #include <random>
+#include <unordered_map>
+#include <queue>
 
 #include "config.h"
+
+struct ParameterController;
 
 struct Parameter
 {
     Parameter(double value);
+    Parameter(double value, ParameterController* source);
 
     double value;
+
+    ParameterController* source;
 
     bool connected = false;
 };
 
 struct ParameterController
 {
-    void connectParameter(Parameter* parameter);
-    void disconnectParameter(Parameter* parameter);
-
+    friend struct ControllerManager;
+    
     void start(double time);
     void update(double time);
     void stop(double time);
@@ -28,9 +34,11 @@ struct ParameterController
 
     double startTime;
 
-    bool running;
+private:
+    bool running = false;
 
     std::unordered_set<Parameter*> connectedParameters;
+
 };
 
 struct ControllerManager
@@ -43,7 +51,11 @@ struct ControllerManager
 
     void updateControllers(double time);
 
+private:
+    void orderControllers();
+
     std::vector<ParameterController*> controllers;
+
 };
 
 struct Sweep : public ParameterController

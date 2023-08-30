@@ -12,30 +12,6 @@ void Event::cancel()
     discard = true;
 }
 
-DelayedEvent::DelayedEvent(std::function<void(double)> event, double startTime, double delay) : Event(event, startTime)
-{
-    next = delay;
-}
-
-void DelayedEvent::perform(double time)
-{
-    event(time);
-
-    cancel();
-}
-
-IntervalEvent::IntervalEvent(std::function<void(double)> event, double startTime, double delay, double interval) : Event(event, startTime), interval(interval)
-{
-    next = delay;
-}
-
-void IntervalEvent::perform(double time)
-{
-    event(time);
-
-    next += interval;
-}
-
 void EventQueue::addEvent(Event* event)
 {
     events.push(event);
@@ -61,4 +37,28 @@ void EventQueue::performEvents(double time)
 bool EventQueue::cmp::operator()(Event* left, Event* right)
 {
     return left->next > right->next;
+}
+
+DelayedEvent::DelayedEvent(std::function<void(double)> event, double startTime, double delay) : Event(event, startTime)
+{
+    next = delay;
+}
+
+void DelayedEvent::perform(double time)
+{
+    event(time);
+
+    cancel();
+}
+
+IntervalEvent::IntervalEvent(std::function<void(double)> event, double startTime, double delay, double interval) : Event(event, startTime), interval(interval)
+{
+    next = delay;
+}
+
+void IntervalEvent::perform(double time)
+{
+    event(time);
+
+    next += interval;
 }

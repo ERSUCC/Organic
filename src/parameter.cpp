@@ -1,30 +1,9 @@
 #include "../include/parameter.h"
 
+#include <iostream>
+
 Parameter::Parameter(double value) : value(value) {}
-
-void ParameterController::connectParameter(Parameter* parameter)
-{
-    if (parameter->connected)
-    {
-        // error
-    }
-
-    parameter->connected = true;
-
-    connectedParameters.insert(parameter);
-}
-
-void ParameterController::disconnectParameter(Parameter* parameter)
-{
-    if (!connectedParameters.count(parameter))
-    {
-        // error
-    }
-
-    parameter->connected = false;
-
-    connectedParameters.erase(parameter);
-}
+Parameter::Parameter(double value, ParameterController* source) : value(value), source(source) {}
 
 void ParameterController::start(double time)
 {
@@ -53,21 +32,34 @@ void ParameterController::stop(double time)
 void ControllerManager::addController(ParameterController* controller)
 {
     controllers.push_back(controller);
+
+    orderControllers();
 }
 
 void ControllerManager::removeController(ParameterController* controller)
 {
+    for (Parameter* parameter : controller->connectedParameters)
+    {
+        parameter->connected = false;
+    }
+
     controllers.erase(std::find(controllers.begin(), controllers.end(), controller));
 }
 
 void ControllerManager::connectParameter(ParameterController* controller, Parameter* parameter)
 {
-    controller->connectParameter(parameter);
+    parameter->connected = true;
+
+    controller->connectedParameters.insert(parameter);
+
+    orderControllers();
 }
 
 void ControllerManager::disconnectParameter(ParameterController* controller, Parameter* parameter)
 {
-    controller->disconnectParameter(parameter);
+    parameter->connected = false;
+
+    controller->connectedParameters.erase(parameter);
 }
 
 void ControllerManager::updateControllers(double time)
@@ -78,7 +70,69 @@ void ControllerManager::updateControllers(double time)
     }
 }
 
-Sweep::Sweep(double first, double second, double length) : first(first), second(second), length(length) {}
+void ControllerManager::orderControllers()
+{
+    std::unordered_map<ParameterController*, int> indices;
+
+    for (int i = 0; i < controllers.size(); i++)
+    {
+        indices.insert({ controllers[i], i });
+    }
+
+    std::vector<std::vector<int>> edges(controllers.size(), std::vector<int>());
+    std::vector<int> degrees(edges.size());
+
+    for (int i = 0; i < controllers.size(); i++)
+    {
+        for (Parameter* parameter : controllers[i]->connectedParameters)
+        {
+            if (parameter->source)
+            {
+                edges[i].push_back(indices[parameter->source]);
+                degrees[indices[parameter->source]]++;
+            }
+        }
+    }
+
+    std::queue<int> queue;
+
+    for (int i = 0; i < controllers.size(); i++)
+    {
+        if (!degrees[i])
+        {
+            queue.push(i);
+        }
+    }
+
+    std::vector<ParameterController*> order;
+
+    for (int i = 0; i < controllers.size(); i++)
+    {
+        if (queue.empty())
+        {
+            // error, circular parameter reference
+        }
+
+        int next = queue.front();
+
+        queue.pop();
+
+        order.push_back(controllers[next]);
+
+        for (int adj : edges[next])
+        {
+            if (!--degrees[adj])
+            {
+                queue.push(adj);
+            }
+        }
+    }
+
+    controllers.clear();
+    controllers.insert(controllers.begin(), order.begin(), order.end());
+}
+
+Sweep::Sweep(double first, double second, double length) : first(first, this), second(second, this), length(length, this) {}
 
 double Sweep::getValue(double time)
 {
@@ -93,7 +147,7 @@ double Sweep::getValue(double time)
 }
 
 Envelope::Envelope(double floor, double ceiling, unsigned int attack, unsigned int decay, double sustain, unsigned int release) :
-    floor(floor), ceiling(ceiling), attack(attack), decay(decay), sustain(sustain), release(release) {}
+    floor(floor, this), ceiling(ceiling, this), attack(attack), decay(decay), sustain(sustain, this), release(release) {}
 
 double Envelope::getValue(double time)
 {
@@ -125,7 +179,7 @@ double Envelope::getValue(double time)
     return peak * (1 - (time - releaseTime) / release);
 }
 
-LFO::LFO(double floor, double ceiling, double rate) : floor(floor), ceiling(ceiling), rate(rate) {}
+LFO::LFO(double floor, double ceiling, double rate) : floor(floor, this), ceiling(ceiling, this), rate(rate) {}
 
 double LFO::getValue(double time)
 {
