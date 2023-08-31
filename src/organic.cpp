@@ -11,10 +11,13 @@
 #include "../include/audiosource.h"
 #include "../include/parameter.h"
 #include "../include/event.h"
+#include "../include/effect.h"
 
 struct AudioData
 {
     std::vector<AudioSource*> sources;
+
+    EffectManager* effectManager;
 };
 
 void error(const std::string& message)
@@ -39,7 +42,14 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
     double* buffer = (double*)output;
 
     AudioData* data = (AudioData*)userData;
-    
+
+    for (AudioSource* source : data->sources)
+    {
+        source->prepareForEffects(frames);
+    }
+
+    data->effectManager->applyEffects(streamTime * 1000);
+
     for (int i = 0; i < frames * Config::CHANNELS; i++)
     {
         buffer[i] = 0;
@@ -71,55 +81,93 @@ int main(int argc, char** argv)
 
     ControllerManager* controllerManager = new ControllerManager();
 
-    FiniteSequence* seq = new FiniteSequence(std::vector<double> {
-        130.81, 146.83, 164.81, 185, 207.65, 233.08, 261.63
-    }, FiniteSequence::Order::PingPong);
-    FiniteSequence* seq2 = new FiniteSequence(std::vector<double> {
-        130.81, 146.83, 164.81, 185, 207.65, 233.08, 261.63
-    }, FiniteSequence::Order::Random);
-    Sweep* pluck = new Sweep(1, 0, 0);
-    LFO* length = new LFO(200, 50, 9600);
+    LFO* volume1 = new LFO(0, 1.5, 20000);
+    LFO* volume2 = new LFO(0, 1, 20000);
+    LFO* volume3 = new LFO(0, 1, 20000);
+    LFO* volume4 = new LFO(0, 0.75, 20000);
 
-    controllerManager->addController(seq);
+    volume1->start(0);
+    volume2->start(0);
+    volume3->start(0);
+    volume4->start(0);
+
+    controllerManager->addController(volume1);
+    controllerManager->addController(volume2);
+    controllerManager->addController(volume3);
+    controllerManager->addController(volume4);
+
+    FiniteSequence* seq1 = new FiniteSequence(std::vector<double>
+    {
+        110, 82.41, 98, 82.41
+    }, FiniteSequence::Order::Forwards);
+    FiniteSequence* seq2 = new FiniteSequence(std::vector<double>
+    {
+        164.81, 164.81, 196, 220
+    }, FiniteSequence::Order::Forwards);
+    FiniteSequence* seq3 = new FiniteSequence(std::vector<double>
+    {
+        220, 220, 246.94, 246.94
+    }, FiniteSequence::Order::Forwards);
+    FiniteSequence* seq4 = new FiniteSequence(std::vector<double>
+    {
+        261.63, 261.63, 329.63, 293.66
+    }, FiniteSequence::Order::Forwards);
+
+    seq1->start(0);
+    seq2->start(0);
+    seq3->start(0);
+    seq4->start(0);
+
+    controllerManager->addController(seq1);
     controllerManager->addController(seq2);
-    controllerManager->addController(pluck);
-    controllerManager->addController(length);
+    controllerManager->addController(seq3);
+    controllerManager->addController(seq4);
 
-    controllerManager->connectParameter(length, &pluck->length);
+    EffectManager* effectManager = new EffectManager();
 
-    length->start(0);
+    LowPassFilter* filter = new LowPassFilter(1000);
+
+    effectManager->addEffect(filter);
 
     AudioData data;
 
-    Square* square = new Square(1, 0, 0);
+    data.effectManager = effectManager;
 
-    controllerManager->connectParameter(seq, &square->frequency);
-    controllerManager->connectParameter(pluck, &square->volume);
+    Saw* saw1 = new Saw(0, 0, 0);
+    Saw* saw2 = new Saw(0, 0, 0);
+    Saw* saw3 = new Saw(0, 0, 0);
+    Saw* saw4 = new Saw(0, 0, 0);
 
-    seq->start(0);
-    pluck->start(0);
+    controllerManager->connectParameter(volume1, &saw1->volume);
+    controllerManager->connectParameter(volume2, &saw2->volume);
+    controllerManager->connectParameter(volume3, &saw3->volume);
+    controllerManager->connectParameter(volume4, &saw4->volume);;
 
-    Sine* bass = new Sine(1, 0, 0);
+    controllerManager->connectParameter(seq1, &saw1->frequency);
+    controllerManager->connectParameter(seq2, &saw2->frequency);
+    controllerManager->connectParameter(seq3, &saw3->frequency);
+    controllerManager->connectParameter(seq4, &saw4->frequency);
 
-    controllerManager->connectParameter(seq2, &bass->frequency);
+    //data.sources.push_back(saw1);
+    //data.sources.push_back(saw2);
+    //data.sources.push_back(saw3);
+    //data.sources.push_back(saw4);
 
-    seq2->start(0);
+    Saw* test = new Saw(1, 0, 110);
 
-    data.sources.push_back(square);
-    data.sources.push_back(bass);
+    effectManager->connectAudioSource(filter, test);
+
+    data.sources.push_back(test);
 
     EventQueue* eventQueue = new EventQueue();
 
     eventQueue->addEvent(new IntervalEvent([=](double time)
     {
-        seq->next(time);
-        pluck->start(time);
-    }, 0, 100, 100));
-
-    eventQueue->addEvent(new IntervalEvent([=](double time)
-    {
+        seq1->next(time);
         seq2->next(time);
-    }, 0, 600, 600));
+        seq3->next(time);
+        seq4->next(time);
+    }, 0, 20000, 20000));
 
     RtAudio::StreamParameters parameters;
 
@@ -151,6 +199,8 @@ int main(int argc, char** argv)
     while (true)
     {
         time = (clock.now() - start).count() / 1000000.0;
+
+        audio.setStreamTime(time / 1000);
 
         eventQueue->performEvents(time);
         controllerManager->updateControllers(time);

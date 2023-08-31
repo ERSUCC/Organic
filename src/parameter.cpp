@@ -48,6 +48,11 @@ void ControllerManager::removeController(ParameterController* controller)
 
 void ControllerManager::connectParameter(ParameterController* controller, Parameter* parameter)
 {
+    if (parameter->connected)
+    {
+        // error, parameter can't be controlled by two controllers at once
+    }
+
     parameter->connected = true;
 
     controller->connectedParameters.insert(parameter);

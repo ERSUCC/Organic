@@ -1,26 +1,42 @@
 #include "../include/audiosource.h"
 
-AudioSource::AudioSource(double volume, double pan) : volume(volume), pan(pan) {}
+AudioSource::AudioSource(double volume, double pan) : volume(volume), pan(pan)
+{
+    effectBuffer = (double*)malloc(sizeof(double) * Config::BUFFER_LENGTH * Config::CHANNELS);
+}
+
+AudioSource::~AudioSource()
+{
+    free(effectBuffer);
+}
+
+void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
+{
+    for (int i = 0; i < bufferLength * Config::CHANNELS; i++)
+    {
+        buffer[i] += effectBuffer[i];
+    }
+}
 
 Oscillator::Oscillator(double volume, double pan, double frequency) : AudioSource(volume, pan), frequency(frequency) {}
 
-void Oscillator::fillBuffer(double* buffer, unsigned int bufferLength)
+void Oscillator::prepareForEffects(unsigned int bufferLength)
 {
     phaseDelta = Config::TWO_PI * frequency.value / Config::SAMPLE_RATE;
 
-    for (int i = 0; i < bufferLength; i++)
+    for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
     {
         if (Config::CHANNELS == 1)
         {
-            buffer[i] += volume.value * getValue();
+            effectBuffer[i] = volume.value * getValue();
         }
 
         else
         {
             double value = getValue();
 
-            buffer[i * 2] += volume.value * value * (1 - pan.value) / 2;
-            buffer[i * 2 + 1] += volume.value * value * (pan.value + 1) / 2;
+            effectBuffer[i] = volume.value * value * (1 - pan.value) / 2;
+            effectBuffer[i + 1] = volume.value * value * (pan.value + 1) / 2;
         }
 
         phase += phaseDelta;

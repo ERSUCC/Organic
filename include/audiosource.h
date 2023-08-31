@@ -6,8 +6,13 @@
 struct AudioSource
 {
     AudioSource(double volume, double pan);
+    ~AudioSource();
 
-    virtual void fillBuffer(double* buffer, unsigned int bufferLength) = 0;
+    void fillBuffer(double* buffer, unsigned int bufferLength);
+
+    virtual void prepareForEffects(unsigned int bufferLength) = 0;
+
+    double* effectBuffer;
 
     Parameter volume;
     Parameter pan;
@@ -17,7 +22,7 @@ struct Oscillator : public AudioSource
 {
     Oscillator(double volume, double pan, double frequency);
 
-    void fillBuffer(double* buffer, unsigned int bufferLength) override;
+    void prepareForEffects(unsigned int bufferLength) override;
 
     virtual double getValue() = 0;
 
