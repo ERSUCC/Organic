@@ -5,13 +5,13 @@
 
 struct Event
 {
-    Event(std::function<void(double)> event, double startTime);
+    Event(std::function<void(double, double)> event, double startTime);
 
     bool ready(double time);
     virtual void perform(double time) = 0;
     void cancel();
 
-    std::function<void(double)> event;
+    std::function<void(double, double)> event;
 
     double startTime;
     double next;
@@ -37,14 +37,26 @@ private:
 
 struct DelayedEvent : public Event
 {
-    DelayedEvent(std::function<void(double)> event, double startTime, double delay);
+    DelayedEvent(std::function<void(double, double)> event, double startTime, double delay);
 
     void perform(double time) override;
 };
 
+struct RepeatedEvent : public Event
+{
+    RepeatedEvent(std::function<void(double, double)> event, double startTime, double delay, double interval, int repeats);
+
+    void perform(double time) override;
+
+    double interval;
+
+    int repeats;
+    int times = 0;
+};
+
 struct IntervalEvent : public Event
 {
-    IntervalEvent(std::function<void(double)> event, double startTime, double delay, double interval);
+    IntervalEvent(std::function<void(double, double)> event, double startTime, double delay, double interval);
 
     void perform(double time) override;
 

@@ -33,10 +33,10 @@ void Oscillator::prepareForEffects(unsigned int bufferLength)
 
         else
         {
-            double value = getValue();
+            double value = volume.value * getValue();
 
-            effectBuffer[i] = volume.value * value * (1 - pan.value) / 2;
-            effectBuffer[i + 1] = volume.value * value * (pan.value + 1) / 2;
+            effectBuffer[i] = value * (1 - pan.value) / 2;
+            effectBuffer[i + 1] = value * (pan.value + 1) / 2;
         }
 
         phase += phaseDelta;

@@ -28,9 +28,9 @@ void EffectManager::applyEffects(double time)
     }
 }
 
-LowPassFilter::LowPassFilter(double cutoff) : cutoff(cutoff) {}
+Delay::Delay(double delay, double feedback) : delay(delay), feedback(feedback) {}
 
-void LowPassFilter::apply(double time)
+void Delay::apply(double time)
 {
     for (AudioSource* audioSource : connectedSources)
     {
@@ -38,12 +38,35 @@ void LowPassFilter::apply(double time)
         {
             if (Config::CHANNELS == 1)
             {
-                
+                if (time >= bufferTime + delay.value)
+                {
+                    audioSource->effectBuffer[i] += buffer.front() * feedback.value;
+
+                    buffer.pop();
+
+                    bufferTime = time - delay.value;
+                }
+
+                buffer.push(audioSource->effectBuffer[i]);
             }
 
             else
             {
-                
+                if (time >= bufferTime + delay.value)
+                {
+                    audioSource->effectBuffer[i] += buffer.front() * feedback.value;
+
+                    buffer.pop();
+
+                    audioSource->effectBuffer[i + 1] += buffer.front() * feedback.value;
+
+                    buffer.pop();
+
+                    bufferTime = time - delay.value;
+                }
+
+                buffer.push(audioSource->effectBuffer[i]);
+                buffer.push(audioSource->effectBuffer[i + 1]);
             }
         }
     }

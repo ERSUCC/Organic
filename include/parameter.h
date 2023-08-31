@@ -34,9 +34,10 @@ struct ParameterController
 
     double startTime;
 
-private:
+protected:
     bool running = false;
 
+private:
     std::unordered_set<Parameter*> connectedParameters;
 
 };
@@ -71,16 +72,16 @@ struct Sweep : public ParameterController
 
 struct Envelope : public ParameterController
 {
-    Envelope(double floor, double ceiling, unsigned int attack, unsigned int decay, double sustain, unsigned int release);
+    Envelope(double floor, double ceiling, double attack, double decay, double sustain, double release);
 
     double getValue(double time) override;
 
     Parameter floor;
     Parameter ceiling;
+    Parameter decay;
     Parameter sustain;
 
     double attack;
-    double decay;
     double release;
     double peak;
 
@@ -125,6 +126,7 @@ struct FiniteSequence : public Sequence
 
     int current = 0;
     int direction = 1;
+    int last = -1;
 
     Order order;
 

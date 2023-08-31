@@ -151,8 +151,8 @@ double Sweep::getValue(double time)
     return first.value + (second.value - first.value) * (time - startTime) / length.value;
 }
 
-Envelope::Envelope(double floor, double ceiling, unsigned int attack, unsigned int decay, double sustain, unsigned int release) :
-    floor(floor, this), ceiling(ceiling, this), attack(attack), decay(decay), sustain(sustain, this), release(release) {}
+Envelope::Envelope(double floor, double ceiling, double attack, double decay, double sustain, double release) :
+    floor(floor, this), ceiling(ceiling, this), attack(attack), decay(decay, this), sustain(sustain, this), release(release) {}
 
 double Envelope::getValue(double time)
 {
@@ -163,9 +163,9 @@ double Envelope::getValue(double time)
             return floor.value + (ceiling.value - floor.value) * (time - startTime) / attack;
         }
 
-        else if (time - startTime - attack < decay)
+        else if (time - startTime - attack < decay.value)
         {
-            return ceiling.value - (ceiling.value - sustain.value) * (time - startTime - attack) / decay;
+            return ceiling.value - (ceiling.value - sustain.value) * (time - startTime - attack) / decay.value;
         }
 
         else
@@ -208,40 +208,55 @@ double FiniteSequence::getValue(double time)
 
 void FiniteSequence::next(double time)
 {
-    switch (order)
+    if (running)
     {
-        case Forwards:
-            current = (current + 1) % values.size();
-
-            break;
-
-        case Backwards:
+        switch (order)
         {
-            current -= 1;
+            case Forwards:
+                current = (current + 1) % values.size();
 
-            if (current < 0)
+                break;
+
+            case Backwards:
             {
-                current = values.size() - 1;
+                current -= 1;
+
+                if (current < 0)
+                {
+                    current = values.size() - 1;
+                }
+
+                break;
             }
 
-            break;
-        }
-
-        case PingPong:
-        {
-            if ((direction == -1 && current <= 0) || current >= values.size() - 1)
+            case PingPong:
             {
-                direction *= -1;
+                if ((direction == -1 && current <= 0) || current >= values.size() - 1)
+                {
+                    direction *= -1;
+                }
+
+                current += direction;
+
+                break;
             }
 
-            current += direction;
+            case Random:
+                current = udist(Config::RNG);
 
-            break;
+                if (current == last)
+                {
+                    current = (current + 1) % values.size();
+                }
+
+                break;
         }
-
-        case Random:
-            current = udist(Config::RNG);
-
-            break;
     }
+
+    else
+    {
+        start(time);
+    }
+
+    last = current;
 }

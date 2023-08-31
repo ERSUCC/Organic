@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <queue>
 
 #include "audiosource.h"
+#include "parameter.h"
 
 struct EffectManager;
 
@@ -32,11 +34,18 @@ private:
 
 };
 
-struct LowPassFilter : public Effect
+struct Delay : public Effect
 {
-    LowPassFilter(double cutoff);
+    Delay(double delay, double feedback);
 
     void apply(double time) override;
 
-    Parameter cutoff;
+    Parameter delay;
+    Parameter feedback;
+
+private:
+    std::queue<double> buffer;
+
+    double bufferTime = 0;
+
 };
