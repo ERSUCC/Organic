@@ -97,7 +97,7 @@ int main(int argc, char** argv)
     Sweep* length = new Sweep(300, 750, 6000);
     FiniteSequence* pitch = new FiniteSequence(std::vector<double>
     {
-        220, 246.94, 277.18, 311.13, 329.63, 369.99, 415.3, 440
+        110, 220, 246.94, 277.18, 311.13, 329.63, 369.99, 415.3, 440
     }, FiniteSequence::Order::Random);
 
     controllerManager->addController(pluck);
@@ -120,12 +120,12 @@ int main(int argc, char** argv)
 
         eventQueue->addEvent(new RepeatedEvent([=](double time, double target)
         {
-            eventQueue->addEvent(new RepeatedEvent([=](double time, double target)
+            eventQueue->addEvent(new RandomRepeatedEvent([=](double time, double target)
             {
                 pluck->start(time);
                 pitch->next(time);
-            }, target, 0, 125, 4));
-        }, target, 0, 1500, 4));
+            }, target, 0, 125, 1000, 125, 4));
+        }, target, 0, 2000, 4));
     }, 0, 0, 15000));
 
     RtAudio::StreamParameters parameters;

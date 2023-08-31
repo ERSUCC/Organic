@@ -2,6 +2,9 @@
 
 #include <functional>
 #include <queue>
+#include <random>
+
+#include "config.h"
 
 struct Event
 {
@@ -54,6 +57,24 @@ struct RepeatedEvent : public Event
     int times = 0;
 };
 
+struct RandomRepeatedEvent : public Event
+{
+    RandomRepeatedEvent(std::function<void(double, double)> event, double startTime, double delay, double floor, double ceiling, double step, int repeats);
+
+    void perform(double time) override;
+
+    double floor;
+    double ceiling;
+    double step;
+
+    int repeats;
+    int times = 0;
+
+private:
+    std::uniform_real_distribution<> udist;
+
+};
+
 struct IntervalEvent : public Event
 {
     IntervalEvent(std::function<void(double, double)> event, double startTime, double delay, double interval);
@@ -61,4 +82,19 @@ struct IntervalEvent : public Event
     void perform(double time) override;
 
     double interval;
+};
+
+struct RandomIntervalEvent : public Event
+{
+    RandomIntervalEvent(std::function<void(double, double)> event, double startTime, double delay, double floor, double ceiling, double step);
+
+    void perform(double time) override;
+
+    double floor;
+    double ceiling;
+    double step;
+
+private:
+    std::uniform_real_distribution<> udist;
+
 };

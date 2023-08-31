@@ -71,6 +71,29 @@ void RepeatedEvent::perform(double time)
     }
 }
 
+RandomRepeatedEvent::RandomRepeatedEvent(std::function<void(double, double)> event, double startTime, double delay, double floor, double ceiling, double step, int repeats) :
+    Event(event, startTime), floor(floor), ceiling(ceiling), step(step), repeats(repeats)
+{
+    next = startTime + delay;
+
+    udist = std::uniform_real_distribution<>(0, ceiling - floor);
+}
+
+void RandomRepeatedEvent::perform(double time)
+{
+    if (++times <= repeats)
+    {
+        event(time, next);
+
+        next += step * round(udist(Config::RNG) / step) + floor;
+    }
+
+    else
+    {
+        cancel();
+    }
+}
+
 IntervalEvent::IntervalEvent(std::function<void(double, double)> event, double startTime, double delay, double interval) : Event(event, startTime), interval(interval)
 {
     next = startTime + delay;
@@ -81,4 +104,19 @@ void IntervalEvent::perform(double time)
     event(time, next);
 
     next += interval;
+}
+
+RandomIntervalEvent::RandomIntervalEvent(std::function<void(double, double)> event, double startTime, double delay, double floor, double ceiling, double step) :
+    Event(event, startTime), floor(floor), ceiling(ceiling), step(step)
+{
+    next = startTime + delay;
+
+    udist = std::uniform_real_distribution<>(0, ceiling - floor);
+}
+
+void RandomIntervalEvent::perform(double time)
+{
+    event(time, next);
+
+    next += step * round(udist(Config::RNG) / step) + floor;
 }
