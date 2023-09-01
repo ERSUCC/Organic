@@ -26,7 +26,7 @@ struct ParameterController
 {
     friend struct ControllerManager;
     
-    void start(double time);
+    virtual void start(double time);
     void update(double time);
     void stop(double time);
 
@@ -74,6 +74,9 @@ struct Envelope : public ParameterController
 {
     Envelope(double floor, double ceiling, double attack, double decay, double sustain, double release);
 
+    void start(double time) override;
+    void releaseAt(double time);
+
     double getValue(double time) override;
 
     Parameter floor;
@@ -85,9 +88,9 @@ struct Envelope : public ParameterController
     double release;
     double peak;
 
-    bool hold;
-
     double releaseTime;
+
+    bool hold = false;
 };
 
 struct LFO : public ParameterController

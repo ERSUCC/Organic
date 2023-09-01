@@ -88,10 +88,12 @@ int main(int argc, char** argv)
     data.effectManager = effectManager;
 
     Delay* delay = new Delay(375, 0.85);
+    Delay* delay2 = new Delay(375, 0.75);
 
     effectManager->addEffect(delay);
+    effectManager->addEffect(delay2);
 
-    Saw* saw = new Saw(1, 0, 0);
+    Saw* boop = new Saw(1, 0, 0);
 
     Sweep* pluck = new Sweep(1, 0, 0);
     Sweep* length = new Sweep(300, 750, 6000);
@@ -104,13 +106,31 @@ int main(int argc, char** argv)
     controllerManager->addController(length);
     controllerManager->addController(pitch);
 
-    controllerManager->connectParameter(pluck, &saw->volume);
+    controllerManager->connectParameter(pluck, &boop->volume);
     controllerManager->connectParameter(length, &pluck->length);
-    controllerManager->connectParameter(pitch, &saw->frequency);
+    controllerManager->connectParameter(pitch, &boop->frequency);
 
-    effectManager->connectAudioSource(delay, saw);
+    effectManager->connectAudioSource(delay, boop);
 
-    data.sources.push_back(saw);
+    data.sources.push_back(boop);
+
+    Square* bell = new Square(0, 0, 0);
+
+    Sweep* pluck2 = new Sweep(0.5, 0, 150);
+    FiniteSequence* pitch2 = new FiniteSequence(std::vector<double>
+    {
+        880, 1244.51, 1318.51
+    }, FiniteSequence::Order::Random);
+
+    controllerManager->addController(pluck2);
+    controllerManager->addController(pitch2);
+
+    controllerManager->connectParameter(pluck2, &bell->volume);
+    controllerManager->connectParameter(pitch2, &bell->frequency);
+
+    effectManager->connectAudioSource(delay2, bell);
+
+    data.sources.push_back(bell);
 
     EventQueue* eventQueue = new EventQueue();
 
@@ -122,10 +142,18 @@ int main(int argc, char** argv)
         {
             eventQueue->addEvent(new RandomRepeatedEvent([=](double time, double target)
             {
+                boop->phase = 0;
+
                 pluck->start(time);
                 pitch->next(time);
             }, target, 0, 125, 1000, 125, 4));
         }, target, 0, 2000, 4));
+
+        eventQueue->addEvent(new RandomRepeatedEvent([=](double time, double target)
+        {
+            pluck2->start(time);
+            pitch2->next(time);
+        }, target, 2500, 125, 375, 125, 12));
     }, 0, 0, 15000));
 
     RtAudio::StreamParameters parameters;

@@ -154,9 +154,22 @@ double Sweep::getValue(double time)
 Envelope::Envelope(double floor, double ceiling, double attack, double decay, double sustain, double release) :
     floor(floor, this), ceiling(ceiling, this), attack(attack), decay(decay, this), sustain(sustain, this), release(release) {}
 
+void Envelope::start(double time)
+{
+    ParameterController::start(time);
+
+    hold = true;
+}
+
+void Envelope::releaseAt(double time)
+{
+    releaseTime = time;
+    hold = false;
+}
+
 double Envelope::getValue(double time)
 {
-    if (hold)
+    if (running)
     {
         if (time - startTime < attack)
         {
