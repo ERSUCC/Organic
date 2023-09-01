@@ -114,9 +114,9 @@ int main(int argc, char** argv)
 
     data.sources.push_back(boop);
 
-    Square* bell = new Square(0, 0, 0);
+    Triangle* bell = new Triangle(0, 0, 0);
 
-    Sweep* pluck2 = new Sweep(0.5, 0, 150);
+    Sweep* pluck2 = new Sweep(1, 0, 150);
     FiniteSequence* pitch2 = new FiniteSequence(std::vector<double>
     {
         880, 1244.51, 1318.51
@@ -153,7 +153,7 @@ int main(int argc, char** argv)
         {
             pluck2->start(time);
             pitch2->next(time);
-        }, target, 2500, 125, 375, 125, 12));
+        }, target, 2500, 125, 500, 125, 15));
     }, 0, 0, 15000));
 
     RtAudio::StreamParameters parameters;

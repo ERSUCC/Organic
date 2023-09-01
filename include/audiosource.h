@@ -52,3 +52,10 @@ struct Saw : public Oscillator
 
     double getValue() override;
 };
+
+struct Triangle : public Oscillator
+{
+    Triangle(double volume, double pan, double frequency);
+
+    double getValue() override;
+};

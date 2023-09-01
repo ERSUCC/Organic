@@ -58,10 +58,10 @@ double Square::getValue()
 {
     if (sin(phase) > 0)
     {
-        return 1;
+        return -1;
     }
 
-    return -1;
+    return 1;
 }
 
 Saw::Saw(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
@@ -69,4 +69,16 @@ Saw::Saw(double volume, double pan, double frequency) : Oscillator(volume, pan, 
 double Saw::getValue()
 {
     return fmod(phase, Config::TWO_PI) / M_PI - 1;
+}
+
+Triangle::Triangle(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
+
+double Triangle::getValue()
+{
+    if (sin(phase) < 0)
+    {
+        return -fmod(phase - M_PI, M_PI) * 2 / M_PI + 1;
+    }
+
+    return fmod(phase, M_PI) * 2 / M_PI - 1;
 }
