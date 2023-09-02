@@ -82,3 +82,24 @@ double Triangle::getValue()
 
     return fmod(phase, M_PI) * 2 / M_PI - 1;
 }
+
+Noise::Noise(double volume, double pan) : AudioSource(volume, pan) {}
+
+void Noise::prepareForEffects(unsigned int bufferLength)
+{
+    for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
+    {
+        if (Config::CHANNELS == 1)
+        {
+            effectBuffer[i] = volume.value * udist(Config::RNG);
+        }
+
+        else
+        {
+            double value = volume.value * udist(Config::RNG);
+
+            effectBuffer[i] = value * (1 - pan.value) / 2;
+            effectBuffer[i + 1] = value * (pan.value + 1) / 2;
+        }
+    }
+}

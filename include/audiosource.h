@@ -59,3 +59,14 @@ struct Triangle : public Oscillator
 
     double getValue() override;
 };
+
+struct Noise : AudioSource
+{
+    Noise(double volume, double pan);
+
+    void prepareForEffects(unsigned int bufferLength) override;
+
+private:
+    std::uniform_real_distribution<> udist = std::uniform_real_distribution<>(-1, 1);
+
+};
