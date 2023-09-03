@@ -1,18 +1,26 @@
 #pragma once
 
+#include <vector>
+
 #include "config.h"
 #include "parameter.h"
+#include "effect.h"
 
 struct AudioSource
 {
     AudioSource(double volume, double pan);
     ~AudioSource();
 
-    void fillBuffer(double* buffer, unsigned int bufferLength);
+    void fillBuffer(double* buffer, unsigned int bufferLength, double time);
 
     virtual void prepareForEffects(unsigned int bufferLength) = 0;
 
+    void addEffect(Effect* effect);
+    void removeEffect(Effect* effect);
+
     double* effectBuffer;
+
+    std::vector<Effect*> effects;
 
     Parameter volume;
     Parameter pan;

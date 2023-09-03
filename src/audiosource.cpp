@@ -10,12 +10,29 @@ AudioSource::~AudioSource()
     free(effectBuffer);
 }
 
-void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
+void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength, double time)
 {
+    prepareForEffects(bufferLength);
+
+    for (Effect* effect : effects)
+    {
+        effect->apply(effectBuffer, bufferLength, time);
+    }
+
     for (int i = 0; i < bufferLength * Config::CHANNELS; i++)
     {
         buffer[i] += effectBuffer[i];
     }
+}
+
+void AudioSource::addEffect(Effect* effect)
+{
+    effects.push_back(effect);
+}
+
+void AudioSource::removeEffect(Effect* effect)
+{
+    effects.erase(std::find(effects.begin(), effects.end(), effect));
 }
 
 Oscillator::Oscillator(double volume, double pan, double frequency) : AudioSource(volume, pan), frequency(frequency) {}

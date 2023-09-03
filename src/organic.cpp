@@ -16,8 +16,6 @@
 struct AudioData
 {
     std::vector<AudioSource*> sources;
-
-    EffectManager* effectManager;
 };
 
 void error(const std::string& message)
@@ -34,7 +32,12 @@ void rtAudioError(RtAudioErrorType type, const std::string& message)
 
 int processAudio(void* output, void* input, unsigned int frames, double streamTime, RtAudioStreamStatus status, void* userData)
 {
-    if (status)
+    if (status == RTAUDIO_INPUT_OVERFLOW)
+    {
+        error("Error: Stream overflow detected.");
+    }
+
+    if (status == RTAUDIO_OUTPUT_UNDERFLOW)
     {
         error("Error: Stream underflow detected.");
     }
@@ -43,13 +46,6 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
     AudioData* data = (AudioData*)userData;
 
-    for (AudioSource* source : data->sources)
-    {
-        source->prepareForEffects(frames);
-    }
-
-    data->effectManager->applyEffects(streamTime * 1000);
-
     for (int i = 0; i < frames * Config::CHANNELS; i++)
     {
         buffer[i] = 0;
@@ -57,7 +53,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
     for (AudioSource* source : data->sources)
     {
-        source->fillBuffer(buffer, frames);
+        source->fillBuffer(buffer, frames, streamTime);
     }
 
     for (int i = 0; i < frames * Config::CHANNELS; i++)
@@ -83,15 +79,8 @@ int main(int argc, char** argv)
 
     ControllerManager* controllerManager = new ControllerManager();
 
-    EffectManager* effectManager = new EffectManager();
-
-    data.effectManager = effectManager;
-
     Delay* delay = new Delay(375, 0.85);
     Delay* delay2 = new Delay(375, 0.75);
-
-    effectManager->addEffect(delay);
-    effectManager->addEffect(delay2);
 
     Saw* boop = new Saw(1, 0, 0);
 
@@ -110,7 +99,7 @@ int main(int argc, char** argv)
     controllerManager->connectParameter(length, &pluck->length);
     controllerManager->connectParameter(pitch, &boop->frequency);
 
-    effectManager->connectAudioSource(delay, boop);
+    boop->addEffect(delay);
 
     data.sources.push_back(boop);
 
@@ -128,7 +117,7 @@ int main(int argc, char** argv)
     controllerManager->connectParameter(pluck2, &bell->volume);
     controllerManager->connectParameter(pitch2, &bell->frequency);
 
-    effectManager->connectAudioSource(delay2, bell);
+    bell->addEffect(delay2);
 
     data.sources.push_back(bell);
 
@@ -187,7 +176,7 @@ int main(int argc, char** argv)
     {
         time = (clock.now() - start).count() / 1000000.0;
 
-        audio.setStreamTime(time / 1000);
+        audio.setStreamTime(time);
 
         eventQueue->performEvents(time);
         controllerManager->updateControllers(time);
