@@ -79,9 +79,6 @@ int main(int argc, char** argv)
 
     ControllerManager* controllerManager = new ControllerManager();
 
-    Delay* delay = new Delay(375, 0.85);
-    Delay* delay2 = new Delay(375, 0.75);
-
     Saw* boop = new Saw(1, 0, 0);
 
     Sweep* pluck = new Sweep(1, 0, 0);
@@ -99,7 +96,17 @@ int main(int argc, char** argv)
     controllerManager->connectParameter(length, &pluck->length);
     controllerManager->connectParameter(pitch, &boop->frequency);
 
+    Delay* delay = new Delay(375, 0.85);
+    LowPassFilter* low = new LowPassFilter(0);
+
     boop->addEffect(delay);
+    boop->addEffect(low);
+
+    Sweep* filterSweep = new Sweep(0, 10000, 15000);
+
+    controllerManager->addController(filterSweep);
+
+    controllerManager->connectParameter(filterSweep, &low->cutoff);
 
     data.sources.push_back(boop);
 
@@ -117,6 +124,8 @@ int main(int argc, char** argv)
     controllerManager->connectParameter(pluck2, &bell->volume);
     controllerManager->connectParameter(pitch2, &bell->frequency);
 
+    Delay* delay2 = new Delay(375, 0.75);
+
     bell->addEffect(delay2);
 
     data.sources.push_back(bell);
@@ -126,6 +135,7 @@ int main(int argc, char** argv)
     eventQueue->addEvent(new IntervalEvent([=](double time, double target)
     {
         length->start(time);
+        filterSweep->start(time);
 
         eventQueue->addEvent(new RepeatedEvent([=](double time, double target)
         {
