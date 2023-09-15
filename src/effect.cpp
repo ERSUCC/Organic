@@ -1,6 +1,8 @@
 #include "../include/effect.h"
 
-Delay::Delay(double delay, double feedback) : delay(delay), feedback(feedback) {}
+Effect::Effect(double mix) : mix(mix) {}
+
+Delay::Delay(double mix, double delay, double feedback) : Effect(mix), delay(delay), feedback(feedback) {}
 
 void Delay::apply(double* buffer, unsigned int bufferLength, double time)
 {
@@ -10,7 +12,7 @@ void Delay::apply(double* buffer, unsigned int bufferLength, double time)
         {
             if (time >= bufferTime + delay.value)
             {
-                buffer[i] += this->buffer.front() * feedback.value;
+                buffer[i] += this->buffer.front() * mix.value * feedback.value;
 
                 this->buffer.pop();
 
@@ -24,11 +26,11 @@ void Delay::apply(double* buffer, unsigned int bufferLength, double time)
         {
             if (time >= bufferTime + delay.value)
             {
-                buffer[i] += this->buffer.front() * feedback.value;
+                buffer[i] += this->buffer.front() * mix.value * feedback.value;
 
                 this->buffer.pop();
 
-                buffer[i + 1] += this->buffer.front() * feedback.value;
+                buffer[i + 1] += this->buffer.front() * mix.value * feedback.value;
 
                 this->buffer.pop();
 
@@ -41,7 +43,7 @@ void Delay::apply(double* buffer, unsigned int bufferLength, double time)
     }
 }
 
-LowPassFilter::LowPassFilter(double cutoff) : cutoff(cutoff) {}
+LowPassFilter::LowPassFilter(double mix, double cutoff) : Effect(mix), cutoff(cutoff) {}
 
 void LowPassFilter::apply(double* buffer, unsigned int bufferLength, double time)
 {
@@ -59,7 +61,7 @@ void LowPassFilter::apply(double* buffer, unsigned int bufferLength, double time
 
         if (Config::CHANNELS == 1)
         {
-            buffer[i] = a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0];
+            buffer[i] = mix.value * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
 
             raw2[0] = raw1[0];
             raw1[0] = rawl;
@@ -72,8 +74,8 @@ void LowPassFilter::apply(double* buffer, unsigned int bufferLength, double time
         {
             double rawr = buffer[i + 1];
 
-            buffer[i] = a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0];
-            buffer[i + 1] = a0 * buffer[i + 1] + a1 * raw1[1] + a0 * raw2[1] - b1 * filtered1[1] - b2 * filtered2[1];
+            buffer[i] = mix.value * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
+            buffer[i + 1] = mix.value * (a0 * buffer[i + 1] + a1 * raw1[1] + a0 * raw2[1] - b1 * filtered1[1] - b2 * filtered2[1]);
 
             raw2[0] = raw1[0];
             raw2[1] = raw1[1];

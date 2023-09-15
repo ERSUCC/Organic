@@ -6,12 +6,16 @@
 
 struct Effect
 {
+    Effect(double mix);
+
     virtual void apply(double* buffer, unsigned int bufferLength, double time) = 0;
+
+    Parameter mix;
 };
 
 struct Delay : public Effect
 {
-    Delay(double delay, double feedback);
+    Delay(double mix, double delay, double feedback);
 
     void apply(double* buffer, unsigned int bufferLength, double time) override;
 
@@ -27,7 +31,7 @@ private:
 
 struct LowPassFilter : public Effect
 {
-    LowPassFilter(double cutoff);
+    LowPassFilter(double mix, double cutoff);
 
     void apply(double* buffer, unsigned int bufferLength, double time) override;
 
