@@ -8,10 +8,10 @@
 
 struct Event
 {
-    Event(std::function<void(double, double)> event, double startTime);
+    Event(std::function<void(double, double)> event, double startTime, double delay);
 
     bool ready(double time);
-    virtual void perform(double time) = 0;
+    virtual void perform(double time);
     void cancel();
 
     std::function<void(double, double)> event;
@@ -36,13 +36,6 @@ private:
 
     std::priority_queue<Event*, std::vector<Event*>, cmp> events;
 
-};
-
-struct DelayedEvent : public Event
-{
-    DelayedEvent(std::function<void(double, double)> event, double startTime, double delay);
-
-    void perform(double time) override;
 };
 
 struct RepeatedEvent : public Event
@@ -96,5 +89,18 @@ struct RandomIntervalEvent : public Event
 
 private:
     std::uniform_real_distribution<> udist;
+
+};
+
+struct RhythmEvent : public Event
+{
+    RhythmEvent(std::function<void(double, double)> event, double startTime, double delay, std::vector<double> rhythm);
+
+    void perform(double time) override;
+
+private:
+    std::vector<double> rhythm;
+
+    int current = 0;
 
 };
