@@ -6,7 +6,6 @@
 #include <random>
 
 #include "../include/RtAudio.h"
-// #include "../include/AudioFile.h"
 
 #include "../include/config.h"
 #include "../include/audiosource.h"
@@ -17,7 +16,6 @@
 struct AudioData
 {
     std::vector<AudioSource*> sources;
-    // AudioFile<double>::AudioBuffer output;
 };
 
 void error(const std::string& message)
@@ -65,13 +63,6 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
         if (Config::CHANNELS == 2)
         {
             buffer[i + 1] *= Config::MASTER_VOLUME;
-
-            // data->output.push_back(std::vector<double> { buffer[i], buffer[i + 1] });
-        }
-
-        else
-        {
-            // data->output.push_back(std::vector<double> { buffer[i] });
         }
     }
 
@@ -122,7 +113,7 @@ int main(int argc, char** argv)
 
     double time = 0;
 
-    while (time < 5000)
+    while (true)
     {
         time = (clock.now() - start).count() / 1000000.0;
 
@@ -141,11 +132,6 @@ int main(int argc, char** argv)
     {
         audio.closeStream();
     }
-
-    // AudioFile<double> output;
-
-    // output.setAudioBuffer(data.output);
-    // output.save("temp.wav");
 
     return 0;
 }
