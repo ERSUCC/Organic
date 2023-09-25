@@ -1,6 +1,7 @@
 #include "../include/event.h"
 
-Event::Event(std::function<void(double, double)> event, double startTime, double delay) : event(event), startTime(startTime)
+Event::Event(std::function<void(double, double)> event, double startTime, double delay, double interval, int repeats) :
+    event(event), startTime(startTime), interval(interval), repeats(repeats)
 {
     next = startTime + delay;
 }
@@ -13,13 +14,23 @@ bool Event::ready(double time)
 void Event::perform(double time)
 {
     event(time, next);
-
-    cancel();
 }
 
-void Event::cancel()
+bool Event::getNext(double time)
 {
-    discard = true;
+    if (interval.value)
+    {
+        next += interval.value;
+
+        if (repeats)
+        {
+            return ++times < repeats;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 void EventQueue::addEvent(Event* event)
@@ -37,7 +48,7 @@ void EventQueue::performEvents(double time)
 
         event->perform(time);
 
-        if (!event->discard)
+        if (event->getNext(time))
         {
             addEvent(event);
         }
@@ -49,76 +60,31 @@ bool EventQueue::cmp::operator()(Event* left, Event* right)
     return left->next > right->next;
 }
 
-RepeatedEvent::RepeatedEvent(std::function<void(double, double)> event, double startTime, double delay, double interval, int repeats) :
-    Event(event, startTime, delay), interval(interval), repeats(repeats) {}
+RhythmEvent::RhythmEvent(std::function<void(double, double)> event, double startTime, double delay, double interval, int repeats, std::vector<double> rhythm) :
+    Event(event, startTime, delay, interval, repeats), rhythm(rhythm) {}
 
-void RepeatedEvent::perform(double time)
+bool RhythmEvent::getNext(double time)
 {
-    if (++times <= repeats)
+    if (current < rhythm.size())
     {
-        event(time, next);
+        next += rhythm[current++];
 
-        next += interval;
+        return true;
     }
 
-    else
+    if (interval.value)
     {
-        cancel();
-    }
-}
+        next += interval.value;
 
-RandomRepeatedEvent::RandomRepeatedEvent(std::function<void(double, double)> event, double startTime, double delay, double floor, double ceiling, double step, int repeats) :
-    Event(event, startTime, delay), floor(floor), ceiling(ceiling), step(step), repeats(repeats)
-{
-    udist = std::uniform_real_distribution<>(0, ceiling - floor);
-}
+        current = 0;
 
-void RandomRepeatedEvent::perform(double time)
-{
-    if (++times <= repeats)
-    {
-        event(time, next);
+        if (repeats)
+        {
+            return ++times < repeats;
+        }
 
-        next += step * round(udist(Config::RNG) / step) + floor;
+        return true;
     }
 
-    else
-    {
-        cancel();
-    }
-}
-
-IntervalEvent::IntervalEvent(std::function<void(double, double)> event, double startTime, double delay, double interval) :
-    Event(event, startTime, delay), interval(interval) {}
-
-void IntervalEvent::perform(double time)
-{
-    event(time, next);
-
-    next += interval;
-}
-
-RandomIntervalEvent::RandomIntervalEvent(std::function<void(double, double)> event, double startTime, double delay, double floor, double ceiling, double step) :
-    Event(event, startTime, delay), floor(floor), ceiling(ceiling), step(step)
-{
-    udist = std::uniform_real_distribution<>(0, ceiling - floor);
-}
-
-void RandomIntervalEvent::perform(double time)
-{
-    event(time, next);
-
-    next += step * round(udist(Config::RNG) / step) + floor;
-}
-
-RhythmEvent::RhythmEvent(std::function<void(double, double)> event, double startTime, double delay, std::vector<double> rhythm) :
-    Event(event, startTime, delay), rhythm(rhythm) {}
-
-void RhythmEvent::perform(double time)
-{
-    event(time, next);
-
-    next += rhythm[current];
-
-    current = (current + 1) % rhythm.size();
+    return false;
 }
