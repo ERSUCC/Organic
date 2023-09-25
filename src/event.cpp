@@ -1,9 +1,9 @@
 #include "../include/event.h"
 
-Event::Event(std::function<void(double, double)> event, double startTime, double delay, double interval, int repeats) :
-    event(event), startTime(startTime), interval(interval), repeats(repeats)
+Event::Event(std::function<void(double, double)> event, std::function<void(double, double)> end, double startTime, double startDelay, double endDelay, double interval, int repeats) :
+    event(event), end(end), startTime(startTime), endDelay(endDelay), interval(interval), repeats(repeats)
 {
-    next = startTime + delay;
+    next = startTime + startDelay;
 }
 
 bool Event::ready(double time)
@@ -24,13 +24,33 @@ bool Event::getNext(double time)
 
         if (repeats)
         {
-            return ++times < repeats;
+            if (++times < repeats)
+            {
+                return true;
+            }
         }
+
+        else
+        {
+            return true;
+        }
+    }
+
+    if (endDelay)
+    {
+        next += endDelay - interval.value;
+        
+        endDelay = 0;
 
         return true;
     }
 
     return false;
+}
+
+void Event::finish(double time)
+{
+    end(time, next);
 }
 
 void EventQueue::addEvent(Event* event)
@@ -52,39 +72,15 @@ void EventQueue::performEvents(double time)
         {
             addEvent(event);
         }
+
+        else
+        {
+            event->finish(time);
+        }
     }
 }
 
 bool EventQueue::cmp::operator()(Event* left, Event* right)
 {
     return left->next > right->next;
-}
-
-RhythmEvent::RhythmEvent(std::function<void(double, double)> event, double startTime, double delay, double interval, int repeats, std::vector<double> rhythm) :
-    Event(event, startTime, delay, interval, repeats), rhythm(rhythm) {}
-
-bool RhythmEvent::getNext(double time)
-{
-    if (current < rhythm.size())
-    {
-        next += rhythm[current++];
-
-        return true;
-    }
-
-    if (interval.value)
-    {
-        next += interval.value;
-
-        current = 0;
-
-        if (repeats)
-        {
-            return ++times < repeats;
-        }
-
-        return true;
-    }
-
-    return false;
 }

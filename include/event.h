@@ -8,22 +8,26 @@
 
 struct Event
 {
-    Event(std::function<void(double, double)> event, double startTime, double delay, double interval, int repeats);
+    friend struct EventQueue;
+
+    Event(std::function<void(double, double)> event, std::function<void(double, double)> end, double startTime, double startDelay, double endDelay, double interval, int repeats);
 
     bool ready(double time);
-    virtual void perform(double time);
-    virtual bool getNext(double time);
-
-    std::function<void(double, double)> event;
-
-    double startTime;
-    double next;
-
-    int repeats;
+    void perform(double time);
+    bool getNext(double time);
+    void finish(double time);
 
     Parameter interval;
 
-protected:
+private:
+    std::function<void(double, double)> event;
+    std::function<void(double, double)> end;
+
+    double startTime;
+    double next;
+    double endDelay;
+
+    int repeats;
     int times = 0;
 
 };
@@ -41,18 +45,5 @@ private:
     };
 
     std::priority_queue<Event*, std::vector<Event*>, cmp> events;
-
-};
-
-struct RhythmEvent : public Event
-{
-    RhythmEvent(std::function<void(double, double)> event, double startTime, double delay, double interval, int repeats, std::vector<double> rhythm);
-
-    bool getNext(double time) override;
-
-private:
-    std::vector<double> rhythm;
-
-    int current = 0;
 
 };
