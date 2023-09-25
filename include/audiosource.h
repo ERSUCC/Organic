@@ -13,7 +13,7 @@ struct AudioSource
 
     void fillBuffer(double* buffer, unsigned int bufferLength, double time);
 
-    virtual void prepareForEffects(unsigned int bufferLength) = 0;
+    virtual void prepareForEffects(unsigned int bufferLength, double time) = 0;
 
     void addEffect(Effect* effect);
     void removeEffect(Effect* effect);
@@ -30,7 +30,7 @@ struct Oscillator : public AudioSource
 {
     Oscillator(double volume, double pan, double frequency);
 
-    void prepareForEffects(unsigned int bufferLength) override;
+    void prepareForEffects(unsigned int bufferLength, double time) override;
 
     virtual double getValue() = 0;
 
@@ -72,7 +72,7 @@ struct Noise : AudioSource
 {
     Noise(double volume, double pan);
 
-    void prepareForEffects(unsigned int bufferLength) override;
+    void prepareForEffects(unsigned int bufferLength, double time) override;
 
 private:
     std::uniform_real_distribution<> udist = std::uniform_real_distribution<>(-1, 1);

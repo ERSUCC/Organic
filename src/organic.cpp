@@ -79,81 +79,9 @@ int main(int argc, char** argv)
 
     ControllerManager* controllerManager = new ControllerManager();
 
-    Saw* boop = new Saw(1, 0, 0);
-
-    Sweep* pluck = new Sweep(1, 0, 0);
-    Sweep* length = new Sweep(300, 750, 6000);
-    FiniteSequence* pitch = new FiniteSequence(std::vector<double>
-    {
-        110, 220, 246.94, 277.18, 311.13, 329.63, 369.99, 415.3, 440
-    }, FiniteSequence::Order::Random);
-
-    controllerManager->addController(pluck);
-    controllerManager->addController(length);
-    controllerManager->addController(pitch);
-
-    controllerManager->connectParameter(pluck, &boop->volume);
-    controllerManager->connectParameter(length, &pluck->length);
-    controllerManager->connectParameter(pitch, &boop->frequency);
-
-    Delay* delay = new Delay(375, 0.85);
-    LowPassFilter* low = new LowPassFilter(0);
-
-    boop->addEffect(delay);
-    boop->addEffect(low);
-
-    Sweep* filterSweep = new Sweep(0, 10000, 15000);
-
-    controllerManager->addController(filterSweep);
-
-    controllerManager->connectParameter(filterSweep, &low->cutoff);
-
-    data.sources.push_back(boop);
-
-    Triangle* bell = new Triangle(0, 0, 0);
-
-    Sweep* pluck2 = new Sweep(1, 0, 150);
-    FiniteSequence* pitch2 = new FiniteSequence(std::vector<double>
-    {
-        880, 1244.51, 1318.51
-    }, FiniteSequence::Order::Random);
-
-    controllerManager->addController(pluck2);
-    controllerManager->addController(pitch2);
-
-    controllerManager->connectParameter(pluck2, &bell->volume);
-    controllerManager->connectParameter(pitch2, &bell->frequency);
-
-    Delay* delay2 = new Delay(375, 0.75);
-
-    bell->addEffect(delay2);
-
-    data.sources.push_back(bell);
-
     EventQueue* eventQueue = new EventQueue();
 
-    eventQueue->addEvent(new IntervalEvent([=](double time, double target)
-    {
-        length->start(time);
-        filterSweep->start(time);
-
-        eventQueue->addEvent(new RepeatedEvent([=](double time, double target)
-        {
-            eventQueue->addEvent(new RandomRepeatedEvent([=](double time, double target)
-            {
-                boop->phase = 0;
-
-                pluck->start(time);
-                pitch->next(time);
-            }, target, 0, 125, 1000, 125, 4));
-        }, target, 0, 2000, 4));
-
-        eventQueue->addEvent(new RandomRepeatedEvent([=](double time, double target)
-        {
-            pluck2->start(time);
-            pitch2->next(time);
-        }, target, 2500, 125, 500, 125, 15));
-    }, 0, 0, 15000));
+    
 
     RtAudio::StreamParameters parameters;
 

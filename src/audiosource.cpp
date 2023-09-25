@@ -12,7 +12,7 @@ AudioSource::~AudioSource()
 
 void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength, double time)
 {
-    prepareForEffects(bufferLength);
+    prepareForEffects(bufferLength, time);
 
     for (Effect* effect : effects)
     {
@@ -37,7 +37,7 @@ void AudioSource::removeEffect(Effect* effect)
 
 Oscillator::Oscillator(double volume, double pan, double frequency) : AudioSource(volume, pan), frequency(frequency) {}
 
-void Oscillator::prepareForEffects(unsigned int bufferLength)
+void Oscillator::prepareForEffects(unsigned int bufferLength, double time)
 {
     phaseDelta = Config::TWO_PI * frequency.value / Config::SAMPLE_RATE;
 
@@ -102,7 +102,7 @@ double Triangle::getValue()
 
 Noise::Noise(double volume, double pan) : AudioSource(volume, pan) {}
 
-void Noise::prepareForEffects(unsigned int bufferLength)
+void Noise::prepareForEffects(unsigned int bufferLength, double time)
 {
     for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
     {
