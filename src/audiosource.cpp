@@ -120,3 +120,95 @@ void Noise::prepareForEffects(unsigned int bufferLength, double time)
         }
     }
 }
+
+Sample::Sample(double volume, double pan, std::string path, bool looping) : AudioSource(volume, pan), looping(looping)
+{
+    AudioFile<double> file(path);
+
+    length = file.getNumSamplesPerChannel() * Config::CHANNELS;
+
+    data = (double*)malloc(sizeof(double) * length);
+
+    for (int i = 0; i < file.getNumSamplesPerChannel(); i++)
+    {
+        if (Config::CHANNELS == 1)
+        {
+            if (file.getNumChannels() == 1)
+            {
+                data[i] = file.samples[0][i];
+            }
+
+            else
+            {
+                data[i] = (file.samples[0][i] + file.samples[1][i]) / 2;
+            }
+        }
+
+        else
+        {
+            if (file.getNumChannels() == 1)
+            {
+                data[i * 2] = file.samples[0][i];
+                data[i * 2 + 1] = file.samples[0][i];
+            }
+
+            else
+            {
+                data[i * 2] = file.samples[0][i];
+                data[i * 2 + 1] = file.samples[1][i];
+            }
+        }
+    }
+}
+
+Sample::~Sample()
+{
+    free(data);
+}
+
+void Sample::prepareForEffects(unsigned int bufferLength, double time)
+{
+    for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
+    {
+        if (current >= length && !looping)
+        {
+            if (Config::CHANNELS == 1)
+            {
+                effectBuffer[i] = 0;
+            }
+
+            else
+            {
+                effectBuffer[i] = 0;
+                effectBuffer[i + 1] = 0;
+            }
+        }
+
+        else
+        {
+            if (Config::CHANNELS == 1)
+            {
+                effectBuffer[i] = volume.value * data[current++];
+            }
+
+            else
+            {
+                double value = volume.value * data[current++];
+                double value2 = volume.value * data[current++];
+
+                effectBuffer[i] = value * (1 - pan.value) / 2;
+                effectBuffer[i + 1] = value2 * (pan.value + 1) / 2;
+            }
+
+            if (current >= length && looping)
+            {
+                current = 0;
+            }
+        }
+    }
+}
+
+void Sample::start()
+{
+    current = 0;
+}

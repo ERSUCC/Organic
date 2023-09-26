@@ -3,6 +3,9 @@
 #define _USE_MATH_DEFINES
 
 #include <vector>
+#include <string>
+
+#include "AudioFile.h"
 
 #include "config.h"
 #include "parameter.h"
@@ -78,5 +81,24 @@ struct Noise : AudioSource
 
 private:
     std::uniform_real_distribution<> udist = std::uniform_real_distribution<>(-1, 1);
+
+};
+
+struct Sample : AudioSource
+{
+    Sample(double volume, double pan, std::string path, bool looping);
+    ~Sample();
+
+    void prepareForEffects(unsigned int bufferLength, double time) override;
+
+    void start();
+
+private:
+    double* data;
+
+    int length;
+    int current = 0;
+
+    bool looping;
 
 };
