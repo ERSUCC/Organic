@@ -37,104 +37,6 @@ void ParameterController::stop(double time)
     }
 }
 
-ControllerGroup::ControllerGroup(bool repeat, std::vector<ParameterController*> controllers, Order order) :
-    ParameterController(repeat), controllers(controllers), order(order)
-{
-    udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
-
-    if (order == Order::PingPong)
-    {
-        max_times = controllers.size() * 2 - 1;
-    }
-
-    else
-    {
-        max_times = controllers.size();
-    }
-}
-
-void ControllerGroup::start(double time)
-{
-    ParameterController::start(time);
-
-    if (order == Order::Backwards)
-    {
-        current = controllers.size() - 1;
-    }
-
-    else
-    {
-        current = 0;
-    }
-
-    times = 0;
-
-    controllers[current]->start(time);
-}
-
-double ControllerGroup::getValue(double time)
-{
-    if (!controllers[current]->running)
-    {
-        last = current;
-
-        switch (order)
-        {
-            case Order::Forwards:
-                current = (current + 1) % controllers.size();
-
-                break;
-
-            case Order::Backwards:
-            {
-                current -= 1;
-
-                if (current < 0)
-                {
-                    current = controllers.size() - 1;
-                }
-
-                break;
-            }
-
-            case Order::PingPong:
-            {
-                if ((direction == -1 && current <= 0) || current >= controllers.size() - 1)
-                {
-                    direction *= -1;
-                }
-
-                current += direction;
-
-                break;
-            }
-
-            case Order::Random:
-            {
-                current = udist(Config::RNG);
-
-                if (current == last)
-                {
-                    current = (current + 1) % controllers.size();
-                }
-
-                break;
-            }
-        }
-
-        if (++times >= max_times)
-        {
-            stop(time);
-
-            return controllers[controllers.size() - 1]->getValue(time);
-        }
-
-        controllers[current]->start(time);
-    }
-
-    return controllers[current]->getValue(time);
-}
-
 void ControllerManager::connectParameter(ParameterController* controller, Parameter* parameter)
 {
     if (parameter->connected)
@@ -234,6 +136,117 @@ void ControllerManager::orderControllers()
 
     controllers.clear();
     controllers.insert(controllers.begin(), order.begin(), order.end());
+}
+
+ControllerGroup::ControllerGroup(bool repeat, std::vector<ParameterController*> controllers, Order order) :
+    ParameterController(repeat), controllers(controllers), order(order)
+{
+    udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
+
+    if (order == Order::PingPong)
+    {
+        max_times = controllers.size() * 2 - 1;
+    }
+
+    else
+    {
+        max_times = controllers.size();
+    }
+}
+
+void ControllerGroup::start(double time)
+{
+    ParameterController::start(time);
+
+    if (order == Order::Backwards)
+    {
+        current = controllers.size() - 1;
+    }
+
+    else
+    {
+        current = 0;
+    }
+
+    times = 0;
+
+    controllers[current]->start(time);
+}
+
+double ControllerGroup::getValue(double time)
+{
+    if (!controllers[current]->running)
+    {
+        last = current;
+
+        switch (order)
+        {
+            case Order::Forwards:
+                current = (current + 1) % controllers.size();
+
+                break;
+
+            case Order::Backwards:
+            {
+                current -= 1;
+
+                if (current < 0)
+                {
+                    current = controllers.size() - 1;
+                }
+
+                break;
+            }
+
+            case Order::PingPong:
+            {
+                if ((direction == -1 && current <= 0) || current >= controllers.size() - 1)
+                {
+                    direction *= -1;
+                }
+
+                current += direction;
+
+                break;
+            }
+
+            case Order::Random:
+            {
+                current = udist(Config::RNG);
+
+                if (current == last)
+                {
+                    current = (current + 1) % controllers.size();
+                }
+
+                break;
+            }
+        }
+
+        if (++times >= max_times)
+        {
+            stop(time);
+
+            return controllers[controllers.size() - 1]->getValue(time);
+        }
+
+        controllers[current]->start(time);
+    }
+
+    return controllers[current]->getValue(time);
+}
+
+Value::Value(bool repeat, double value, double length) :
+    ParameterController(repeat), value(value), length(length) {}
+
+double Value::getValue(double time)
+{
+    if (time - startTime >= length.value)
+    {
+        stop(time);
+    }
+
+    return value.value;
 }
 
 Sweep::Sweep(bool repeat, double first, double second, double length) :

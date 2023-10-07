@@ -46,6 +46,20 @@ private:
 
 };
 
+struct ControllerManager
+{
+    void connectParameter(ParameterController* controller, Parameter* parameter);
+    void disconnectParameter(ParameterController* controller, Parameter* parameter);
+
+    void updateControllers(double time);
+
+private:
+    void orderControllers();
+
+    std::vector<ParameterController*> controllers;
+
+};
+
 struct ControllerGroup : public ParameterController
 {
     enum Order
@@ -77,18 +91,14 @@ private:
 
 };
 
-struct ControllerManager
+struct Value : public ParameterController
 {
-    void connectParameter(ParameterController* controller, Parameter* parameter);
-    void disconnectParameter(ParameterController* controller, Parameter* parameter);
+    Value(bool repeat, double value, double length);
 
-    void updateControllers(double time);
+    double getValue(double time) override;
 
-private:
-    void orderControllers();
-
-    std::vector<ParameterController*> controllers;
-
+    Parameter value;
+    Parameter length;
 };
 
 struct Sweep : public ParameterController
