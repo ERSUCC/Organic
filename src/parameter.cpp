@@ -37,14 +37,25 @@ void ParameterController::stop(double time)
     }
 }
 
-ControllerGroup::ControllerGroup(bool repeat, std::vector<ParameterController*> controllers) :
-    ParameterController(repeat), controllers(controllers) {}
+ControllerGroup::ControllerGroup(bool repeat, std::vector<ParameterController*> controllers, Order order) :
+    ParameterController(repeat), controllers(controllers), order(order)
+{
+    udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
+}
 
 void ControllerGroup::start(double time)
 {
     ParameterController::start(time);
 
-    current = 0;
+    if (order == Order::Backwards)
+    {
+        current = controllers.size() - 1;
+    }
+
+    else
+    {
+        current = 0;
+    }
 
     controllers[current]->start(time);
 }
@@ -53,15 +64,60 @@ double ControllerGroup::getValue(double time)
 {
     if (!controllers[current]->running)
     {
-        if (current + 1 >= controllers.size())
+        switch (order)
         {
-            stop(time);
+            case Forwards:
+                current = (current + 1) % controllers.size();
+
+                break;
+
+            case Backwards:
+            {
+                current -= 1;
+
+                if (current < 0)
+                {
+                    current = controllers.size() - 1;
+                }
+
+                break;
+            }
+
+            case PingPong:
+            {
+                if ((direction == -1 && current <= 0) || current >= controllers.size() - 1)
+                {
+                    direction *= -1;
+                }
+
+                current += direction;
+
+                break;
+            }
+
+            case Random:
+            {
+                current = udist(Config::RNG);
+
+                if (current == last)
+                {
+                    current = (current + 1) % controllers.size();
+                }
+
+                break;
+            }
         }
 
-        else
+        last = current;
+
+        if (current >= controllers.size())
         {
-            controllers[++current]->start(time);
+            stop(time);
+
+            return controllers[controllers.size() - 1]->getValue(time);
         }
+
+        controllers[current]->start(time);
     }
 
     return controllers[current]->getValue(time);
@@ -189,71 +245,4 @@ LFO::LFO(bool repeat, double floor, double ceiling, double rate) :
 double LFO::getValue(double time)
 {
     return floor.value + (ceiling.value - floor.value) * (-cos(Config::TWO_PI * (time - startTime) / rate) / 2 + 0.5);
-}
-
-Sequence::Sequence(bool repeat) : ParameterController(repeat) {}
-
-FiniteSequence::FiniteSequence(bool repeat, std::vector<double> values, Order order) :
-    Sequence(repeat), values(values), order(order)
-{
-    udist = std::uniform_int_distribution<>(0, values.size() - 1);
-
-    if (order == Order::Backwards)
-    {
-        current = values.size() - 1;
-    }
-}
-
-double FiniteSequence::getValue(double time)
-{
-    return values[current];
-}
-
-void FiniteSequence::next(double time)
-{
-    switch (order)
-    {
-        case Forwards:
-            current = (current + 1) % values.size();
-
-            break;
-
-        case Backwards:
-        {
-            current -= 1;
-
-            if (current < 0)
-            {
-                current = values.size() - 1;
-            }
-
-            break;
-        }
-
-        case PingPong:
-        {
-            if ((direction == -1 && current <= 0) || current >= values.size() - 1)
-            {
-                direction *= -1;
-            }
-
-            current += direction;
-
-            break;
-        }
-
-        case Random:
-        {
-            current = udist(Config::RNG);
-
-            if (current == last)
-            {
-                current = (current + 1) % values.size();
-            }
-
-            break;
-        }
-    }
-
-    last = current;
 }

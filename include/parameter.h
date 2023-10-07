@@ -48,7 +48,15 @@ private:
 
 struct ControllerGroup : public ParameterController
 {
-    ControllerGroup(bool repeat, std::vector<ParameterController*> controllers);
+    enum Order
+    {
+        Forwards,
+        Backwards,
+        PingPong,
+        Random
+    };
+
+    ControllerGroup(bool repeat, std::vector<ParameterController*> controllers, Order order);
 
     void start(double time) override;
 
@@ -57,7 +65,13 @@ struct ControllerGroup : public ParameterController
 private:
     std::vector<ParameterController*> controllers;
 
+    Order order;
+
     int current = 0;
+    int direction = 1;
+    int last = -1;
+
+    std::uniform_int_distribution<> udist;
 
 };
 
@@ -96,37 +110,4 @@ struct LFO : public ParameterController
     Parameter ceiling;
 
     double rate;
-};
-
-struct Sequence : public ParameterController
-{
-    Sequence(bool repeat);
-
-    virtual void next(double time) = 0;
-};
-
-struct FiniteSequence : public Sequence
-{
-    enum Order
-    {
-        Forwards,
-        Backwards,
-        PingPong,
-        Random
-    };
-
-    FiniteSequence(bool repeat, std::vector<double> values, Order order);
-
-    double getValue(double time) override;
-    void next(double time) override;
-
-    std::vector<double> values;
-
-    int current = 0;
-    int direction = 1;
-    int last = -1;
-
-    Order order;
-
-    std::uniform_int_distribution<> udist;
 };
