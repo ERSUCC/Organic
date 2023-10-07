@@ -5,6 +5,8 @@
 Parameter::Parameter(double value) : value(value) {}
 Parameter::Parameter(double value, ParameterController* source) : value(value), source(source) {}
 
+ParameterController::ParameterController(bool repeat) : repeat(repeat) {}
+
 void ParameterController::start(double time)
 {
     startTime = time;
@@ -26,7 +28,30 @@ void ParameterController::update(double time)
 
 void ParameterController::stop(double time)
 {
-    running = false;
+    if (repeat)
+    {
+        startTime = time;
+    }
+
+    else
+    {
+        running = false;
+    }
+}
+
+ParameterGroup::ParameterGroup(bool repeat, std::vector<ParameterController*> controllers) :
+    ParameterController(repeat), controllers(controllers) {}
+
+double ParameterGroup::getValue(double time)
+{
+    if (!controllers[current]->running && ++current >= controllers.size())
+    {
+        stop(time);
+
+        current -= 1;
+    }
+
+    return controllers[current]->getValue(time);
 }
 
 void ControllerManager::addController(ParameterController* controller)
@@ -137,7 +162,8 @@ void ControllerManager::orderControllers()
     controllers.insert(controllers.begin(), order.begin(), order.end());
 }
 
-Sweep::Sweep(double first, double second, double length) : first(first, this), second(second, this), length(length, this) {}
+Sweep::Sweep(bool repeat, double first, double second, double length) :
+    ParameterController(repeat), first(first, this), second(second, this), length(length, this) {}
 
 double Sweep::getValue(double time)
 {
@@ -151,60 +177,18 @@ double Sweep::getValue(double time)
     return first.value + (second.value - first.value) * (time - startTime) / length.value;
 }
 
-Envelope::Envelope(double floor, double ceiling, double attack, double decay, double sustain, double release) :
-    floor(floor, this), ceiling(ceiling, this), attack(attack), decay(decay, this), sustain(sustain, this), release(release) {}
-
-void Envelope::start(double time)
-{
-    ParameterController::start(time);
-
-    hold = true;
-}
-
-void Envelope::releaseAt(double time)
-{
-    releaseTime = time;
-    hold = false;
-}
-
-double Envelope::getValue(double time)
-{
-    if (running)
-    {
-        if (time - startTime < attack)
-        {
-            return floor.value + (ceiling.value - floor.value) * (time - startTime) / attack;
-        }
-
-        else if (time - startTime - attack < decay.value)
-        {
-            return ceiling.value - (ceiling.value - sustain.value) * (time - startTime - attack) / decay.value;
-        }
-
-        else
-        {
-            return sustain.value;
-        }
-    }
-
-    if (time - releaseTime >= release)
-    {
-        stop(time);
-
-        return floor.value;
-    }
-
-    return peak * (1 - (time - releaseTime) / release);
-}
-
-LFO::LFO(double floor, double ceiling, double rate) : floor(floor, this), ceiling(ceiling, this), rate(rate) {}
+LFO::LFO(bool repeat, double floor, double ceiling, double rate) :
+    ParameterController(repeat), floor(floor, this), ceiling(ceiling, this), rate(rate) {}
 
 double LFO::getValue(double time)
 {
     return floor.value + (ceiling.value - floor.value) * (-cos(Config::TWO_PI * (time - startTime) / rate) / 2 + 0.5);
 }
 
-FiniteSequence::FiniteSequence(std::vector<double> values, Order order) : values(values), order(order)
+Sequence::Sequence(bool repeat) : ParameterController(repeat) {}
+
+FiniteSequence::FiniteSequence(bool repeat, std::vector<double> values, Order order) :
+    Sequence(repeat), values(values), order(order)
 {
     udist = std::uniform_int_distribution<>(0, values.size() - 1);
 
@@ -221,54 +205,48 @@ double FiniteSequence::getValue(double time)
 
 void FiniteSequence::next(double time)
 {
-    if (running)
+    switch (order)
     {
-        switch (order)
+        case Forwards:
+            current = (current + 1) % values.size();
+
+            break;
+
+        case Backwards:
         {
-            case Forwards:
-                current = (current + 1) % values.size();
+            current -= 1;
 
-                break;
-
-            case Backwards:
+            if (current < 0)
             {
-                current -= 1;
-
-                if (current < 0)
-                {
-                    current = values.size() - 1;
-                }
-
-                break;
+                current = values.size() - 1;
             }
 
-            case PingPong:
-            {
-                if ((direction == -1 && current <= 0) || current >= values.size() - 1)
-                {
-                    direction *= -1;
-                }
-
-                current += direction;
-
-                break;
-            }
-
-            case Random:
-                current = udist(Config::RNG);
-
-                if (current == last)
-                {
-                    current = (current + 1) % values.size();
-                }
-
-                break;
+            break;
         }
-    }
 
-    else
-    {
-        start(time);
+        case PingPong:
+        {
+            if ((direction == -1 && current <= 0) || current >= values.size() - 1)
+            {
+                direction *= -1;
+            }
+
+            current += direction;
+
+            break;
+        }
+
+        case Random:
+        {
+            current = udist(Config::RNG);
+
+            if (current == last)
+            {
+                current = (current + 1) % values.size();
+            }
+
+            break;
+        }
     }
 
     last = current;

@@ -86,6 +86,24 @@ int main(int argc, char** argv)
 
     EventQueue* eventQueue = new EventQueue();
 
+    Triangle* test = new Triangle(1, 0, 0);
+
+    data.sources.push_back(test);
+
+    Sweep* sweep = new Sweep(true, 100, 200, 1000);
+
+    controllerManager->addController(sweep);
+    controllerManager->connectParameter(sweep, &test->frequency);
+
+    sweep->start(0);
+
+    Sweep* lfo = new Sweep(true, 100, 0, 1000);
+
+    controllerManager->addController(lfo);
+    controllerManager->connectParameter(lfo, &sweep->length);
+
+    lfo->start(0);
+
     RtAudio::StreamParameters parameters;
 
     parameters.deviceId = audio.getDefaultOutputDevice();
@@ -118,9 +136,8 @@ int main(int argc, char** argv)
         time = (clock.now() - start).count() / 1000000.0;
 
         audio.setStreamTime(time);
-
-        eventQueue->performEvents(time);
         controllerManager->updateControllers(time);
+        eventQueue->performEvents(time);
     }
 
     if (audio.isStreamRunning())

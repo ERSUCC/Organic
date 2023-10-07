@@ -24,7 +24,10 @@ struct Parameter
 
 struct ParameterController
 {
+    friend struct ParameterGroup;
     friend struct ControllerManager;
+
+    ParameterController(bool repeat);
     
     virtual void start(double time);
     void update(double time);
@@ -36,9 +39,23 @@ struct ParameterController
 
 protected:
     bool running = false;
+    bool repeat;
 
 private:
     std::unordered_set<Parameter*> connectedParameters;
+
+};
+
+struct ParameterGroup : public ParameterController
+{
+    ParameterGroup(bool repeat, std::vector<ParameterController*> controllers);
+
+    double getValue(double time) override;
+
+private:
+    std::vector<ParameterController*> controllers;
+
+    int current = 0;
 
 };
 
@@ -61,7 +78,7 @@ private:
 
 struct Sweep : public ParameterController
 {
-    Sweep(double first, double second, double length);
+    Sweep(bool repeat, double first, double second, double length);
 
     double getValue(double time) override;
 
@@ -70,32 +87,9 @@ struct Sweep : public ParameterController
     Parameter length;
 };
 
-struct Envelope : public ParameterController
-{
-    Envelope(double floor, double ceiling, double attack, double decay, double sustain, double release);
-
-    void start(double time) override;
-    void releaseAt(double time);
-
-    double getValue(double time) override;
-
-    Parameter floor;
-    Parameter ceiling;
-    Parameter decay;
-    Parameter sustain;
-
-    double attack;
-    double release;
-    double peak;
-
-    double releaseTime;
-
-    bool hold = false;
-};
-
 struct LFO : public ParameterController
 {
-    LFO(double floor, double ceiling, double rate);
+    LFO(bool repeat, double floor, double ceiling, double rate);
 
     double getValue(double time) override;
 
@@ -107,6 +101,8 @@ struct LFO : public ParameterController
 
 struct Sequence : public ParameterController
 {
+    Sequence(bool repeat);
+
     virtual void next(double time) = 0;
 };
 
@@ -120,7 +116,7 @@ struct FiniteSequence : public Sequence
         Random
     };
 
-    FiniteSequence(std::vector<double> values, Order order);
+    FiniteSequence(bool repeat, std::vector<double> values, Order order);
 
     double getValue(double time) override;
     void next(double time) override;
