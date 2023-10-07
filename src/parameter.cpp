@@ -41,6 +41,16 @@ ControllerGroup::ControllerGroup(bool repeat, std::vector<ParameterController*> 
     ParameterController(repeat), controllers(controllers), order(order)
 {
     udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
+
+    if (order == Order::PingPong)
+    {
+        max_times = controllers.size() * 2 - 1;
+    }
+
+    else
+    {
+        max_times = controllers.size();
+    }
 }
 
 void ControllerGroup::start(double time)
@@ -57,6 +67,8 @@ void ControllerGroup::start(double time)
         current = 0;
     }
 
+    times = 0;
+
     controllers[current]->start(time);
 }
 
@@ -64,14 +76,16 @@ double ControllerGroup::getValue(double time)
 {
     if (!controllers[current]->running)
     {
+        last = current;
+
         switch (order)
         {
-            case Forwards:
+            case Order::Forwards:
                 current = (current + 1) % controllers.size();
 
                 break;
 
-            case Backwards:
+            case Order::Backwards:
             {
                 current -= 1;
 
@@ -83,7 +97,7 @@ double ControllerGroup::getValue(double time)
                 break;
             }
 
-            case PingPong:
+            case Order::PingPong:
             {
                 if ((direction == -1 && current <= 0) || current >= controllers.size() - 1)
                 {
@@ -95,7 +109,7 @@ double ControllerGroup::getValue(double time)
                 break;
             }
 
-            case Random:
+            case Order::Random:
             {
                 current = udist(Config::RNG);
 
@@ -108,9 +122,7 @@ double ControllerGroup::getValue(double time)
             }
         }
 
-        last = current;
-
-        if (current >= controllers.size())
+        if (++times >= max_times)
         {
             stop(time);
 

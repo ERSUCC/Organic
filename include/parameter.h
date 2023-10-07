@@ -70,6 +70,8 @@ private:
     int current = 0;
     int direction = 1;
     int last = -1;
+    int times = 0;
+    int max_times;
 
     std::uniform_int_distribution<> udist;
 
