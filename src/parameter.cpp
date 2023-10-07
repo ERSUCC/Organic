@@ -39,10 +39,10 @@ void ParameterController::stop(double time)
     }
 }
 
-ParameterGroup::ParameterGroup(bool repeat, std::vector<ParameterController*> controllers) :
+ControllerGroup::ControllerGroup(bool repeat, std::vector<ParameterController*> controllers) :
     ParameterController(repeat), controllers(controllers) {}
 
-double ParameterGroup::getValue(double time)
+double ControllerGroup::getValue(double time)
 {
     if (!controllers[current]->running && ++current >= controllers.size())
     {

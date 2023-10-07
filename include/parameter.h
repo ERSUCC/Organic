@@ -24,7 +24,7 @@ struct Parameter
 
 struct ParameterController
 {
-    friend struct ParameterGroup;
+    friend struct ControllerGroup;
     friend struct ControllerManager;
 
     ParameterController(bool repeat);
@@ -46,9 +46,9 @@ private:
 
 };
 
-struct ParameterGroup : public ParameterController
+struct ControllerGroup : public ParameterController
 {
-    ParameterGroup(bool repeat, std::vector<ParameterController*> controllers);
+    ControllerGroup(bool repeat, std::vector<ParameterController*> controllers);
 
     double getValue(double time) override;
 

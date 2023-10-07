@@ -90,19 +90,17 @@ int main(int argc, char** argv)
 
     data.sources.push_back(test);
 
-    Sweep* sweep = new Sweep(true, 100, 200, 1000);
+    Sweep* sweep1 = new Sweep(false, 100, 200, 500);
+    Sweep* sweep2 = new Sweep(false, 300, 200, 500);
+    Sweep* sweep3 = new Sweep(false, 175, 200, 375);
+    Sweep* sweep4 = new Sweep(false, 175, 200, 125);
 
-    controllerManager->addController(sweep);
-    controllerManager->connectParameter(sweep, &test->frequency);
+    ControllerGroup* group = new ControllerGroup(false, std::vector<ParameterController*> {
+        sweep1, sweep2, sweep3, sweep4
+    });
 
-    sweep->start(0);
-
-    Sweep* lfo = new Sweep(true, 100, 0, 1000);
-
-    controllerManager->addController(lfo);
-    controllerManager->connectParameter(lfo, &sweep->length);
-
-    lfo->start(0);
+    controllerManager->addController(group);
+    controllerManager->connectParameter(group, &test->frequency);
 
     RtAudio::StreamParameters parameters;
 
