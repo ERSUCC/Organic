@@ -27,7 +27,7 @@ struct ParameterController
     friend struct ControllerGroup;
     friend struct ControllerManager;
 
-    ParameterController(bool repeat);
+    ParameterController(int repeats);
     
     virtual void start(double time);
     void update(double time);
@@ -39,7 +39,9 @@ struct ParameterController
 
 protected:
     bool running = false;
-    bool repeat;
+
+    int repeats;
+    int times = 0;
 
 private:
     std::unordered_set<Parameter*> connectedParameters;
@@ -70,7 +72,7 @@ struct ControllerGroup : public ParameterController
         Random
     };
 
-    ControllerGroup(bool repeat, std::vector<ParameterController*> controllers, Order order);
+    ControllerGroup(int repeats, std::vector<ParameterController*> controllers, Order order);
 
     void start(double time) override;
 
@@ -93,7 +95,7 @@ private:
 
 struct Value : public ParameterController
 {
-    Value(bool repeat, double value, double length);
+    Value(int repeats, double value, double length);
 
     double getValue(double time) override;
 
@@ -103,7 +105,7 @@ struct Value : public ParameterController
 
 struct Sweep : public ParameterController
 {
-    Sweep(bool repeat, double first, double second, double length);
+    Sweep(int repeats, double first, double second, double length);
 
     double getValue(double time) override;
 
@@ -114,7 +116,7 @@ struct Sweep : public ParameterController
 
 struct LFO : public ParameterController
 {
-    LFO(bool repeat, double floor, double ceiling, double rate);
+    LFO(int repeats, double floor, double ceiling, double rate);
 
     double getValue(double time) override;
 

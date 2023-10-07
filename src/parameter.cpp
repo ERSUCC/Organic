@@ -3,7 +3,7 @@
 Parameter::Parameter(double value) : value(value) {}
 Parameter::Parameter(double value, ParameterController* source) : value(value), source(source) {}
 
-ParameterController::ParameterController(bool repeat) : repeat(repeat) {}
+ParameterController::ParameterController(int repeats) : repeats(repeats) {}
 
 void ParameterController::start(double time)
 {
@@ -26,7 +26,7 @@ void ParameterController::update(double time)
 
 void ParameterController::stop(double time)
 {
-    if (repeat)
+    if (repeats == 0 || ++times < repeats)
     {
         start(time);
     }
@@ -138,8 +138,8 @@ void ControllerManager::orderControllers()
     controllers.insert(controllers.begin(), order.begin(), order.end());
 }
 
-ControllerGroup::ControllerGroup(bool repeat, std::vector<ParameterController*> controllers, Order order) :
-    ParameterController(repeat), controllers(controllers), order(order)
+ControllerGroup::ControllerGroup(int repeats, std::vector<ParameterController*> controllers, Order order) :
+    ParameterController(repeats), controllers(controllers), order(order)
 {
     udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
 
@@ -236,8 +236,8 @@ double ControllerGroup::getValue(double time)
     return controllers[current]->getValue(time);
 }
 
-Value::Value(bool repeat, double value, double length) :
-    ParameterController(repeat), value(value), length(length) {}
+Value::Value(int repeats, double value, double length) :
+    ParameterController(repeats), value(value), length(length) {}
 
 double Value::getValue(double time)
 {
@@ -249,8 +249,8 @@ double Value::getValue(double time)
     return value.value;
 }
 
-Sweep::Sweep(bool repeat, double first, double second, double length) :
-    ParameterController(repeat), first(first, this), second(second, this), length(length, this) {}
+Sweep::Sweep(int repeats, double first, double second, double length) :
+    ParameterController(repeats), first(first, this), second(second, this), length(length, this) {}
 
 double Sweep::getValue(double time)
 {
@@ -264,8 +264,8 @@ double Sweep::getValue(double time)
     return first.value + (second.value - first.value) * (time - startTime) / length.value;
 }
 
-LFO::LFO(bool repeat, double floor, double ceiling, double rate) :
-    ParameterController(repeat), floor(floor, this), ceiling(ceiling, this), rate(rate) {}
+LFO::LFO(int repeats, double floor, double ceiling, double rate) :
+    ParameterController(repeats), floor(floor, this), ceiling(ceiling, this), rate(rate) {}
 
 double LFO::getValue(double time)
 {
