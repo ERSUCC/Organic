@@ -61,9 +61,6 @@ private:
 
 struct ControllerManager
 {
-    void addController(ParameterController* controller);
-    void removeController(ParameterController* controller);
-
     void connectParameter(ParameterController* controller, Parameter* parameter);
     void disconnectParameter(ParameterController* controller, Parameter* parameter);
 

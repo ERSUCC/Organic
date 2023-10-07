@@ -54,28 +54,16 @@ double ControllerGroup::getValue(double time)
     return controllers[current]->getValue(time);
 }
 
-void ControllerManager::addController(ParameterController* controller)
-{
-    controllers.push_back(controller);
-
-    orderControllers();
-}
-
-void ControllerManager::removeController(ParameterController* controller)
-{
-    for (Parameter* parameter : controller->connectedParameters)
-    {
-        parameter->connected = false;
-    }
-
-    controllers.erase(std::find(controllers.begin(), controllers.end(), controller));
-}
-
 void ControllerManager::connectParameter(ParameterController* controller, Parameter* parameter)
 {
     if (parameter->connected)
     {
         // error, parameter can't be controlled by two controllers at once
+    }
+
+    if (std::find(controllers.begin(), controllers.end(), controller) == controllers.end())
+    {
+        controllers.push_back(controller);
     }
 
     parameter->connected = true;
@@ -90,6 +78,11 @@ void ControllerManager::disconnectParameter(ParameterController* controller, Par
     parameter->connected = false;
 
     controller->connectedParameters.erase(parameter);
+
+    if (controller->connectedParameters.size() == 0)
+    {
+        controllers.erase(std::find(controllers.begin(), controllers.end(), controller));
+    }
 }
 
 void ControllerManager::updateControllers(double time)
