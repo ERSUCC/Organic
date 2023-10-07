@@ -1,7 +1,5 @@
 #include "../include/parameter.h"
 
-#include <iostream>
-
 Parameter::Parameter(double value) : value(value) {}
 Parameter::Parameter(double value, ParameterController* source) : value(value), source(source) {}
 
@@ -30,7 +28,7 @@ void ParameterController::stop(double time)
 {
     if (repeat)
     {
-        startTime = time;
+        start(time);
     }
 
     else
@@ -42,13 +40,28 @@ void ParameterController::stop(double time)
 ControllerGroup::ControllerGroup(bool repeat, std::vector<ParameterController*> controllers) :
     ParameterController(repeat), controllers(controllers) {}
 
+void ControllerGroup::start(double time)
+{
+    ParameterController::start(time);
+
+    current = 0;
+
+    controllers[current]->start(time);
+}
+
 double ControllerGroup::getValue(double time)
 {
-    if (!controllers[current]->running && ++current >= controllers.size())
+    if (!controllers[current]->running)
     {
-        stop(time);
+        if (current + 1 >= controllers.size())
+        {
+            stop(time);
+        }
 
-        current -= 1;
+        else
+        {
+            controllers[++current]->start(time);
+        }
     }
 
     return controllers[current]->getValue(time);

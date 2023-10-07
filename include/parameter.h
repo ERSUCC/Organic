@@ -50,6 +50,8 @@ struct ControllerGroup : public ParameterController
 {
     ControllerGroup(bool repeat, std::vector<ParameterController*> controllers);
 
+    void start(double time) override;
+
     double getValue(double time) override;
 
 private:
