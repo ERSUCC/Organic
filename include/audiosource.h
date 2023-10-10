@@ -16,9 +16,9 @@ struct AudioSource
     AudioSource(double volume, double pan);
     ~AudioSource();
 
-    void fillBuffer(double* buffer, unsigned int bufferLength, double time);
+    void fillBuffer(double* buffer, unsigned int bufferLength);
 
-    virtual void prepareForEffects(unsigned int bufferLength, double time) = 0;
+    virtual void prepareForEffects(unsigned int bufferLength) = 0;
 
     void addEffect(Effect* effect);
     void removeEffect(Effect* effect);
@@ -35,7 +35,7 @@ struct Oscillator : public AudioSource
 {
     Oscillator(double volume, double pan, double frequency);
 
-    void prepareForEffects(unsigned int bufferLength, double time) override;
+    void prepareForEffects(unsigned int bufferLength) override;
 
     virtual double getValue() = 0;
 
@@ -77,7 +77,7 @@ struct Noise : AudioSource
 {
     Noise(double volume, double pan);
 
-    void prepareForEffects(unsigned int bufferLength, double time) override;
+    void prepareForEffects(unsigned int bufferLength) override;
 
 private:
     std::uniform_real_distribution<> udist = std::uniform_real_distribution<>(-1, 1);
@@ -86,10 +86,10 @@ private:
 
 struct Sample : AudioSource
 {
-    Sample(double volume, double pan, std::string path, bool looping);
+    Sample(double volume, double pan, std::string path, int grains, bool looping);
     ~Sample();
 
-    void prepareForEffects(unsigned int bufferLength, double time) override;
+    void prepareForEffects(unsigned int bufferLength) override;
 
     void start();
 
@@ -97,7 +97,8 @@ private:
     double* data;
 
     int length;
-    int current = 0;
+
+    std::vector<int> grains;
 
     bool looping;
 

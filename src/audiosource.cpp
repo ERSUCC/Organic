@@ -10,13 +10,13 @@ AudioSource::~AudioSource()
     free(effectBuffer);
 }
 
-void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength, double time)
+void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
 {
-    prepareForEffects(bufferLength, time);
+    prepareForEffects(bufferLength);
 
     for (Effect* effect : effects)
     {
-        effect->apply(effectBuffer, bufferLength, time);
+        effect->apply(effectBuffer, bufferLength);
     }
 
     for (int i = 0; i < bufferLength * Config::CHANNELS; i++)
@@ -37,7 +37,7 @@ void AudioSource::removeEffect(Effect* effect)
 
 Oscillator::Oscillator(double volume, double pan, double frequency) : AudioSource(volume, pan), frequency(frequency) {}
 
-void Oscillator::prepareForEffects(unsigned int bufferLength, double time)
+void Oscillator::prepareForEffects(unsigned int bufferLength)
 {
     phaseDelta = Config::TWO_PI * frequency.value / Config::SAMPLE_RATE;
 
@@ -102,7 +102,7 @@ double Triangle::getValue()
 
 Noise::Noise(double volume, double pan) : AudioSource(volume, pan) {}
 
-void Noise::prepareForEffects(unsigned int bufferLength, double time)
+void Noise::prepareForEffects(unsigned int bufferLength)
 {
     for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
     {
@@ -121,8 +121,13 @@ void Noise::prepareForEffects(unsigned int bufferLength, double time)
     }
 }
 
-Sample::Sample(double volume, double pan, std::string path, bool looping) : AudioSource(volume, pan), looping(looping)
+Sample::Sample(double volume, double pan, std::string path, int grains, bool looping) : AudioSource(volume, pan), grains(grains), looping(looping)
 {
+    for (int i = 0; i < grains; i++)
+    {
+        this->grains[i] = 0;
+    }
+
     AudioFile<double> file(path);
 
     length = file.getNumSamplesPerChannel() * Config::CHANNELS;
@@ -166,49 +171,51 @@ Sample::~Sample()
     free(data);
 }
 
-void Sample::prepareForEffects(unsigned int bufferLength, double time)
+void Sample::prepareForEffects(unsigned int bufferLength)
 {
+    for (int i = 0; i < bufferLength * Config::CHANNELS; i++)
+    {
+        effectBuffer[i] = 0;
+    }
+
     for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
     {
-        if (current >= length && !looping)
+        for (int j = 0; j < grains.size(); j++)
         {
-            if (Config::CHANNELS == 1)
+            if (grains[j] >= length && looping)
             {
-                effectBuffer[i] = 0;
+                grains[j] = 0;
             }
 
-            else
+            if (grains[j] < length)
             {
-                effectBuffer[i] = 0;
-                effectBuffer[i + 1] = 0;
+                if (Config::CHANNELS == 1)
+                {
+                    effectBuffer[i] += volume.value * data[grains[j]++];
+                }
+
+                else
+                {
+                    double value = volume.value * data[grains[j]++];
+                    double value2 = volume.value * data[grains[j]++];
+
+                    effectBuffer[i] += value * (1 - pan.value) / 2;
+                    effectBuffer[i + 1] += value2 * (pan.value + 1) / 2;
+                }
             }
         }
+    }
 
-        else
-        {
-            if (Config::CHANNELS == 1)
-            {
-                effectBuffer[i] = volume.value * data[current++];
-            }
-
-            else
-            {
-                double value = volume.value * data[current++];
-                double value2 = volume.value * data[current++];
-
-                effectBuffer[i] = value * (1 - pan.value) / 2;
-                effectBuffer[i + 1] = value2 * (pan.value + 1) / 2;
-            }
-
-            if (current >= length && looping)
-            {
-                current = 0;
-            }
-        }
+    for (int i = 0; i < bufferLength * Config::CHANNELS; i++)
+    {
+        effectBuffer[i] /= grains.size();
     }
 }
 
 void Sample::start()
 {
-    current = 0;
+    for (int i = 0; i < grains.size(); i++)
+    {
+        grains[i] = 0;
+    }
 }

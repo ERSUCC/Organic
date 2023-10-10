@@ -29,11 +29,11 @@ struct ParameterController
 
     ParameterController(int repeats);
     
-    virtual void start(double time);
-    void update(double time);
-    void stop(double time);
+    virtual void start();
+    void update();
+    void stop();
 
-    virtual double getValue(double time) = 0;
+    virtual double getValue() = 0;
 
     double startTime;
 
@@ -53,7 +53,7 @@ struct ControllerManager
     void connectParameter(ParameterController* controller, Parameter* parameter);
     void disconnectParameter(ParameterController* controller, Parameter* parameter);
 
-    void updateControllers(double time);
+    void updateControllers();
 
 private:
     void orderControllers();
@@ -74,9 +74,9 @@ struct ControllerGroup : public ParameterController
 
     ControllerGroup(int repeats, std::vector<ParameterController*> controllers, Order order);
 
-    void start(double time) override;
+    void start() override;
 
-    double getValue(double time) override;
+    double getValue() override;
 
 private:
     std::vector<ParameterController*> controllers;
@@ -97,7 +97,7 @@ struct Value : public ParameterController
 {
     Value(int repeats, double value, double length);
 
-    double getValue(double time) override;
+    double getValue() override;
 
     Parameter value;
     Parameter length;
@@ -107,7 +107,7 @@ struct Sweep : public ParameterController
 {
     Sweep(int repeats, double first, double second, double length);
 
-    double getValue(double time) override;
+    double getValue() override;
 
     Parameter first;
     Parameter second;
@@ -118,7 +118,7 @@ struct LFO : public ParameterController
 {
     LFO(int repeats, double floor, double ceiling, double rate);
 
-    double getValue(double time) override;
+    double getValue() override;
 
     Parameter floor;
     Parameter ceiling;

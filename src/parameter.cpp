@@ -5,17 +5,17 @@ Parameter::Parameter(double value, ParameterController* source) : value(value), 
 
 ParameterController::ParameterController(int repeats) : repeats(repeats) {}
 
-void ParameterController::start(double time)
+void ParameterController::start()
 {
-    startTime = time;
+    startTime = Config::TIME;
     running = true;
 }
 
-void ParameterController::update(double time)
+void ParameterController::update()
 {
     if (running)
     {
-        double value = getValue(time);
+        double value = getValue();
 
         for (Parameter* parameter : connectedParameters)
         {
@@ -24,11 +24,11 @@ void ParameterController::update(double time)
     }
 }
 
-void ParameterController::stop(double time)
+void ParameterController::stop()
 {
-    if (repeats == 0 || ++times < repeats)
+    if (!repeats || ++times < repeats)
     {
-        start(time);
+        start();
     }
 
     else
@@ -68,11 +68,11 @@ void ControllerManager::disconnectParameter(ParameterController* controller, Par
     }
 }
 
-void ControllerManager::updateControllers(double time)
+void ControllerManager::updateControllers()
 {
     for (ParameterController* controller : controllers)
     {
-        controller->update(time);
+        controller->update();
     }
 }
 
@@ -154,9 +154,9 @@ ControllerGroup::ControllerGroup(int repeats, std::vector<ParameterController*> 
     }
 }
 
-void ControllerGroup::start(double time)
+void ControllerGroup::start()
 {
-    ParameterController::start(time);
+    ParameterController::start();
 
     if (order == Order::Backwards)
     {
@@ -170,10 +170,10 @@ void ControllerGroup::start(double time)
 
     times = 0;
 
-    controllers[current]->start(time);
+    controllers[current]->start();
 }
 
-double ControllerGroup::getValue(double time)
+double ControllerGroup::getValue()
 {
     if (!controllers[current]->running)
     {
@@ -225,25 +225,25 @@ double ControllerGroup::getValue(double time)
 
         if (++times >= max_times)
         {
-            stop(time);
+            stop();
 
-            return controllers[controllers.size() - 1]->getValue(time);
+            return controllers[controllers.size() - 1]->getValue();
         }
 
-        controllers[current]->start(time);
+        controllers[current]->start();
     }
 
-    return controllers[current]->getValue(time);
+    return controllers[current]->getValue();
 }
 
 Value::Value(int repeats, double value, double length) :
     ParameterController(repeats), value(value), length(length) {}
 
-double Value::getValue(double time)
+double Value::getValue()
 {
-    if (time - startTime >= length.value)
+    if (Config::TIME - startTime >= length.value)
     {
-        stop(time);
+        stop();
     }
 
     return value.value;
@@ -252,22 +252,22 @@ double Value::getValue(double time)
 Sweep::Sweep(int repeats, double first, double second, double length) :
     ParameterController(repeats), first(first, this), second(second, this), length(length, this) {}
 
-double Sweep::getValue(double time)
+double Sweep::getValue()
 {
-    if (time - startTime >= length.value)
+    if (Config::TIME - startTime >= length.value)
     {
-        stop(time);
+        stop();
 
         return second.value;
     }
 
-    return first.value + (second.value - first.value) * (time - startTime) / length.value;
+    return first.value + (second.value - first.value) * (Config::TIME - startTime) / length.value;
 }
 
 LFO::LFO(int repeats, double floor, double ceiling, double rate) :
     ParameterController(repeats), floor(floor, this), ceiling(ceiling, this), rate(rate) {}
 
-double LFO::getValue(double time)
+double LFO::getValue()
 {
-    return floor.value + (ceiling.value - floor.value) * (-cos(Config::TWO_PI * (time - startTime) / rate) / 2 + 0.5);
+    return floor.value + (ceiling.value - floor.value) * (-cos(Config::TWO_PI * (Config::TIME - startTime) / rate) / 2 + 0.5);
 }

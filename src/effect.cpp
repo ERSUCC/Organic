@@ -4,19 +4,19 @@ Effect::Effect(double mix) : mix(mix) {}
 
 Delay::Delay(double mix, double delay, double feedback) : Effect(mix), delay(delay), feedback(feedback) {}
 
-void Delay::apply(double* buffer, unsigned int bufferLength, double time)
+void Delay::apply(double* buffer, unsigned int bufferLength)
 {
     for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
     {
         if (Config::CHANNELS == 1)
         {
-            if (time >= bufferTime + delay.value)
+            if (Config::TIME >= bufferTime + delay.value)
             {
                 buffer[i] += this->buffer.front() * mix.value * feedback.value;
 
                 this->buffer.pop();
 
-                bufferTime = time - delay.value;
+                bufferTime = Config::TIME - delay.value;
             }
 
             this->buffer.push(buffer[i]);
@@ -24,7 +24,7 @@ void Delay::apply(double* buffer, unsigned int bufferLength, double time)
 
         else
         {
-            if (time >= bufferTime + delay.value)
+            if (Config::TIME >= bufferTime + delay.value)
             {
                 buffer[i] += this->buffer.front() * mix.value * feedback.value;
 
@@ -34,7 +34,7 @@ void Delay::apply(double* buffer, unsigned int bufferLength, double time)
 
                 this->buffer.pop();
 
-                bufferTime = time - delay.value;
+                bufferTime = Config::TIME - delay.value;
             }
 
             this->buffer.push(buffer[i]);
@@ -45,7 +45,7 @@ void Delay::apply(double* buffer, unsigned int bufferLength, double time)
 
 LowPassFilter::LowPassFilter(double mix, double cutoff) : Effect(mix), cutoff(cutoff) {}
 
-void LowPassFilter::apply(double* buffer, unsigned int bufferLength, double time)
+void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
 {
     double omega = tan(M_PI * cutoff.value / Config::SAMPLE_RATE);
     double omega2 = omega * omega;

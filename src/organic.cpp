@@ -34,12 +34,12 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 {
     if (status == RTAUDIO_INPUT_OVERFLOW)
     {
-        error("Error: Stream overflow detected.");
+        std::cout << "Error: Stream overflow detected.\n";
     }
 
     if (status == RTAUDIO_OUTPUT_UNDERFLOW)
     {
-        error("Error: Stream underflow detected.");
+        std::cout << "Error: Stream underflow detected.\n";
     }
 
     double* buffer = (double*)output;
@@ -53,7 +53,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
     for (AudioSource* source : data->sources)
     {
-        source->fillBuffer(buffer, frames, streamTime);
+        source->fillBuffer(buffer, frames);
     }
 
     for (int i = 0; i < frames * Config::CHANNELS; i += Config::CHANNELS)
@@ -90,17 +90,45 @@ int main(int argc, char** argv)
 
     data.sources.push_back(test);
 
-    Sweep* sweep1 = new Sweep(false, 100, 200, 500);
-    Sweep* sweep2 = new Sweep(false, 300, 200, 500);
-    Sweep* sweep3 = new Sweep(false, 175, 200, 375);
-    Sweep* sweep4 = new Sweep(false, 175, 200, 125);
+    test->addEffect(new Delay(1, 250, 0.75));
 
-    ControllerGroup* group = new ControllerGroup(false, std::vector<ParameterController*> {
-        sweep1, sweep2, sweep3, sweep4
-    });
+    ControllerGroup* arp = new ControllerGroup(0, std::vector<ParameterController*>
+    {
+        new ControllerGroup(8, std::vector<ParameterController*>
+        {
+            new Value(1, 200, 125),
+            new Value(1, 233.3, 125),
+            new Value(1, 266.6, 125),
+            new Value(1, 300, 125),
+            new Value(1, 333.3, 125),
+            new Value(1, 366.6, 125),
+            new Value(1, 400, 125)
+        }, ControllerGroup::Order::Random),
+        new ControllerGroup(8, std::vector<ParameterController*>
+        {
+            new Value(1, 200 - 100, 125),
+            new Value(1, 233.3 - 100, 125),
+            new Value(1, 266.6 - 100, 125),
+            new Value(1, 300 - 100, 125),
+            new Value(1, 333.3 - 100, 125),
+            new Value(1, 366.6 - 100, 125),
+            new Value(1, 400 - 100, 125)
+        }, ControllerGroup::Order::Random)
+    }, ControllerGroup::Order::Forwards);
 
-    controllerManager->addController(group);
-    controllerManager->connectParameter(group, &test->frequency);
+    arp->start();
+
+    controllerManager->connectParameter(arp, &test->frequency);
+
+    ControllerGroup* pluck = new ControllerGroup(0, std::vector<ParameterController*>
+    {
+        new Sweep(1, 0, 1, 25),
+        new Sweep(1, 1, 0, 100)
+    }, ControllerGroup::Order::Forwards);
+
+    pluck->start();
+
+    controllerManager->connectParameter(pluck, &test->volume);
 
     RtAudio::StreamParameters parameters;
 
@@ -133,9 +161,10 @@ int main(int argc, char** argv)
     {
         time = (clock.now() - start).count() / 1000000.0;
 
-        audio.setStreamTime(time);
-        controllerManager->updateControllers(time);
-        eventQueue->performEvents(time);
+        Config::TIME = time;
+
+        controllerManager->updateControllers();
+        eventQueue->performEvents();
     }
 
     if (audio.isStreamRunning())

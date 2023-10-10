@@ -10,22 +10,21 @@ struct Event
 {
     friend struct EventQueue;
 
-    Event(std::function<void(double, double)> event, std::function<void(double, double)> end, double startTime, double startDelay, double endDelay, double interval, int repeats);
+    Event(std::function<void(double)> event, std::function<void(double)> end, double startDelay, double interval, int repeats);
 
-    bool ready(double time);
-    void perform(double time);
-    bool getNext(double time);
-    void finish(double time);
+    bool ready();
+    void perform();
+    bool getNext();
+    void finish();
 
     Parameter interval;
 
 private:
-    std::function<void(double, double)> event;
-    std::function<void(double, double)> end;
+    std::function<void(double)> event;
+    std::function<void(double)> end;
 
     double startTime;
     double next;
-    double endDelay;
 
     int repeats;
     int times = 0;
@@ -36,7 +35,7 @@ struct EventQueue
 {
     void addEvent(Event* event);
 
-    void performEvents(double time);
+    void performEvents();
 
 private:
     struct cmp

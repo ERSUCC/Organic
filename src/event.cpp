@@ -1,56 +1,39 @@
 #include "../include/event.h"
 
-Event::Event(std::function<void(double, double)> event, std::function<void(double, double)> end, double startTime, double startDelay, double endDelay, double interval, int repeats) :
-    event(event), end(end), startTime(startTime), endDelay(endDelay), interval(interval), repeats(repeats)
+Event::Event(std::function<void(double)> event, std::function<void(double)> end, double startDelay, double interval, int repeats) :
+    event(event), end(end), startTime(Config::TIME), interval(interval), repeats(repeats)
 {
     next = startTime + startDelay;
 }
 
-bool Event::ready(double time)
+bool Event::ready()
 {
-    return time >= next;
+    return Config::TIME >= next;
 }
 
-void Event::perform(double time)
+void Event::perform()
 {
-    event(time, next);
+    event(next);
 }
 
-bool Event::getNext(double time)
+bool Event::getNext()
 {
     if (interval.value)
     {
         next += interval.value;
 
-        if (repeats)
-        {
-            if (++times < repeats)
-            {
-                return true;
-            }
-        }
-
-        else
+        if (!repeats || ++times < repeats)
         {
             return true;
         }
     }
 
-    if (endDelay)
-    {
-        next += endDelay - interval.value;
-        
-        endDelay = 0;
-
-        return true;
-    }
-
     return false;
 }
 
-void Event::finish(double time)
+void Event::finish()
 {
-    end(time, next);
+    end(next);
 }
 
 void EventQueue::addEvent(Event* event)
@@ -58,24 +41,24 @@ void EventQueue::addEvent(Event* event)
     events.push(event);
 }
 
-void EventQueue::performEvents(double time)
+void EventQueue::performEvents()
 {
-    while (!events.empty() && events.top()->ready(time))
+    while (!events.empty() && events.top()->ready())
     {
         Event* event = events.top();
 
         events.pop();
 
-        event->perform(time);
+        event->perform();
 
-        if (event->getNext(time))
+        if (event->getNext())
         {
             addEvent(event);
         }
 
         else
         {
-            event->finish(time);
+            event->finish();
         }
     }
 }

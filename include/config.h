@@ -13,5 +13,6 @@ struct Config
     static unsigned int BUFFER_LENGTH;
     static double TWO_PI;
     static double MASTER_VOLUME;
+    static double TIME;
     static std::mt19937 RNG;
 };
