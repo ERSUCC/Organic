@@ -46,10 +46,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
     AudioData* data = (AudioData*)userData;
 
-    for (int i = 0; i < frames * Config::CHANNELS; i++)
-    {
-        buffer[i] = 0;
-    }
+    std::fill(buffer, buffer + frames * Config::CHANNELS, 0);
 
     for (AudioSource* source : data->sources)
     {
