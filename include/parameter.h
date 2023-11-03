@@ -22,7 +22,7 @@ struct Parameter
     bool connected = false;
 };
 
-struct ParameterController
+struct ParameterController : public Sync
 {
     friend struct ControllerGroup;
     friend struct ControllerManager;

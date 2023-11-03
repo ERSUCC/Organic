@@ -6,17 +6,17 @@ Delay::Delay(double mix, double delay, double feedback) : Effect(mix), delay(del
 
 void Delay::apply(double* buffer, unsigned int bufferLength)
 {
-    for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
+    for (int i = 0; i < bufferLength * config->channels; i += config->channels)
     {
-        if (Config::CHANNELS == 1)
+        if (config->channels == 1)
         {
-            if (Config::TIME >= bufferTime + delay.value)
+            if (config->time >= bufferTime + delay.value)
             {
                 buffer[i] += this->buffer.front() * mix.value * feedback.value;
 
                 this->buffer.pop();
 
-                bufferTime = Config::TIME - delay.value;
+                bufferTime = config->time - delay.value;
             }
 
             this->buffer.push(buffer[i]);
@@ -24,7 +24,7 @@ void Delay::apply(double* buffer, unsigned int bufferLength)
 
         else
         {
-            if (Config::TIME >= bufferTime + delay.value)
+            if (config->time >= bufferTime + delay.value)
             {
                 buffer[i] += this->buffer.front() * mix.value * feedback.value;
 
@@ -34,7 +34,7 @@ void Delay::apply(double* buffer, unsigned int bufferLength)
 
                 this->buffer.pop();
 
-                bufferTime = Config::TIME - delay.value;
+                bufferTime = config->time - delay.value;
             }
 
             this->buffer.push(buffer[i]);
@@ -47,7 +47,7 @@ LowPassFilter::LowPassFilter(double mix, double cutoff) : Effect(mix), cutoff(cu
 
 void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
 {
-    double omega = tan(M_PI * cutoff.value / Config::SAMPLE_RATE);
+    double omega = tan(M_PI * cutoff.value / config->sampleRate);
     double omega2 = omega * omega;
     double c = 1 + 2 * cos(M_PI / 4) * omega + omega2;
     double a0 = omega2 / c;
@@ -55,11 +55,11 @@ void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
     double b1 = 2 * (omega2 - 1) / c;
     double b2 = (1 - 2 * cos(M_PI / 4) * omega + omega2) / c;
 
-    for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
+    for (int i = 0; i < bufferLength * config->channels; i += config->channels)
     {
         double rawl = buffer[i];
 
-        if (Config::CHANNELS == 1)
+        if (config->channels == 1)
         {
             buffer[i] = mix.value * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
 

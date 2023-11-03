@@ -7,7 +7,7 @@ ParameterController::ParameterController(int repeats) : repeats(repeats) {}
 
 void ParameterController::start()
 {
-    startTime = Config::TIME;
+    startTime = config->time;
     running = true;
 }
 
@@ -212,7 +212,7 @@ double ControllerGroup::getValue()
 
             case Order::Random:
             {
-                current = udist(Config::RNG);
+                current = udist(config->rng);
 
                 if (current == last)
                 {
@@ -241,7 +241,7 @@ Value::Value(int repeats, double value, double length) :
 
 double Value::getValue()
 {
-    if (Config::TIME - startTime >= length.value)
+    if (config->time - startTime >= length.value)
     {
         stop();
     }
@@ -254,14 +254,14 @@ Sweep::Sweep(int repeats, double first, double second, double length) :
 
 double Sweep::getValue()
 {
-    if (Config::TIME - startTime >= length.value)
+    if (config->time - startTime >= length.value)
     {
         stop();
 
         return second.value;
     }
 
-    return first.value + (second.value - first.value) * (Config::TIME - startTime) / length.value;
+    return first.value + (second.value - first.value) * (config->time - startTime) / length.value;
 }
 
 LFO::LFO(int repeats, double floor, double ceiling, double rate) :
@@ -269,5 +269,5 @@ LFO::LFO(int repeats, double floor, double ceiling, double rate) :
 
 double LFO::getValue()
 {
-    return floor.value + (ceiling.value - floor.value) * (-cos(Config::TWO_PI * (Config::TIME - startTime) / rate) / 2 + 0.5);
+    return floor.value + (ceiling.value - floor.value) * (-cos(config->twoPi * (config->time - startTime) / rate) / 2 + 0.5);
 }

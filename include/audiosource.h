@@ -1,7 +1,5 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-
 #include <vector>
 #include <string>
 
@@ -11,7 +9,7 @@
 #include "parameter.h"
 #include "effect.h"
 
-struct AudioSource
+struct AudioSource : public Sync
 {
     AudioSource(double volume, double pan);
     ~AudioSource();

@@ -1,12 +1,11 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-
 #include <queue>
 
+#include "config.h"
 #include "parameter.h"
 
-struct Effect
+struct Effect : public Sync
 {
     Effect(double mix);
 

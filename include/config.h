@@ -8,11 +8,30 @@
 
 struct Config
 {
-    static unsigned int SAMPLE_RATE;
-    static unsigned int CHANNELS;
-    static unsigned int BUFFER_LENGTH;
-    static double TWO_PI;
-    static double MASTER_VOLUME;
-    static double TIME;
-    static std::mt19937 RNG;
+    static Config* get();
+
+    const unsigned int sampleRate = 44100;
+    const unsigned int channels = 2;
+    const unsigned int bufferLength = 128;
+
+    const double twoPi = M_PI * 2;
+    double volume = 0.25;
+    double time = 0;
+
+    std::mt19937 rng;
+
+private:
+    Config();
+
+    static Config* instance;
+    
+};
+
+struct Sync
+{
+    Sync();
+
+protected:
+    Config* config;
+
 };

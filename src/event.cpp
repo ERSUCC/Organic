@@ -1,14 +1,14 @@
 #include "../include/event.h"
 
 Event::Event(std::function<void(double)> event, std::function<void(double)> end, double startDelay, double interval, int repeats) :
-    event(event), end(end), startTime(Config::TIME), interval(interval), repeats(repeats)
+    event(event), end(end), startTime(config->time), interval(interval), repeats(repeats)
 {
     next = startTime + startDelay;
 }
 
 bool Event::ready()
 {
-    return Config::TIME >= next;
+    return config->time >= next;
 }
 
 void Event::perform()

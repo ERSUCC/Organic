@@ -2,7 +2,7 @@
 
 AudioSource::AudioSource(double volume, double pan) : volume(volume), pan(pan)
 {
-    effectBuffer = (double*)malloc(sizeof(double) * Config::BUFFER_LENGTH * Config::CHANNELS);
+    effectBuffer = (double*)malloc(sizeof(double) * config->bufferLength * config->channels);
 }
 
 AudioSource::~AudioSource()
@@ -19,7 +19,7 @@ void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
         effect->apply(effectBuffer, bufferLength);
     }
 
-    for (int i = 0; i < bufferLength * Config::CHANNELS; i++)
+    for (int i = 0; i < bufferLength * config->channels; i++)
     {
         buffer[i] += effectBuffer[i];
     }
@@ -39,11 +39,11 @@ Oscillator::Oscillator(double volume, double pan, double frequency) : AudioSourc
 
 void Oscillator::prepareForEffects(unsigned int bufferLength)
 {
-    phaseDelta = Config::TWO_PI * frequency.value / Config::SAMPLE_RATE;
+    phaseDelta = config->twoPi * frequency.value / config->sampleRate;
 
-    for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
+    for (int i = 0; i < bufferLength * config->channels; i += config->channels)
     {
-        if (Config::CHANNELS == 1)
+        if (config->channels == 1)
         {
             effectBuffer[i] = volume.value * getValue();
         }
@@ -59,7 +59,7 @@ void Oscillator::prepareForEffects(unsigned int bufferLength)
         phase += phaseDelta;
     }
 
-    phase = fmod(phase, Config::TWO_PI);
+    phase = fmod(phase, config->twoPi);
 }
 
 Sine::Sine(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
@@ -85,7 +85,7 @@ Saw::Saw(double volume, double pan, double frequency) : Oscillator(volume, pan, 
 
 double Saw::getValue()
 {
-    return fmod(phase, Config::TWO_PI) / M_PI - 1;
+    return fmod(phase, config->twoPi) / M_PI - 1;
 }
 
 Triangle::Triangle(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
@@ -104,16 +104,16 @@ Noise::Noise(double volume, double pan) : AudioSource(volume, pan) {}
 
 void Noise::prepareForEffects(unsigned int bufferLength)
 {
-    for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
+    for (int i = 0; i < bufferLength * config->channels; i += config->channels)
     {
-        if (Config::CHANNELS == 1)
+        if (config->channels == 1)
         {
-            effectBuffer[i] = volume.value * udist(Config::RNG);
+            effectBuffer[i] = volume.value * udist(config->rng);
         }
 
         else
         {
-            double value = volume.value * udist(Config::RNG);
+            double value = volume.value * udist(config->rng);
 
             effectBuffer[i] = value * (1 - pan.value) / 2;
             effectBuffer[i + 1] = value * (pan.value + 1) / 2;
@@ -130,13 +130,13 @@ Sample::Sample(double volume, double pan, std::string path, int grains, bool loo
 
     AudioFile<double> file(path);
 
-    length = file.getNumSamplesPerChannel() * Config::CHANNELS;
+    length = file.getNumSamplesPerChannel() * config->channels;
 
     data = (double*)malloc(sizeof(double) * length);
 
     for (int i = 0; i < file.getNumSamplesPerChannel(); i++)
     {
-        if (Config::CHANNELS == 1)
+        if (config->channels == 1)
         {
             if (file.getNumChannels() == 1)
             {
@@ -173,12 +173,12 @@ Sample::~Sample()
 
 void Sample::prepareForEffects(unsigned int bufferLength)
 {
-    for (int i = 0; i < bufferLength * Config::CHANNELS; i++)
+    for (int i = 0; i < bufferLength * config->channels; i++)
     {
         effectBuffer[i] = 0;
     }
 
-    for (int i = 0; i < bufferLength * Config::CHANNELS; i += Config::CHANNELS)
+    for (int i = 0; i < bufferLength * config->channels; i += config->channels)
     {
         for (int j = 0; j < grains.size(); j++)
         {
@@ -189,7 +189,7 @@ void Sample::prepareForEffects(unsigned int bufferLength)
 
             if (grains[j] < length)
             {
-                if (Config::CHANNELS == 1)
+                if (config->channels == 1)
                 {
                     effectBuffer[i] += volume.value * data[grains[j]++];
                 }
@@ -206,7 +206,7 @@ void Sample::prepareForEffects(unsigned int bufferLength)
         }
     }
 
-    for (int i = 0; i < bufferLength * Config::CHANNELS; i++)
+    for (int i = 0; i < bufferLength * config->channels; i++)
     {
         effectBuffer[i] /= grains.size();
     }

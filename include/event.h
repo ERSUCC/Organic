@@ -6,7 +6,7 @@
 #include "config.h"
 #include "parameter.h"
 
-struct Event
+struct Event : public Sync
 {
     friend struct EventQueue;
 
