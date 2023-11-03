@@ -83,50 +83,6 @@ int main(int argc, char** argv)
 
     EventQueue* eventQueue = new EventQueue();
 
-    Triangle* test = new Triangle(1, 0, 0);
-
-    data.sources.push_back(test);
-
-    test->addEffect(new Delay(1, 250, 0.75));
-
-    ControllerGroup* arp = new ControllerGroup(0, std::vector<ParameterController*>
-    {
-        new ControllerGroup(8, std::vector<ParameterController*>
-        {
-            new Value(1, 200, 125),
-            new Value(1, 233.3, 125),
-            new Value(1, 266.6, 125),
-            new Value(1, 300, 125),
-            new Value(1, 333.3, 125),
-            new Value(1, 366.6, 125),
-            new Value(1, 400, 125)
-        }, ControllerGroup::Order::Random),
-        new ControllerGroup(8, std::vector<ParameterController*>
-        {
-            new Value(1, 200 - 100, 125),
-            new Value(1, 233.3 - 100, 125),
-            new Value(1, 266.6 - 100, 125),
-            new Value(1, 300 - 100, 125),
-            new Value(1, 333.3 - 100, 125),
-            new Value(1, 366.6 - 100, 125),
-            new Value(1, 400 - 100, 125)
-        }, ControllerGroup::Order::Random)
-    }, ControllerGroup::Order::Forwards);
-
-    arp->start();
-
-    controllerManager->connectParameter(arp, &test->frequency);
-
-    ControllerGroup* pluck = new ControllerGroup(0, std::vector<ParameterController*>
-    {
-        new Sweep(1, 0, 1, 25),
-        new Sweep(1, 1, 0, 100)
-    }, ControllerGroup::Order::Forwards);
-
-    pluck->start();
-
-    controllerManager->connectParameter(pluck, &test->volume);
-
     RtAudio::StreamParameters parameters;
 
     parameters.deviceId = audio.getDefaultOutputDevice();
