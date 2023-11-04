@@ -24,6 +24,13 @@ std::string Name::toString()
     return name;
 }
 
+Argument::Argument(Name* name, Token* value) : name(name), value(value) {}
+
+std::string Argument::toString()
+{
+    return name->toString() + ": " + value->toString();
+}
+
 CreateSine::CreateSine(Token* volume, Token* pan, Token* frequency) : volume(volume), pan(pan), frequency(frequency) {}
 
 std::string CreateSine::toString()

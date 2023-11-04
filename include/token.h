@@ -37,6 +37,16 @@ struct Name : public Token
     std::string name;
 };
 
+struct Argument : public Token
+{
+    Argument(Name* name, Token* value);
+
+    std::string toString() override;
+
+    Name* name;
+    Token* value;
+};
+
 struct Instruction : public Token {};
 
 struct CreateSine : public Instruction
@@ -55,7 +65,7 @@ struct CreateSine : public Instruction
 struct Program : public Token
 {
     std::string toString() override;
-    
+
     std::vector<Instruction*> instructions;
 };
 

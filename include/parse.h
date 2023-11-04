@@ -16,14 +16,19 @@ struct Parser
     Program* parse();
 
 private:
+    Token* getToken();
     template <typename T> T* getToken();
 
     void skipWhitespace();
 
     void parseInstruction();
+    bool parseArgument();
     void parseName();
+    void parseConstant();
     void parseOpenParenthesis();
     void parseCloseParenthesis();
+    void parseEquals();
+    void parseColon();
 
     std::string program;
 
