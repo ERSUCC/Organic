@@ -21,6 +21,8 @@ Program* Parser::parse()
         }
 
         p->instructions.push_back(instruction);
+
+        skipWhitespace();
     }
 
     return p;

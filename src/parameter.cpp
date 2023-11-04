@@ -58,7 +58,10 @@ void ControllerManager::connectParameter(ParameterController* controller, Parame
 
     controller->connectedParameters.insert(parameter);
 
-    orderControllers();
+    if (std::find(controllers.begin(), controllers.end(), parameter->source) != controllers.end())
+    {
+        orderControllers();
+    }
 }
 
 void ControllerManager::disconnectParameter(ParameterController* controller, Parameter* parameter)
@@ -242,7 +245,7 @@ double ControllerGroup::getValue()
 }
 
 Value::Value(int repeats, double value, double length) :
-    ParameterController(repeats), value(value), length(length) {}
+    ParameterController(repeats), value(value, this), length(length, this) {}
 
 double Value::getValue()
 {
@@ -270,7 +273,7 @@ double Sweep::getValue()
 }
 
 LFO::LFO(int repeats, double floor, double ceiling, double rate) :
-    ParameterController(repeats), floor(floor, this), ceiling(ceiling, this), rate(rate) {}
+    ParameterController(repeats), floor(floor, this), ceiling(ceiling, this), rate(rate, this) {}
 
 double LFO::getValue()
 {
