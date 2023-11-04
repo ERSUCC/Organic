@@ -12,7 +12,7 @@ ParameterController::ParameterController(int repeats) : repeats(repeats) {}
 
 void ParameterController::start()
 {
-    startTime = config->time;
+    startTime = utils->time;
     running = true;
 }
 
@@ -46,7 +46,7 @@ void ControllerManager::connectParameter(ParameterController* controller, Parame
 {
     if (parameter->connected)
     {
-        // error, parameter can't be controlled by two controllers at once
+        Utils::error("Cannot connect two controllers to one parameter.");
     }
 
     if (std::find(controllers.begin(), controllers.end(), controller) == controllers.end())
@@ -121,7 +121,7 @@ void ControllerManager::orderControllers()
     {
         if (queue.empty())
         {
-            // error, circular parameter reference
+            Utils::error("Circular parameter reference.");
         }
 
         int next = queue.front();
@@ -217,7 +217,7 @@ double ControllerGroup::getValue()
 
             case Order::Random:
             {
-                current = udist(config->rng);
+                current = udist(utils->rng);
 
                 if (current == last)
                 {
@@ -246,7 +246,7 @@ Value::Value(int repeats, double value, double length) :
 
 double Value::getValue()
 {
-    if (config->time - startTime >= length)
+    if (utils->time - startTime >= length)
     {
         stop();
     }
@@ -259,14 +259,14 @@ Sweep::Sweep(int repeats, double first, double second, double length) :
 
 double Sweep::getValue()
 {
-    if (config->time - startTime >= length)
+    if (utils->time - startTime >= length)
     {
         stop();
 
         return second;
     }
 
-    return first + (second - first) * (config->time - startTime) / length;
+    return first + (second - first) * (utils->time - startTime) / length;
 }
 
 LFO::LFO(int repeats, double floor, double ceiling, double rate) :
@@ -274,5 +274,10 @@ LFO::LFO(int repeats, double floor, double ceiling, double rate) :
 
 double LFO::getValue()
 {
-    return floor + (ceiling - floor) * (-cos(config->twoPi * (config->time - startTime) / rate) / 2 + 0.5);
+    if (utils->time >= rate)
+    {
+        stop();
+    }
+
+    return floor + (ceiling - floor) * (-cos(utils->twoPi * (utils->time - startTime) / rate) / 2 + 0.5);
 }

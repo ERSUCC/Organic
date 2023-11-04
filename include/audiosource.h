@@ -5,9 +5,9 @@
 
 #include "AudioFile.h"
 
-#include "config.h"
 #include "parameter.h"
 #include "effect.h"
+#include "utils.h"
 
 struct AudioSource : public Sync
 {

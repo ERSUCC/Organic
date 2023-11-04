@@ -1,59 +1,61 @@
-#include "../include/organic.h"
+#include <iostream>
+#include <vector>
+#include <string>
+#include <chrono>
+#include <queue>
+#include <random>
+
+#include "../include/RtAudio.h"
+
+#include "../include/audiosource.h"
+#include "../include/compile.h"
+#include "../include/utils.h"
+#include "../include/effect.h"
+#include "../include/event.h"
+#include "../include/parameter.h"
 
 struct AudioData
 {
     std::vector<AudioSource*> sources;
 
-    Config* config;
+    Utils* utils;
 };
-
-void Organic::warning(const std::string message)
-{
-    std::cout << message << "\n";
-}
-
-void Organic::error(const std::string message)
-{
-    std::cout << message << "\n";
-
-    exit(1);
-}
 
 void rtAudioError(RtAudioErrorType type, const std::string& message)
 {
-    Organic::error(message);
+    Utils::error(message);
 }
 
 int processAudio(void* output, void* input, unsigned int frames, double streamTime, RtAudioStreamStatus status, void* userData)
 {
     if (status == RTAUDIO_INPUT_OVERFLOW)
     {
-        Organic::warning("Stream overflow detected.");
+        Utils::warning("Stream overflow detected.");
     }
 
     if (status == RTAUDIO_OUTPUT_UNDERFLOW)
     {
-        Organic::warning("Stream underflow detected.");
+        Utils::warning("Stream underflow detected.");
     }
 
     double* buffer = (double*)output;
 
     AudioData* data = (AudioData*)userData;
 
-    std::fill(buffer, buffer + frames * data->config->channels, 0);
+    std::fill(buffer, buffer + frames * data->utils->channels, 0);
 
     for (AudioSource* source : data->sources)
     {
         source->fillBuffer(buffer, frames);
     }
 
-    for (int i = 0; i < frames * data->config->channels; i += data->config->channels)
+    for (int i = 0; i < frames * data->utils->channels; i += data->utils->channels)
     {
-        buffer[i] *= data->config->volume;
+        buffer[i] *= data->utils->volume;
 
-        if (data->config->channels == 2)
+        if (data->utils->channels == 2)
         {
-            buffer[i + 1] *= data->config->volume;
+            buffer[i + 1] *= data->utils->volume;
         }
     }
 
@@ -64,12 +66,12 @@ int main(int argc, char** argv)
 {
     if (argc < 2)
     {
-        Organic::error("Not enough arguments specified.");
+        Utils::error("Not enough arguments specified.");
     }
 
     if (argc > 2)
     {
-        Organic::error("Too many arguments specified.");
+        Utils::error("Too many arguments specified.");
     }
 
     CompilerResult compilerResult = Compiler::compile(argv[1]);
@@ -80,23 +82,23 @@ int main(int argc, char** argv)
 
     if (ids.size() < 1)
     {
-        Organic::error("No audio device detected.");
+        Utils::error("No audio device detected.");
     }
 
-    Config* config = Config::get();
+    Utils* utils = Utils::get();
 
-    AudioData data { compilerResult.sources, config };
+    AudioData data { compilerResult.sources, utils };
 
     RtAudio::StreamParameters parameters;
 
     parameters.deviceId = audio.getDefaultOutputDevice();
-    parameters.nChannels = config->channels;
+    parameters.nChannels = utils->channels;
 
-    unsigned int bufferFrames = config->bufferLength;
+    unsigned int bufferFrames = utils->bufferLength;
 
-    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, config->sampleRate, &bufferFrames, &processAudio, (void*)&data))
+    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)&data))
     {
-        Organic::error(audio.getErrorText());
+        Utils::error(audio.getErrorText());
     }
 
     if (audio.startStream())
@@ -106,7 +108,7 @@ int main(int argc, char** argv)
             audio.closeStream();
         }
 
-        Organic::error(audio.getErrorText());
+        Utils::error(audio.getErrorText());
     }
 
     std::chrono::high_resolution_clock clock;
@@ -114,7 +116,7 @@ int main(int argc, char** argv)
 
     while (true)
     {
-        config->time = (clock.now() - start).count() / 1000000.0;
+        utils->time = (clock.now() - start).count() / 1000000.0;
 
         compilerResult.controllerManager->updateControllers();
         compilerResult.eventQueue->performEvents();

@@ -6,8 +6,8 @@
 #include <vector>
 #include <stack>
 
-#include "organic.h"
 #include "token.h"
+#include "utils.h"
 
 struct Parser
 {

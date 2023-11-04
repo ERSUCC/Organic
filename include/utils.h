@@ -2,13 +2,17 @@
 
 #define _USE_MATH_DEFINES
 
+#include <iostream>
 #include <cmath>
 #include <random>
 #include <chrono>
 
-struct Config
+struct Utils
 {
-    static Config* get();
+    static Utils* get();
+
+    static void warning(std::string message);
+    static void error(std::string message);
 
     const unsigned int sampleRate = 44100;
     const unsigned int channels = 2;
@@ -21,9 +25,9 @@ struct Config
     std::mt19937 rng;
 
 private:
-    Config();
+    Utils();
 
-    static Config* instance;
+    static Utils* instance;
     
 };
 
@@ -32,6 +36,6 @@ struct Sync
     Sync();
 
 protected:
-    Config* config;
+    Utils* utils;
 
 };

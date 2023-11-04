@@ -293,7 +293,7 @@ class RTAUDIO_DLL_PUBLIC RtAudio
     bool isDefaultOutput{false};         /*!< true if this is the default output device. */
     bool isDefaultInput{false};          /*!< true if this is the default input device. */
     std::vector<unsigned int> sampleRates; /*!< Supported sample rates (queried from list of standard rates). */
-    unsigned int currentSampleRate{};   /*!< Current sample rate, system sample rate as currently configured. */
+    unsigned int currentSampleRate{};   /*!< Current sample rate, system sample rate as currently utilsured. */
     unsigned int preferredSampleRate{}; /*!< Preferred sample rate, e.g. for WASAPI the system sample rate. */
     RtAudioFormat nativeFormats{};  /*!< Bit mask of supported data formats. */
   };

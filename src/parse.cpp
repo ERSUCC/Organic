@@ -17,7 +17,7 @@ Program* Parser::parse()
 
         if (!instruction)
         {
-            Organic::error("Expected instruction, received '" + lastToken->toString() + "'.");
+            Utils::error("Expected instruction, received '" + lastToken->toString() + "'.");
         }
 
         p->instructions.push_back(instruction);
@@ -94,7 +94,7 @@ void Parser::parseCall()
 
             else
             {
-                Organic::error("Unknown argument name '" + argument->name->name + "'.");
+                Utils::error("Unknown argument name '" + argument->name->name + "'.");
             }
         }
 
@@ -134,7 +134,7 @@ void Parser::parseCall()
 
             else
             {
-                Organic::error("Unknown argument name '" + argument->name->name + "'.");
+                Utils::error("Unknown argument name '" + argument->name->name + "'.");
             }
         }
 
@@ -143,7 +143,7 @@ void Parser::parseCall()
 
     else
     {
-        Organic::error("Unknown function '" + name->name + "'.");
+        Utils::error("Unknown function '" + name->name + "'.");
     }
 
     parseSingleChar(')');
@@ -198,7 +198,7 @@ void Parser::parseName()
 
     if (!isalpha(program[pos]))
     {
-        Organic::error("Expected letter, received '" + std::string(1, program[pos]) + "'.");
+        Utils::error("Expected letter, received '" + std::string(1, program[pos]) + "'.");
     }
 
     std::string name;
@@ -217,7 +217,7 @@ void Parser::parseConstant()
 
     if (!isdigit(program[pos]))
     {
-        Organic::error("Expected number, received '" + std::string(1, program[pos]) + "'.");
+        Utils::error("Expected number, received '" + std::string(1, program[pos]) + "'.");
     }
 
     std::string constant;
@@ -236,7 +236,7 @@ void Parser::parseSingleChar(char c)
 
     if (program[pos] != c)
     {
-        Organic::error("Expected '" + std::string(1, c) + "', received '" + std::string(1, program[pos]) + "'.");
+        Utils::error("Expected '" + std::string(1, c) + "', received '" + std::string(1, program[pos]) + "'.");
     }
 
     pos++;

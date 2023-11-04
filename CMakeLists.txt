@@ -7,12 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(organic src/audiosource.cpp
                        src/compile.cpp
-                       src/config.cpp
                        src/effect.cpp
                        src/event.cpp
                        src/organic.cpp
                        src/parameter.cpp
                        src/parse.cpp
-                       src/token.cpp)
+                       src/token.cpp
+                       src/utils.cpp)
 
 target_link_libraries(organic rtaudio)
