@@ -96,9 +96,9 @@ private:
 
 };
 
-struct Value : public ParameterController
+struct Hold : public ParameterController
 {
-    Value(int repeats, double value, double length);
+    Hold(double value, double length);
 
     double getValue() override;
 
@@ -108,22 +108,22 @@ struct Value : public ParameterController
 
 struct Sweep : public ParameterController
 {
-    Sweep(int repeats, double first, double second, double length);
+    Sweep(int repeats, double from, double to, double length);
 
     double getValue() override;
 
-    Parameter first;
-    Parameter second;
+    Parameter from;
+    Parameter to;
     Parameter length;
 };
 
 struct LFO : public ParameterController
 {
-    LFO(int repeats, double floor, double ceiling, double rate);
+    LFO(int repeats, double from, double to, double length);
 
     double getValue() override;
 
-    Parameter floor;
-    Parameter ceiling;
-    Parameter rate;
+    Parameter from;
+    Parameter to;
+    Parameter length;
 };

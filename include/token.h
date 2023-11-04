@@ -12,16 +12,12 @@ struct ProgramVisitor;
 
 struct Token
 {
-    virtual std::string toString();
-
     virtual void accept(ProgramVisitor* visitor) {}
 };
 
 struct Constant : public Token
 {
     Constant(double value);
-
-    std::string toString() override;
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -32,16 +28,12 @@ struct Name : public Token
 {
     Name(std::string name);
 
-    std::string toString() override;
-
     std::string name;
 };
 
 struct Argument : public Token
 {
     Argument(Name* name, Token* value);
-
-    std::string toString() override;
 
     Name* name;
     Token* value;
@@ -52,8 +44,6 @@ struct Instruction : public Token {};
 struct CreateSine : public Instruction
 {
     CreateSine(Token* volume, Token* pan, Token* frequency);
-
-    std::string toString() override;
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -66,8 +56,6 @@ struct CreateSquare : public Instruction
 {
     CreateSquare(Token* volume, Token* pan, Token* frequency);
 
-    std::string toString() override;
-
     void accept(ProgramVisitor* visitor) override;
 
     Token* volume;
@@ -79,8 +67,6 @@ struct CreateSaw : public Instruction
 {
     CreateSaw(Token* volume, Token* pan, Token* frequency);
 
-    std::string toString() override;
-
     void accept(ProgramVisitor* visitor) override;
 
     Token* volume;
@@ -90,36 +76,30 @@ struct CreateSaw : public Instruction
 
 struct CreateSweep : public Instruction
 {
-    CreateSweep(Token* repeats, Token* floor, Token* ceiling, Token* length);
-
-    std::string toString() override;
+    CreateSweep(Token* repeats, Token* from, Token* to, Token* length);
 
     void accept(ProgramVisitor* visitor) override;
 
     Token* repeats;
-    Token* floor;
-    Token* ceiling;
+    Token* from;
+    Token* to;
     Token* length;
 };
 
 struct CreateLFO : public Instruction
 {
-    CreateLFO(Token* repeats, Token* floor, Token* ceiling, Token* rate);
-
-    std::string toString() override;
+    CreateLFO(Token* repeats, Token* from, Token* to, Token* length);
 
     void accept(ProgramVisitor* visitor) override;
 
     Token* repeats;
-    Token* floor;
-    Token* ceiling;
-    Token* rate;
+    Token* from;
+    Token* to;
+    Token* length;
 };
 
 struct Program : public Token
 {
-    std::string toString() override;
-
     std::vector<Instruction*> instructions;
 };
 

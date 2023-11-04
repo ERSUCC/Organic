@@ -1,16 +1,6 @@
 #include "../include/token.h"
 
-std::string Token::toString()
-{
-    return "";
-}
-
 Constant::Constant(double value) : value(value) {}
-
-std::string Constant::toString()
-{
-    return std::to_string(value);
-}
 
 void Constant::accept(ProgramVisitor* visitor)
 {
@@ -19,25 +9,10 @@ void Constant::accept(ProgramVisitor* visitor)
 
 Name::Name(std::string name) : name(name) {}
 
-std::string Name::toString()
-{
-    return name;
-}
-
 Argument::Argument(Name* name, Token* value) : name(name), value(value) {}
-
-std::string Argument::toString()
-{
-    return name->toString() + ": " + value->toString();
-}
 
 CreateSine::CreateSine(Token* volume, Token* pan, Token* frequency) :
     volume(volume), pan(pan), frequency(frequency) {}
-
-std::string CreateSine::toString()
-{
-    return "sine(" + volume->toString() + ", " + pan->toString() + ", " + frequency->toString() + ")";
-}
 
 void CreateSine::accept(ProgramVisitor* visitor)
 {
@@ -47,11 +22,6 @@ void CreateSine::accept(ProgramVisitor* visitor)
 CreateSquare::CreateSquare(Token* volume, Token* pan, Token* frequency) :
     volume(volume), pan(pan), frequency(frequency) {}
 
-std::string CreateSquare::toString()
-{
-    return "square(" + volume->toString() + ", " + pan->toString() + ", " + frequency->toString() + ")";
-}
-
 void CreateSquare::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
@@ -60,52 +30,25 @@ void CreateSquare::accept(ProgramVisitor* visitor)
 CreateSaw::CreateSaw(Token* volume, Token* pan, Token* frequency) :
     volume(volume), pan(pan), frequency(frequency) {}
 
-std::string CreateSaw::toString()
-{
-    return "saw(" + volume->toString() + ", " + pan->toString() + ", " + frequency->toString() + ")";
-}
-
 void CreateSaw::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateSweep::CreateSweep(Token* repeats, Token* floor, Token* ceiling, Token* length) :
-    repeats(repeats), floor(floor), ceiling(ceiling), length(length) {}
-
-std::string CreateSweep::toString()
-{
-    return "sweep(" + repeats->toString() + "," + floor->toString() + "," + ceiling->toString() + ", " + length->toString() + ")";
-}
+CreateSweep::CreateSweep(Token* repeats, Token* from, Token* to, Token* length) :
+    repeats(repeats), from(from), to(to), length(length) {}
 
 void CreateSweep::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateLFO::CreateLFO(Token* repeats, Token* floor, Token* ceiling, Token* rate) :
-    repeats(repeats), floor(floor), ceiling(ceiling), rate(rate) {}
-
-std::string CreateLFO::toString()
-{
-    return "lfo(" + repeats->toString() + "," + floor->toString() + "," + ceiling->toString() + ", " + rate->toString() + ")";
-}
+CreateLFO::CreateLFO(Token* repeats, Token* from, Token* to, Token* length) :
+    repeats(repeats), from(from), to(to), length(length) {}
 
 void CreateLFO::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
-}
-
-std::string Program::toString()
-{
-    std::string s;
-
-    for (Instruction* instruction : instructions)
-    {
-        s += instruction->toString() + "\n";
-    }
-
-    return s;
 }
 
 ProgramVisitor::ProgramVisitor()
@@ -157,8 +100,8 @@ void ProgramVisitor::visit(CreateSweep* token)
     Sweep* sweep = new Sweep(0, 0, 0, 0);
 
     prepareForVisit(token->repeats, &sweep->repeats);
-    prepareForVisit(token->floor, &sweep->first);
-    prepareForVisit(token->ceiling, &sweep->second);
+    prepareForVisit(token->from, &sweep->from);
+    prepareForVisit(token->to, &sweep->to);
     prepareForVisit(token->length, &sweep->length);
 
     controllerManager->connectParameter(sweep, slots.top());
@@ -171,9 +114,9 @@ void ProgramVisitor::visit(CreateLFO* token)
     LFO* lfo = new LFO(0, 0, 0, 0);
 
     prepareForVisit(token->repeats, &lfo->repeats);
-    prepareForVisit(token->floor, &lfo->floor);
-    prepareForVisit(token->ceiling, &lfo->ceiling);
-    prepareForVisit(token->rate, &lfo->rate);
+    prepareForVisit(token->from, &lfo->from);
+    prepareForVisit(token->to, &lfo->to);
+    prepareForVisit(token->length, &lfo->length);
 
     controllerManager->connectParameter(lfo, slots.top());
 

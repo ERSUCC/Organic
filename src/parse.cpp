@@ -17,7 +17,7 @@ Program* Parser::parse()
 
         if (!instruction)
         {
-            Utils::error("Expected instruction, received '" + lastToken->toString() + "'.");
+            Utils::error("Expected instruction.");
         }
 
         p->instructions.push_back(instruction);

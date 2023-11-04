@@ -244,10 +244,10 @@ double ControllerGroup::getValue()
     return controllers[current]->getValue();
 }
 
-Value::Value(int repeats, double value, double length) :
-    ParameterController(repeats), value(value, this), length(length, this) {}
+Hold::Hold(double value, double length) :
+    ParameterController(1), value(value, this), length(length, this) {}
 
-double Value::getValue()
+double Hold::getValue()
 {
     if (utils->time - startTime >= length)
     {
@@ -257,8 +257,8 @@ double Value::getValue()
     return value;
 }
 
-Sweep::Sweep(int repeats, double first, double second, double length) :
-    ParameterController(repeats), first(first, this), second(second, this), length(length, this) {}
+Sweep::Sweep(int repeats, double from, double to, double length) :
+    ParameterController(repeats), from(from, this), to(to, this), length(length, this) {}
 
 double Sweep::getValue()
 {
@@ -266,21 +266,21 @@ double Sweep::getValue()
     {
         stop();
 
-        return second;
+        return to;
     }
 
-    return first + (second - first) * (utils->time - startTime) / length;
+    return from + (to - from) * (utils->time - startTime) / length;
 }
 
-LFO::LFO(int repeats, double floor, double ceiling, double rate) :
-    ParameterController(repeats), floor(floor, this), ceiling(ceiling, this), rate(rate, this) {}
+LFO::LFO(int repeats, double from, double to, double length) :
+    ParameterController(repeats), from(from, this), to(to, this), length(length, this) {}
 
 double LFO::getValue()
 {
-    if (utils->time >= startTime + rate)
+    if (utils->time >= startTime + length)
     {
         stop();
     }
 
-    return floor + (ceiling - floor) * (-cos(utils->twoPi * (utils->time - startTime) / rate) / 2 + 0.5);
+    return from + (to - from) * (-cos(utils->twoPi * (utils->time - startTime) / length) / 2 + 0.5);
 }
