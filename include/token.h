@@ -74,6 +74,16 @@ struct CreateSaw : public Instruction
     Token* frequency;
 };
 
+struct CreateHold : public Instruction
+{
+    CreateHold(Token* value, Token* length);
+
+    void accept(ProgramVisitor* visitor) override;
+
+    Token* value;
+    Token* length;
+};
+
 struct CreateSweep : public Instruction
 {
     CreateSweep(Token* repeats, Token* from, Token* to, Token* length);
@@ -111,6 +121,7 @@ struct ProgramVisitor
     void visit(CreateSine* token);
     void visit(CreateSquare* token);
     void visit(CreateSaw* token);
+    void visit(CreateHold* token);
     void visit(CreateSweep* token);
     void visit(CreateLFO* token);
     void visit(Program* token);

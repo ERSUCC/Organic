@@ -120,12 +120,44 @@ void Parser::parseCall()
         }
     }
 
+    else if (name->name == "hold")
+    {
+        Token* value = new Constant(0);
+        Token* length = new Constant(0);
+
+        while (program[pos] != ')')
+        {
+            parseArgument();
+
+            Argument* argument = getToken<Argument>();
+
+            if (argument->name->name == "value")
+            {
+                value = argument->value;
+            }
+
+            else if (argument->name->name == "length")
+            {
+                length = argument->value;
+            }
+
+            else
+            {
+                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+            }
+
+            skipWhitespace();
+        }
+
+        tokens.push(new CreateHold(value, length));
+    }
+
     else if (name->name == "lfo" || name->name == "sweep")
     {
         Token* repeats = new Constant(0);
         Token* from = new Constant(0);
         Token* to = new Constant(1);
-        Token* length = new Constant(1);
+        Token* length = new Constant(0);
 
         while (program[pos] != ')')
         {

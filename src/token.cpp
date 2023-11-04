@@ -35,6 +35,13 @@ void CreateSaw::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
+CreateHold::CreateHold(Token* value, Token* length) : value(value), length(length) {}
+
+void CreateHold::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 CreateSweep::CreateSweep(Token* repeats, Token* from, Token* to, Token* length) :
     repeats(repeats), from(from), to(to), length(length) {}
 
@@ -93,6 +100,18 @@ void ProgramVisitor::visit(CreateSaw* token)
     prepareForVisit(token->frequency, &saw->frequency);
 
     sources.push_back(saw);
+}
+
+void ProgramVisitor::visit(CreateHold* token)
+{
+    Hold* hold = new Hold(0, 0);
+
+    prepareForVisit(token->value, &hold->value);
+    prepareForVisit(token->length, &hold->length);
+
+    controllerManager->connectParameter(hold, slots.top());
+
+    hold->start();
 }
 
 void ProgramVisitor::visit(CreateSweep* token)
