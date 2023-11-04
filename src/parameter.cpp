@@ -274,7 +274,7 @@ LFO::LFO(int repeats, double floor, double ceiling, double rate) :
 
 double LFO::getValue()
 {
-    if (utils->time >= rate)
+    if (utils->time >= startTime + rate)
     {
         stop();
     }
