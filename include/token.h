@@ -62,6 +62,46 @@ struct CreateSine : public Instruction
     Token* frequency;
 };
 
+struct CreateSquare : public Instruction
+{
+    CreateSquare(Token* volume, Token* pan, Token* frequency);
+
+    std::string toString() override;
+
+    void accept(ProgramVisitor* visitor) override;
+
+    Token* volume;
+    Token* pan;
+    Token* frequency;
+};
+
+struct CreateSaw : public Instruction
+{
+    CreateSaw(Token* volume, Token* pan, Token* frequency);
+
+    std::string toString() override;
+
+    void accept(ProgramVisitor* visitor) override;
+
+    Token* volume;
+    Token* pan;
+    Token* frequency;
+};
+
+struct CreateSweep : public Instruction
+{
+    CreateSweep(Token* repeats, Token* floor, Token* ceiling, Token* length);
+
+    std::string toString() override;
+
+    void accept(ProgramVisitor* visitor) override;
+
+    Token* repeats;
+    Token* floor;
+    Token* ceiling;
+    Token* length;
+};
+
 struct CreateLFO : public Instruction
 {
     CreateLFO(Token* repeats, Token* floor, Token* ceiling, Token* rate);
@@ -89,6 +129,9 @@ struct ProgramVisitor
 
     void visit(Constant* token);
     void visit(CreateSine* token);
+    void visit(CreateSquare* token);
+    void visit(CreateSaw* token);
+    void visit(CreateSweep* token);
     void visit(CreateLFO* token);
     void visit(Program* token);
 

@@ -24,7 +24,7 @@ private:
 
     void parseInstruction();
     void parseCall();
-    bool parseArgument();
+    void parseArgument();
     void parseArgumentValue();
     void parseName();
     void parseConstant();

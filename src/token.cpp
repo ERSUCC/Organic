@@ -31,7 +31,8 @@ std::string Argument::toString()
     return name->toString() + ": " + value->toString();
 }
 
-CreateSine::CreateSine(Token* volume, Token* pan, Token* frequency) : volume(volume), pan(pan), frequency(frequency) {}
+CreateSine::CreateSine(Token* volume, Token* pan, Token* frequency) :
+    volume(volume), pan(pan), frequency(frequency) {}
 
 std::string CreateSine::toString()
 {
@@ -39,6 +40,45 @@ std::string CreateSine::toString()
 }
 
 void CreateSine::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
+CreateSquare::CreateSquare(Token* volume, Token* pan, Token* frequency) :
+    volume(volume), pan(pan), frequency(frequency) {}
+
+std::string CreateSquare::toString()
+{
+    return "square(" + volume->toString() + ", " + pan->toString() + ", " + frequency->toString() + ")";
+}
+
+void CreateSquare::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
+CreateSaw::CreateSaw(Token* volume, Token* pan, Token* frequency) :
+    volume(volume), pan(pan), frequency(frequency) {}
+
+std::string CreateSaw::toString()
+{
+    return "saw(" + volume->toString() + ", " + pan->toString() + ", " + frequency->toString() + ")";
+}
+
+void CreateSaw::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
+CreateSweep::CreateSweep(Token* repeats, Token* floor, Token* ceiling, Token* length) :
+    repeats(repeats), floor(floor), ceiling(ceiling), length(length) {}
+
+std::string CreateSweep::toString()
+{
+    return "sweep(" + repeats->toString() + "," + floor->toString() + "," + ceiling->toString() + ", " + length->toString() + ")";
+}
+
+void CreateSweep::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
@@ -88,6 +128,42 @@ void ProgramVisitor::visit(CreateSine* token)
     prepareForVisit(token->frequency, &sine->frequency);
 
     sources.push_back(sine);
+}
+
+void ProgramVisitor::visit(CreateSquare* token)
+{
+    Square* square = new Square(0, 0, 0);
+
+    prepareForVisit(token->volume, &square->volume);
+    prepareForVisit(token->pan, &square->pan);
+    prepareForVisit(token->frequency, &square->frequency);
+
+    sources.push_back(square);
+}
+
+void ProgramVisitor::visit(CreateSaw* token)
+{
+    Saw* saw = new Saw(0, 0, 0);
+
+    prepareForVisit(token->volume, &saw->volume);
+    prepareForVisit(token->pan, &saw->pan);
+    prepareForVisit(token->frequency, &saw->frequency);
+
+    sources.push_back(saw);
+}
+
+void ProgramVisitor::visit(CreateSweep* token)
+{
+    Sweep* sweep = new Sweep(0, 0, 0, 0);
+
+    prepareForVisit(token->repeats, &sweep->repeats);
+    prepareForVisit(token->floor, &sweep->first);
+    prepareForVisit(token->ceiling, &sweep->second);
+    prepareForVisit(token->length, &sweep->length);
+
+    controllerManager->connectParameter(sweep, slots.top());
+
+    sweep->start();
 }
 
 void ProgramVisitor::visit(CreateLFO* token)

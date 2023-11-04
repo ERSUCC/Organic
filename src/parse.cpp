@@ -67,14 +67,16 @@ void Parser::parseCall()
 
     Name* name = getToken<Name>();
 
-    if (name->name == "sine")
+    if (name->name == "sine" || name->name == "square" || name->name == "saw")
     {
         Token* volume = new Constant(1);
         Token* pan = new Constant(0);
         Token* frequency = new Constant(0);
 
-        while (parseArgument())
+        while (program[pos] != ')')
         {
+            parseArgument();
+
             Argument* argument = getToken<Argument>();
 
             if (argument->name->name == "volume")
@@ -96,20 +98,37 @@ void Parser::parseCall()
             {
                 Utils::error("Unknown argument name '" + argument->name->name + "'.");
             }
+
+            skipWhitespace();
         }
 
-        tokens.push(new CreateSine(volume, pan, frequency));
+        if (name->name == "sine")
+        {
+            tokens.push(new CreateSine(volume, pan, frequency));
+        }
+        
+        else if (name->name == "square")
+        {
+            tokens.push(new CreateSquare(volume, pan, frequency));
+        }
+
+        else if (name->name == "saw")
+        {
+            tokens.push(new CreateSaw(volume, pan, frequency));
+        }
     }
 
-    else if (name->name == "lfo")
+    else if (name->name == "lfo" || name->name == "sweep")
     {
         Token* repeats = new Constant(0);
-        Token* floor = new Constant(0);
-        Token* ceiling = new Constant(1);
-        Token* rate = new Constant(1);
+        Token* from = new Constant(0);
+        Token* to = new Constant(1);
+        Token* length = new Constant(1);
 
-        while (parseArgument())
+        while (program[pos] != ')')
         {
+            parseArgument();
+
             Argument* argument = getToken<Argument>();
 
             if (argument->name->name == "repeats")
@@ -117,28 +136,38 @@ void Parser::parseCall()
                 repeats = argument->value;
             }
 
-            else if (argument->name->name == "floor")
+            else if (argument->name->name == "from")
             {
-                floor = argument->value;
+                from = argument->value;
             }
 
-            else if (argument->name->name == "ceiling")
+            else if (argument->name->name == "to")
             {
-                ceiling = argument->value;
+                to = argument->value;
             }
 
-            else if (argument->name->name == "rate")
+            else if (argument->name->name == "length")
             {
-                rate = argument->value;
+                length = argument->value;
             }
 
             else
             {
                 Utils::error("Unknown argument name '" + argument->name->name + "'.");
             }
+
+            skipWhitespace();
         }
 
-        tokens.push(new CreateLFO(repeats, floor, ceiling, rate));
+        if (name->name == "lfo")
+        {
+            tokens.push(new CreateLFO(repeats, from, to, length));
+        }
+
+        else if (name->name == "sweep")
+        {
+            tokens.push(new CreateSweep(repeats, from, to, length));
+        }
     }
 
     else
@@ -149,15 +178,9 @@ void Parser::parseCall()
     parseSingleChar(')');
 }
 
-bool Parser::parseArgument()
+void Parser::parseArgument()
 {
     skipWhitespace();
-
-    if (program[pos] == ')')
-    {
-        return false;
-    }
-
     parseName();
 
     Name* name = getToken<Name>();
@@ -173,8 +196,6 @@ bool Parser::parseArgument()
     {
         pos++;
     }
-
-    return true;
 }
 
 void Parser::parseArgumentValue()
