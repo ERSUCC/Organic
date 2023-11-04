@@ -1,3 +1,5 @@
+#include "../include/organic.h"
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -7,11 +9,12 @@
 
 #include "../include/RtAudio.h"
 
-#include "../include/config.h"
 #include "../include/audiosource.h"
-#include "../include/parameter.h"
-#include "../include/event.h"
+#include "../include/compile.h"
+#include "../include/config.h"
 #include "../include/effect.h"
+#include "../include/event.h"
+#include "../include/parameter.h"
 
 struct AudioData
 {
@@ -20,28 +23,33 @@ struct AudioData
     Config* config;
 };
 
-void error(const std::string& message)
+void Organic::warning(const std::string message)
+{
+    std::cout << message << "\n";
+}
+
+void Organic::error(const std::string message)
 {
     std::cout << message << "\n";
 
-    exit(0);
+    exit(1);
 }
 
 void rtAudioError(RtAudioErrorType type, const std::string& message)
 {
-    error(message);
+    Organic::error(message);
 }
 
 int processAudio(void* output, void* input, unsigned int frames, double streamTime, RtAudioStreamStatus status, void* userData)
 {
     if (status == RTAUDIO_INPUT_OVERFLOW)
     {
-        std::cout << "Error: Stream overflow detected.\n";
+        Organic::warning("Stream overflow detected.");
     }
 
     if (status == RTAUDIO_OUTPUT_UNDERFLOW)
     {
-        std::cout << "Error: Stream underflow detected.\n";
+        Organic::warning("Stream underflow detected.");
     }
 
     double* buffer = (double*)output;
@@ -70,24 +78,30 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
 int main(int argc, char** argv)
 {
+    if (argc < 2)
+    {
+        Organic::error("Not enough arguments specified.");
+    }
+
+    if (argc > 2)
+    {
+        Organic::error("Too many arguments specified.");
+    }
+
+    CompilerResult compilerResult = Compiler::compile(argv[1]);
+
     RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
 
     std::vector<unsigned int> ids = audio.getDeviceIds();
 
     if (ids.size() < 1)
     {
-        error("Error: No audio device detected.");
+        Organic::error("No audio device detected.");
     }
 
     Config* config = Config::get();
 
-    AudioData data;
-
-    data.config = config;
-
-    ControllerManager* controllerManager = new ControllerManager();
-
-    EventQueue* eventQueue = new EventQueue();
+    AudioData data { compilerResult.sources, config };
 
     RtAudio::StreamParameters parameters;
 
@@ -98,7 +112,7 @@ int main(int argc, char** argv)
 
     if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, config->sampleRate, &bufferFrames, &processAudio, (void*)&data))
     {
-        error(audio.getErrorText());
+        Organic::error(audio.getErrorText());
     }
 
     if (audio.startStream())
@@ -108,22 +122,18 @@ int main(int argc, char** argv)
             audio.closeStream();
         }
 
-        error(audio.getErrorText());
+        Organic::error(audio.getErrorText());
     }
 
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
 
-    double time = 0;
-
     while (true)
     {
-        time = (clock.now() - start).count() / 1000000.0;
+        config->time = (clock.now() - start).count() / 1000000.0;
 
-        config->time = time;
-
-        controllerManager->updateControllers();
-        eventQueue->performEvents();
+        compilerResult.controllerManager->updateControllers();
+        compilerResult.eventQueue->performEvents();
     }
 
     if (audio.isStreamRunning())
