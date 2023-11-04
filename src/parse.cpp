@@ -202,7 +202,7 @@ void Parser::parseArgumentValue()
 {
     skipWhitespace();
 
-    if (isdigit(program[pos]))
+    if (isdigit(program[pos]) || program[pos] == '-')
     {
         parseConstant();
     }
@@ -236,7 +236,7 @@ void Parser::parseConstant()
 {
     skipWhitespace();
 
-    if (!isdigit(program[pos]))
+    if (!isdigit(program[pos]) && program[pos] != '-')
     {
         Utils::error("Expected number, received '" + std::string(1, program[pos]) + "'.");
     }
