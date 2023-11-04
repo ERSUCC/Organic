@@ -39,21 +39,21 @@ Oscillator::Oscillator(double volume, double pan, double frequency) : AudioSourc
 
 void Oscillator::prepareForEffects(unsigned int bufferLength)
 {
-    phaseDelta = config->twoPi * frequency.value / config->sampleRate;
+    phaseDelta = config->twoPi * frequency / config->sampleRate;
 
     for (int i = 0; i < bufferLength * config->channels; i += config->channels)
     {
         if (config->channels == 1)
         {
-            effectBuffer[i] = volume.value * getValue();
+            effectBuffer[i] = volume * getValue();
         }
 
         else
         {
-            double value = volume.value * getValue();
+            double value = volume * getValue();
 
-            effectBuffer[i] = value * (1 - pan.value) / 2;
-            effectBuffer[i + 1] = value * (pan.value + 1) / 2;
+            effectBuffer[i] = value * (1 - pan) / 2;
+            effectBuffer[i + 1] = value * (pan + 1) / 2;
         }
 
         phase += phaseDelta;
@@ -108,15 +108,15 @@ void Noise::prepareForEffects(unsigned int bufferLength)
     {
         if (config->channels == 1)
         {
-            effectBuffer[i] = volume.value * udist(config->rng);
+            effectBuffer[i] = volume * udist(config->rng);
         }
 
         else
         {
-            double value = volume.value * udist(config->rng);
+            double value = volume * udist(config->rng);
 
-            effectBuffer[i] = value * (1 - pan.value) / 2;
-            effectBuffer[i + 1] = value * (pan.value + 1) / 2;
+            effectBuffer[i] = value * (1 - pan) / 2;
+            effectBuffer[i + 1] = value * (pan + 1) / 2;
         }
     }
 }
@@ -191,16 +191,16 @@ void Sample::prepareForEffects(unsigned int bufferLength)
             {
                 if (config->channels == 1)
                 {
-                    effectBuffer[i] += volume.value * data[grains[j]++];
+                    effectBuffer[i] += volume * data[grains[j]++];
                 }
 
                 else
                 {
-                    double value = volume.value * data[grains[j]++];
-                    double value2 = volume.value * data[grains[j]++];
+                    double value = volume * data[grains[j]++];
+                    double value2 = volume * data[grains[j]++];
 
-                    effectBuffer[i] += value * (1 - pan.value) / 2;
-                    effectBuffer[i + 1] += value2 * (pan.value + 1) / 2;
+                    effectBuffer[i] += value * (1 - pan) / 2;
+                    effectBuffer[i + 1] += value2 * (pan + 1) / 2;
                 }
             }
         }

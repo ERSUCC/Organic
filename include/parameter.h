@@ -15,6 +15,8 @@ struct Parameter
     Parameter(double value);
     Parameter(double value, ParameterController* source);
 
+    operator double();
+
     double value;
 
     ParameterController* source;
@@ -37,10 +39,11 @@ struct ParameterController : public Sync
 
     double startTime;
 
+    Parameter repeats;
+
 protected:
     bool running = false;
 
-    int repeats;
     int times = 0;
 
 private:
@@ -122,6 +125,5 @@ struct LFO : public ParameterController
 
     Parameter floor;
     Parameter ceiling;
-
-    double rate;
+    Parameter rate;
 };

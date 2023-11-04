@@ -3,6 +3,11 @@
 Parameter::Parameter(double value) : value(value) {}
 Parameter::Parameter(double value, ParameterController* source) : value(value), source(source) {}
 
+Parameter::operator double()
+{
+    return value;
+}
+
 ParameterController::ParameterController(int repeats) : repeats(repeats) {}
 
 void ParameterController::start()
@@ -241,12 +246,12 @@ Value::Value(int repeats, double value, double length) :
 
 double Value::getValue()
 {
-    if (config->time - startTime >= length.value)
+    if (config->time - startTime >= length)
     {
         stop();
     }
 
-    return value.value;
+    return value;
 }
 
 Sweep::Sweep(int repeats, double first, double second, double length) :
@@ -254,14 +259,14 @@ Sweep::Sweep(int repeats, double first, double second, double length) :
 
 double Sweep::getValue()
 {
-    if (config->time - startTime >= length.value)
+    if (config->time - startTime >= length)
     {
         stop();
 
-        return second.value;
+        return second;
     }
 
-    return first.value + (second.value - first.value) * (config->time - startTime) / length.value;
+    return first + (second - first) * (config->time - startTime) / length;
 }
 
 LFO::LFO(int repeats, double floor, double ceiling, double rate) :
@@ -269,5 +274,5 @@ LFO::LFO(int repeats, double floor, double ceiling, double rate) :
 
 double LFO::getValue()
 {
-    return floor.value + (ceiling.value - floor.value) * (-cos(config->twoPi * (config->time - startTime) / rate) / 2 + 0.5);
+    return floor + (ceiling - floor) * (-cos(config->twoPi * (config->time - startTime) / rate) / 2 + 0.5);
 }

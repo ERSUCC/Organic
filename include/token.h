@@ -62,6 +62,20 @@ struct CreateSine : public Instruction
     Token* frequency;
 };
 
+struct CreateLFO : public Instruction
+{
+    CreateLFO(Token* repeats, Token* floor, Token* ceiling, Token* rate);
+
+    std::string toString() override;
+
+    void accept(ProgramVisitor* visitor) override;
+
+    Token* repeats;
+    Token* floor;
+    Token* ceiling;
+    Token* rate;
+};
+
 struct Program : public Token
 {
     std::string toString() override;
@@ -75,6 +89,7 @@ struct ProgramVisitor
 
     void visit(Constant* token);
     void visit(CreateSine* token);
+    void visit(CreateLFO* token);
     void visit(Program* token);
 
     std::vector<AudioSource*> sources;

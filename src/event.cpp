@@ -18,9 +18,9 @@ void Event::perform()
 
 bool Event::getNext()
 {
-    if (interval.value)
+    if (interval)
     {
-        next += interval.value;
+        next += interval;
 
         if (!repeats || ++times < repeats)
         {

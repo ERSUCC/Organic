@@ -43,6 +43,19 @@ void CreateSine::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
+CreateLFO::CreateLFO(Token* repeats, Token* floor, Token* ceiling, Token* rate) :
+    repeats(repeats), floor(floor), ceiling(ceiling), rate(rate) {}
+
+std::string CreateLFO::toString()
+{
+    return "lfo(" + repeats->toString() + "," + floor->toString() + "," + ceiling->toString() + ", " + rate->toString() + ")";
+}
+
+void CreateLFO::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 std::string Program::toString()
 {
     std::string s;
@@ -68,13 +81,27 @@ void ProgramVisitor::visit(Constant* token)
 
 void ProgramVisitor::visit(CreateSine* token)
 {
-    Sine* sine = new Sine(1, 0, 0);
+    Sine* sine = new Sine(0, 0, 0);
 
     prepareForVisit(token->volume, &sine->volume);
     prepareForVisit(token->pan, &sine->pan);
     prepareForVisit(token->frequency, &sine->frequency);
 
     sources.push_back(sine);
+}
+
+void ProgramVisitor::visit(CreateLFO* token)
+{
+    LFO* lfo = new LFO(0, 0, 0, 0);
+
+    prepareForVisit(token->repeats, &lfo->repeats);
+    prepareForVisit(token->floor, &lfo->floor);
+    prepareForVisit(token->ceiling, &lfo->ceiling);
+    prepareForVisit(token->rate, &lfo->rate);
+
+    controllerManager->connectParameter(lfo, slots.top());
+
+    lfo->start();
 }
 
 void ProgramVisitor::visit(Program* token)

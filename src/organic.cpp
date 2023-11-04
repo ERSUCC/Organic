@@ -1,21 +1,5 @@
 #include "../include/organic.h"
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <chrono>
-#include <queue>
-#include <random>
-
-#include "../include/RtAudio.h"
-
-#include "../include/audiosource.h"
-#include "../include/compile.h"
-#include "../include/config.h"
-#include "../include/effect.h"
-#include "../include/event.h"
-#include "../include/parameter.h"
-
 struct AudioData
 {
     std::vector<AudioSource*> sources;

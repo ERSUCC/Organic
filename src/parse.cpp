@@ -40,6 +40,11 @@ template <typename T> T* Parser::getToken()
     return dynamic_cast<T*>(getToken());
 }
 
+template <typename T> bool Parser::nextTokenIs()
+{
+    return dynamic_cast<T*>(tokens.top());
+}
+
 void Parser::skipWhitespace()
 {
     while (isspace(program[pos]))
@@ -50,16 +55,17 @@ void Parser::skipWhitespace()
 
 void Parser::parseInstruction()
 {
+    skipWhitespace();
+    parseCall();
+}
+
+void Parser::parseCall()
+{
+    skipWhitespace();
     parseName();
+    parseSingleChar('(');
 
     Name* name = getToken<Name>();
-
-    if (!name)
-    {
-        Organic::error("Expected name, received '" + lastToken->toString() + "'.");
-    }
-
-    parseOpenParenthesis();
 
     if (name->name == "sine")
     {
@@ -95,12 +101,52 @@ void Parser::parseInstruction()
         tokens.push(new CreateSine(volume, pan, frequency));
     }
 
-    else
+    else if (name->name == "lfo")
     {
-        Organic::error("Unknown keyword '" + name->name + "'.");
+        Token* repeats = new Constant(0);
+        Token* floor = new Constant(0);
+        Token* ceiling = new Constant(1);
+        Token* rate = new Constant(1);
+
+        while (parseArgument())
+        {
+            Argument* argument = getToken<Argument>();
+
+            if (argument->name->name == "repeats")
+            {
+                repeats = argument->value;
+            }
+
+            else if (argument->name->name == "floor")
+            {
+                floor = argument->value;
+            }
+
+            else if (argument->name->name == "ceiling")
+            {
+                ceiling = argument->value;
+            }
+
+            else if (argument->name->name == "rate")
+            {
+                rate = argument->value;
+            }
+
+            else
+            {
+                Organic::error("Unknown argument name '" + argument->name->name + "'.");
+            }
+        }
+
+        tokens.push(new CreateLFO(repeats, floor, ceiling, rate));
     }
 
-    parseCloseParenthesis();
+    else
+    {
+        Organic::error("Unknown function '" + name->name + "'.");
+    }
+
+    parseSingleChar(')');
 }
 
 bool Parser::parseArgument()
@@ -116,10 +162,10 @@ bool Parser::parseArgument()
 
     Name* name = getToken<Name>();
 
-    parseColon();
-    parseConstant();
+    parseSingleChar(':');
+    parseArgumentValue();
 
-    Constant* constant = getToken<Constant>();
+    tokens.push(new Argument(name, getToken()));
 
     skipWhitespace();
 
@@ -128,9 +174,22 @@ bool Parser::parseArgument()
         pos++;
     }
 
-    tokens.push(new Argument(name, constant));
-
     return true;
+}
+
+void Parser::parseArgumentValue()
+{
+    skipWhitespace();
+
+    if (isdigit(program[pos]))
+    {
+        parseConstant();
+    }
+
+    else
+    {
+        parseCall();
+    }
 }
 
 void Parser::parseName()
@@ -171,49 +230,13 @@ void Parser::parseConstant()
     tokens.push(new Constant(std::stod(constant)));
 }
 
-void Parser::parseOpenParenthesis()
+void Parser::parseSingleChar(char c)
 {
     skipWhitespace();
 
-    if (program[pos] != '(')
+    if (program[pos] != c)
     {
-        Organic::error("Expected '(', received '" + std::string(1, program[pos]) + "'.");
-    }
-
-    pos++;
-}
-
-void Parser::parseCloseParenthesis()
-{
-    skipWhitespace();
-
-    if (program[pos] != ')')
-    {
-        Organic::error("Expected ')', received '" + std::string(1, program[pos]) + "'.");
-    }
-
-    pos++;
-}
-
-void Parser::parseEquals()
-{
-    skipWhitespace();
-
-    if (program[pos] != '=')
-    {
-        Organic::error("Expected '=', received '" + std::string(1, program[pos]) + "'.");
-    }
-
-    pos++;
-}
-
-void Parser::parseColon()
-{
-    skipWhitespace();
-
-    if (program[pos] != ':')
-    {
-        Organic::error("Expected ':', received '" + std::string(1, program[pos]) + "'.");
+        Organic::error("Expected '" + std::string(1, c) + "', received '" + std::string(1, program[pos]) + "'.");
     }
 
     pos++;
