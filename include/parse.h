@@ -23,9 +23,10 @@ private:
     void skipWhitespace();
 
     void parseInstruction();
+    void parseAssign();
+    void parseExpression();
     void parseCall();
     void parseArgument();
-    void parseArgumentValue();
     void parseName();
     void parseConstant();
     void parseSingleChar(char c);

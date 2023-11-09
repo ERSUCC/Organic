@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <stack>
+#include <unordered_map>
 
 #include "audiosource.h"
 #include "event.h"
@@ -31,6 +32,13 @@ struct Name : public Token
     std::string name;
 };
 
+struct Variable : public Name
+{
+    Variable(std::string name);
+
+    void accept(ProgramVisitor* visitor) override;
+};
+
 struct Argument : public Token
 {
     Argument(Name* name, Token* value);
@@ -40,6 +48,16 @@ struct Argument : public Token
 };
 
 struct Instruction : public Token {};
+
+struct Assign : public Instruction
+{
+    Assign(std::string variable, Token* value);
+
+    void accept(ProgramVisitor* visitor) override;
+
+    std::string variable;
+    Token* value;
+};
 
 struct CreateSine : public Instruction
 {
@@ -118,6 +136,8 @@ struct ProgramVisitor
     ProgramVisitor();
 
     void visit(Constant* token);
+    void visit(Variable* token);
+    void visit(Assign* token);
     void visit(CreateSine* token);
     void visit(CreateSquare* token);
     void visit(CreateSaw* token);
@@ -131,8 +151,10 @@ struct ProgramVisitor
     EventQueue* eventQueue;
 
 private:
-    void prepareForVisit(Token* token, Parameter* slot);
+    void visitWithParameter(Token* token, Parameter* slot);
 
     std::stack<Parameter*> slots;
+
+    std::unordered_map<std::string, Token*> variables;
 
 };

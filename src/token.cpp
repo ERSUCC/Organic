@@ -9,7 +9,21 @@ void Constant::accept(ProgramVisitor* visitor)
 
 Name::Name(std::string name) : name(name) {}
 
+Variable::Variable(std::string name) : Name(name) {}
+
+void Variable::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 Argument::Argument(Name* name, Token* value) : name(name), value(value) {}
+
+Assign::Assign(std::string variable, Token* value) : variable(variable), value(value) {}
+
+void Assign::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
 
 CreateSine::CreateSine(Token* volume, Token* pan, Token* frequency) :
     volume(volume), pan(pan), frequency(frequency) {}
@@ -66,16 +80,34 @@ ProgramVisitor::ProgramVisitor()
 
 void ProgramVisitor::visit(Constant* token)
 {
-    *slots.top() = token->value;
+    if (!slots.empty())
+    {
+        *slots.top() = token->value;
+    }
+}
+
+void ProgramVisitor::visit(Variable* token)
+{
+    if (!variables.count(token->name))
+    {
+        Utils::error("Variable '" + token->name + "' not defined.");
+    }
+
+    variables[token->name]->accept(this);
+}
+
+void ProgramVisitor::visit(Assign* token)
+{
+    variables.insert(std::make_pair(token->variable, token->value));
 }
 
 void ProgramVisitor::visit(CreateSine* token)
 {
     Sine* sine = new Sine(0, 0, 0);
 
-    prepareForVisit(token->volume, &sine->volume);
-    prepareForVisit(token->pan, &sine->pan);
-    prepareForVisit(token->frequency, &sine->frequency);
+    visitWithParameter(token->volume, &sine->volume);
+    visitWithParameter(token->pan, &sine->pan);
+    visitWithParameter(token->frequency, &sine->frequency);
 
     sources.push_back(sine);
 }
@@ -84,9 +116,9 @@ void ProgramVisitor::visit(CreateSquare* token)
 {
     Square* square = new Square(0, 0, 0);
 
-    prepareForVisit(token->volume, &square->volume);
-    prepareForVisit(token->pan, &square->pan);
-    prepareForVisit(token->frequency, &square->frequency);
+    visitWithParameter(token->volume, &square->volume);
+    visitWithParameter(token->pan, &square->pan);
+    visitWithParameter(token->frequency, &square->frequency);
 
     sources.push_back(square);
 }
@@ -95,9 +127,9 @@ void ProgramVisitor::visit(CreateSaw* token)
 {
     Saw* saw = new Saw(0, 0, 0);
 
-    prepareForVisit(token->volume, &saw->volume);
-    prepareForVisit(token->pan, &saw->pan);
-    prepareForVisit(token->frequency, &saw->frequency);
+    visitWithParameter(token->volume, &saw->volume);
+    visitWithParameter(token->pan, &saw->pan);
+    visitWithParameter(token->frequency, &saw->frequency);
 
     sources.push_back(saw);
 }
@@ -106,8 +138,8 @@ void ProgramVisitor::visit(CreateHold* token)
 {
     Hold* hold = new Hold(0, 0);
 
-    prepareForVisit(token->value, &hold->value);
-    prepareForVisit(token->length, &hold->length);
+    visitWithParameter(token->value, &hold->value);
+    visitWithParameter(token->length, &hold->length);
 
     controllerManager->connectParameter(hold, slots.top());
 
@@ -118,12 +150,15 @@ void ProgramVisitor::visit(CreateSweep* token)
 {
     Sweep* sweep = new Sweep(0, 0, 0, 0);
 
-    prepareForVisit(token->repeats, &sweep->repeats);
-    prepareForVisit(token->from, &sweep->from);
-    prepareForVisit(token->to, &sweep->to);
-    prepareForVisit(token->length, &sweep->length);
+    visitWithParameter(token->repeats, &sweep->repeats);
+    visitWithParameter(token->from, &sweep->from);
+    visitWithParameter(token->to, &sweep->to);
+    visitWithParameter(token->length, &sweep->length);
 
-    controllerManager->connectParameter(sweep, slots.top());
+    if (!slots.empty())
+    {
+        controllerManager->connectParameter(sweep, slots.top());
+    }
 
     sweep->start();
 }
@@ -132,10 +167,10 @@ void ProgramVisitor::visit(CreateLFO* token)
 {
     LFO* lfo = new LFO(0, 0, 0, 0);
 
-    prepareForVisit(token->repeats, &lfo->repeats);
-    prepareForVisit(token->from, &lfo->from);
-    prepareForVisit(token->to, &lfo->to);
-    prepareForVisit(token->length, &lfo->length);
+    visitWithParameter(token->repeats, &lfo->repeats);
+    visitWithParameter(token->from, &lfo->from);
+    visitWithParameter(token->to, &lfo->to);
+    visitWithParameter(token->length, &lfo->length);
 
     controllerManager->connectParameter(lfo, slots.top());
 
@@ -150,7 +185,7 @@ void ProgramVisitor::visit(Program* token)
     }
 }
 
-void ProgramVisitor::prepareForVisit(Token* token, Parameter* slot)
+void ProgramVisitor::visitWithParameter(Token* token, Parameter* slot)
 {
     slots.push(slot);
 

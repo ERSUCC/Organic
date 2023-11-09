@@ -13,14 +13,7 @@ Program* Parser::parse()
     {
         parseInstruction();
 
-        Instruction* instruction = getToken<Instruction>();
-
-        if (!instruction)
-        {
-            Utils::error("Expected instruction.");
-        }
-
-        p->instructions.push_back(instruction);
+        p->instructions.push_back(getToken<Instruction>());
 
         skipWhitespace();
     }
@@ -58,13 +51,60 @@ void Parser::skipWhitespace()
 void Parser::parseInstruction()
 {
     skipWhitespace();
-    parseCall();
+    parseName();
+    skipWhitespace();
+
+    if (program[pos] == '(')
+    {
+        parseCall();
+    }
+
+    else
+    {
+        parseAssign();
+    }
+}
+
+void Parser::parseAssign()
+{
+    Name* name = getToken<Name>();
+
+    skipWhitespace();
+    parseSingleChar('=');
+    parseExpression();
+
+    tokens.push(new Assign(name->name, getToken()));
+}
+
+void Parser::parseExpression()
+{
+    skipWhitespace();
+
+    if (isalpha(program[pos]))
+    {
+        parseName();
+        skipWhitespace();
+
+        if (program[pos] == '(')
+        {
+            parseCall();
+        }
+
+        else
+        {
+            tokens.push(new Variable(getToken<Name>()->name));
+        }
+    }
+
+    else
+    {
+        parseConstant();
+    }
 }
 
 void Parser::parseCall()
 {
     skipWhitespace();
-    parseName();
     parseSingleChar('(');
 
     Name* name = getToken<Name>();
@@ -220,7 +260,7 @@ void Parser::parseArgument()
     Name* name = getToken<Name>();
 
     parseSingleChar(':');
-    parseArgumentValue();
+    parseExpression();
 
     tokens.push(new Argument(name, getToken()));
 
@@ -229,21 +269,6 @@ void Parser::parseArgument()
     if (program[pos] == ',')
     {
         pos++;
-    }
-}
-
-void Parser::parseArgumentValue()
-{
-    skipWhitespace();
-
-    if (isdigit(program[pos]) || program[pos] == '-')
-    {
-        parseConstant();
-    }
-
-    else
-    {
-        parseCall();
     }
 }
 
