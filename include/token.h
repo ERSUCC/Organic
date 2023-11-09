@@ -47,6 +47,11 @@ struct Argument : public Token
     Token* value;
 };
 
+struct List : public Token
+{
+    std::vector<Token*> items;
+};
+
 struct Instruction : public Token {};
 
 struct Assign : public Instruction
@@ -59,37 +64,41 @@ struct Assign : public Instruction
     Token* value;
 };
 
-struct CreateSine : public Instruction
+struct CreateAudioSource : public Instruction
 {
-    CreateSine(Token* volume, Token* pan, Token* frequency);
-
-    void accept(ProgramVisitor* visitor) override;
+    CreateAudioSource(Token* volume, Token* pan, List* effects);
 
     Token* volume;
     Token* pan;
+    List* effects;
+};
+
+struct CreateOscillator : public CreateAudioSource
+{
+    CreateOscillator(Token* volume, Token* pan, Token* frequency, List* effects);
+
     Token* frequency;
 };
 
-struct CreateSquare : public Instruction
+struct CreateSine : public CreateOscillator
 {
-    CreateSquare(Token* volume, Token* pan, Token* frequency);
+    CreateSine(Token* volume, Token* pan, Token* frequency, List* effects);
 
     void accept(ProgramVisitor* visitor) override;
-
-    Token* volume;
-    Token* pan;
-    Token* frequency;
 };
 
-struct CreateSaw : public Instruction
+struct CreateSquare : public CreateOscillator
 {
-    CreateSaw(Token* volume, Token* pan, Token* frequency);
+    CreateSquare(Token* volume, Token* pan, Token* frequency, List* effects);
 
     void accept(ProgramVisitor* visitor) override;
+};
 
-    Token* volume;
-    Token* pan;
-    Token* frequency;
+struct CreateSaw : public CreateOscillator
+{
+    CreateSaw(Token* volume, Token* pan, Token* frequency, List* effects);
+
+    void accept(ProgramVisitor* visitor) override;
 };
 
 struct CreateHold : public Instruction
@@ -126,6 +135,23 @@ struct CreateLFO : public Instruction
     Token* length;
 };
 
+struct CreateEffect : public Instruction
+{
+    CreateEffect(Token* mix);
+
+    Token* mix;
+};
+
+struct CreateDelay : public CreateEffect
+{
+    CreateDelay(Token* mix, Token* delay, Token* feedback);
+
+    void accept(ProgramVisitor* visitor) override;
+
+    Token* delay;
+    Token* feedback;
+};
+
 struct Program : public Token
 {
     std::vector<Instruction*> instructions;
@@ -144,6 +170,7 @@ struct ProgramVisitor
     void visit(CreateHold* token);
     void visit(CreateSweep* token);
     void visit(CreateLFO* token);
+    void visit(CreateDelay* token);
     void visit(Program* token);
 
     std::vector<AudioSource*> sources;
@@ -151,9 +178,9 @@ struct ProgramVisitor
     EventQueue* eventQueue;
 
 private:
-    void visitWithParameter(Token* token, Parameter* slot);
+    void visitWithSlot(Token* token, void* slot);
 
-    std::stack<Parameter*> slots;
+    std::stack<void*> slots;
 
     std::unordered_map<std::string, Token*> variables;
 

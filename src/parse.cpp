@@ -35,11 +35,6 @@ template <typename T> T* Parser::getToken()
     return dynamic_cast<T*>(getToken());
 }
 
-template <typename T> bool Parser::nextTokenIs()
-{
-    return dynamic_cast<T*>(tokens.top());
-}
-
 void Parser::skipWhitespace()
 {
     while (isspace(program[pos]))
@@ -96,6 +91,11 @@ void Parser::parseExpression()
         }
     }
 
+    else if (program[pos] == '(')
+    {
+        parseList();
+    }
+
     else
     {
         parseConstant();
@@ -114,6 +114,7 @@ void Parser::parseCall()
         Token* volume = new Constant(1);
         Token* pan = new Constant(0);
         Token* frequency = new Constant(0);
+        List* effects = new List();
 
         while (program[pos] != ')')
         {
@@ -136,6 +137,18 @@ void Parser::parseCall()
                 frequency = argument->value;
             }
 
+            else if (argument->name->name == "effects")
+            {
+                List* list = dynamic_cast<List*>(argument->value);
+
+                if (!list)
+                {
+                    Utils::error("Expected list.");
+                }
+
+                effects = list;
+            }
+
             else
             {
                 Utils::error("Unknown argument name '" + argument->name->name + "'.");
@@ -146,17 +159,17 @@ void Parser::parseCall()
 
         if (name->name == "sine")
         {
-            tokens.push(new CreateSine(volume, pan, frequency));
+            tokens.push(new CreateSine(volume, pan, frequency, effects));
         }
         
         else if (name->name == "square")
         {
-            tokens.push(new CreateSquare(volume, pan, frequency));
+            tokens.push(new CreateSquare(volume, pan, frequency, effects));
         }
 
         else if (name->name == "saw")
         {
-            tokens.push(new CreateSaw(volume, pan, frequency));
+            tokens.push(new CreateSaw(volume, pan, frequency, effects));
         }
     }
 
@@ -244,10 +257,76 @@ void Parser::parseCall()
         }
     }
 
+    else if (name->name == "delay")
+    {
+        Token* mix = new Constant(1);
+        Token* delay = new Constant(0);
+        Token* feedback = new Constant(0);
+
+        while (program[pos] != ')')
+        {
+            parseArgument();
+
+            Argument* argument = getToken<Argument>();
+
+            if (argument->name->name == "mix")
+            {
+                mix = argument->value;
+            }
+
+            else if (argument->name->name == "delay")
+            {
+                delay = argument->value;
+            }
+
+            else if (argument->name->name == "feedback")
+            {
+                feedback = argument->value;
+            }
+
+            else
+            {
+                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+            }
+
+            skipWhitespace();
+        }
+
+        tokens.push(new CreateDelay(mix, delay, feedback));
+    }
+
     else
     {
         Utils::error("Unknown function '" + name->name + "'.");
     }
+
+    parseSingleChar(')');
+}
+
+void Parser::parseList()
+{
+    skipWhitespace();
+    parseSingleChar('(');
+    skipWhitespace();
+
+    List* list = new List();
+
+    while (program[pos] != ')')
+    {
+        parseExpression();
+
+        list->items.push_back(getToken());
+
+        skipWhitespace();
+
+        if (program[pos] != ')')
+        {
+            parseSingleChar(',');
+            skipWhitespace();
+        }
+    }
+
+    tokens.push(list);
 
     parseSingleChar(')');
 }
@@ -266,9 +345,9 @@ void Parser::parseArgument()
 
     skipWhitespace();
 
-    if (program[pos] == ',')
+    if (program[pos] != ')')
     {
-        pos++;
+        parseSingleChar(',');
     }
 }
 
