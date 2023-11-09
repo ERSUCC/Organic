@@ -5,7 +5,7 @@
 #include "parameter.h"
 #include "utils.h"
 
-struct Effect : public Sync
+struct Effect : public Sync, public Object
 {
     Effect(double mix);
 

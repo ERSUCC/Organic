@@ -87,7 +87,17 @@ void Parser::parseExpression()
 
         else
         {
-            tokens.push(new Variable(getToken<Name>()->name));
+            Token* token = getToken();
+
+            if (dynamic_cast<Name*>(token))
+            {
+                tokens.push(new Variable(dynamic_cast<Name*>(token)->name));
+            }
+
+            else
+            {
+                tokens.push(token);
+            }
         }
     }
 
@@ -139,14 +149,7 @@ void Parser::parseCall()
 
             else if (argument->name->name == "effects")
             {
-                List* list = dynamic_cast<List*>(argument->value);
-
-                if (!list)
-                {
-                    Utils::error("Expected list.");
-                }
-
-                effects = list;
+                effects = (List*)argument->value;
             }
 
             else
@@ -262,6 +265,44 @@ void Parser::parseCall()
         }
     }
 
+    else if (name->name == "sequence")
+    {
+        Token* repeats = new Constant(0);
+        List* values = new List();
+        Token* order = new GroupOrder(ControllerGroup::OrderEnum::Forwards);
+
+        while (program[pos] != ')')
+        {
+            parseArgument();
+
+            Argument* argument = getToken<Argument>();
+
+            if (argument->name->name == "repeats")
+            {
+                repeats = argument->value;
+            }
+
+            else if (argument->name->name == "values")
+            {
+                values = (List*)argument->value;
+            }
+
+            else if (argument->name->name == "order")
+            {
+                order = argument->value;
+            }
+
+            else
+            {
+                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+            }
+
+            skipWhitespace();
+        }
+
+        tokens.push(new CreateControllerGroup(repeats, values, order));
+    }
+
     else if (name->name == "delay")
     {
         Token* mix = new Constant(1);
@@ -372,7 +413,30 @@ void Parser::parseName()
         name += program[pos++];
     }
 
-    tokens.push(new Name(name));
+    if (name == "forwards")
+    {
+        tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Forwards));
+    }
+
+    else if (name == "backwards")
+    {
+        tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Backwards));
+    }
+
+    else if (name == "pingpong")
+    {
+        tokens.push(new GroupOrder(ControllerGroup::OrderEnum::PingPong));
+    }
+
+    else if (name == "random")
+    {
+        tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Random));
+    }
+
+    else
+    {
+        tokens.push(new Name(name));
+    }
 }
 
 void Parser::parseConstant()

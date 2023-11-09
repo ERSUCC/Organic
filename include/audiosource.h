@@ -9,7 +9,7 @@
 #include "effect.h"
 #include "utils.h"
 
-struct AudioSource : public Sync
+struct AudioSource : public Sync, public Object
 {
     AudioSource(double volume, double pan);
     ~AudioSource();

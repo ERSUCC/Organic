@@ -10,7 +10,7 @@
 
 struct ParameterController;
 
-struct Parameter
+struct Parameter : public Object
 {
     Parameter(double value);
     Parameter(double value, ParameterController* source);
@@ -24,7 +24,7 @@ struct Parameter
     bool connected = false;
 };
 
-struct ParameterController : public Sync
+struct ParameterController : public Sync, public Object
 {
     friend struct ControllerGroup;
     friend struct ControllerManager;
@@ -67,7 +67,7 @@ private:
 
 struct ControllerGroup : public ParameterController
 {
-    enum Order
+    enum OrderEnum
     {
         Forwards,
         Backwards,
@@ -75,17 +75,24 @@ struct ControllerGroup : public ParameterController
         Random
     };
 
-    ControllerGroup(int repeats, std::vector<ParameterController*> controllers, Order order);
+    struct Order : public Object
+    {
+        Order(OrderEnum order);
+        
+        OrderEnum order;
+    };
+
+    ControllerGroup(int repeats, std::vector<ParameterController*> controllers, OrderEnum order);
 
     void start() override;
 
     double getValue() override;
 
-private:
     std::vector<ParameterController*> controllers;
 
     Order order;
 
+private:
     int current = 0;
     int direction = 1;
     int last = -1;

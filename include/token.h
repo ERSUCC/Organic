@@ -52,6 +52,15 @@ struct List : public Token
     std::vector<Token*> items;
 };
 
+struct GroupOrder : public Token
+{
+    GroupOrder(ControllerGroup::OrderEnum order);
+
+    void accept(ProgramVisitor* visitor) override;
+
+    ControllerGroup::OrderEnum order;
+};
+
 struct Instruction : public Token {};
 
 struct Assign : public Instruction
@@ -142,6 +151,17 @@ struct CreateLFO : public Instruction
     Token* length;
 };
 
+struct CreateControllerGroup : public Instruction
+{
+    CreateControllerGroup(Token* repeats, List* controllers, Token* order);
+
+    void accept(ProgramVisitor* visitor) override;
+
+    Token* repeats;
+    List* controllers;
+    Token* order;
+};
+
 struct CreateEffect : public Instruction
 {
     CreateEffect(Token* mix);
@@ -170,6 +190,7 @@ struct ProgramVisitor
 
     void visit(Constant* token);
     void visit(Variable* token);
+    void visit(GroupOrder* token);
     void visit(Assign* token);
     void visit(CreateSine* token);
     void visit(CreateSquare* token);
@@ -178,6 +199,7 @@ struct ProgramVisitor
     void visit(CreateHold* token);
     void visit(CreateSweep* token);
     void visit(CreateLFO* token);
+    void visit(CreateControllerGroup* token);
     void visit(CreateDelay* token);
     void visit(Program* token);
 
@@ -186,9 +208,9 @@ struct ProgramVisitor
     EventQueue* eventQueue;
 
 private:
-    void visitWithSlot(Token* token, void* slot);
+    void visitWithSlot(Token* token, Object* slot);
 
-    std::stack<void*> slots;
+    std::stack<Object*> slots;
 
     std::unordered_map<std::string, Token*> variables;
 

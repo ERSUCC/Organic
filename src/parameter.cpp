@@ -146,12 +146,16 @@ void ControllerManager::orderControllers()
     controllers.insert(controllers.begin(), order.begin(), order.end());
 }
 
-ControllerGroup::ControllerGroup(int repeats, std::vector<ParameterController*> controllers, Order order) :
-    ParameterController(repeats), controllers(controllers), order(order)
+ControllerGroup::ControllerGroup(int repeats, std::vector<ParameterController*> controllers, OrderEnum order) :
+    ParameterController(repeats), controllers(controllers), order(order) {}
+
+ControllerGroup::Order::Order(OrderEnum order) : order(order) {}
+
+void ControllerGroup::start()
 {
     udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
 
-    if (order == Order::PingPong)
+    if (order.order == OrderEnum::PingPong)
     {
         max_times = controllers.size() * 2 - 1;
     }
@@ -160,13 +164,10 @@ ControllerGroup::ControllerGroup(int repeats, std::vector<ParameterController*> 
     {
         max_times = controllers.size();
     }
-}
 
-void ControllerGroup::start()
-{
     ParameterController::start();
 
-    if (order == Order::Backwards)
+    if (order.order == OrderEnum::Backwards)
     {
         current = controllers.size() - 1;
     }
@@ -187,14 +188,14 @@ double ControllerGroup::getValue()
     {
         last = current;
 
-        switch (order)
+        switch (order.order)
         {
-            case Order::Forwards:
+            case OrderEnum::Forwards:
                 current = (current + 1) % controllers.size();
 
                 break;
 
-            case Order::Backwards:
+            case OrderEnum::Backwards:
             {
                 current -= 1;
 
@@ -206,7 +207,7 @@ double ControllerGroup::getValue()
                 break;
             }
 
-            case Order::PingPong:
+            case OrderEnum::PingPong:
             {
                 if ((direction == -1 && current <= 0) || current >= controllers.size() - 1)
                 {
@@ -218,7 +219,7 @@ double ControllerGroup::getValue()
                 break;
             }
 
-            case Order::Random:
+            case OrderEnum::Random:
             {
                 current = udist(utils->rng);
 

@@ -39,3 +39,8 @@ protected:
     Utils* utils;
 
 };
+
+struct Object
+{
+    virtual ~Object() {}
+};

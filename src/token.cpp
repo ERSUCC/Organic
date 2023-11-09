@@ -18,6 +18,13 @@ void Variable::accept(ProgramVisitor* visitor)
 
 Argument::Argument(Name* name, Token* value) : name(name), value(value) {}
 
+GroupOrder::GroupOrder(ControllerGroup::OrderEnum order) : order(order) {}
+
+void GroupOrder::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 Assign::Assign(std::string variable, Token* value) : variable(variable), value(value) {}
 
 void Assign::accept(ProgramVisitor* visitor)
@@ -86,6 +93,14 @@ void CreateLFO::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
+CreateControllerGroup::CreateControllerGroup(Token* repeats, List* controllers, Token* order) :
+    repeats(repeats), controllers(controllers), order(order) {}
+
+void CreateControllerGroup::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 CreateEffect::CreateEffect(Token* mix) : mix(mix) {}
 
 CreateDelay::CreateDelay(Token* mix, Token* delay, Token* feedback) :
@@ -118,6 +133,11 @@ void ProgramVisitor::visit(Variable* token)
     }
 
     variables[token->name]->accept(this);
+}
+
+void ProgramVisitor::visit(GroupOrder* token)
+{
+    *(ControllerGroup::Order*)slots.top() = token->order;
 }
 
 void ProgramVisitor::visit(Assign* token)
@@ -196,9 +216,19 @@ void ProgramVisitor::visit(CreateHold* token)
     visitWithSlot(token->value, &hold->value);
     visitWithSlot(token->length, &hold->length);
 
-    controllerManager->connectParameter(hold, (Parameter*)slots.top());
+    ControllerGroup* group = dynamic_cast<ControllerGroup*>(slots.top());
 
-    hold->start();
+    if (group)
+    {
+        group->controllers.push_back(hold);
+    }
+
+    else
+    {
+        controllerManager->connectParameter(hold, (Parameter*)slots.top());
+
+        hold->start();
+    }
 }
 
 void ProgramVisitor::visit(CreateSweep* token)
@@ -210,12 +240,19 @@ void ProgramVisitor::visit(CreateSweep* token)
     visitWithSlot(token->to, &sweep->to);
     visitWithSlot(token->length, &sweep->length);
 
-    if (!slots.empty())
+    ControllerGroup* group = dynamic_cast<ControllerGroup*>(slots.top());
+
+    if (group)
     {
-        controllerManager->connectParameter(sweep, (Parameter*)slots.top());
+        group->controllers.push_back(sweep);
     }
 
-    sweep->start();
+    else
+    {
+        controllerManager->connectParameter(sweep, (Parameter*)slots.top());
+
+        sweep->start();
+    }
 }
 
 void ProgramVisitor::visit(CreateLFO* token)
@@ -227,9 +264,47 @@ void ProgramVisitor::visit(CreateLFO* token)
     visitWithSlot(token->to, &lfo->to);
     visitWithSlot(token->length, &lfo->length);
 
-    controllerManager->connectParameter(lfo, (Parameter*)slots.top());
+    ControllerGroup* group = dynamic_cast<ControllerGroup*>(slots.top());
 
-    lfo->start();
+    if (group)
+    {
+        group->controllers.push_back(lfo);
+    }
+
+    else
+    {
+        controllerManager->connectParameter(lfo, (Parameter*)slots.top());
+
+        lfo->start();
+    }
+}
+
+void ProgramVisitor::visit(CreateControllerGroup* token)
+{
+    ControllerGroup* group = new ControllerGroup(0, {}, ControllerGroup::OrderEnum::Forwards);
+
+    visitWithSlot(token->repeats, &group->repeats);
+
+    for (Token* controller : token->controllers->items)
+    {
+        visitWithSlot(controller, group);
+    }
+
+    visitWithSlot(token->order, &group->order);
+
+    ControllerGroup* group2 = dynamic_cast<ControllerGroup*>(slots.top());
+
+    if (group2)
+    {
+        group2->controllers.push_back(group);
+    }
+
+    else
+    {
+        controllerManager->connectParameter(group, (Parameter*)slots.top());
+
+        group->start();
+    }
 }
 
 void ProgramVisitor::visit(CreateDelay* token)
@@ -251,7 +326,7 @@ void ProgramVisitor::visit(Program* token)
     }
 }
 
-void ProgramVisitor::visitWithSlot(Token* token, void* slot)
+void ProgramVisitor::visitWithSlot(Token* token, Object* slot)
 {
     slots.push(slot);
 
