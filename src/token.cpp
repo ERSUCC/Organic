@@ -55,6 +55,14 @@ void CreateSaw::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
+CreateTriangle::CreateTriangle(Token* volume, Token* pan, Token* frequency, List* effects) :
+    CreateOscillator(volume, pan, frequency, effects) {}
+
+void CreateTriangle::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 CreateHold::CreateHold(Token* value, Token* length) : value(value), length(length) {}
 
 void CreateHold::accept(ProgramVisitor* visitor)
@@ -163,6 +171,22 @@ void ProgramVisitor::visit(CreateSaw* token)
     }
 
     sources.push_back(saw);
+}
+
+void ProgramVisitor::visit(CreateTriangle* token)
+{
+    Triangle* triangle = new Triangle(0, 0, 0);
+
+    visitWithSlot(token->volume, &triangle->volume);
+    visitWithSlot(token->pan, &triangle->pan);
+    visitWithSlot(token->frequency, &triangle->frequency);
+
+    for (Token* effect : token->effects->items)
+    {
+        visitWithSlot(effect, triangle);
+    }
+
+    sources.push_back(triangle);
 }
 
 void ProgramVisitor::visit(CreateHold* token)

@@ -101,6 +101,13 @@ struct CreateSaw : public CreateOscillator
     void accept(ProgramVisitor* visitor) override;
 };
 
+struct CreateTriangle : public CreateOscillator
+{
+    CreateTriangle(Token* volume, Token* pan, Token* frequency, List* effects);
+
+    void accept(ProgramVisitor* visitor) override;
+};
+
 struct CreateHold : public Instruction
 {
     CreateHold(Token* value, Token* length);
@@ -167,6 +174,7 @@ struct ProgramVisitor
     void visit(CreateSine* token);
     void visit(CreateSquare* token);
     void visit(CreateSaw* token);
+    void visit(CreateTriangle* token);
     void visit(CreateHold* token);
     void visit(CreateSweep* token);
     void visit(CreateLFO* token);

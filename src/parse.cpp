@@ -109,7 +109,7 @@ void Parser::parseCall()
 
     Name* name = getToken<Name>();
 
-    if (name->name == "sine" || name->name == "square" || name->name == "saw")
+    if (name->name == "sine" || name->name == "square" || name->name == "saw" || name->name == "triangle")
     {
         Token* volume = new Constant(1);
         Token* pan = new Constant(0);
@@ -170,6 +170,11 @@ void Parser::parseCall()
         else if (name->name == "saw")
         {
             tokens.push(new CreateSaw(volume, pan, frequency, effects));
+        }
+
+        else if (name->name == "triangle")
+        {
+            tokens.push(new CreateTriangle(volume, pan, frequency, effects));
         }
     }
 
