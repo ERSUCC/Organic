@@ -42,5 +42,12 @@ protected:
 
 struct Object
 {
-    virtual ~Object() {}
+    virtual double getValue();
+};
+
+struct Variable : public Object
+{
+    double getValue() override;
+
+    Object* value;
 };

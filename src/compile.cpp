@@ -10,5 +10,5 @@ CompilerResult Compiler::compile(char* path)
 
     visitor->visit(program);
 
-    return { visitor->sources, visitor->controllerManager, visitor->eventQueue };
+    return { visitor->sources, visitor->eventQueue };
 }

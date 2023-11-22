@@ -1,6 +1,6 @@
 #include "../include/audiosource.h"
 
-AudioSource::AudioSource(double volume, double pan) : volume(volume), pan(pan)
+AudioSource::AudioSource()
 {
     effectBuffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
 }
@@ -35,25 +35,23 @@ void AudioSource::removeEffect(Effect* effect)
     effects.erase(std::find(effects.begin(), effects.end(), effect));
 }
 
-Oscillator::Oscillator(double volume, double pan, double frequency) : AudioSource(volume, pan), frequency(frequency) {}
-
 void Oscillator::prepareForEffects(unsigned int bufferLength)
 {
-    phaseDelta = utils->twoPi * frequency / utils->sampleRate;
+    phaseDelta = utils->twoPi * frequency->getValue() / utils->sampleRate;
 
     for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
         if (utils->channels == 1)
         {
-            effectBuffer[i] = volume * getValue();
+            effectBuffer[i] = volume->getValue() * getValue();
         }
 
         else
         {
-            double value = volume * getValue();
+            double value = volume->getValue() * getValue();
 
-            effectBuffer[i] = value * (1 - pan) / 2;
-            effectBuffer[i + 1] = value * (pan + 1) / 2;
+            effectBuffer[i] = value * (1 - pan->getValue()) / 2;
+            effectBuffer[i + 1] = value * (pan->getValue() + 1) / 2;
         }
 
         phase += phaseDelta;
@@ -62,14 +60,10 @@ void Oscillator::prepareForEffects(unsigned int bufferLength)
     phase = fmod(phase, utils->twoPi);
 }
 
-Sine::Sine(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
-
 double Sine::getValue()
 {
     return sin(phase);
 }
-
-Square::Square(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
 
 double Square::getValue()
 {
@@ -81,14 +75,10 @@ double Square::getValue()
     return 1;
 }
 
-Saw::Saw(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
-
 double Saw::getValue()
 {
     return fmod(phase, utils->twoPi) / M_PI - 1;
 }
-
-Triangle::Triangle(double volume, double pan, double frequency) : Oscillator(volume, pan, frequency) {}
 
 double Triangle::getValue()
 {
@@ -100,28 +90,26 @@ double Triangle::getValue()
     return fmod(phase, M_PI) * 2 / M_PI - 1;
 }
 
-Noise::Noise(double volume, double pan) : AudioSource(volume, pan) {}
-
 void Noise::prepareForEffects(unsigned int bufferLength)
 {
     for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
         if (utils->channels == 1)
         {
-            effectBuffer[i] = volume * udist(utils->rng);
+            effectBuffer[i] = volume->getValue() * udist(utils->rng);
         }
 
         else
         {
-            double value = volume * udist(utils->rng);
+            double value = volume->getValue() * udist(utils->rng);
 
-            effectBuffer[i] = value * (1 - pan) / 2;
-            effectBuffer[i + 1] = value * (pan + 1) / 2;
+            effectBuffer[i] = value * (1 - pan->getValue()) / 2;
+            effectBuffer[i + 1] = value * (pan->getValue() + 1) / 2;
         }
     }
 }
 
-Sample::Sample(double volume, double pan, std::string path, int grains, bool looping) : AudioSource(volume, pan), grains(grains), looping(looping)
+Sample::Sample(double volume, double pan, std::string path, int grains, bool looping) : grains(grains), looping(looping)
 {
     for (int i = 0; i < grains; i++)
     {
@@ -191,16 +179,16 @@ void Sample::prepareForEffects(unsigned int bufferLength)
             {
                 if (utils->channels == 1)
                 {
-                    effectBuffer[i] += volume * data[grains[j]++];
+                    effectBuffer[i] += volume->getValue() * data[grains[j]++];
                 }
 
                 else
                 {
-                    double value = volume * data[grains[j]++];
-                    double value2 = volume * data[grains[j]++];
+                    double value = volume->getValue() * data[grains[j]++];
+                    double value2 = volume->getValue() * data[grains[j]++];
 
-                    effectBuffer[i] += value * (1 - pan) / 2;
-                    effectBuffer[i + 1] += value2 * (pan + 1) / 2;
+                    effectBuffer[i] += value * (1 - pan->getValue()) / 2;
+                    effectBuffer[i + 1] += value2 * (pan->getValue() + 1) / 2;
                 }
             }
         }

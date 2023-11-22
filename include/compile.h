@@ -10,7 +10,6 @@
 struct CompilerResult
 {
     std::vector<AudioSource*> sources;
-    ControllerManager* controllerManager;
     EventQueue* eventQueue;
 };
 

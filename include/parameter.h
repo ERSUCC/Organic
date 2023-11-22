@@ -8,60 +8,22 @@
 
 #include "utils.h"
 
-struct ParameterController;
-
-struct Parameter : public Object
-{
-    Parameter(double value);
-    Parameter(double value, ParameterController* source);
-
-    operator double();
-
-    double value;
-
-    ParameterController* source;
-
-    bool connected = false;
-};
-
 struct ParameterController : public Sync, public Object
 {
     friend struct ControllerGroup;
     friend struct ControllerManager;
 
-    ParameterController(int repeats);
-    
     virtual void start();
-    void update();
     void stop();
-
-    virtual double getValue() = 0;
 
     double startTime;
 
-    Parameter repeats;
+    ParameterController* repeats;
 
 protected:
     bool running = false;
 
     int times = 0;
-
-private:
-    std::unordered_set<Parameter*> connectedParameters;
-
-};
-
-struct ControllerManager
-{
-    void connectParameter(ParameterController* controller, Parameter* parameter);
-    void disconnectParameter(ParameterController* controller, Parameter* parameter);
-
-    void updateControllers();
-
-private:
-    void orderControllers();
-
-    std::vector<ParameterController*> controllers;
 
 };
 
@@ -82,15 +44,13 @@ struct ControllerGroup : public ParameterController
         OrderEnum order;
     };
 
-    ControllerGroup(int repeats, std::vector<ParameterController*> controllers, OrderEnum order);
-
     void start() override;
 
     double getValue() override;
 
     std::vector<ParameterController*> controllers;
 
-    Order order;
+    Order* order;
 
 private:
     int current = 0;
@@ -103,34 +63,37 @@ private:
 
 };
 
-struct Hold : public ParameterController
+struct Value : public ParameterController
 {
-    Hold(double value, double length);
+    Value(double value);
 
     double getValue() override;
 
-    Parameter value;
-    Parameter length;
+    double value;
+};
+
+struct Hold : public ParameterController
+{
+    double getValue() override;
+
+    ParameterController* value = new ParameterController();
+    ParameterController* length = new ParameterController();
 };
 
 struct Sweep : public ParameterController
 {
-    Sweep(int repeats, double from, double to, double length);
-
     double getValue() override;
 
-    Parameter from;
-    Parameter to;
-    Parameter length;
+    ParameterController* from = new ParameterController();
+    ParameterController* to = new ParameterController();
+    ParameterController* length = new ParameterController();
 };
 
 struct LFO : public ParameterController
 {
-    LFO(int repeats, double from, double to, double length);
-
     double getValue() override;
 
-    Parameter from;
-    Parameter to;
-    Parameter length;
+    ParameterController* from = new ParameterController();
+    ParameterController* to = new ParameterController();
+    ParameterController* length = new ParameterController();
 };

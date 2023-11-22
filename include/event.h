@@ -10,14 +10,14 @@ struct Event : public Sync, public Object
 {
     friend struct EventQueue;
 
-    Event(std::function<void(double)> event, std::function<void(double)> end, double startDelay, double interval, int repeats);
+    Event(std::function<void(double)> event, std::function<void(double)> end, double startDelay, int repeats);
 
     bool ready();
     void perform();
     bool getNext();
     void finish();
 
-    Parameter interval;
+    ParameterController* interval = new ParameterController();
 
 private:
     std::function<void(double)> event;

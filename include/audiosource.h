@@ -11,7 +11,7 @@
 
 struct AudioSource : public Sync, public Object
 {
-    AudioSource(double volume, double pan);
+    AudioSource();
     ~AudioSource();
 
     void fillBuffer(double* buffer, unsigned int bufferLength);
@@ -25,19 +25,15 @@ struct AudioSource : public Sync, public Object
 
     std::vector<Effect*> effects;
 
-    Parameter volume;
-    Parameter pan;
+    ParameterController* volume = new ParameterController();
+    ParameterController* pan = new ParameterController();
 };
 
 struct Oscillator : public AudioSource
 {
-    Oscillator(double volume, double pan, double frequency);
-
     void prepareForEffects(unsigned int bufferLength) override;
 
-    virtual double getValue() = 0;
-
-    Parameter frequency;
+    ParameterController* frequency;
 
     double phase = 0;
     double phaseDelta;
@@ -45,36 +41,26 @@ struct Oscillator : public AudioSource
 
 struct Sine : public Oscillator
 {
-    Sine(double volume, double pan, double frequency);
-
     double getValue() override;
 };
 
 struct Square : public Oscillator
 {
-    Square(double volume, double pan, double frequency);
-
     double getValue() override;
 };
 
 struct Saw : public Oscillator
 {
-    Saw(double volume, double pan, double frequency);
-
     double getValue() override;
 };
 
 struct Triangle : public Oscillator
 {
-    Triangle(double volume, double pan, double frequency);
-
     double getValue() override;
 };
 
 struct Noise : AudioSource
 {
-    Noise(double volume, double pan);
-
     void prepareForEffects(unsigned int bufferLength) override;
 
 private:

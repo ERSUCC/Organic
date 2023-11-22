@@ -91,7 +91,7 @@ void Parser::parseExpression()
 
             if (dynamic_cast<Name*>(token))
             {
-                tokens.push(new Variable(dynamic_cast<Name*>(token)->name));
+                tokens.push(new VariableRef(dynamic_cast<Name*>(token)->name));
             }
 
             else

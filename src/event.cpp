@@ -1,7 +1,7 @@
 #include "../include/event.h"
 
-Event::Event(std::function<void(double)> event, std::function<void(double)> end, double startDelay, double interval, int repeats) :
-    event(event), end(end), startTime(utils->time), interval(interval), repeats(repeats)
+Event::Event(std::function<void(double)> event, std::function<void(double)> end, double startDelay, int repeats) :
+    event(event), end(end), startTime(utils->time), repeats(repeats)
 {
     next = startTime + startDelay;
 }
@@ -20,7 +20,7 @@ bool Event::getNext()
 {
     if (interval)
     {
-        next += interval;
+        next += interval->getValue();
 
         if (!repeats || ++times < repeats)
         {

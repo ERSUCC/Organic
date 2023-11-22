@@ -32,9 +32,9 @@ struct Name : public Token
     std::string name;
 };
 
-struct Variable : public Name
+struct VariableRef : public Name
 {
-    Variable(std::string name);
+    VariableRef(std::string name);
 
     void accept(ProgramVisitor* visitor) override;
 };
@@ -186,10 +186,8 @@ struct Program : public Token
 
 struct ProgramVisitor
 {
-    ProgramVisitor();
-
     void visit(Constant* token);
-    void visit(Variable* token);
+    void visit(VariableRef* token);
     void visit(GroupOrder* token);
     void visit(Assign* token);
     void visit(CreateSine* token);
@@ -204,14 +202,13 @@ struct ProgramVisitor
     void visit(Program* token);
 
     std::vector<AudioSource*> sources;
-    ControllerManager* controllerManager;
-    EventQueue* eventQueue;
+    EventQueue* eventQueue = new EventQueue();
 
 private:
-    void visitWithSlot(Token* token, Object* slot);
+    void visitWithSlot(Token* token, Object** slot);
 
-    std::stack<Object*> slots;
+    std::stack<Object**> slots;
 
-    std::unordered_map<std::string, Token*> variables;
+    std::unordered_map<std::string, Variable*> variables;
 
 };

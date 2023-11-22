@@ -9,9 +9,9 @@ void Constant::accept(ProgramVisitor* visitor)
 
 Name::Name(std::string name) : name(name) {}
 
-Variable::Variable(std::string name) : Name(name) {}
+VariableRef::VariableRef(std::string name) : Name(name) {}
 
-void Variable::accept(ProgramVisitor* visitor)
+void VariableRef::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
@@ -111,51 +111,50 @@ void CreateDelay::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
-ProgramVisitor::ProgramVisitor()
-{
-    controllerManager = new ControllerManager();
-    eventQueue = new EventQueue();
-}
-
 void ProgramVisitor::visit(Constant* token)
 {
     if (!slots.empty())
     {
-        *(Parameter*)slots.top() = token->value;
+        *slots.top() = new Value(token->value);
     }
 }
 
-void ProgramVisitor::visit(Variable* token)
+void ProgramVisitor::visit(VariableRef* token)
 {
     if (!variables.count(token->name))
     {
         Utils::error("Variable '" + token->name + "' not defined.");
     }
 
-    variables[token->name]->accept(this);
+    *slots.top() = variables[token->name];
 }
 
 void ProgramVisitor::visit(GroupOrder* token)
 {
-    *(ControllerGroup::Order*)slots.top() = token->order;
+    *slots.top() = new ControllerGroup::Order(token->order);
 }
 
 void ProgramVisitor::visit(Assign* token)
 {
-    variables.insert(std::make_pair(token->variable, token->value));
+    if (!variables.count(token->variable))
+    {
+        variables.insert(std::make_pair(token->variable, new Variable()));
+    }
+
+    visitWithSlot(token->value, &variables[token->variable]->value);
 }
 
 void ProgramVisitor::visit(CreateSine* token)
 {
-    Sine* sine = new Sine(0, 0, 0);
+    Sine* sine = new Sine();
 
-    visitWithSlot(token->volume, &sine->volume);
-    visitWithSlot(token->pan, &sine->pan);
-    visitWithSlot(token->frequency, &sine->frequency);
+    visitWithSlot(token->volume, (Object**)&sine->volume);
+    visitWithSlot(token->pan, (Object**)&sine->pan);
+    visitWithSlot(token->frequency, (Object**)&sine->frequency);
 
     for (Token* effect : token->effects->items)
     {
-        visitWithSlot(effect, sine);
+        visitWithSlot(effect, (Object**)&sine);
     }
 
     sources.push_back(sine);
@@ -163,15 +162,15 @@ void ProgramVisitor::visit(CreateSine* token)
 
 void ProgramVisitor::visit(CreateSquare* token)
 {
-    Square* square = new Square(0, 0, 0);
+    Square* square = new Square();
 
-    visitWithSlot(token->volume, &square->volume);
-    visitWithSlot(token->pan, &square->pan);
-    visitWithSlot(token->frequency, &square->frequency);
+    visitWithSlot(token->volume, (Object**)&square->volume);
+    visitWithSlot(token->pan, (Object**)&square->pan);
+    visitWithSlot(token->frequency, (Object**)&square->frequency);
 
     for (Token* effect : token->effects->items)
     {
-        visitWithSlot(effect, square);
+        visitWithSlot(effect, (Object**)&square);
     }
 
     sources.push_back(square);
@@ -179,15 +178,15 @@ void ProgramVisitor::visit(CreateSquare* token)
 
 void ProgramVisitor::visit(CreateSaw* token)
 {
-    Saw* saw = new Saw(0, 0, 0);
+    Saw* saw = new Saw();
 
-    visitWithSlot(token->volume, &saw->volume);
-    visitWithSlot(token->pan, &saw->pan);
-    visitWithSlot(token->frequency, &saw->frequency);
+    visitWithSlot(token->volume, (Object**)&saw->volume);
+    visitWithSlot(token->pan, (Object**)&saw->pan);
+    visitWithSlot(token->frequency, (Object**)&saw->frequency);
 
     for (Token* effect : token->effects->items)
     {
-        visitWithSlot(effect, saw);
+        visitWithSlot(effect, (Object**)&saw);
     }
 
     sources.push_back(saw);
@@ -195,15 +194,15 @@ void ProgramVisitor::visit(CreateSaw* token)
 
 void ProgramVisitor::visit(CreateTriangle* token)
 {
-    Triangle* triangle = new Triangle(0, 0, 0);
+    Triangle* triangle = new Triangle();
 
-    visitWithSlot(token->volume, &triangle->volume);
-    visitWithSlot(token->pan, &triangle->pan);
-    visitWithSlot(token->frequency, &triangle->frequency);
+    visitWithSlot(token->volume, (Object**)&triangle->volume);
+    visitWithSlot(token->pan, (Object**)&triangle->pan);
+    visitWithSlot(token->frequency, (Object**)&triangle->frequency);
 
     for (Token* effect : token->effects->items)
     {
-        visitWithSlot(effect, triangle);
+        visitWithSlot(effect, (Object**)&triangle);
     }
 
     sources.push_back(triangle);
@@ -211,12 +210,12 @@ void ProgramVisitor::visit(CreateTriangle* token)
 
 void ProgramVisitor::visit(CreateHold* token)
 {
-    Hold* hold = new Hold(0, 0);
+    Hold* hold = new Hold();
 
-    visitWithSlot(token->value, &hold->value);
-    visitWithSlot(token->length, &hold->length);
+    visitWithSlot(token->value, (Object**)&hold->value);
+    visitWithSlot(token->length, (Object**)&hold->length);
 
-    ControllerGroup* group = dynamic_cast<ControllerGroup*>(slots.top());
+    ControllerGroup* group = dynamic_cast<ControllerGroup*>(*slots.top());
 
     if (group)
     {
@@ -225,7 +224,7 @@ void ProgramVisitor::visit(CreateHold* token)
 
     else
     {
-        controllerManager->connectParameter(hold, (Parameter*)slots.top());
+        *slots.top() = hold;
 
         hold->start();
     }
@@ -233,14 +232,14 @@ void ProgramVisitor::visit(CreateHold* token)
 
 void ProgramVisitor::visit(CreateSweep* token)
 {
-    Sweep* sweep = new Sweep(0, 0, 0, 0);
+    Sweep* sweep = new Sweep();
 
-    visitWithSlot(token->repeats, &sweep->repeats);
-    visitWithSlot(token->from, &sweep->from);
-    visitWithSlot(token->to, &sweep->to);
-    visitWithSlot(token->length, &sweep->length);
+    visitWithSlot(token->repeats, (Object**)&sweep->repeats);
+    visitWithSlot(token->from, (Object**)&sweep->from);
+    visitWithSlot(token->to, (Object**)&sweep->to);
+    visitWithSlot(token->length, (Object**)&sweep->length);
 
-    ControllerGroup* group = dynamic_cast<ControllerGroup*>(slots.top());
+    ControllerGroup* group = dynamic_cast<ControllerGroup*>(*slots.top());
 
     if (group)
     {
@@ -249,7 +248,7 @@ void ProgramVisitor::visit(CreateSweep* token)
 
     else
     {
-        controllerManager->connectParameter(sweep, (Parameter*)slots.top());
+        *slots.top() = sweep;
 
         sweep->start();
     }
@@ -257,14 +256,14 @@ void ProgramVisitor::visit(CreateSweep* token)
 
 void ProgramVisitor::visit(CreateLFO* token)
 {
-    LFO* lfo = new LFO(0, 0, 0, 0);
+    LFO* lfo = new LFO();
 
-    visitWithSlot(token->repeats, &lfo->repeats);
-    visitWithSlot(token->from, &lfo->from);
-    visitWithSlot(token->to, &lfo->to);
-    visitWithSlot(token->length, &lfo->length);
+    visitWithSlot(token->repeats, (Object**)&lfo->repeats);
+    visitWithSlot(token->from, (Object**)&lfo->from);
+    visitWithSlot(token->to, (Object**)&lfo->to);
+    visitWithSlot(token->length, (Object**)&lfo->length);
 
-    ControllerGroup* group = dynamic_cast<ControllerGroup*>(slots.top());
+    ControllerGroup* group = dynamic_cast<ControllerGroup*>(*slots.top());
 
     if (group)
     {
@@ -273,7 +272,7 @@ void ProgramVisitor::visit(CreateLFO* token)
 
     else
     {
-        controllerManager->connectParameter(lfo, (Parameter*)slots.top());
+        *slots.top() = lfo;
 
         lfo->start();
     }
@@ -281,18 +280,18 @@ void ProgramVisitor::visit(CreateLFO* token)
 
 void ProgramVisitor::visit(CreateControllerGroup* token)
 {
-    ControllerGroup* group = new ControllerGroup(0, {}, ControllerGroup::OrderEnum::Forwards);
+    ControllerGroup* group = new ControllerGroup();
 
-    visitWithSlot(token->repeats, &group->repeats);
+    visitWithSlot(token->repeats, (Object**)&group->repeats);
 
     for (Token* controller : token->controllers->items)
     {
-        visitWithSlot(controller, group);
+        visitWithSlot(controller, (Object**)&group);
     }
 
-    visitWithSlot(token->order, &group->order);
+    visitWithSlot(token->order, (Object**)&group->order);
 
-    ControllerGroup* group2 = dynamic_cast<ControllerGroup*>(slots.top());
+    ControllerGroup* group2 = dynamic_cast<ControllerGroup*>(*slots.top());
 
     if (group2)
     {
@@ -301,7 +300,7 @@ void ProgramVisitor::visit(CreateControllerGroup* token)
 
     else
     {
-        controllerManager->connectParameter(group, (Parameter*)slots.top());
+        *slots.top() = group;
 
         group->start();
     }
@@ -309,13 +308,13 @@ void ProgramVisitor::visit(CreateControllerGroup* token)
 
 void ProgramVisitor::visit(CreateDelay* token)
 {
-    Delay* delay = new Delay(0, 0, 0);
+    Delay* delay = new Delay();
 
-    visitWithSlot(token->mix, &delay->mix);
-    visitWithSlot(token->delay, &delay->delay);
-    visitWithSlot(token->feedback, &delay->feedback);
+    visitWithSlot(token->mix, (Object**)&delay->mix);
+    visitWithSlot(token->delay, (Object**)&delay->delay);
+    visitWithSlot(token->feedback, (Object**)&delay->feedback);
 
-    ((AudioSource*)slots.top())->addEffect(delay);
+    ((AudioSource*)*slots.top())->addEffect(delay);
 }
 
 void ProgramVisitor::visit(Program* token)
@@ -326,7 +325,7 @@ void ProgramVisitor::visit(Program* token)
     }
 }
 
-void ProgramVisitor::visitWithSlot(Token* token, Object* slot)
+void ProgramVisitor::visitWithSlot(Token* token, Object** slot)
 {
     slots.push(slot);
 

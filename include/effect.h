@@ -7,21 +7,17 @@
 
 struct Effect : public Sync, public Object
 {
-    Effect(double mix);
-
     virtual void apply(double* buffer, unsigned int bufferLength) = 0;
 
-    Parameter mix;
+    ParameterController* mix = new ParameterController();
 };
 
 struct Delay : public Effect
 {
-    Delay(double mix, double delay, double feedback);
-
     void apply(double* buffer, unsigned int bufferLength) override;
 
-    Parameter delay;
-    Parameter feedback;
+    ParameterController* delay = new ParameterController();
+    ParameterController* feedback = new ParameterController();
 
 private:
     std::queue<double> buffer;
@@ -32,11 +28,9 @@ private:
 
 struct LowPassFilter : public Effect
 {
-    LowPassFilter(double mix, double cutoff);
-
     void apply(double* buffer, unsigned int bufferLength) override;
 
-    Parameter cutoff;
+    ParameterController* cutoff = new ParameterController();
 
 private:
     double raw1[2] = { 0 };

@@ -118,7 +118,6 @@ int main(int argc, char** argv)
     {
         utils->time = (clock.now() - start).count() / 1000000.0;
 
-        compilerResult.controllerManager->updateControllers();
         compilerResult.eventQueue->performEvents();
     }
 

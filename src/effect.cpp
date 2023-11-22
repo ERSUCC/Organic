@@ -1,22 +1,18 @@
 #include "../include/effect.h"
 
-Effect::Effect(double mix) : mix(mix) {}
-
-Delay::Delay(double mix, double delay, double feedback) : Effect(mix), delay(delay), feedback(feedback) {}
-
 void Delay::apply(double* buffer, unsigned int bufferLength)
 {
     for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
         if (utils->channels == 1)
         {
-            if (utils->time >= bufferTime + delay)
+            if (utils->time >= bufferTime + delay->getValue())
             {
-                buffer[i] += this->buffer.front() * mix * feedback;
+                buffer[i] += this->buffer.front() * mix->getValue() * feedback->getValue();
 
                 this->buffer.pop();
 
-                bufferTime = utils->time - delay;
+                bufferTime = utils->time - delay->getValue();
             }
 
             this->buffer.push(buffer[i]);
@@ -24,17 +20,17 @@ void Delay::apply(double* buffer, unsigned int bufferLength)
 
         else
         {
-            if (utils->time >= bufferTime + delay)
+            if (utils->time >= bufferTime + delay->getValue())
             {
-                buffer[i] += this->buffer.front() * mix * feedback;
+                buffer[i] += this->buffer.front() * mix->getValue() * feedback->getValue();
 
                 this->buffer.pop();
 
-                buffer[i + 1] += this->buffer.front() * mix * feedback;
+                buffer[i + 1] += this->buffer.front() * mix->getValue() * feedback->getValue();
 
                 this->buffer.pop();
 
-                bufferTime = utils->time - delay;
+                bufferTime = utils->time - delay->getValue();
             }
 
             this->buffer.push(buffer[i]);
@@ -43,11 +39,9 @@ void Delay::apply(double* buffer, unsigned int bufferLength)
     }
 }
 
-LowPassFilter::LowPassFilter(double mix, double cutoff) : Effect(mix), cutoff(cutoff) {}
-
 void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
 {
-    double omega = tan(M_PI * cutoff / utils->sampleRate);
+    double omega = tan(M_PI * cutoff->getValue() / utils->sampleRate);
     double omega2 = omega * omega;
     double c = 1 + 2 * cos(M_PI / 4) * omega + omega2;
     double a0 = omega2 / c;
@@ -61,7 +55,7 @@ void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
 
         if (utils->channels == 1)
         {
-            buffer[i] = mix * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
+            buffer[i] = mix->getValue() * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
 
             raw2[0] = raw1[0];
             raw1[0] = rawl;
@@ -74,8 +68,8 @@ void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
         {
             double rawr = buffer[i + 1];
 
-            buffer[i] = mix * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
-            buffer[i + 1] = mix * (a0 * buffer[i + 1] + a1 * raw1[1] + a0 * raw2[1] - b1 * filtered1[1] - b2 * filtered2[1]);
+            buffer[i] = mix->getValue() * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
+            buffer[i + 1] = mix->getValue() * (a0 * buffer[i + 1] + a1 * raw1[1] + a0 * raw2[1] - b1 * filtered1[1] - b2 * filtered2[1]);
 
             raw2[0] = raw1[0];
             raw2[1] = raw1[1];

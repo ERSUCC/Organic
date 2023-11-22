@@ -33,3 +33,13 @@ Sync::Sync()
 {
     utils = Utils::get();
 }
+
+double Object::getValue()
+{
+    return 0;
+}
+
+double Variable::getValue()
+{
+    return value->getValue();
+}
