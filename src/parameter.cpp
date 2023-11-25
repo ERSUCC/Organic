@@ -113,7 +113,7 @@ double Value::getValueUnchecked()
 
 Hold::Hold()
 {
-    repeats = new Value(0);
+    repeats = new Value(1);
 }
 
 void Hold::finishStart()
