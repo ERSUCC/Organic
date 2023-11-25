@@ -29,17 +29,53 @@ void Utils::error(const std::string message)
     exit(1);
 }
 
+AssignableObject::~AssignableObject() {}
+
 Sync::Sync()
 {
     utils = Utils::get();
 }
 
-double Object::getValue()
+void ValueObject::start()
 {
+    startTime = utils->time;
+
+    enabled = true;
+
+    finishStart();
+}
+
+void ValueObject::stop()
+{
+    enabled = false;
+
+    finishStop();
+}
+
+double ValueObject::getValue()
+{
+    if (enabled)
+    {
+        return getValueUnchecked();
+    }
+
     return 0;
 }
 
-double Variable::getValue()
+void ValueObject::finishStart() {}
+void ValueObject::finishStop() {}
+
+double Variable::getValueUnchecked()
 {
     return value->getValue();
+}
+
+void Variable::finishStart()
+{
+    value->start();
+}
+
+void Variable::finishStop()
+{
+    value->stop();
 }

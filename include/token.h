@@ -205,9 +205,9 @@ struct ProgramVisitor
     EventQueue* eventQueue = new EventQueue();
 
 private:
-    void visitWithSlot(Token* token, Object** slot);
+    void visitWithSlot(Token* token, AssignableObject** slot);
 
-    std::stack<Object**> slots;
+    std::stack<AssignableObject**> slots;
 
     std::unordered_map<std::string, Variable*> variables;
 

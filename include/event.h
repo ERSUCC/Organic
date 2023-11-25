@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "parameter.h"
 
-struct Event : public Sync, public Object
+struct Event : public Sync
 {
     friend struct EventQueue;
 
@@ -17,7 +17,7 @@ struct Event : public Sync, public Object
     bool getNext();
     void finish();
 
-    ParameterController* interval = new ParameterController();
+    ValueObject* interval;
 
 private:
     std::function<void(double)> event;

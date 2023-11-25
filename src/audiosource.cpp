@@ -12,16 +12,19 @@ AudioSource::~AudioSource()
 
 void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
 {
-    prepareForEffects(bufferLength);
-
-    for (Effect* effect : effects)
+    if (enabled)
     {
-        effect->apply(effectBuffer, bufferLength);
-    }
+        prepareForEffects(bufferLength);
 
-    for (int i = 0; i < bufferLength * utils->channels; i++)
-    {
-        buffer[i] += effectBuffer[i];
+        for (Effect* effect : effects)
+        {
+            effect->apply(effectBuffer, bufferLength);
+        }
+
+        for (int i = 0; i < bufferLength * utils->channels; i++)
+        {
+            buffer[i] += effectBuffer[i];
+        }
     }
 }
 
@@ -33,6 +36,20 @@ void AudioSource::addEffect(Effect* effect)
 void AudioSource::removeEffect(Effect* effect)
 {
     effects.erase(std::find(effects.begin(), effects.end(), effect));
+}
+
+void Oscillator::finishStart()
+{
+    volume->start();
+    pan->start();
+    frequency->start();
+}
+
+void Oscillator::finishStop()
+{
+    volume->stop();
+    pan->stop();
+    frequency->stop();
 }
 
 void Oscillator::prepareForEffects(unsigned int bufferLength)
@@ -60,12 +77,12 @@ void Oscillator::prepareForEffects(unsigned int bufferLength)
     phase = fmod(phase, utils->twoPi);
 }
 
-double Sine::getValue()
+double Sine::getValueUnchecked()
 {
     return sin(phase);
 }
 
-double Square::getValue()
+double Square::getValueUnchecked()
 {
     if (sin(phase) > 0)
     {
@@ -75,12 +92,12 @@ double Square::getValue()
     return 1;
 }
 
-double Saw::getValue()
+double Saw::getValueUnchecked()
 {
     return fmod(phase, utils->twoPi) / M_PI - 1;
 }
 
-double Triangle::getValue()
+double Triangle::getValueUnchecked()
 {
     if (sin(phase) < 0)
     {
@@ -159,6 +176,14 @@ Sample::~Sample()
     free(data);
 }
 
+void Sample::finishStart()
+{
+    for (int i = 0; i < grains.size(); i++)
+    {
+        grains[i] = 0;
+    }
+}
+
 void Sample::prepareForEffects(unsigned int bufferLength)
 {
     for (int i = 0; i < bufferLength * utils->channels; i++)
@@ -197,13 +222,5 @@ void Sample::prepareForEffects(unsigned int bufferLength)
     for (int i = 0; i < bufferLength * utils->channels; i++)
     {
         effectBuffer[i] /= grains.size();
-    }
-}
-
-void Sample::start()
-{
-    for (int i = 0; i < grains.size(); i++)
-    {
-        grains[i] = 0;
     }
 }

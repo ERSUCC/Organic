@@ -76,6 +76,11 @@ int main(int argc, char** argv)
 
     CompilerResult compilerResult = Compiler::compile(argv[1]);
 
+    for (AudioSource* audioSource : compilerResult.sources)
+    {
+        audioSource->start();
+    }
+
     RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
 
     std::vector<unsigned int> ids = audio.getDeviceIds();

@@ -1,27 +1,20 @@
 #pragma once
 
 #include <unordered_set>
+#include <unordered_map>
 #include <vector>
 #include <random>
-#include <unordered_map>
-#include <queue>
 
 #include "utils.h"
 
-struct ParameterController : public Sync, public Object
+struct ParameterController : public ValueObject
 {
     friend struct ControllerGroup;
-    friend struct ControllerManager;
 
-    virtual void start();
-    void stop();
-
-    double startTime;
-
-    ParameterController* repeats;
+    ValueObject* repeats;
 
 protected:
-    bool running = false;
+    void finishStop() override;
 
     int times = 0;
 
@@ -37,20 +30,21 @@ struct ControllerGroup : public ParameterController
         Random
     };
 
-    struct Order : public Object
+    struct Order : public AssignableObject
     {
         Order(OrderEnum order);
         
         OrderEnum order;
     };
 
-    void start() override;
-
-    double getValue() override;
-
-    std::vector<ParameterController*> controllers;
+    std::vector<ValueObject*> controllers;
 
     Order* order;
+
+protected:
+    void finishStart() override;
+
+    double getValueUnchecked() override;
 
 private:
     int current = 0;
@@ -67,33 +61,47 @@ struct Value : public ParameterController
 {
     Value(double value);
 
-    double getValue() override;
-
     double value;
+
+protected:
+    double getValueUnchecked() override;
+
 };
 
 struct Hold : public ParameterController
 {
-    double getValue() override;
+    ValueObject* value;
+    ValueObject* length;
 
-    ParameterController* value = new ParameterController();
-    ParameterController* length = new ParameterController();
+protected:
+    void finishStart() override;
+
+    double getValueUnchecked() override;
+
 };
 
 struct Sweep : public ParameterController
 {
-    double getValue() override;
+    ValueObject* from;
+    ValueObject* to;
+    ValueObject* length;
 
-    ParameterController* from = new ParameterController();
-    ParameterController* to = new ParameterController();
-    ParameterController* length = new ParameterController();
+protected:
+    void finishStart() override;
+
+    double getValueUnchecked() override;
+
 };
 
 struct LFO : public ParameterController
 {
-    double getValue() override;
+    ValueObject* from;
+    ValueObject* to;
+    ValueObject* length;
 
-    ParameterController* from = new ParameterController();
-    ParameterController* to = new ParameterController();
-    ParameterController* length = new ParameterController();
+protected:
+    void finishStart() override;
+
+    double getValueUnchecked() override;
+
 };

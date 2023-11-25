@@ -1,28 +1,19 @@
 #include "../include/parameter.h"
 
-void ParameterController::start()
-{
-    startTime = utils->time;
-    running = true;
-}
-
-void ParameterController::stop()
+void ParameterController::finishStop()
 {
     if (repeats->getValue() == 0 || ++times < repeats->getValue())
     {
         start();
     }
-
-    else
-    {
-        running = false;
-    }
 }
 
 ControllerGroup::Order::Order(OrderEnum order) : order(order) {}
 
-void ControllerGroup::start()
+void ControllerGroup::finishStart()
 {
+    repeats->start();
+
     udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
 
     if (order->order == OrderEnum::PingPong)
@@ -34,8 +25,6 @@ void ControllerGroup::start()
     {
         max_times = controllers.size();
     }
-
-    ParameterController::start();
 
     if (order->order == OrderEnum::Backwards)
     {
@@ -52,9 +41,9 @@ void ControllerGroup::start()
     controllers[current]->start();
 }
 
-double ControllerGroup::getValue()
+double ControllerGroup::getValueUnchecked()
 {
-    if (!controllers[current]->running)
+    if (!controllers[current]->enabled)
     {
         last = current;
 
@@ -117,12 +106,19 @@ double ControllerGroup::getValue()
 
 Value::Value(double value) : value(value) {}
 
-double Value::getValue()
+double Value::getValueUnchecked()
 {
     return value;
 }
 
-double Hold::getValue()
+void Hold::finishStart()
+{
+    repeats->start();
+    value->start();
+    length->start();
+}
+
+double Hold::getValueUnchecked()
 {
     if (utils->time - startTime >= length->getValue())
     {
@@ -132,7 +128,15 @@ double Hold::getValue()
     return value->getValue();
 }
 
-double Sweep::getValue()
+void Sweep::finishStart()
+{
+    repeats->start();
+    from->start();
+    to->start();
+    length->start();
+}
+
+double Sweep::getValueUnchecked()
 {
     if (utils->time - startTime >= length->getValue())
     {
@@ -144,7 +148,15 @@ double Sweep::getValue()
     return from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / length->getValue();
 }
 
-double LFO::getValue()
+void LFO::finishStart()
+{
+    repeats->start();
+    from->start();
+    to->start();
+    length->start();
+}
+
+double LFO::getValueUnchecked()
 {
     if (utils->time >= startTime + length->getValue())
     {

@@ -5,19 +5,19 @@
 #include "parameter.h"
 #include "utils.h"
 
-struct Effect : public Sync, public Object
+struct Effect : public Sync
 {
     virtual void apply(double* buffer, unsigned int bufferLength) = 0;
 
-    ParameterController* mix = new ParameterController();
+    ValueObject* mix;
 };
 
 struct Delay : public Effect
 {
     void apply(double* buffer, unsigned int bufferLength) override;
 
-    ParameterController* delay = new ParameterController();
-    ParameterController* feedback = new ParameterController();
+    ValueObject* delay;
+    ValueObject* feedback;
 
 private:
     std::queue<double> buffer;
@@ -30,7 +30,7 @@ struct LowPassFilter : public Effect
 {
     void apply(double* buffer, unsigned int bufferLength) override;
 
-    ParameterController* cutoff = new ParameterController();
+    ValueObject* cutoff;
 
 private:
     double raw1[2] = { 0 };

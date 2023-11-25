@@ -31,7 +31,12 @@ private:
     
 };
 
-struct Sync
+struct AssignableObject
+{
+    virtual ~AssignableObject();
+};
+
+struct Sync : public AssignableObject
 {
     Sync();
 
@@ -40,14 +45,33 @@ protected:
 
 };
 
-struct Object
+struct ValueObject : public Sync
 {
-    virtual double getValue();
+    void start();
+    void stop();
+
+    double getValue();
+
+    double startTime = 0;
+
+    bool enabled = false;
+
+protected:
+    virtual void finishStart();
+    virtual void finishStop();
+
+    virtual double getValueUnchecked() = 0;
+
 };
 
-struct Variable : public Object
+struct Variable : public ValueObject
 {
-    double getValue() override;
+    ValueObject* value;
 
-    Object* value;
+protected:
+    void finishStart() override;
+    void finishStop() override;
+
+    double getValueUnchecked() override;
+
 };
