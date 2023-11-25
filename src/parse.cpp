@@ -23,11 +23,11 @@ Program* Parser::parse()
 
 Token* Parser::getToken()
 {
-    lastToken = tokens.top();
+    Token* token = tokens.top();
 
     tokens.pop();
 
-    return lastToken;
+    return token;
 }
 
 template <typename T> T* Parser::getToken()

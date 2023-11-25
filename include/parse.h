@@ -35,8 +35,6 @@ private:
 
     std::stack<Token*> tokens;
 
-    Token* lastToken;
-
     int pos = 0;
 
 };
