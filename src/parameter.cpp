@@ -111,6 +111,11 @@ double Value::getValueUnchecked()
     return value;
 }
 
+Hold::Hold()
+{
+    repeats = new Value(0);
+}
+
 void Hold::finishStart()
 {
     repeats->start();

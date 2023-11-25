@@ -70,6 +70,8 @@ protected:
 
 struct Hold : public ParameterController
 {
+    Hold();
+
     ValueObject* value;
     ValueObject* length;
 
