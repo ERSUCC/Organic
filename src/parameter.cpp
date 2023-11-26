@@ -95,7 +95,7 @@ double ControllerGroup::getValueUnchecked()
         {
             stop();
 
-            return controllers[controllers.size() - 1]->getValue();
+            return controllers[last]->getValue();
         }
 
         controllers[current]->start();
