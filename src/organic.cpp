@@ -8,7 +8,7 @@
 #include "../include/RtAudio.h"
 
 #include "../include/audiosource.h"
-#include "../include/compile.h"
+#include "../include/interpret.h"
 #include "../include/utils.h"
 #include "../include/effect.h"
 #include "../include/event.h"
@@ -74,9 +74,9 @@ int main(int argc, char** argv)
         Utils::error("Too many arguments specified.");
     }
 
-    CompilerResult compilerResult = Compiler::compile(argv[1]);
+    InterpreterResult interpreterResult = Interpreter::interpret(argv[1]);
 
-    for (AudioSource* audioSource : compilerResult.sources)
+    for (AudioSource* audioSource : interpreterResult.sources)
     {
         audioSource->start();
     }
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 
     Utils* utils = Utils::get();
 
-    AudioData data { compilerResult.sources, utils };
+    AudioData data { interpreterResult.sources, utils };
 
     RtAudio::StreamParameters parameters;
 
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
     {
         utils->time = (clock.now() - start).count() / 1000000.0;
 
-        compilerResult.eventQueue->performEvents();
+        interpreterResult.eventQueue->performEvents();
     }
 
     if (audio.isStreamRunning())

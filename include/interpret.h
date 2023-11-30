@@ -7,13 +7,13 @@
 #include "parse.h"
 #include "token.h"
 
-struct CompilerResult
+struct InterpreterResult
 {
     std::vector<AudioSource*> sources;
     EventQueue* eventQueue;
 };
 
-struct Compiler
+struct Interpreter
 {
-    static CompilerResult compile(char* path);
+    static InterpreterResult interpret(char* path);
 };

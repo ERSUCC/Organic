@@ -1,6 +1,6 @@
-#include "../include/compile.h"
+#include "../include/interpret.h"
 
-CompilerResult Compiler::compile(char* path)
+InterpreterResult Interpreter::interpret(char* path)
 {
     Parser* parser = new Parser(path);
 
