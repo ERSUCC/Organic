@@ -40,26 +40,29 @@ struct Sync : public AssignableObject
 {
     Sync();
 
-protected:
-    Utils* utils;
-
-};
-
-struct ValueObject : public Sync
-{
     void start();
+    void start(double time);
     void stop();
 
-    double getValue();
+    virtual double syncLength();
 
     double startTime = 0;
 
     bool enabled = false;
 
 protected:
+    Utils* utils;
+
     virtual void finishStart();
     virtual void finishStop();
 
+};
+
+struct ValueObject : public Sync
+{
+    double getValue();
+
+protected:
     virtual double getValueUnchecked() = 0;
 
 };

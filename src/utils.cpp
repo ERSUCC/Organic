@@ -36,21 +36,34 @@ Sync::Sync()
     utils = Utils::get();
 }
 
-void ValueObject::start()
+void Sync::start()
 {
-    startTime = utils->time;
+    start(utils->time);
+}
+
+void Sync::start(double time)
+{
+    startTime = time;
 
     enabled = true;
 
     finishStart();
 }
 
-void ValueObject::stop()
+void Sync::stop()
 {
     enabled = false;
 
     finishStop();
 }
+
+double Sync::syncLength()
+{
+    return 0;
+}
+
+void Sync::finishStart() {}
+void Sync::finishStop() {}
 
 double ValueObject::getValue()
 {
@@ -61,9 +74,6 @@ double ValueObject::getValue()
 
     return 0;
 }
-
-void ValueObject::finishStart() {}
-void ValueObject::finishStop() {}
 
 double Variable::getValueUnchecked()
 {

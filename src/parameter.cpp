@@ -4,15 +4,27 @@ void ParameterController::finishStop()
 {
     if (repeats->getValue() == 0 || ++times < repeats->getValue())
     {
-        start();
+        start(startTime + syncLength());
     }
 }
 
 ControllerGroup::Order::Order(OrderEnum order) : order(order) {}
 
+double ControllerGroup::syncLength()
+{
+    double length = 0;
+
+    for (ValueObject* controller : controllers)
+    {
+        length += controller->syncLength();
+    }
+
+    return length;
+}
+
 void ControllerGroup::finishStart()
 {
-    repeats->start();
+    repeats->start(startTime);
 
     udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
 
@@ -38,7 +50,7 @@ void ControllerGroup::finishStart()
 
     times = 0;
 
-    controllers[current]->start();
+    controllers[current]->start(startTime);
 }
 
 double ControllerGroup::getValueUnchecked()
@@ -98,7 +110,7 @@ double ControllerGroup::getValueUnchecked()
             return controllers[last]->getValue();
         }
 
-        controllers[current]->start();
+        controllers[current]->start(controllers[last]->startTime + controllers[last]->syncLength());
     }
 
     return controllers[current]->getValue();
@@ -116,11 +128,16 @@ Hold::Hold()
     repeats = new Value(1);
 }
 
+double Hold::syncLength()
+{
+    return length->getValue();
+}
+
 void Hold::finishStart()
 {
-    repeats->start();
-    value->start();
-    length->start();
+    repeats->start(startTime);
+    value->start(startTime);
+    length->start(startTime);
 }
 
 double Hold::getValueUnchecked()
@@ -133,12 +150,17 @@ double Hold::getValueUnchecked()
     return value->getValue();
 }
 
+double Sweep::syncLength()
+{
+    return length->getValue();
+}
+
 void Sweep::finishStart()
 {
-    repeats->start();
-    from->start();
-    to->start();
-    length->start();
+    repeats->start(startTime);
+    from->start(startTime);
+    to->start(startTime);
+    length->start(startTime);
 }
 
 double Sweep::getValueUnchecked()
@@ -153,12 +175,17 @@ double Sweep::getValueUnchecked()
     return from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / length->getValue();
 }
 
+double LFO::syncLength()
+{
+    return length->getValue();
+}
+
 void LFO::finishStart()
 {
-    repeats->start();
-    from->start();
-    to->start();
-    length->start();
+    repeats->start(startTime);
+    from->start(startTime);
+    to->start(startTime);
+    length->start(startTime);
 }
 
 double LFO::getValueUnchecked()

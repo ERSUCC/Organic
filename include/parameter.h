@@ -37,6 +37,8 @@ struct ControllerGroup : public ParameterController
         OrderEnum order;
     };
 
+    double syncLength() override;
+
     std::vector<ValueObject*> controllers;
 
     Order* order;
@@ -72,6 +74,8 @@ struct Hold : public ParameterController
 {
     Hold();
 
+    double syncLength() override;
+
     ValueObject* value;
     ValueObject* length;
 
@@ -84,6 +88,8 @@ protected:
 
 struct Sweep : public ParameterController
 {
+    double syncLength() override;
+
     ValueObject* from;
     ValueObject* to;
     ValueObject* length;
@@ -97,6 +103,8 @@ protected:
 
 struct LFO : public ParameterController
 {
+    double syncLength() override;
+
     ValueObject* from;
     ValueObject* to;
     ValueObject* length;
