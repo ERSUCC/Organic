@@ -190,6 +190,8 @@ void LFO::finishStart()
 
 double LFO::getValueUnchecked()
 {
+    std::cout << startTime << "\n";
+
     if (utils->time >= startTime + length->getValue())
     {
         stop();

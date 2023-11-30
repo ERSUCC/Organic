@@ -98,6 +98,28 @@ void Parser::parseExpression()
             {
                 tokens.push(token);
             }
+
+            if (program[pos] == '+')
+            {
+                Token* value1 = getToken();
+
+                parseSingleChar('+');
+                skipWhitespace();
+                parseExpression();
+
+                tokens.push(new CreateValueAdd(value1, getToken()));
+            }
+
+            else if (program[pos] == '-')
+            {
+                Token* value1 = getToken();
+
+                parseSingleChar('-');
+                skipWhitespace();
+                parseExpression();
+
+                tokens.push(new CreateValueSubtract(value1, getToken()));
+            }
         }
     }
 

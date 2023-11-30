@@ -46,11 +46,6 @@ double ValueObject::getValue()
     return 0;
 }
 
-double Variable::getValueUnchecked()
-{
-    return value->getValue();
-}
-
 void Variable::finishStart()
 {
     value->start();
@@ -59,4 +54,31 @@ void Variable::finishStart()
 void Variable::finishStop()
 {
     value->stop();
+}
+
+double Variable::getValueUnchecked()
+{
+    return value->getValue();
+}
+
+void ValueCombination::finishStart()
+{
+    value1->start();
+    value2->start();
+}
+
+void ValueCombination::finishStop()
+{
+    value1->stop();
+    value2->stop();
+}
+
+double ValueAdd::getValueUnchecked()
+{
+    return value1->getValue() + value2->getValue();
+}
+
+double ValueSubtract::getValueUnchecked()
+{
+    return value1->getValue() - value2->getValue();
 }

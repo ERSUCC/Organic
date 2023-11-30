@@ -61,6 +61,28 @@ struct GroupOrder : public Token
     ControllerGroup::OrderEnum order;
 };
 
+struct CreateValueCombination : public Token
+{
+    CreateValueCombination(Token* value1, Token* value2);
+
+    Token* value1;
+    Token* value2;
+};
+
+struct CreateValueAdd : public CreateValueCombination
+{
+    CreateValueAdd(Token* value1, Token* value2);
+
+    void accept(ProgramVisitor* visitor) override;
+};
+
+struct CreateValueSubtract : public CreateValueCombination
+{
+    CreateValueSubtract(Token* value1, Token* value2);
+
+    void accept(ProgramVisitor* visitor) override;
+};
+
 struct Instruction : public Token {};
 
 struct Assign : public Instruction
@@ -189,6 +211,8 @@ struct ProgramVisitor
     void visit(Constant* token);
     void visit(VariableRef* token);
     void visit(GroupOrder* token);
+    void visit(CreateValueAdd* token);
+    void visit(CreateValueSubtract* token);
     void visit(Assign* token);
     void visit(CreateSine* token);
     void visit(CreateSquare* token);

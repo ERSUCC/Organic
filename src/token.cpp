@@ -25,6 +25,22 @@ void GroupOrder::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
+CreateValueCombination::CreateValueCombination(Token* value1, Token* value2) : value1(value1), value2(value2) {}
+
+CreateValueAdd::CreateValueAdd(Token* value1, Token* value2) : CreateValueCombination(value1, value2) {}
+
+void CreateValueAdd::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
+CreateValueSubtract::CreateValueSubtract(Token* value1, Token* value2) : CreateValueCombination(value1, value2) {}
+
+void CreateValueSubtract::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 Assign::Assign(std::string variable, Token* value) : variable(variable), value(value) {}
 
 void Assign::accept(ProgramVisitor* visitor)
@@ -132,6 +148,26 @@ void ProgramVisitor::visit(VariableRef* token)
 void ProgramVisitor::visit(GroupOrder* token)
 {
     *slots.top() = new ControllerGroup::Order(token->order);
+}
+
+void ProgramVisitor::visit(CreateValueAdd* token)
+{
+    ValueAdd* add = new ValueAdd();
+
+    visitWithSlot(token->value1, (Object**)&add->value1);
+    visitWithSlot(token->value2, (Object**)&add->value2);
+
+    *slots.top() = add;
+}
+
+void ProgramVisitor::visit(CreateValueSubtract* token)
+{
+    ValueSubtract* subtract = new ValueSubtract();
+
+    visitWithSlot(token->value1, (Object**)&subtract->value1);
+    visitWithSlot(token->value2, (Object**)&subtract->value2);
+
+    *slots.top() = subtract;
 }
 
 void ProgramVisitor::visit(Assign* token)

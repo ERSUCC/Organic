@@ -49,3 +49,30 @@ protected:
     double getValueUnchecked() override;
 
 };
+
+struct ValueCombination : public ValueObject
+{
+    ValueObject* value1;
+    ValueObject* value2;
+
+protected:
+    void finishStart() override;
+    void finishStop() override;
+
+};
+
+struct ValueAdd : public ValueCombination
+{
+
+protected:
+    double getValueUnchecked() override;
+
+};
+
+struct ValueSubtract : public ValueCombination
+{
+
+protected:
+    double getValueUnchecked() override;
+
+};
