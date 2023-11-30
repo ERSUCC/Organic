@@ -76,11 +76,6 @@ int main(int argc, char** argv)
 
     InterpreterResult interpreterResult = Interpreter::interpret(argv[1]);
 
-    for (AudioSource* audioSource : interpreterResult.sources)
-    {
-        audioSource->start();
-    }
-
     RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
 
     std::vector<unsigned int> ids = audio.getDeviceIds();
@@ -114,6 +109,11 @@ int main(int argc, char** argv)
         }
 
         Utils::error(audio.getErrorText());
+    }
+
+    for (AudioSource* audioSource : data.sources)
+    {
+        audioSource->start(true);
     }
 
     std::chrono::high_resolution_clock clock;
