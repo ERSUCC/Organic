@@ -5,7 +5,7 @@
 #include <vector>
 #include <random>
 
-#include "utils.h"
+#include "object.h"
 
 struct ParameterController : public ValueObject
 {
@@ -30,7 +30,7 @@ struct ControllerGroup : public ParameterController
         Random
     };
 
-    struct Order : public AssignableObject
+    struct Order : public Object
     {
         Order(OrderEnum order);
         
