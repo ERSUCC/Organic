@@ -123,7 +123,7 @@ void Parser::parseExpression()
         }
     }
 
-    else if (program[pos] == '(')
+    else if (program[pos] == '[')
     {
         parseList();
     }
@@ -374,12 +374,12 @@ void Parser::parseCall()
 void Parser::parseList()
 {
     skipWhitespace();
-    parseSingleChar('(');
+    parseSingleChar('[');
     skipWhitespace();
 
     List* list = new List();
 
-    while (program[pos] != ')')
+    while (program[pos] != ']')
     {
         parseExpression();
 
@@ -387,7 +387,7 @@ void Parser::parseList()
 
         skipWhitespace();
 
-        if (program[pos] != ')')
+        if (program[pos] != ']')
         {
             parseSingleChar(',');
             skipWhitespace();
@@ -396,7 +396,7 @@ void Parser::parseList()
 
     tokens.push(list);
 
-    parseSingleChar(')');
+    parseSingleChar(']');
 }
 
 void Parser::parseArgument()
