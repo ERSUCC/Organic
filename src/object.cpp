@@ -14,11 +14,14 @@ void Sync::start()
 
 void Sync::start(double time)
 {
-    startTime = time;
+    if (!enabled)
+    {
+        startTime = time;
 
-    enabled = true;
+        enabled = true;
 
-    finishStart();
+        finishStart();
+    }
 }
 
 void Sync::stop()

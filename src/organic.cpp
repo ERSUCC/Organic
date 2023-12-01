@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 
     for (AudioSource* audioSource : data.sources)
     {
-        audioSource->start(true);
+        audioSource->start();
     }
 
     std::chrono::high_resolution_clock clock;

@@ -40,9 +40,9 @@ void AudioSource::removeEffect(Effect* effect)
 
 void Oscillator::finishStart()
 {
-    volume->start();
-    pan->start();
-    frequency->start();
+    volume->start(startTime);
+    pan->start(startTime);
+    frequency->start(startTime);
 }
 
 void Oscillator::finishStop()
