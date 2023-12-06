@@ -69,71 +69,88 @@ int main(int argc, char** argv)
         Utils::error("Not enough arguments specified.");
     }
 
-    if (argc > 2)
-    {
-        Utils::error("Too many arguments specified.");
-    }
-
-    InterpreterResult interpreterResult = Interpreter::interpret(argv[1]);
-
-    RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
-
-    std::vector<unsigned int> ids = audio.getDeviceIds();
-
-    if (ids.size() < 1)
-    {
-        Utils::error("No audio device detected.");
-    }
-
     Utils* utils = Utils::get();
 
-    AudioData data { interpreterResult.sources, utils };
+    std::vector<char*> flags;
 
-    RtAudio::StreamParameters parameters;
-
-    parameters.deviceId = audio.getDefaultOutputDevice();
-    parameters.nChannels = utils->channels;
-
-    unsigned int bufferFrames = utils->bufferLength;
-
-    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)&data))
+    for (int i = 2; i < argc; i++)
     {
-        Utils::error(audio.getErrorText());
+        flags.push_back(argv[i]);
     }
 
-    if (audio.startStream())
+    std::cout << "test\n";
+
+    InterpreterResult interpreterResult = Interpreter::interpret(argv[1], flags);
+
+    std::cout << "test\n";
+
+    if (interpreterResult.options->test)
     {
+        for (double time = 0; time <= interpreterResult.options->time; time += interpreterResult.options->step)
+        {
+            std::cout << time << "\n";
+        }
+    }
+
+    else
+    {
+        RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
+
+        std::vector<unsigned int> ids = audio.getDeviceIds();
+
+        if (ids.size() < 1)
+        {
+            Utils::error("No audio device detected.");
+        }
+
+        AudioData data { interpreterResult.sources, utils };
+
+        RtAudio::StreamParameters parameters;
+
+        parameters.deviceId = audio.getDefaultOutputDevice();
+        parameters.nChannels = utils->channels;
+
+        unsigned int bufferFrames = utils->bufferLength;
+
+        if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)&data))
+        {
+            Utils::error(audio.getErrorText());
+        }
+
+        if (audio.startStream())
+        {
+            if (audio.isStreamOpen())
+            {
+                audio.closeStream();
+            }
+
+            Utils::error(audio.getErrorText());
+        }
+
+        for (AudioSource* audioSource : data.sources)
+        {
+            audioSource->start();
+        }
+
+        std::chrono::high_resolution_clock clock;
+        std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
+
+        while (true)
+        {
+            utils->time = (clock.now() - start).count() / 1000000.0;
+
+            interpreterResult.eventQueue->performEvents();
+        }
+
+        if (audio.isStreamRunning())
+        {
+            audio.stopStream();
+        }
+
         if (audio.isStreamOpen())
         {
             audio.closeStream();
         }
-
-        Utils::error(audio.getErrorText());
-    }
-
-    for (AudioSource* audioSource : data.sources)
-    {
-        audioSource->start();
-    }
-
-    std::chrono::high_resolution_clock clock;
-    std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
-
-    while (true)
-    {
-        utils->time = (clock.now() - start).count() / 1000000.0;
-
-        interpreterResult.eventQueue->performEvents();
-    }
-
-    if (audio.isStreamRunning())
-    {
-        audio.stopStream();
-    }
-
-    if (audio.isStreamOpen())
-    {
-        audio.closeStream();
     }
 
     return 0;

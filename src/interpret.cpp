@@ -1,7 +1,44 @@
 #include "../include/interpret.h"
 
-InterpreterResult Interpreter::interpret(char* path)
+InterpreterResult Interpreter::interpret(char* path, std::vector<char*> flags)
 {
+    InterpreterOptions* options;
+
+    for (int i = 0; i < flags.size(); i++)
+    {
+        if (!strncmp(flags[i], "-t", 2) || !strncmp(flags[i], "--test", 6))
+        {
+            options->test = true;
+            options->setTest = true;
+        }
+
+        else if (!strncmp(flags[i], "-i", 2) || !strncmp(flags[i], "--time", 6))
+        {
+            checkNextOption(flags, &i);
+
+            options->time = strtod(flags[i], nullptr);
+            options->setTime = true;
+        }
+
+        else if (!strncmp(flags[i], "-s", 2) || !strncmp(flags[i], "--step", 6))
+        {
+            checkNextOption(flags, &i);
+
+            options->step = strtod(flags[i], nullptr);
+            options->setStep = true;
+        }
+
+        else
+        {
+            Utils::error("Unknown option '" + std::string(flags[i]) + "'.");
+        }
+    }
+
+    if (!options->setTest && (options->setTime || options->setStep))
+    {
+        Utils::error("Cannot set time and step options in normal playback mode.");
+    }
+
     Parser* parser = new Parser(path);
 
     Program* program = parser->parse();
@@ -10,5 +47,13 @@ InterpreterResult Interpreter::interpret(char* path)
 
     visitor->visit(program);
 
-    return { visitor->sources, visitor->eventQueue };
+    return { options, visitor->sources, visitor->eventQueue };
+}
+
+void Interpreter::checkNextOption(std::vector<char*>& flags, int* pos)
+{
+    if (++*pos >= flags.size())
+    {
+        Utils::error("Value must be provided for option '" + std::string(flags[*pos - 1]) + "'.");
+    }
 }
