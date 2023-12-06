@@ -2,23 +2,20 @@
 
 Parser::Parser(char* path)
 {
-    std::getline(std::ifstream(path), program, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
+    std::getline(std::ifstream(path), code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
 }
 
 Program* Parser::parse()
 {
-    Program* p = new Program();
+    program = new Program();
 
-    while (pos < program.size())
+    while (pos < code.size())
     {
         parseInstruction();
-
-        p->instructions.push_back(getToken<Instruction>());
-
         skipWhitespace();
     }
 
-    return p;
+    return program;
 }
 
 Token* Parser::getToken()
@@ -37,7 +34,7 @@ template <typename T> T* Parser::getToken()
 
 void Parser::skipWhitespace()
 {
-    while (isspace(program[pos]))
+    while (pos < code.size() && isspace(code[pos]))
     {
         pos++;
     }
@@ -46,17 +43,39 @@ void Parser::skipWhitespace()
 void Parser::parseInstruction()
 {
     skipWhitespace();
-    parseName();
-    skipWhitespace();
 
-    if (program[pos] == '(')
+    if (code[pos] == '#')
     {
-        parseCall();
+        parseComment();
     }
 
     else
     {
-        parseAssign();
+        parseName();
+        skipWhitespace();
+
+        if (code[pos] == '(')
+        {
+            parseCall();
+        }
+
+        else
+        {
+            parseAssign();
+        }
+
+        program->instructions.push_back(getToken<Instruction>());
+    }
+}
+
+void Parser::parseComment()
+{
+    skipWhitespace();
+    parseSingleChar('#');
+
+    while (pos < code.size() && code[pos] != '\n')
+    {
+        pos++;
     }
 }
 
@@ -75,12 +94,12 @@ void Parser::parseExpression()
 {
     skipWhitespace();
 
-    if (isalpha(program[pos]))
+    if (isalpha(code[pos]))
     {
         parseName();
         skipWhitespace();
 
-        if (program[pos] == '(')
+        if (code[pos] == '(')
         {
             parseCall();
         }
@@ -99,7 +118,7 @@ void Parser::parseExpression()
                 tokens.push(token);
             }
 
-            if (program[pos] == '+')
+            if (code[pos] == '+')
             {
                 Token* value1 = getToken();
 
@@ -110,7 +129,7 @@ void Parser::parseExpression()
                 tokens.push(new CreateValueAdd(value1, getToken()));
             }
 
-            else if (program[pos] == '-')
+            else if (code[pos] == '-')
             {
                 Token* value1 = getToken();
 
@@ -123,12 +142,12 @@ void Parser::parseExpression()
         }
     }
 
-    else if (program[pos] == '[')
+    else if (code[pos] == '[')
     {
         parseList();
     }
 
-    else if (program[pos] == '(')
+    else if (code[pos] == '(')
     {
         parseSingleChar('(');
         parseExpression();
@@ -142,7 +161,7 @@ void Parser::parseExpression()
 
     skipWhitespace();
 
-    if (program[pos] == '+')
+    if (code[pos] == '+')
     {
         Token* value1 = getToken();
 
@@ -153,7 +172,7 @@ void Parser::parseExpression()
         tokens.push(new CreateValueAdd(value1, getToken()));
     }
 
-    else if (program[pos] == '-')
+    else if (code[pos] == '-')
     {
         Token* value1 = getToken();
 
@@ -179,7 +198,7 @@ void Parser::parseCall()
         Token* frequency = new Constant(0);
         List* effects = new List();
 
-        while (program[pos] != ')')
+        while (code[pos] != ')')
         {
             parseArgument();
 
@@ -239,7 +258,7 @@ void Parser::parseCall()
         Token* value = new Constant(0);
         Token* length = new Constant(0);
 
-        while (program[pos] != ')')
+        while (code[pos] != ')')
         {
             parseArgument();
 
@@ -273,7 +292,7 @@ void Parser::parseCall()
         Token* to = new Constant(1);
         Token* length = new Constant(0);
 
-        while (program[pos] != ')')
+        while (code[pos] != ')')
         {
             parseArgument();
 
@@ -324,7 +343,7 @@ void Parser::parseCall()
         List* values = new List();
         Token* order = new GroupOrder(ControllerGroup::OrderEnum::Forwards);
 
-        while (program[pos] != ')')
+        while (code[pos] != ')')
         {
             parseArgument();
 
@@ -362,7 +381,7 @@ void Parser::parseCall()
         Token* delay = new Constant(0);
         Token* feedback = new Constant(0);
 
-        while (program[pos] != ')')
+        while (code[pos] != ')')
         {
             parseArgument();
 
@@ -410,7 +429,7 @@ void Parser::parseList()
 
     List* list = new List();
 
-    while (program[pos] != ']')
+    while (code[pos] != ']')
     {
         parseExpression();
 
@@ -418,7 +437,7 @@ void Parser::parseList()
 
         skipWhitespace();
 
-        if (program[pos] != ']')
+        if (code[pos] != ']')
         {
             parseSingleChar(',');
             skipWhitespace();
@@ -444,7 +463,7 @@ void Parser::parseArgument()
 
     skipWhitespace();
 
-    if (program[pos] != ')')
+    if (code[pos] != ')')
     {
         parseSingleChar(',');
     }
@@ -454,16 +473,16 @@ void Parser::parseName()
 {
     skipWhitespace();
 
-    if (!isalpha(program[pos]))
+    if (!isalpha(code[pos]))
     {
-        Utils::error("Expected letter, received '" + std::string(1, program[pos]) + "'.");
+        Utils::error("Expected letter, received '" + std::string(1, code[pos]) + "'.");
     }
 
     std::string name;
 
-    while (pos < program.size() && (isalnum(program[pos]) || program[pos] == '-' || program[pos] == '_'))
+    while (pos < code.size() && (isalnum(code[pos]) || code[pos] == '-' || code[pos] == '_'))
     {
-        name += program[pos++];
+        name += code[pos++];
     }
 
     if (name == "forwards")
@@ -496,16 +515,16 @@ void Parser::parseConstant()
 {
     skipWhitespace();
 
-    if (!isdigit(program[pos]) && program[pos] != '-')
+    if (!isdigit(code[pos]) && code[pos] != '-')
     {
-        Utils::error("Expected number, received '" + std::string(1, program[pos]) + "'.");
+        Utils::error("Expected number, received '" + std::string(1, code[pos]) + "'.");
     }
 
     std::string constant;
 
-    while (pos < program.size() && (isdigit(program[pos]) || program[pos] == '.' || program[pos] == '-'))
+    while (pos < code.size() && (isdigit(code[pos]) || code[pos] == '.' || code[pos] == '-'))
     {
-        constant += program[pos++];
+        constant += code[pos++];
     }
 
     tokens.push(new Constant(std::stod(constant)));
@@ -515,9 +534,9 @@ void Parser::parseSingleChar(char c)
 {
     skipWhitespace();
 
-    if (program[pos] != c)
+    if (code[pos] != c)
     {
-        Utils::error("Expected '" + std::string(1, c) + "', received '" + std::string(1, program[pos]) + "'.");
+        Utils::error("Expected '" + std::string(1, c) + "', received '" + std::string(1, code[pos]) + "'.");
     }
 
     pos++;

@@ -22,6 +22,7 @@ private:
     void skipWhitespace();
 
     void parseInstruction();
+    void parseComment();
     void parseAssign();
     void parseExpression();
     void parseCall();
@@ -31,7 +32,9 @@ private:
     void parseConstant();
     void parseSingleChar(char c);
 
-    std::string program;
+    std::string code;
+
+    Program* program;
 
     std::stack<Token*> tokens;
 
