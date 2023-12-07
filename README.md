@@ -12,7 +12,9 @@ Organic is a programming language for generative audio synthesis, with the goal 
 
 Organic is a command-line interpreter, run from the Command Prompt (Windows) or the Terminal (Mac/Linux). To run it, first open the command-line and navigate to the location where you installed the program. If you're on Windows, run the command `organic` (Windows) or `./organic` (Mac/Linux). In both cases, you will need to provide at least one input, which is the path to your Organic code. Here is a full example (Mac/Linux):
 
-`./organic /Users/johndoe/Documents/play_a_sine.organic`
+```
+./organic /Users/johndoe/Documents/play_a_sine.organic
+```
 
 This is all you need to know for the simplest usage of Organic, but the next section further details the `organic` command and its other arguments.
 
