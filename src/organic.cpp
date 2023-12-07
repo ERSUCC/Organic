@@ -2,8 +2,8 @@
 #include <vector>
 #include <string>
 #include <chrono>
-#include <queue>
 #include <random>
+#include <fstream>
 
 #include "../include/RtAudio.h"
 
@@ -78,13 +78,9 @@ int main(int argc, char** argv)
         flags.push_back(argv[i]);
     }
 
-    std::cout << "test\n";
-
     InterpreterResult interpreterResult = Interpreter::interpret(argv[1], flags);
 
-    std::cout << "test\n";
-
-    if (interpreterResult.options->test)
+    if (interpreterResult.options.test)
     {
         for (double time = 0; time <= interpreterResult.options->time; time += interpreterResult.options->step)
         {

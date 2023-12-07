@@ -10,16 +10,14 @@ struct InterpreterOptions
 {
     bool test = false;
     double time = 0;
-    double step = 1;
 
     bool setTest = false;
     bool setTime = false;
-    bool setStep = false;
 };
 
 struct InterpreterResult
 {
-    InterpreterOptions* options;
+    InterpreterOptions options;
 
     std::vector<AudioSource*> sources;
     EventQueue* eventQueue;
