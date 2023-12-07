@@ -11,7 +11,7 @@
 
 struct Parser
 {
-    Parser(char* path);
+    Parser(const char* path);
 
     Program* parse();
 

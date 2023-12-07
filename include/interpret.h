@@ -19,17 +19,16 @@ struct InterpreterOptions
 
 struct InterpreterResult
 {
-    InterpreterOptions options;
-
     std::vector<AudioSource*> sources;
     EventQueue* eventQueue;
+    InterpreterOptions options;
 };
 
 struct Interpreter
 {
-    static InterpreterResult interpret(char* path, std::vector<char*> flags);
+    static InterpreterResult interpret(const char* path, std::vector<const char*> flags);
 
 private:
-    static void checkNextOption(std::vector<char*>& flags, int* pos);
+    static void checkNextOption(std::vector<const char*>& flags, int* pos);
 
 };

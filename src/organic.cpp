@@ -1,26 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <chrono>
-#include <random>
-#include <fstream>
-#include <sstream>
-
-#include "../include/RtAudio.h"
-
-#include "../include/audiosource.h"
-#include "../include/interpret.h"
-#include "../include/utils.h"
-#include "../include/effect.h"
-#include "../include/event.h"
-#include "../include/parameter.h"
-
-struct AudioData
-{
-    std::vector<AudioSource*> sources;
-
-    Utils* utils;
-};
+#include "../include/organic.h"
 
 void rtAudioError(RtAudioErrorType type, const std::string& message)
 {
@@ -39,13 +17,13 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
         Utils::warning("Stream underflow detected.");
     }
 
-    double* buffer = (double*)output;
-
     AudioData* data = (AudioData*)userData;
+
+    double* buffer = (double*)output;
 
     std::fill(buffer, buffer + frames * data->utils->channels, 0);
 
-    for (AudioSource* source : data->sources)
+    for (AudioSource* source : data->audioSources)
     {
         source->fillBuffer(buffer, frames);
     }
@@ -63,132 +41,139 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
     return 0;
 }
 
-int main(int argc, char** argv)
+Organic::Organic(std::vector<AudioSource*> audioSources, EventQueue* eventQueue, InterpreterOptions options) :
+    audioSources(audioSources), eventQueue(eventQueue), options(options)
 {
-    if (argc < 2)
-    {
-        Utils::error("Not enough arguments specified.");
-    }
+    utils = Utils::get();
+}
 
-    Utils* utils = Utils::get();
+void Organic::init(const char* program, std::vector<const char*> flags)
+{
+    InterpreterResult result = Interpreter::interpret(program, flags);
 
-    std::vector<char*> flags;
+    Organic* instance = new Organic(result.sources, result.eventQueue, result.options);
 
-    for (int i = 2; i < argc; i++)
-    {
-        flags.push_back(argv[i]);
-    }
+    instance->start();
+}
 
-    InterpreterResult interpreterResult = Interpreter::interpret(argv[1], flags);
-
-    for (AudioSource* audioSource : interpreterResult.sources)
+void Organic::start()
+{
+    for (AudioSource* audioSource : audioSources)
     {
         audioSource->start();
     }
 
-    if (interpreterResult.options.test)
+    if (options.test)
     {
-        std::ostringstream result;
-
-        for (double frame = 0; frame <= interpreterResult.options.time * utils->sampleRate; frame++)
-        {
-            utils->time = frame / utils->sampleRate;
-
-            double* buffer = (double*)calloc(utils->channels, sizeof(double));
-
-            for (AudioSource* source : interpreterResult.sources)
-            {
-                source->fillBuffer(buffer, 1);
-            }
-
-            char value[21];
-
-            snprintf(value, 21, "%0.20f", buffer[0] * utils->volume);
-
-            result << value;
-
-            if (utils->channels == 2)
-            {
-                snprintf(value, 21, "%0.20f", buffer[1] * utils->volume);
-
-                result << value;
-            }
-        }
-
-        std::ifstream input(interpreterResult.options.testFile);
-
-        if (!input.is_open())
-        {
-            Utils::error("Could not open testing file.");
-        }
-
-        std::stringstream compare;
-
-        compare << input.rdbuf();
-
-        input.close();
-
-        if (compare.str() != result.str())
-        {
-            Utils::error("Failed test.");
-        }
+        startTest();
     }
 
     else
     {
-        RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
+        startPlayback();
+    }
+}
 
-        std::vector<unsigned int> ids = audio.getDeviceIds();
+void Organic::startTest()
+{
+    std::ostringstream result;
 
-        if (ids.size() < 1)
+    for (double frame = 0; frame <= options.time * utils->sampleRate; frame++)
+    {
+        utils->time = frame / utils->sampleRate;
+
+        double* buffer = (double*)calloc(utils->channels, sizeof(double));
+
+        for (AudioSource* source : audioSources)
         {
-            Utils::error("No audio device detected.");
+            source->fillBuffer(buffer, 1);
         }
 
-        AudioData data { interpreterResult.sources, utils };
+        char value[21];
 
-        RtAudio::StreamParameters parameters;
+        snprintf(value, 21, "%0.20f", buffer[0] * utils->volume);
 
-        parameters.deviceId = audio.getDefaultOutputDevice();
-        parameters.nChannels = utils->channels;
+        result << value;
 
-        unsigned int bufferFrames = utils->bufferLength;
-
-        if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)&data))
+        if (utils->channels == 2)
         {
-            Utils::error(audio.getErrorText());
+            snprintf(value, 21, "%0.20f", buffer[1] * utils->volume);
+
+            result << value;
         }
+    }
 
-        if (audio.startStream())
-        {
-            if (audio.isStreamOpen())
-            {
-                audio.closeStream();
-            }
+    std::ifstream input(options.testFile);
 
-            Utils::error(audio.getErrorText());
-        }
+    if (!input.is_open())
+    {
+        Utils::error("Could not open testing file.");
+    }
 
-        std::chrono::high_resolution_clock clock;
-        std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
+    std::stringstream compare;
 
-        while (true)
-        {
-            utils->time = (clock.now() - start).count() / 1000000.0;
+    compare << input.rdbuf();
 
-            interpreterResult.eventQueue->performEvents();
-        }
+    input.close();
 
-        if (audio.isStreamRunning())
-        {
-            audio.stopStream();
-        }
+    if (compare.str() != result.str())
+    {
+        Utils::error("Failed test.");
+    }
+}
 
+void Organic::startPlayback()
+{
+    RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
+
+    std::vector<unsigned int> ids = audio.getDeviceIds();
+
+    if (ids.size() < 1)
+    {
+        Utils::error("No audio device detected.");
+    }
+
+    RtAudio::StreamParameters parameters;
+
+    parameters.deviceId = audio.getDefaultOutputDevice();
+    parameters.nChannels = utils->channels;
+
+    unsigned int bufferFrames = utils->bufferLength;
+
+    AudioData data { audioSources, utils };
+
+    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)&data))
+    {
+        Utils::error(audio.getErrorText());
+    }
+
+    if (audio.startStream())
+    {
         if (audio.isStreamOpen())
         {
             audio.closeStream();
         }
+
+        Utils::error(audio.getErrorText());
     }
 
-    return 0;
+    std::chrono::high_resolution_clock clock;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
+
+    while (true)
+    {
+        utils->time = (clock.now() - start).count() / 1000000.0;
+
+        eventQueue->performEvents();
+    }
+
+    if (audio.isStreamRunning())
+    {
+        audio.stopStream();
+    }
+
+    if (audio.isStreamOpen())
+    {
+        audio.closeStream();
+    }
 }

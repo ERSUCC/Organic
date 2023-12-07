@@ -1,6 +1,6 @@
 #include "../include/interpret.h"
 
-InterpreterResult Interpreter::interpret(char* path, std::vector<char*> flags)
+InterpreterResult Interpreter::interpret(const char* path, std::vector<const char*> flags)
 {
     InterpreterOptions options;
 
@@ -52,10 +52,10 @@ InterpreterResult Interpreter::interpret(char* path, std::vector<char*> flags)
 
     visitor->visit(program);
 
-    return { options, visitor->sources, visitor->eventQueue };
+    return { visitor->sources, visitor->eventQueue, options };
 }
 
-void Interpreter::checkNextOption(std::vector<char*>& flags, int* pos)
+void Interpreter::checkNextOption(std::vector<const char*>& flags, int* pos)
 {
     if (++*pos >= flags.size())
     {

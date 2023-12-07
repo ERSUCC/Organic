@@ -1,8 +1,15 @@
 #include "../include/parse.h"
 
-Parser::Parser(char* path)
+Parser::Parser(const char* path)
 {
-    std::getline(std::ifstream(path), code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
+    std::ifstream file(path);
+    
+    if (!file.is_open())
+    {
+        Utils::error("Could not open the specified organic program.");
+    }
+
+    std::getline(file, code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
 }
 
 Program* Parser::parse()
