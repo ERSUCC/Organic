@@ -20,6 +20,14 @@ InterpreterResult Interpreter::interpret(char* path, std::vector<char*> flags)
             options.setTime = true;
         }
 
+        else if (!strncmp(flags[i], "-f", 2) || !strncmp(flags[i], "--file", 6))
+        {
+            checkNextOption(flags, &i);
+
+            options.testFile = flags[i];
+            options.setTestFile = true;
+        }
+
         else
         {
             Utils::error("Unknown option '" + std::string(flags[i]) + "'.");
@@ -29,6 +37,11 @@ InterpreterResult Interpreter::interpret(char* path, std::vector<char*> flags)
     if (!options.setTest && options.setTime)
     {
         Utils::error("Cannot set time option in normal playback mode.");
+    }
+
+    if (options.setTest && !options.setTestFile)
+    {
+        Utils::error("Test file must be specified in test mode.");
     }
 
     Parser* parser = new Parser(path);

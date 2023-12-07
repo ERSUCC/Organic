@@ -4,6 +4,7 @@
 #include <chrono>
 #include <random>
 #include <fstream>
+#include <sstream>
 
 #include "../include/RtAudio.h"
 
@@ -80,11 +81,56 @@ int main(int argc, char** argv)
 
     InterpreterResult interpreterResult = Interpreter::interpret(argv[1], flags);
 
+    for (AudioSource* audioSource : interpreterResult.sources)
+    {
+        audioSource->start();
+    }
+
     if (interpreterResult.options.test)
     {
-        for (double time = 0; time <= interpreterResult.options->time; time += interpreterResult.options->step)
+        std::ostringstream result;
+
+        for (double frame = 0; frame <= interpreterResult.options.time * utils->sampleRate; frame++)
         {
-            std::cout << time << "\n";
+            utils->time = frame / utils->sampleRate;
+
+            double* buffer = (double*)calloc(utils->channels, sizeof(double));
+
+            for (AudioSource* source : interpreterResult.sources)
+            {
+                source->fillBuffer(buffer, 1);
+            }
+
+            char value[21];
+
+            snprintf(value, 21, "%0.20f", buffer[0] * utils->volume);
+
+            result << value;
+
+            if (utils->channels == 2)
+            {
+                snprintf(value, 21, "%0.20f", buffer[1] * utils->volume);
+
+                result << value;
+            }
+        }
+
+        std::ifstream input(interpreterResult.options.testFile);
+
+        if (!input.is_open())
+        {
+            Utils::error("Could not open testing file.");
+        }
+
+        std::stringstream compare;
+
+        compare << input.rdbuf();
+
+        input.close();
+
+        if (compare.str() != result.str())
+        {
+            Utils::error("Failed test.");
         }
     }
 
@@ -121,11 +167,6 @@ int main(int argc, char** argv)
             }
 
             Utils::error(audio.getErrorText());
-        }
-
-        for (AudioSource* audioSource : data.sources)
-        {
-            audioSource->start();
         }
 
         std::chrono::high_resolution_clock clock;
