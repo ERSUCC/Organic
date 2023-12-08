@@ -502,7 +502,7 @@ void Parser::parseName()
         tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Backwards));
     }
 
-    else if (name == "pingpong-order")
+    else if (name == "ping-pong-order")
     {
         tokens.push(new GroupOrder(ControllerGroup::OrderEnum::PingPong));
     }
