@@ -76,3 +76,19 @@ protected:
     double getValueUnchecked() override;
 
 };
+
+struct ValueMultiply : public ValueCombination
+{
+
+protected:
+    double getValueUnchecked() override;
+
+};
+
+struct ValueDivide : public ValueCombination
+{
+
+protected:
+    double getValueUnchecked() override;
+
+};

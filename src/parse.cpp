@@ -146,6 +146,28 @@ void Parser::parseExpression()
 
                 tokens.push(new CreateValueSubtract(value1, getToken()));
             }
+
+            else if (code[pos] == '*')
+            {
+                Token* value1 = getToken();
+
+                parseSingleChar('*');
+                skipWhitespace();
+                parseExpression();
+
+                tokens.push(new CreateValueMultiply(value1, getToken()));
+            }
+
+            else if (code[pos] == '/')
+            {
+                Token* value1 = getToken();
+
+                parseSingleChar('/');
+                skipWhitespace();
+                parseExpression();
+
+                tokens.push(new CreateValueDivide(value1, getToken()));
+            }
         }
     }
 
@@ -188,6 +210,28 @@ void Parser::parseExpression()
         parseExpression();
 
         tokens.push(new CreateValueSubtract(value1, getToken()));
+    }
+
+    else if (code[pos] == '*')
+    {
+        Token* value1 = getToken();
+
+        parseSingleChar('*');
+        skipWhitespace();
+        parseExpression();
+
+        tokens.push(new CreateValueMultiply(value1, getToken()));
+    }
+
+    else if (code[pos] == '/')
+    {
+        Token* value1 = getToken();
+
+        parseSingleChar('/');
+        skipWhitespace();
+        parseExpression();
+
+        tokens.push(new CreateValueDivide(value1, getToken()));
     }
 }
 

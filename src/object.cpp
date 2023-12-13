@@ -85,3 +85,13 @@ double ValueSubtract::getValueUnchecked()
 {
     return value1->getValue() - value2->getValue();
 }
+
+double ValueMultiply::getValueUnchecked()
+{
+    return value1->getValue() * value2->getValue();
+}
+
+double ValueDivide::getValueUnchecked()
+{
+    return value1->getValue() / value2->getValue();
+}

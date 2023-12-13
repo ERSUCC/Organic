@@ -34,6 +34,20 @@ void CreateValueSubtract::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
+CreateValueMultiply::CreateValueMultiply(Token* value1, Token* value2) : CreateValueCombination(value1, value2) {}
+
+void CreateValueMultiply::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
+CreateValueDivide::CreateValueDivide(Token* value1, Token* value2) : CreateValueCombination(value1, value2) {}
+
+void CreateValueDivide::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 Assign::Assign(std::string variable, Token* value) : variable(variable), value(value) {}
 
 void Assign::accept(ProgramVisitor* visitor)
@@ -175,6 +189,26 @@ void ProgramVisitor::visit(CreateValueSubtract* token)
     visitWithSlot(token->value2, (Object**)&subtract->value2);
 
     setLastSlot(subtract);
+}
+
+void ProgramVisitor::visit(CreateValueMultiply* token)
+{
+    ValueMultiply* multiply = new ValueMultiply();
+
+    visitWithSlot(token->value1, (Object**)&multiply->value1);
+    visitWithSlot(token->value2, (Object**)&multiply->value2);
+
+    setLastSlot(multiply);
+}
+
+void ProgramVisitor::visit(CreateValueDivide* token)
+{
+    ValueDivide* divide = new ValueDivide();
+
+    visitWithSlot(token->value1, (Object**)&divide->value1);
+    visitWithSlot(token->value2, (Object**)&divide->value2);
+
+    setLastSlot(divide);
 }
 
 void ProgramVisitor::visit(Assign* token)

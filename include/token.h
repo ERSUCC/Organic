@@ -74,6 +74,20 @@ struct CreateValueSubtract : public CreateValueCombination
     void accept(ProgramVisitor* visitor) override;
 };
 
+struct CreateValueMultiply : public CreateValueCombination
+{
+    CreateValueMultiply(Token* value1, Token* value2);
+
+    void accept(ProgramVisitor* visitor) override;
+};
+
+struct CreateValueDivide : public CreateValueCombination
+{
+    CreateValueDivide(Token* value1, Token* value2);
+
+    void accept(ProgramVisitor* visitor) override;
+};
+
 struct Instruction : public Token {};
 
 struct Assign : public Instruction
@@ -234,6 +248,8 @@ struct ProgramVisitor
     void visit(VariableRef* token);
     void visit(CreateValueAdd* token);
     void visit(CreateValueSubtract* token);
+    void visit(CreateValueMultiply* token);
+    void visit(CreateValueDivide* token);
     void visit(Assign* token);
     void visit(CreateSine* token);
     void visit(CreateSquare* token);
