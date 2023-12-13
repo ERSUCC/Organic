@@ -254,6 +254,7 @@ struct ProgramVisitor
 
 private:
     void visitWithSlot(Token* token, Object** slot);
+    void setLastSlot(Object* value);
 
     std::stack<Object**> slots;
 

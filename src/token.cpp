@@ -144,10 +144,7 @@ void CreateDelay::accept(ProgramVisitor* visitor)
 
 void ProgramVisitor::visit(Constant* token)
 {
-    if (!slots.empty())
-    {
-        *slots.top() = new Value(token->value);
-    }
+    setLastSlot(new Value(token->value));
 }
 
 void ProgramVisitor::visit(VariableRef* token)
@@ -157,7 +154,7 @@ void ProgramVisitor::visit(VariableRef* token)
         Utils::error("Variable '" + token->name + "' not defined.");
     }
 
-    *slots.top() = variables[token->name];
+    setLastSlot(variables[token->name]);
 }
 
 void ProgramVisitor::visit(CreateValueAdd* token)
@@ -167,7 +164,7 @@ void ProgramVisitor::visit(CreateValueAdd* token)
     visitWithSlot(token->value1, (Object**)&add->value1);
     visitWithSlot(token->value2, (Object**)&add->value2);
 
-    *slots.top() = add;
+    setLastSlot(add);
 }
 
 void ProgramVisitor::visit(CreateValueSubtract* token)
@@ -177,7 +174,7 @@ void ProgramVisitor::visit(CreateValueSubtract* token)
     visitWithSlot(token->value1, (Object**)&subtract->value1);
     visitWithSlot(token->value2, (Object**)&subtract->value2);
 
-    *slots.top() = subtract;
+    setLastSlot(subtract);
 }
 
 void ProgramVisitor::visit(Assign* token)
@@ -261,7 +258,7 @@ void ProgramVisitor::visit(CreateHold* token)
     visitWithSlot(token->value, (Object**)&hold->value);
     visitWithSlot(token->length, (Object**)&hold->length);
 
-    *slots.top() = hold;
+    setLastSlot(hold);
 }
 
 void ProgramVisitor::visit(CreateSweep* token)
@@ -273,7 +270,7 @@ void ProgramVisitor::visit(CreateSweep* token)
     visitWithSlot(token->to, (Object**)&sweep->to);
     visitWithSlot(token->length, (Object**)&sweep->length);
 
-    *slots.top() = sweep;
+    setLastSlot(sweep);
 }
 
 void ProgramVisitor::visit(CreateLFO* token)
@@ -285,12 +282,12 @@ void ProgramVisitor::visit(CreateLFO* token)
     visitWithSlot(token->to, (Object**)&lfo->to);
     visitWithSlot(token->length, (Object**)&lfo->length);
 
-    *slots.top() = lfo;
+    setLastSlot(lfo);
 }
 
 void ProgramVisitor::visit(GroupOrder* token)
 {
-    *slots.top() = new ControllerGroup::Order(token->order);
+    setLastSlot(new ControllerGroup::Order(token->order));
 }
 
 void ProgramVisitor::visit(CreateControllerGroup* token)
@@ -310,12 +307,12 @@ void ProgramVisitor::visit(CreateControllerGroup* token)
 
     visitWithSlot(token->order, (Object**)&group->order);
 
-    *slots.top() = group;
+    setLastSlot(group);
 }
 
 void ProgramVisitor::visit(RandomType* token)
 {
-    *slots.top() = new Random::Type(token->type);
+    setLastSlot(new Random::Type(token->type));
 }
 
 void ProgramVisitor::visit(CreateRandom* token)
@@ -328,7 +325,7 @@ void ProgramVisitor::visit(CreateRandom* token)
     visitWithSlot(token->length, (Object**)&random->length);
     visitWithSlot(token->type, (Object**)&random->type);
 
-    *slots.top() = random;
+    setLastSlot(random);
 }
 
 void ProgramVisitor::visit(CreateDelay* token)
@@ -357,4 +354,12 @@ void ProgramVisitor::visitWithSlot(Token* token, Object** slot)
     token->accept(this);
 
     slots.pop();
+}
+
+void ProgramVisitor::setLastSlot(Object* value)
+{
+    if (!slots.empty())
+    {
+        *slots.top() = value;
+    }
 }
