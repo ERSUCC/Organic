@@ -209,7 +209,10 @@ void Random::finishStart()
     to->start(startTime);
     length->start(startTime);
 
-    value = std::uniform_real_distribution<>(from->getValue(), to->getValue())(utils->rng);
+    std::uniform_real_distribution<> udist(from->getValue(), to->getValue());
+
+    current = next;
+    next = udist(utils->rng);
 }
 
 double Random::getValueUnchecked()
@@ -219,5 +222,12 @@ double Random::getValueUnchecked()
         stop();
     }
 
-    return value;
+    switch (type->type)
+    {
+        case TypeEnum::Step:
+            return current;
+
+        case TypeEnum::Linear:
+            return current + (next - current) * (utils->time - startTime) / length->getValue();
+    }
 }

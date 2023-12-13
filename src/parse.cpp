@@ -418,7 +418,7 @@ void Parser::parseCall()
 
             else if (argument->name->name == "type")
             {
-                length = dynamic_cast<RandomType*>(argument->value);
+                type = dynamic_cast<RandomType*>(argument->value);
             }
 
             else
@@ -565,6 +565,11 @@ void Parser::parseName()
     else if (name == "random-step")
     {
         tokens.push(new RandomType(Random::TypeEnum::Step));
+    }
+
+    else if (name == "random-linear")
+    {
+        tokens.push(new RandomType(Random::TypeEnum::Linear));
     }
 
     else

@@ -120,7 +120,8 @@ struct Random : public ParameterController
 {
     enum TypeEnum
     {
-        Step
+        Step,
+        Linear
     };
 
     struct Type : public Object
@@ -144,6 +145,7 @@ protected:
     double getValueUnchecked() override;
 
 private:
-    double value;
+    double current;
+    double next = 0;
 
 };
