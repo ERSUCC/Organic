@@ -416,6 +416,11 @@ void Parser::parseCall()
                 length = argument->value;
             }
 
+            else if (argument->name->name == "type")
+            {
+                length = dynamic_cast<RandomType*>(argument->value);
+            }
+
             else
             {
                 Utils::error("Unknown argument name '" + argument->name->name + "'.");
