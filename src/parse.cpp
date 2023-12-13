@@ -537,24 +537,29 @@ void Parser::parseName()
         name += code[pos++];
     }
 
-    if (name == "forwards-order")
+    if (name == "sequence-forwards")
     {
         tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Forwards));
     }
 
-    else if (name == "backwards-order")
+    else if (name == "sequence-backwards")
     {
         tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Backwards));
     }
 
-    else if (name == "ping-pong-order")
+    else if (name == "sequence-ping-pong")
     {
         tokens.push(new GroupOrder(ControllerGroup::OrderEnum::PingPong));
     }
 
-    else if (name == "random-order")
+    else if (name == "sequence-random")
     {
         tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Random));
+    }
+
+    else if (name == "random-step")
+    {
+        tokens.push(new RandomType(Random::TypeEnum::Step));
     }
 
     else
