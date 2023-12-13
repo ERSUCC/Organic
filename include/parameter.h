@@ -115,3 +115,35 @@ protected:
     double getValueUnchecked() override;
 
 };
+
+struct Random : public ParameterController
+{
+    enum TypeEnum
+    {
+        Step
+    };
+
+    struct Type : public Object
+    {
+        Type(TypeEnum type);
+        
+        TypeEnum type;
+    };
+
+    double syncLength() override;
+
+    ValueObject* from;
+    ValueObject* to;
+    ValueObject* length;
+
+    Type* type;
+
+protected:
+    void finishStart() override;
+
+    double getValueUnchecked() override;
+
+private:
+    double value;
+
+};

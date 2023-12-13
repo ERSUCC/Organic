@@ -52,15 +52,6 @@ struct List : public Token
     std::vector<Token*> items;
 };
 
-struct GroupOrder : public Token
-{
-    GroupOrder(ControllerGroup::OrderEnum order);
-
-    void accept(ProgramVisitor* visitor) override;
-
-    ControllerGroup::OrderEnum order;
-};
-
 struct CreateValueCombination : public Token
 {
     CreateValueCombination(Token* value1, Token* value2);
@@ -173,6 +164,15 @@ struct CreateLFO : public Instruction
     Token* length;
 };
 
+struct GroupOrder : public Token
+{
+    GroupOrder(ControllerGroup::OrderEnum order);
+
+    void accept(ProgramVisitor* visitor) override;
+
+    ControllerGroup::OrderEnum order;
+};
+
 struct CreateControllerGroup : public Instruction
 {
     CreateControllerGroup(Token* repeats, List* controllers, Token* order);
@@ -182,6 +182,28 @@ struct CreateControllerGroup : public Instruction
     Token* repeats;
     List* controllers;
     Token* order;
+};
+
+struct RandomType : public Token
+{
+    RandomType(Random::TypeEnum type);
+
+    void accept(ProgramVisitor* visitor) override;
+    
+    Random::TypeEnum type;
+};
+
+struct CreateRandom : public Instruction
+{
+    CreateRandom(Token* repeats, Token* from, Token* to, Token* length, RandomType* type);
+
+    void accept(ProgramVisitor* visitor) override;
+
+    Token* repeats;
+    Token* from;
+    Token* to;
+    Token* length;
+    RandomType* type;
 };
 
 struct CreateEffect : public Instruction
@@ -210,7 +232,6 @@ struct ProgramVisitor
 {
     void visit(Constant* token);
     void visit(VariableRef* token);
-    void visit(GroupOrder* token);
     void visit(CreateValueAdd* token);
     void visit(CreateValueSubtract* token);
     void visit(Assign* token);
@@ -221,7 +242,10 @@ struct ProgramVisitor
     void visit(CreateHold* token);
     void visit(CreateSweep* token);
     void visit(CreateLFO* token);
+    void visit(GroupOrder* token);
     void visit(CreateControllerGroup* token);
+    void visit(RandomType* token);
+    void visit(CreateRandom* token);
     void visit(CreateDelay* token);
     void visit(Program* token);
 

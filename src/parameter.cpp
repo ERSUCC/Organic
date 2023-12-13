@@ -168,8 +168,6 @@ double Sweep::getValueUnchecked()
     if (utils->time - startTime >= length->getValue())
     {
         stop();
-
-        return to->getValue();
     }
 
     return from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / length->getValue();
@@ -196,4 +194,30 @@ double LFO::getValueUnchecked()
     }
 
     return from->getValue() + (to->getValue() - from->getValue()) * (-cos(utils->twoPi * (utils->time - startTime) / length->getValue()) / 2 + 0.5);
+}
+
+Random::Type::Type(TypeEnum type) : type(type) {}
+
+double Random::syncLength()
+{
+    return length->getValue();
+}
+
+void Random::finishStart()
+{
+    from->start(startTime);
+    to->start(startTime);
+    length->start(startTime);
+
+    value = std::uniform_real_distribution<>(from->getValue(), to->getValue())(utils->rng);
+}
+
+double Random::getValueUnchecked()
+{
+    if (utils->time >= startTime + length->getValue())
+    {
+        stop();
+    }
+
+    return value;
 }

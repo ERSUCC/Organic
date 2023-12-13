@@ -382,6 +382,51 @@ void Parser::parseCall()
         tokens.push(new CreateControllerGroup(repeats, values, order));
     }
 
+    else if (name->name == "random")
+    {
+        Token* repeats = new Constant(0);
+        Token* from = new Constant(0);
+        Token* to = new Constant(1);
+        Token* length = new Constant(0);
+        RandomType* type = new RandomType(Random::TypeEnum::Step);
+
+        while (code[pos] != ')')
+        {
+            parseArgument();
+
+            Argument* argument = getToken<Argument>();
+
+            if (argument->name->name == "repeats")
+            {
+                repeats = argument->value;
+            }
+
+            else if (argument->name->name == "from")
+            {
+                from = argument->value;
+            }
+
+            else if (argument->name->name == "to")
+            {
+                to = argument->value;
+            }
+
+            else if (argument->name->name == "length")
+            {
+                length = argument->value;
+            }
+
+            else
+            {
+                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+            }
+
+            skipWhitespace();
+        }
+
+        tokens.push(new CreateRandom(repeats, from, to, length, type));
+    }
+
     else if (name->name == "delay")
     {
         Token* mix = new Constant(1);

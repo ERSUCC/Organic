@@ -18,13 +18,6 @@ void VariableRef::accept(ProgramVisitor* visitor)
 
 Argument::Argument(Name* name, Token* value) : name(name), value(value) {}
 
-GroupOrder::GroupOrder(ControllerGroup::OrderEnum order) : order(order) {}
-
-void GroupOrder::accept(ProgramVisitor* visitor)
-{
-    visitor->visit(this);
-}
-
 CreateValueCombination::CreateValueCombination(Token* value1, Token* value2) : value1(value1), value2(value2) {}
 
 CreateValueAdd::CreateValueAdd(Token* value1, Token* value2) : CreateValueCombination(value1, value2) {}
@@ -109,10 +102,32 @@ void CreateLFO::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
+GroupOrder::GroupOrder(ControllerGroup::OrderEnum order) : order(order) {}
+
+void GroupOrder::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 CreateControllerGroup::CreateControllerGroup(Token* repeats, List* controllers, Token* order) :
     repeats(repeats), controllers(controllers), order(order) {}
 
 void CreateControllerGroup::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
+RandomType::RandomType(Random::TypeEnum type) : type(type) {}
+
+void RandomType::accept(ProgramVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
+CreateRandom::CreateRandom(Token* repeats, Token* from, Token* to, Token* length, RandomType* type) :
+    repeats(repeats), from(from), to(to), length(length), type(type) {}
+
+void CreateRandom::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
@@ -143,11 +158,6 @@ void ProgramVisitor::visit(VariableRef* token)
     }
 
     *slots.top() = variables[token->name];
-}
-
-void ProgramVisitor::visit(GroupOrder* token)
-{
-    *slots.top() = new ControllerGroup::Order(token->order);
 }
 
 void ProgramVisitor::visit(CreateValueAdd* token)
@@ -278,6 +288,11 @@ void ProgramVisitor::visit(CreateLFO* token)
     *slots.top() = lfo;
 }
 
+void ProgramVisitor::visit(GroupOrder* token)
+{
+    *slots.top() = new ControllerGroup::Order(token->order);
+}
+
 void ProgramVisitor::visit(CreateControllerGroup* token)
 {
     ControllerGroup* group = new ControllerGroup();
@@ -296,6 +311,24 @@ void ProgramVisitor::visit(CreateControllerGroup* token)
     visitWithSlot(token->order, (Object**)&group->order);
 
     *slots.top() = group;
+}
+
+void ProgramVisitor::visit(RandomType* token)
+{
+    *slots.top() = new Random::Type(token->type);
+}
+
+void ProgramVisitor::visit(CreateRandom* token)
+{
+    Random* random = new Random();
+
+    visitWithSlot(token->repeats, (Object**)&random->repeats);
+    visitWithSlot(token->from, (Object**)&random->from);
+    visitWithSlot(token->to, (Object**)&random->to);
+    visitWithSlot(token->length, (Object**)&random->length);
+    visitWithSlot(token->type, (Object**)&random->type);
+
+    *slots.top() = random;
 }
 
 void ProgramVisitor::visit(CreateDelay* token)
