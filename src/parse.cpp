@@ -480,7 +480,7 @@ void Parser::parseName()
 {
     skipWhitespace();
 
-    if (!isalpha(code[pos]))
+    if (!isalpha(code[pos]) && code[pos] != '_')
     {
         Utils::error("Expected letter, received '" + std::string(1, code[pos]) + "'.");
     }
