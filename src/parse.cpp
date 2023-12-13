@@ -482,7 +482,7 @@ void Parser::parseName()
 
     if (!isalpha(code[pos]) && code[pos] != '_')
     {
-        Utils::error("Expected letter, received '" + std::string(1, code[pos]) + "'.");
+        Utils::error("Expected letter or '_', received '" + std::string(1, code[pos]) + "'.");
     }
 
     std::string name;
