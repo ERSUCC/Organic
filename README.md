@@ -71,6 +71,8 @@ The following sections detail the purpose, inputs, and default values for each a
 
 #### sine
 
+| Input |
+| --- |
 | volume |
 | pan |
 | frequency |
