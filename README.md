@@ -61,23 +61,20 @@ In this example program, the variable `freq` makes it easier to change the frequ
 
 ## Organic Functions
 
+[Audio Sources](#audio-sources)
+[Controllers](#controllers)
+
 ### Audio Sources
-
-#### saw
-
-test
 
 #### sine
 
-test
+sine()
 
-#### square
+### Controllers
 
-test
+#### sweep
 
-#### triangle
-
-test
+sweep()
 
 ## Building Organic
 
