@@ -71,11 +71,12 @@ The following sections detail the purpose, inputs, and default values for each a
 
 #### sine
 
-| --- |
-| volume |
-| pan |
-| frequency |
-| effects |
+| Input | Type | Default | Description |
+| --- | --- | --- | --- |
+| volume | number | 1 | the volume of the generated sound wave |
+| pan | number | 0 | the pan amount of the generated sound wave (-1 for 100% left, 1 for 100% right) |
+| frequency | number | 0 | the frequency of the generated sound wave |
+| effects | list | empty | the effects to be applied to the audio output |
 
 ### Controllers
 
