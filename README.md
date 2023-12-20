@@ -71,10 +71,10 @@ The following sections detail the purpose, inputs, and default values for each a
 
 #### sine
 
-volume
-pan
-frequency
-effects
+| volume |
+| pan |
+| frequency |
+| effects |
 
 ### Controllers
 
