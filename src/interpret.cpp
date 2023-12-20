@@ -52,6 +52,11 @@ InterpreterResult Interpreter::interpret(const char* path, std::vector<const cha
 
     visitor->visit(program);
 
+    if (visitor->sources.size() == 0)
+    {
+        Utils::error("Invalid program, no audio sources detected.");
+    }
+
     return { visitor->sources, visitor->eventQueue, options };
 }
 
