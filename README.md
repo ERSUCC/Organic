@@ -61,20 +61,28 @@ In this example program, the variable `freq` makes it easier to change the frequ
 
 ## Organic Functions
 
-[Audio Sources](#audio-sources)
-[Controllers](#controllers)
+The following sections detail the purpose, inputs, and default values for each available function.
+
+[Audio Sources](#audio-sources)  
+[Controllers](#controllers)  
+[Effects](#effects)
 
 ### Audio Sources
 
 #### sine
 
-sine()
+volume
+pan
+frequency
+effects
 
 ### Controllers
 
-#### sweep
 
-sweep()
+
+### Effects
+
+
 
 ## Building Organic
 
