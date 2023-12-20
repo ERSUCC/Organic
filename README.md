@@ -6,8 +6,7 @@ Organic is a programming language for generative audio synthesis, with the goal 
 
 1. [Using Organic](#using-organic)
 2. [Organic Syntax](#organic-syntax)
-3. [Organic Functions](#organic-functions)
-4. [Building Organic](#building-organic)
+3. [Building Organic](#building-organic)
 
 ## Using Organic
 
@@ -58,33 +57,6 @@ saw(frequency: freq)
 ```
 
 In this example program, the variable `freq` makes it easier to change the frequency of all three oscillators at the same time, ensuring that they always have the same value regardless of what is assigned to `freq`.
-
-## Organic Functions
-
-The following sections detail the purpose, inputs, and default values for each available function.
-
-[Audio Sources](#audio-sources)  
-[Controllers](#controllers)  
-[Effects](#effects)
-
-### Audio Sources
-
-#### sine
-
-| Input | Type | Default | Description |
-| --- | --- | --- | --- |
-| volume | number | 1 | the volume of the generated sound wave |
-| pan | number | 0 | the pan amount of the generated sound wave (-1 for 100% left, 1 for 100% right) |
-| frequency | number | 0 | the frequency of the generated sound wave |
-| effects | list | empty | the effects to be applied to the audio output |
-
-### Controllers
-
-
-
-### Effects
-
-
 
 ## Building Organic
 
