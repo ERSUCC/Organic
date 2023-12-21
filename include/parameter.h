@@ -148,4 +148,6 @@ private:
     double current;
     double next = 0;
 
+    bool first = true;
+
 };

@@ -211,8 +211,19 @@ void Random::finishStart()
 
     std::uniform_real_distribution<> udist(from->getValue(), to->getValue());
 
-    current = next;
+    if (first)
+    {
+        current = udist(utils->rng);
+    }
+
+    else
+    {
+        current = next;
+    }
+    
     next = udist(utils->rng);
+
+    first = false;
 }
 
 double Random::getValueUnchecked()
