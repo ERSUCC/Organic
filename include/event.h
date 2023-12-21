@@ -3,8 +3,8 @@
 #include <functional>
 #include <queue>
 
+#include "controller.h"
 #include "object.h"
-#include "parameter.h"
 
 struct Event : public Sync
 {

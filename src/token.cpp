@@ -129,7 +129,7 @@ void CreateLFO::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
-GroupOrder::GroupOrder(int line, int character, ControllerGroup::OrderEnum order) :
+GroupOrder::GroupOrder(int line, int character, Sequence::OrderEnum order) :
     Token(line, character), order(order) {}
 
 void GroupOrder::accept(ProgramVisitor* visitor)
@@ -137,10 +137,10 @@ void GroupOrder::accept(ProgramVisitor* visitor)
     visitor->visit(this);
 }
 
-CreateControllerGroup::CreateControllerGroup(int line, int character, Token* repeats, List* controllers, Token* order) :
+CreateSequence::CreateSequence(int line, int character, Token* repeats, List* controllers, Token* order) :
     Instruction(line, character), repeats(repeats), controllers(controllers), order(order) {}
 
-void CreateControllerGroup::accept(ProgramVisitor* visitor)
+void CreateSequence::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
@@ -337,12 +337,12 @@ void ProgramVisitor::visit(CreateLFO* token)
 
 void ProgramVisitor::visit(GroupOrder* token)
 {
-    setLastSlot(new ControllerGroup::Order(token->order));
+    setLastSlot(new Sequence::Order(token->order));
 }
 
-void ProgramVisitor::visit(CreateControllerGroup* token)
+void ProgramVisitor::visit(CreateSequence* token)
 {
-    ControllerGroup* group = new ControllerGroup();
+    Sequence* group = new Sequence();
 
     visitWithSlot(token->repeats, (Object**)&group->repeats);
 

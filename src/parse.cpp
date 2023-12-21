@@ -427,7 +427,7 @@ void Parser::parseCall()
     {
         Token* repeats = new Constant(name->line, name->character, 0);
         List* values = new List(name->line, name->character);
-        Token* order = new GroupOrder(name->line, name->character, ControllerGroup::OrderEnum::Forwards);
+        Token* order = new GroupOrder(name->line, name->character, Sequence::OrderEnum::Forwards);
 
         while (code[pos] != ')')
         {
@@ -458,7 +458,7 @@ void Parser::parseCall()
             skipWhitespace();
         }
 
-        tokens.push(new CreateControllerGroup(name->line, name->character, repeats, values, order));
+        tokens.push(new CreateSequence(name->line, name->character, repeats, values, order));
     }
 
     else if (name->name == "random")
@@ -637,22 +637,22 @@ void Parser::parseName()
 
     if (name == "sequence-forwards")
     {
-        tokens.push(new GroupOrder(startLine, startCharacter, ControllerGroup::OrderEnum::Forwards));
+        tokens.push(new GroupOrder(startLine, startCharacter, Sequence::OrderEnum::Forwards));
     }
 
     else if (name == "sequence-backwards")
     {
-        tokens.push(new GroupOrder(startLine, startCharacter, ControllerGroup::OrderEnum::Backwards));
+        tokens.push(new GroupOrder(startLine, startCharacter, Sequence::OrderEnum::Backwards));
     }
 
     else if (name == "sequence-ping-pong")
     {
-        tokens.push(new GroupOrder(startLine, startCharacter, ControllerGroup::OrderEnum::PingPong));
+        tokens.push(new GroupOrder(startLine, startCharacter, Sequence::OrderEnum::PingPong));
     }
 
     else if (name == "sequence-random")
     {
-        tokens.push(new GroupOrder(startLine, startCharacter, ControllerGroup::OrderEnum::Random));
+        tokens.push(new GroupOrder(startLine, startCharacter, Sequence::OrderEnum::Random));
     }
 
     else if (name == "random-step")

@@ -1,6 +1,6 @@
-#include "../include/parameter.h"
+#include "../include/controller.h"
 
-void ParameterController::finishStop()
+void ValueController::finishStop()
 {
     if (repeats->getValue() == 0 || ++times < repeats->getValue())
     {
@@ -8,9 +8,9 @@ void ParameterController::finishStop()
     }
 }
 
-ControllerGroup::Order::Order(OrderEnum order) : order(order) {}
+Sequence::Order::Order(OrderEnum order) : order(order) {}
 
-double ControllerGroup::syncLength()
+double Sequence::syncLength()
 {
     double length = 0;
 
@@ -22,7 +22,7 @@ double ControllerGroup::syncLength()
     return length;
 }
 
-void ControllerGroup::finishStart()
+void Sequence::finishStart()
 {
     repeats->start(startTime);
 
@@ -58,7 +58,7 @@ void ControllerGroup::finishStart()
     controllers[current]->start(startTime);
 }
 
-double ControllerGroup::getValueUnchecked()
+double Sequence::getValueUnchecked()
 {
     if (!controllers[current]->enabled)
     {

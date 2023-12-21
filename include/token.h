@@ -6,8 +6,8 @@
 #include <unordered_map>
 
 #include "audiosource.h"
+#include "controller.h"
 #include "event.h"
-#include "parameter.h"
 
 struct ProgramVisitor;
 
@@ -190,16 +190,16 @@ struct CreateLFO : public Instruction
 
 struct GroupOrder : public Token
 {
-    GroupOrder(int line, int character, ControllerGroup::OrderEnum order);
+    GroupOrder(int line, int character, Sequence::OrderEnum order);
 
     void accept(ProgramVisitor* visitor) override;
 
-    ControllerGroup::OrderEnum order;
+    Sequence::OrderEnum order;
 };
 
-struct CreateControllerGroup : public Instruction
+struct CreateSequence : public Instruction
 {
-    CreateControllerGroup(int line, int character, Token* repeats, List* controllers, Token* order);
+    CreateSequence(int line, int character, Token* repeats, List* controllers, Token* order);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -271,7 +271,7 @@ struct ProgramVisitor
     void visit(CreateSweep* token);
     void visit(CreateLFO* token);
     void visit(GroupOrder* token);
-    void visit(CreateControllerGroup* token);
+    void visit(CreateSequence* token);
     void visit(RandomType* token);
     void visit(CreateRandom* token);
     void visit(CreateDelay* token);

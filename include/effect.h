@@ -2,8 +2,8 @@
 
 #include <queue>
 
+#include "controller.h"
 #include "object.h"
-#include "parameter.h"
 
 struct Effect : public Sync
 {

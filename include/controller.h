@@ -7,9 +7,9 @@
 
 #include "object.h"
 
-struct ParameterController : public ValueObject
+struct ValueController : public ValueObject
 {
-    friend struct ControllerGroup;
+    friend struct Sequence;
 
     ValueObject* repeats;
 
@@ -20,7 +20,7 @@ protected:
 
 };
 
-struct ControllerGroup : public ParameterController
+struct Sequence : public ValueController
 {
     enum OrderEnum
     {
@@ -59,7 +59,7 @@ private:
 
 };
 
-struct Value : public ParameterController
+struct Value : public ValueController
 {
     Value(double value);
 
@@ -70,7 +70,7 @@ protected:
 
 };
 
-struct Hold : public ParameterController
+struct Hold : public ValueController
 {
     Hold();
 
@@ -86,7 +86,7 @@ protected:
 
 };
 
-struct Sweep : public ParameterController
+struct Sweep : public ValueController
 {
     double syncLength() override;
 
@@ -101,7 +101,7 @@ protected:
 
 };
 
-struct LFO : public ParameterController
+struct LFO : public ValueController
 {
     double syncLength() override;
 
@@ -116,7 +116,7 @@ protected:
 
 };
 
-struct Random : public ParameterController
+struct Random : public ValueController
 {
     enum TypeEnum
     {

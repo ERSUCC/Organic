@@ -5,9 +5,9 @@
 
 #include "AudioFile.h"
 
+#include "controller.h"
 #include "effect.h"
 #include "object.h"
-#include "parameter.h"
 
 struct AudioSource : public ValueObject
 {
