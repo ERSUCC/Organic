@@ -7,6 +7,7 @@ Organic is a programming language for generative audio synthesis, with the goal 
 1. [Using Organic](#using-organic)
 2. [Organic Syntax](#organic-syntax)
 3. [Building Organic](#building-organic)
+4. [Credits](#credits)
 
 ## Using Organic
 
@@ -74,3 +75,7 @@ cmake --build .
 ```
 
 This will create the `organic` binary in the `build` directory. Move it wherever you would like, then return to [Using Organic](#using-organic) to continue.
+
+## Credits
+
+Organic relies on RtAudio for cross-platform audio output, which can be found here: [https://github.com/thestk/rtaudio](https://github.com/thestk/rtaudio).
