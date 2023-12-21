@@ -30,12 +30,12 @@ void Sequence::finishStart()
 
     if (order->order == OrderEnum::PingPong)
     {
-        max_times = controllers.size() * 2 - 1;
+        max_switches = controllers.size() * 2 - 1;
     }
 
     else
     {
-        max_times = controllers.size();
+        max_switches = controllers.size();
     }
 
     if (order->order == OrderEnum::Backwards)
@@ -53,7 +53,7 @@ void Sequence::finishStart()
         current = 0;
     }
 
-    times = 0;
+    switches = 0;
 
     controllers[current]->start(startTime);
 }
@@ -108,7 +108,7 @@ double Sequence::getValueUnchecked()
             }
         }
 
-        if (++times >= max_times)
+        if (++switches >= max_switches)
         {
             double value = controllers[last]->getValue();
 

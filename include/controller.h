@@ -52,8 +52,8 @@ private:
     int current = 0;
     int direction = 1;
     int last = -1;
-    int times = 0;
-    int max_times;
+    int switches = 0;
+    int max_switches;
 
     std::uniform_int_distribution<> udist;
 
