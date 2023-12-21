@@ -149,12 +149,14 @@ void Hold::finishStart()
 
 double Hold::getValueUnchecked()
 {
+    double val = value->getValue();
+
     if (utils->time - startTime >= length->getValue())
     {
         stop();
     }
 
-    return value->getValue();
+    return val;
 }
 
 double Sweep::syncLength()
@@ -172,12 +174,14 @@ void Sweep::finishStart()
 
 double Sweep::getValueUnchecked()
 {
+    double value = from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / length->getValue();
+
     if (utils->time - startTime >= length->getValue())
     {
         stop();
     }
 
-    return from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / length->getValue();
+    return value;
 }
 
 double LFO::syncLength()
@@ -195,12 +199,14 @@ void LFO::finishStart()
 
 double LFO::getValueUnchecked()
 {
+    double value = from->getValue() + (to->getValue() - from->getValue()) * (-cos(utils->twoPi * (utils->time - startTime) / length->getValue()) / 2 + 0.5);
+
     if (utils->time >= startTime + length->getValue())
     {
         stop();
     }
 
-    return from->getValue() + (to->getValue() - from->getValue()) * (-cos(utils->twoPi * (utils->time - startTime) / length->getValue()) / 2 + 0.5);
+    return value;
 }
 
 Random::Type::Type(TypeEnum type) : type(type) {}
@@ -235,10 +241,7 @@ void Random::finishStart()
 
 double Random::getValueUnchecked()
 {
-    if (utils->time >= startTime + length->getValue())
-    {
-        stop();
-    }
+    double value = 0;
 
     switch (type->type)
     {
@@ -248,4 +251,11 @@ double Random::getValueUnchecked()
         case TypeEnum::Linear:
             return current + (next - current) * (utils->time - startTime) / length->getValue();
     }
+    
+    if (utils->time >= startTime + length->getValue())
+    {
+        stop();
+    }
+
+    return value;
 }
