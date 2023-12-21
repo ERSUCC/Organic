@@ -43,6 +43,11 @@ void ControllerGroup::finishStart()
         current = controllers.size() - 1;
     }
 
+    else if (order->order == OrderEnum::Random)
+    {
+        current = udist(utils->rng);
+    }
+
     else
     {
         current = 0;
