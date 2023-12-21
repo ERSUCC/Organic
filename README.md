@@ -62,9 +62,9 @@ In this example program, the variable `freq` makes it easier to change the frequ
 
 This section details the process of building Organic yourself, rather than using one of the released binary files.
 
-First, make sure you have the necessary dependencies installed. Organic relies on RtAudio for cross-platform audio output, which can be found here: [https://github.com/thestk/rtaudio](https://github.com/thestk/rtaudio). Currently the only provided method for building Organic is CMake, which can be found here: [https://cmake.org/download/](https://cmake.org/download/).
+Currently the only provided method for building Organic is CMake, which can be found here: [https://cmake.org/download/](https://cmake.org/download/). Make sure CMake is installed and working properly before continuing.
 
-Once you have installed the necessary dependencies and downloaded the Organic source code, open the command-line and navigate to the directory where you installed the source code. To build with CMake, run the following commands:
+Once you have downloaded the Organic source code, open the command-line and navigate to the directory where you installed the source code. To build with CMake, run the following commands:
 
 ```
 mkdir build
