@@ -17,4 +17,13 @@ add_executable(organic src/audiosource.cpp
                        src/token.cpp
                        src/utils.cpp)
 
+add_library(rtaudio STATIC src/RtAudio.cpp)
+
+target_compile_options(rtaudio PRIVATE -D__MACOSX_CORE__)
+
+find_library(COREAUDIO_LIB CoreAudio)
+find_library(COREFOUNDATION_LIB CoreFoundation)
+
+target_link_libraries(rtaudio ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
+
 target_link_libraries(organic rtaudio)
