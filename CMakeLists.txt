@@ -36,4 +36,15 @@ if (APPLE)
     target_link_libraries(rtaudio ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
 endif()
 
+if (LINUX)
+    target_compile_options(rtaudio PRIVATE -D__LINUX_ALSA__)
+
+    find_package(ALSA)
+
+    find_package(Threads REQUIRED CMAKE_THREAD_PREFER_PTHREAD THREADS_PREFER_PTHREAD_FLAG)
+
+    target_include_directories(rtaudio PRIVATE ${ALSA_INCLUDE_DIRS})
+    target_link_libraries(rtaudio ${ALSA_LIBRARIES} Threads::Threads)
+endif()
+
 target_link_libraries(organic rtaudio)
