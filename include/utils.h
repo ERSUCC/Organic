@@ -2,8 +2,13 @@
 
 #define _USE_MATH_DEFINES
 
+#if defined(_WIN32)
+    #include <cmath>
+#else
+    #include <math.h>
+#endif
+
 #include <iostream>
-#include <cmath>
 #include <random>
 #include <chrono>
 
