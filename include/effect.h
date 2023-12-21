@@ -2,8 +2,8 @@
 
 #include <queue>
 
-#include "parameter.h"
 #include "object.h"
+#include "parameter.h"
 
 struct Effect : public Sync
 {
@@ -19,6 +19,10 @@ struct Delay : public Effect
     ValueObject* delay;
     ValueObject* feedback;
 
+protected:
+    void finishStart() override;
+    void finishStop() override;
+
 private:
     std::queue<double> buffer;
 
@@ -31,6 +35,10 @@ struct LowPassFilter : public Effect
     void apply(double* buffer, unsigned int bufferLength) override;
 
     ValueObject* cutoff;
+
+protected:
+    void finishStart() override;
+    void finishStop() override;
 
 private:
     double raw1[2] = { 0 };

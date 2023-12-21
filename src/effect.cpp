@@ -39,6 +39,20 @@ void Delay::apply(double* buffer, unsigned int bufferLength)
     }
 }
 
+void Delay::finishStart()
+{
+    mix->start(startTime);
+    delay->start(startTime);
+    feedback->start(startTime);
+}
+
+void Delay::finishStop()
+{
+    mix->stop();
+    delay->stop();
+    feedback->stop();
+}
+
 void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
 {
     double omega = tan(M_PI * cutoff->getValue() / utils->sampleRate);
@@ -82,4 +96,16 @@ void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
             filtered1[1] = buffer[i + 1];
         }
     }
+}
+
+void LowPassFilter::finishStart()
+{
+    mix->start(startTime);
+    cutoff->start(startTime);
+}
+
+void LowPassFilter::finishStop()
+{
+    mix->stop();
+    cutoff->stop();
 }

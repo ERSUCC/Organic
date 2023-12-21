@@ -43,6 +43,11 @@ void Oscillator::finishStart()
     volume->start(startTime);
     pan->start(startTime);
     frequency->start(startTime);
+
+    for (Effect* effect : effects)
+    {
+        effect->start(startTime);
+    }
 }
 
 void Oscillator::finishStop()
@@ -181,6 +186,11 @@ void Sample::finishStart()
     for (int i = 0; i < grains.size(); i++)
     {
         grains[i] = 0;
+    }
+
+    for (Effect* effect : effects)
+    {
+        effect->start(startTime);
     }
 }
 
