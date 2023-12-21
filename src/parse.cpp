@@ -661,7 +661,11 @@ void Parser::parseConstant()
 
     std::string constant;
 
-    while (pos < code.size() && (isdigit(code[pos]) || code[pos] == '.' || code[pos] == '-'))
+    constant += code[pos];
+
+    nextCharacter();
+
+    while (pos < code.size() && (isdigit(code[pos]) || code[pos] == '.'))
     {
         constant += code[pos];
 
