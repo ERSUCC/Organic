@@ -49,6 +49,11 @@ double ValueObject::getValue()
     return 0;
 }
 
+double Variable::syncLength()
+{
+    return value->syncLength();
+}
+
 void Variable::finishStart()
 {
     value->start();
@@ -62,6 +67,11 @@ void Variable::finishStop()
 double Variable::getValueUnchecked()
 {
     return value->getValue();
+}
+
+double ValueCombination::syncLength()
+{
+    return value1->syncLength();
 }
 
 void ValueCombination::finishStart()

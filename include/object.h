@@ -40,6 +40,8 @@ protected:
 
 struct Variable : public ValueObject
 {
+    double syncLength() override;
+
     ValueObject* value;
 
 protected:
@@ -52,6 +54,8 @@ protected:
 
 struct ValueCombination : public ValueObject
 {
+    double syncLength() override;
+    
     ValueObject* value1;
     ValueObject* value2;
 
