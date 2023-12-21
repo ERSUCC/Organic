@@ -104,11 +104,18 @@ void Parser::parseComment()
 
 void Parser::parseAssign()
 {
-    Name* name = getToken<Name>();
+    Token* token = getToken();
+
+    Name* name = dynamic_cast<Name*>(token);
 
     skipWhitespace();
     parseSingleChar('=');
     parseExpression();
+
+    if (!name)
+    {
+        parseError("Cannot define a variable with a reserved name.", token->line, token->character);
+    }
 
     tokens.push(new Assign(name->line, name->character, name->name, getToken()));
 }
@@ -256,7 +263,14 @@ void Parser::parseCall()
     skipWhitespace();
     parseSingleChar('(');
 
-    Name* name = getToken<Name>();
+    Token* token = getToken();
+
+    Name* name = dynamic_cast<Name*>(token);
+
+    if (!name)
+    {
+        parseError("Reserved names cannot be used as functions.", token->line, token->character);
+    }
 
     if (name->name == "sine" || name->name == "square" || name->name == "saw" || name->name == "triangle")
     {
