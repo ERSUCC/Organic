@@ -3,9 +3,9 @@
 #define _USE_MATH_DEFINES
 
 #if defined(_WIN32)
-    #include <cmath>
-#else
     #include <math.h>
+#else
+    #include <cmath>
 #endif
 
 #include <iostream>
