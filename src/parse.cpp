@@ -584,6 +584,11 @@ void Parser::parseList()
         }
     }
 
+    if (list->items.size() == 0)
+    {
+        parseError("Lists cannot be empty.", list->line, list->character);
+    }
+
     tokens.push(list);
 
     parseSingleChar(']');
