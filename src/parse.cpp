@@ -2,7 +2,7 @@
 
 Parser::Parser(const char* path)
 {
-    sourcePath = std::filesystem::canonical(path);
+    sourcePath = std::filesystem::canonical(path).string();
 
     std::ifstream file(path);
     
