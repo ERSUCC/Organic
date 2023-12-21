@@ -17,15 +17,20 @@ struct Sync : public Object
 
     virtual double syncLength();
 
+    Sync* parent = nullptr;
+
     double startTime = 0;
 
     bool enabled = false;
 
 protected:
-    Utils* utils;
-
     virtual void finishStart();
     virtual void finishStop();
+
+    virtual void childStart(Sync* child);
+    virtual void childStop(Sync* child);
+
+    Utils* utils;
 
 };
 
@@ -48,6 +53,9 @@ protected:
     void finishStart() override;
     void finishStop() override;
 
+    void childStart(Sync* child) override;
+    void childStop(Sync* child) override;
+
     double getValueUnchecked() override;
 
 };
@@ -55,7 +63,7 @@ protected:
 struct ValueCombination : public ValueObject
 {
     double syncLength() override;
-    
+
     ValueObject* value1;
     ValueObject* value2;
 

@@ -21,14 +21,27 @@ void Sync::start(double time)
         enabled = true;
 
         finishStart();
+
+        if (parent)
+        {
+            parent->childStart(this);
+        }
     }
 }
 
 void Sync::stop()
 {
-    enabled = false;
+    if (enabled)
+    {
+        enabled = false;
 
-    finishStop();
+        finishStop();
+
+        if (parent)
+        {
+            parent->childStop(this);
+        }
+    }
 }
 
 double Sync::syncLength()
@@ -38,6 +51,9 @@ double Sync::syncLength()
 
 void Sync::finishStart() {}
 void Sync::finishStop() {}
+
+void Sync::childStart(Sync* child) {}
+void Sync::childStop(Sync* child) {}
 
 double ValueObject::getValue()
 {
@@ -62,6 +78,16 @@ void Variable::finishStart()
 void Variable::finishStop()
 {
     value->stop();
+}
+
+void Variable::childStart(Sync* child)
+{
+    start();
+}
+
+void Variable::childStop(Sync* child)
+{
+    stop();
 }
 
 double Variable::getValueUnchecked()

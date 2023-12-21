@@ -235,6 +235,8 @@ void ProgramVisitor::visit(Assign* token)
     }
 
     visitWithSlot(token->value, (Object**)&variables[token->variable]->value);
+
+    variables[token->variable]->value->parent = variables[token->variable];
 }
 
 void ProgramVisitor::visit(CreateSine* token)
