@@ -19,11 +19,21 @@ add_executable(organic src/audiosource.cpp
 
 add_library(rtaudio STATIC src/RtAudio.cpp)
 
-target_compile_options(rtaudio PRIVATE -D__MACOSX_CORE__)
+if (WIN32)
+    target_compile_options(rtaudio PRIVATE -D__WINDOWS_WASAPI__)
 
-find_library(COREAUDIO_LIB CoreAudio)
-find_library(COREFOUNDATION_LIB CoreFoundation)
+    find_package(Threads REQUIRED CMAKE_THREAD_PREFER_PTHREAD THREADS_PREFER_PTHREAD_FLAG)
 
-target_link_libraries(rtaudio ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
+    target_link_libraries(rtaudio ksuser mfplat mfuuid wmcodecdspuuid winmm ole32 Threads::Threads)
+endif()
+
+if (APPLE)
+    target_compile_options(rtaudio PRIVATE -D__MACOSX_CORE__)
+
+    find_library(COREAUDIO_LIB CoreAudio)
+    find_library(COREFOUNDATION_LIB CoreFoundation)
+
+    target_link_libraries(rtaudio ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
+endif()
 
 target_link_libraries(organic rtaudio)
