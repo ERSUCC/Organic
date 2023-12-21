@@ -13,7 +13,7 @@ Sequence::Order::Order(OrderEnum order) : order(order) {}
 double Sequence::syncLength()
 {
     double length = 0;
-
+    
     for (ValueObject* controller : controllers)
     {
         length += controller->syncLength();
@@ -110,9 +110,11 @@ double Sequence::getValueUnchecked()
 
         if (++times >= max_times)
         {
+            double value = controllers[last]->getValue();
+
             stop();
 
-            return controllers[last]->getValue();
+            return value;
         }
 
         controllers[current]->start(controllers[last]->startTime + controllers[last]->syncLength());
