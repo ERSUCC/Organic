@@ -29,6 +29,11 @@ Program* Parser::parse()
     return program;
 }
 
+void Parser::parseError(const std::string message, const int line, const int character)
+{
+    Utils::error("Parse error in \"" + sourcePath + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ": " + message);
+}
+
 Token* Parser::getToken()
 {
     Token* token = tokens.top();
@@ -657,6 +662,65 @@ void Parser::parseName()
 
     else
     {
+        double base = 0;
+
+        switch (name[0])
+        {
+            case 'c':
+                break;
+
+            case 'd':
+                base = 2;
+
+                break;
+
+            case 'e':
+                base = 4;
+
+                break;
+
+            case 'f':
+                base = 5;
+
+                break;
+
+            case 'g':
+                base = 7;
+
+                break;
+
+            case 'a':
+                base = 9;
+
+                break;
+
+            case 'b':
+                base = 11;
+
+                break;
+
+            default:
+                return tokens.push(new Name(startLine, startCharacter, name));
+        }
+
+        if (name.size() == 2 && isdigit(name[1]))
+        {
+            return tokens.push(new Constant(startLine, startCharacter, getFrequency(base + 12 * (name[1] - 48))));
+        }
+
+        if (name.size() == 3 && isdigit(name[2]))
+        {
+            if (name[1] == 's')
+            {
+                return tokens.push(new Constant(startLine, startCharacter, getFrequency(base + 12 * (name[2] - 48) + 1)));
+            }
+
+            if (name[1] == 'f')
+            {
+                return tokens.push(new Constant(startLine, startCharacter, getFrequency(base + 12 * (name[2] - 48) - 1)));
+            }
+        }
+
         tokens.push(new Name(startLine, startCharacter, name));
     }
 }
@@ -701,7 +765,7 @@ void Parser::parseSingleChar(char c)
     nextCharacter();
 }
 
-void Parser::parseError(const std::string message, const int line, const int character)
+double Parser::getFrequency(double note)
 {
-    Utils::error("Parse error in \"" + sourcePath + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ": " + message);
+    return 440 * pow(2, (note - 45) / 12);
 }

@@ -17,6 +17,8 @@ struct Parser
     Program* parse();
 
 private:
+    void parseError(const std::string message, const int line, const int character);
+
     Token* getToken();
     template <typename T> T* getToken();
 
@@ -34,7 +36,7 @@ private:
     void parseConstant();
     void parseSingleChar(char c);
 
-    void parseError(const std::string message, const int line, const int character);
+    double getFrequency(double note);
 
     std::string sourcePath;
     std::string code;
