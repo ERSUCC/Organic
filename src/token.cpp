@@ -1,155 +1,171 @@
 #include "../include/token.h"
 
-Constant::Constant(double value) : value(value) {}
+Token::Token(int line, int character) : line(line), character(character) {}
+
+Constant::Constant(int line, int character, double value) : Token(line, character), value(value) {}
 
 void Constant::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-Name::Name(std::string name) : name(name) {}
+Name::Name(int line, int character, std::string name) : Token(line, character), name(name) {}
 
-VariableRef::VariableRef(std::string name) : Name(name) {}
+VariableRef::VariableRef(int line, int character, std::string name) : Name(line, character, name) {}
 
 void VariableRef::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-Argument::Argument(Name* name, Token* value) : name(name), value(value) {}
+Argument::Argument(int line, int character, Name* name, Token* value) : Token(line, character), name(name), value(value) {}
 
-CreateValueCombination::CreateValueCombination(Token* value1, Token* value2) : value1(value1), value2(value2) {}
+List::List(int line, int character) : Token(line, character) {}
 
-CreateValueAdd::CreateValueAdd(Token* value1, Token* value2) : CreateValueCombination(value1, value2) {}
+CreateValueCombination::CreateValueCombination(int line, int character, Token* value1, Token* value2) :
+    Token(line, character), value1(value1), value2(value2) {}
+
+CreateValueAdd::CreateValueAdd(int line, int character, Token* value1, Token* value2) :
+    CreateValueCombination(line, character, value1, value2) {}
 
 void CreateValueAdd::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateValueSubtract::CreateValueSubtract(Token* value1, Token* value2) : CreateValueCombination(value1, value2) {}
+CreateValueSubtract::CreateValueSubtract(int line, int character, Token* value1, Token* value2) :
+    CreateValueCombination(line, character, value1, value2) {}
 
 void CreateValueSubtract::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateValueMultiply::CreateValueMultiply(Token* value1, Token* value2) : CreateValueCombination(value1, value2) {}
+CreateValueMultiply::CreateValueMultiply(int line, int character, Token* value1, Token* value2) :
+    CreateValueCombination(line, character, value1, value2) {}
 
 void CreateValueMultiply::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateValueDivide::CreateValueDivide(Token* value1, Token* value2) : CreateValueCombination(value1, value2) {}
+CreateValueDivide::CreateValueDivide(int line, int character, Token* value1, Token* value2) :
+    CreateValueCombination(line, character, value1, value2) {}
 
 void CreateValueDivide::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-Assign::Assign(std::string variable, Token* value) : variable(variable), value(value) {}
+Instruction::Instruction(int line, int character) : Token(line, character) {}
+
+Assign::Assign(int line, int character, std::string variable, Token* value) :
+    Instruction(line, character), variable(variable), value(value) {}
 
 void Assign::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateAudioSource::CreateAudioSource(Token* volume, Token* pan, List* effects) :
-    volume(volume), pan(pan), effects(effects) {}
+CreateAudioSource::CreateAudioSource(int line, int character, Token* volume, Token* pan, List* effects) :
+    Instruction(line, character), volume(volume), pan(pan), effects(effects) {}
 
-CreateOscillator::CreateOscillator(Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateAudioSource(volume, pan, effects), frequency(frequency) {}
+CreateOscillator::CreateOscillator(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
+    CreateAudioSource(line, character, volume, pan, effects), frequency(frequency) {}
 
-CreateSine::CreateSine(Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateOscillator(volume, pan, frequency, effects) {}
+CreateSine::CreateSine(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
+    CreateOscillator(line, character, volume, pan, frequency, effects) {}
 
 void CreateSine::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateSquare::CreateSquare(Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateOscillator(volume, pan, frequency, effects) {}
+CreateSquare::CreateSquare(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
+    CreateOscillator(line, character, volume, pan, frequency, effects) {}
 
 void CreateSquare::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateSaw::CreateSaw(Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateOscillator(volume, pan, frequency, effects) {}
+CreateSaw::CreateSaw(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
+    CreateOscillator(line, character, volume, pan, frequency, effects) {}
 
 void CreateSaw::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateTriangle::CreateTriangle(Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateOscillator(volume, pan, frequency, effects) {}
+CreateTriangle::CreateTriangle(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
+    CreateOscillator(line, character, volume, pan, frequency, effects) {}
 
 void CreateTriangle::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateHold::CreateHold(Token* value, Token* length) : value(value), length(length) {}
+CreateHold::CreateHold(int line, int character, Token* value, Token* length) :
+    Instruction(line, character), value(value), length(length) {}
 
 void CreateHold::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateSweep::CreateSweep(Token* repeats, Token* from, Token* to, Token* length) :
-    repeats(repeats), from(from), to(to), length(length) {}
+CreateSweep::CreateSweep(int line, int character, Token* repeats, Token* from, Token* to, Token* length) :
+    Instruction(line, character), repeats(repeats), from(from), to(to), length(length) {}
 
 void CreateSweep::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateLFO::CreateLFO(Token* repeats, Token* from, Token* to, Token* length) :
-    repeats(repeats), from(from), to(to), length(length) {}
+CreateLFO::CreateLFO(int line, int character, Token* repeats, Token* from, Token* to, Token* length) :
+    Instruction(line, character), repeats(repeats), from(from), to(to), length(length) {}
 
 void CreateLFO::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-GroupOrder::GroupOrder(ControllerGroup::OrderEnum order) : order(order) {}
+GroupOrder::GroupOrder(int line, int character, ControllerGroup::OrderEnum order) :
+    Token(line, character), order(order) {}
 
 void GroupOrder::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateControllerGroup::CreateControllerGroup(Token* repeats, List* controllers, Token* order) :
-    repeats(repeats), controllers(controllers), order(order) {}
+CreateControllerGroup::CreateControllerGroup(int line, int character, Token* repeats, List* controllers, Token* order) :
+    Instruction(line, character), repeats(repeats), controllers(controllers), order(order) {}
 
 void CreateControllerGroup::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-RandomType::RandomType(Random::TypeEnum type) : type(type) {}
+RandomType::RandomType(int line, int character, Random::TypeEnum type) :
+    Token(line, character), type(type) {}
 
 void RandomType::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateRandom::CreateRandom(Token* repeats, Token* from, Token* to, Token* length, RandomType* type) :
-    repeats(repeats), from(from), to(to), length(length), type(type) {}
+CreateRandom::CreateRandom(int line, int character, Token* repeats, Token* from, Token* to, Token* length, RandomType* type) :
+    Instruction(line, character), repeats(repeats), from(from), to(to), length(length), type(type) {}
 
 void CreateRandom::accept(ProgramVisitor* visitor)
 {
     visitor->visit(this);
 }
 
-CreateEffect::CreateEffect(Token* mix) : mix(mix) {}
+CreateEffect::CreateEffect(int line, int character, Token* mix) :
+    Instruction(line, character), mix(mix) {}
 
-CreateDelay::CreateDelay(Token* mix, Token* delay, Token* feedback) :
-    CreateEffect(mix), delay(delay), feedback(feedback) {}
+CreateDelay::CreateDelay(int line, int character, Token* mix, Token* delay, Token* feedback) :
+    CreateEffect(line, character, mix), delay(delay), feedback(feedback) {}
 
 void CreateDelay::accept(ProgramVisitor* visitor)
 {

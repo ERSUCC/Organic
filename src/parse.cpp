@@ -2,14 +2,18 @@
 
 Parser::Parser(const char* path)
 {
+    sourcePath = std::filesystem::canonical(path);
+
     std::ifstream file(path);
     
     if (!file.is_open())
     {
-        Utils::error("Could not open the specified organic program.");
+        Utils::error("Could not open \"" + sourcePath + "\".");
     }
 
     std::getline(file, code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
+
+    file.close();
 }
 
 Program* Parser::parse()
@@ -43,8 +47,20 @@ void Parser::skipWhitespace()
 {
     while (pos < code.size() && isspace(code[pos]))
     {
-        pos++;
+        nextCharacter();
     }
+}
+
+void Parser::nextCharacter()
+{
+    if (code[pos] == '\n')
+    {
+        line++;
+        character = 0;
+    }
+
+    pos++;
+    character++;
 }
 
 void Parser::parseInstruction()
@@ -82,7 +98,7 @@ void Parser::parseComment()
 
     while (pos < code.size() && code[pos] != '\n')
     {
-        pos++;
+        nextCharacter();
     }
 }
 
@@ -94,7 +110,7 @@ void Parser::parseAssign()
     parseSingleChar('=');
     parseExpression();
 
-    tokens.push(new Assign(name->name, getToken()));
+    tokens.push(new Assign(name->line, name->character, name->name, getToken()));
 }
 
 void Parser::parseExpression()
@@ -117,7 +133,7 @@ void Parser::parseExpression()
 
             if (dynamic_cast<Name*>(token))
             {
-                tokens.push(new VariableRef(dynamic_cast<Name*>(token)->name));
+                tokens.push(new VariableRef(token->line, token->character, dynamic_cast<Name*>(token)->name));
             }
 
             else
@@ -133,7 +149,7 @@ void Parser::parseExpression()
                 skipWhitespace();
                 parseExpression();
 
-                tokens.push(new CreateValueAdd(value1, getToken()));
+                tokens.push(new CreateValueAdd(value1->line, value1->character, value1, getToken()));
             }
 
             else if (code[pos] == '-')
@@ -144,7 +160,7 @@ void Parser::parseExpression()
                 skipWhitespace();
                 parseExpression();
 
-                tokens.push(new CreateValueSubtract(value1, getToken()));
+                tokens.push(new CreateValueSubtract(value1->line, value1->character, value1, getToken()));
             }
 
             else if (code[pos] == '*')
@@ -155,7 +171,7 @@ void Parser::parseExpression()
                 skipWhitespace();
                 parseExpression();
 
-                tokens.push(new CreateValueMultiply(value1, getToken()));
+                tokens.push(new CreateValueMultiply(value1->line, value1->character, value1, getToken()));
             }
 
             else if (code[pos] == '/')
@@ -166,7 +182,7 @@ void Parser::parseExpression()
                 skipWhitespace();
                 parseExpression();
 
-                tokens.push(new CreateValueDivide(value1, getToken()));
+                tokens.push(new CreateValueDivide(value1->line, value1->character, value1, getToken()));
             }
         }
     }
@@ -198,7 +214,7 @@ void Parser::parseExpression()
         skipWhitespace();
         parseExpression();
 
-        tokens.push(new CreateValueAdd(value1, getToken()));
+        tokens.push(new CreateValueAdd(value1->line, value1->character, value1, getToken()));
     }
 
     else if (code[pos] == '-')
@@ -209,7 +225,7 @@ void Parser::parseExpression()
         skipWhitespace();
         parseExpression();
 
-        tokens.push(new CreateValueSubtract(value1, getToken()));
+        tokens.push(new CreateValueSubtract(value1->line, value1->character, value1, getToken()));
     }
 
     else if (code[pos] == '*')
@@ -220,7 +236,7 @@ void Parser::parseExpression()
         skipWhitespace();
         parseExpression();
 
-        tokens.push(new CreateValueMultiply(value1, getToken()));
+        tokens.push(new CreateValueMultiply(value1->line, value1->character, value1, getToken()));
     }
 
     else if (code[pos] == '/')
@@ -231,7 +247,7 @@ void Parser::parseExpression()
         skipWhitespace();
         parseExpression();
 
-        tokens.push(new CreateValueDivide(value1, getToken()));
+        tokens.push(new CreateValueDivide(value1->line, value1->character, value1, getToken()));
     }
 }
 
@@ -244,10 +260,10 @@ void Parser::parseCall()
 
     if (name->name == "sine" || name->name == "square" || name->name == "saw" || name->name == "triangle")
     {
-        Token* volume = new Constant(1);
-        Token* pan = new Constant(0);
-        Token* frequency = new Constant(0);
-        List* effects = new List();
+        Token* volume = new Constant(name->line, name->character, 1);
+        Token* pan = new Constant(name->line, name->character, 0);
+        Token* frequency = new Constant(name->line, name->character, 0);
+        List* effects = new List(name->line, name->character);
 
         while (code[pos] != ')')
         {
@@ -277,7 +293,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+                parseError("Unknown input name '" + argument->name->name + "'.", argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -285,29 +301,29 @@ void Parser::parseCall()
 
         if (name->name == "sine")
         {
-            tokens.push(new CreateSine(volume, pan, frequency, effects));
+            tokens.push(new CreateSine(name->line, name->character, volume, pan, frequency, effects));
         }
         
         else if (name->name == "square")
         {
-            tokens.push(new CreateSquare(volume, pan, frequency, effects));
+            tokens.push(new CreateSquare(name->line, name->character, volume, pan, frequency, effects));
         }
 
         else if (name->name == "saw")
         {
-            tokens.push(new CreateSaw(volume, pan, frequency, effects));
+            tokens.push(new CreateSaw(name->line, name->character, volume, pan, frequency, effects));
         }
 
         else if (name->name == "triangle")
         {
-            tokens.push(new CreateTriangle(volume, pan, frequency, effects));
+            tokens.push(new CreateTriangle(name->line, name->character, volume, pan, frequency, effects));
         }
     }
 
     else if (name->name == "hold")
     {
-        Token* value = new Constant(0);
-        Token* length = new Constant(0);
+        Token* value = new Constant(name->line, name->character, 0);
+        Token* length = new Constant(name->line, name->character, 0);
 
         while (code[pos] != ')')
         {
@@ -327,21 +343,21 @@ void Parser::parseCall()
 
             else
             {
-                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+                parseError("Unknown input name '" + argument->name->name + "'.", argument->line, argument->character);
             }
 
             skipWhitespace();
         }
 
-        tokens.push(new CreateHold(value, length));
+        tokens.push(new CreateHold(name->line, name->character, value, length));
     }
 
     else if (name->name == "lfo" || name->name == "sweep")
     {
-        Token* repeats = new Constant(0);
-        Token* from = new Constant(0);
-        Token* to = new Constant(1);
-        Token* length = new Constant(0);
+        Token* repeats = new Constant(name->line, name->character, 0);
+        Token* from = new Constant(name->line, name->character, 0);
+        Token* to = new Constant(name->line, name->character, 1);
+        Token* length = new Constant(name->line, name->character, 0);
 
         while (code[pos] != ')')
         {
@@ -371,7 +387,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+                parseError("Unknown input name '" + argument->name->name + "'.", argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -379,20 +395,20 @@ void Parser::parseCall()
 
         if (name->name == "lfo")
         {
-            tokens.push(new CreateLFO(repeats, from, to, length));
+            tokens.push(new CreateLFO(name->line, name->character, repeats, from, to, length));
         }
 
         else if (name->name == "sweep")
         {
-            tokens.push(new CreateSweep(repeats, from, to, length));
+            tokens.push(new CreateSweep(name->line, name->character, repeats, from, to, length));
         }
     }
 
     else if (name->name == "sequence")
     {
-        Token* repeats = new Constant(0);
-        List* values = new List();
-        Token* order = new GroupOrder(ControllerGroup::OrderEnum::Forwards);
+        Token* repeats = new Constant(name->line, name->character, 0);
+        List* values = new List(name->line, name->character);
+        Token* order = new GroupOrder(name->line, name->character, ControllerGroup::OrderEnum::Forwards);
 
         while (code[pos] != ')')
         {
@@ -417,22 +433,22 @@ void Parser::parseCall()
 
             else
             {
-                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+                parseError("Unknown input name '" + argument->name->name + "'.", argument->line, argument->character);
             }
 
             skipWhitespace();
         }
 
-        tokens.push(new CreateControllerGroup(repeats, values, order));
+        tokens.push(new CreateControllerGroup(name->line, name->character, repeats, values, order));
     }
 
     else if (name->name == "random")
     {
-        Token* repeats = new Constant(0);
-        Token* from = new Constant(0);
-        Token* to = new Constant(1);
-        Token* length = new Constant(0);
-        RandomType* type = new RandomType(Random::TypeEnum::Step);
+        Token* repeats = new Constant(name->line, name->character, 0);
+        Token* from = new Constant(name->line, name->character, 0);
+        Token* to = new Constant(name->line, name->character, 1);
+        Token* length = new Constant(name->line, name->character, 0);
+        RandomType* type = new RandomType(name->line, name->character, Random::TypeEnum::Step);
 
         while (code[pos] != ')')
         {
@@ -467,20 +483,20 @@ void Parser::parseCall()
 
             else
             {
-                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+                parseError("Unknown input name '" + argument->name->name + "'.", argument->line, argument->character);
             }
 
             skipWhitespace();
         }
 
-        tokens.push(new CreateRandom(repeats, from, to, length, type));
+        tokens.push(new CreateRandom(name->line, name->character, repeats, from, to, length, type));
     }
 
     else if (name->name == "delay")
     {
-        Token* mix = new Constant(1);
-        Token* delay = new Constant(0);
-        Token* feedback = new Constant(0);
+        Token* mix = new Constant(name->line, name->character, 1);
+        Token* delay = new Constant(name->line, name->character, 0);
+        Token* feedback = new Constant(name->line, name->character, 0);
 
         while (code[pos] != ')')
         {
@@ -505,18 +521,18 @@ void Parser::parseCall()
 
             else
             {
-                Utils::error("Unknown argument name '" + argument->name->name + "'.");
+                parseError("Unknown input name '" + argument->name->name + "'.", argument->line, argument->character);
             }
 
             skipWhitespace();
         }
 
-        tokens.push(new CreateDelay(mix, delay, feedback));
+        tokens.push(new CreateDelay(name->line, name->character, mix, delay, feedback));
     }
 
     else
     {
-        Utils::error("Unknown function '" + name->name + "'.");
+        parseError("Unknown function '" + name->name + "'.", name->line, name->character);
     }
 
     parseSingleChar(')');
@@ -525,10 +541,14 @@ void Parser::parseCall()
 void Parser::parseList()
 {
     skipWhitespace();
+
+    int startLine = line;
+    int startCharacter = character;
+
     parseSingleChar('[');
     skipWhitespace();
 
-    List* list = new List();
+    List* list = new List(startLine, startCharacter);
 
     while (code[pos] != ']')
     {
@@ -560,7 +580,7 @@ void Parser::parseArgument()
     parseSingleChar(':');
     parseExpression();
 
-    tokens.push(new Argument(name, getToken()));
+    tokens.push(new Argument(name->line, name->character, name, getToken()));
 
     skipWhitespace();
 
@@ -576,49 +596,54 @@ void Parser::parseName()
 
     if (!isalpha(code[pos]) && code[pos] != '_')
     {
-        Utils::error("Expected letter or '_', received '" + std::string(1, code[pos]) + "'.");
+        parseError("Expected letter or '_', received '" + std::string(1, code[pos]) + "'.", line, character);
     }
+
+    int startLine = line;
+    int startCharacter = character;
 
     std::string name;
 
     while (pos < code.size() && (isalnum(code[pos]) || code[pos] == '-' || code[pos] == '_'))
     {
-        name += code[pos++];
+        name += code[pos];
+
+        nextCharacter();
     }
 
     if (name == "sequence-forwards")
     {
-        tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Forwards));
+        tokens.push(new GroupOrder(startLine, startCharacter, ControllerGroup::OrderEnum::Forwards));
     }
 
     else if (name == "sequence-backwards")
     {
-        tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Backwards));
+        tokens.push(new GroupOrder(startLine, startCharacter, ControllerGroup::OrderEnum::Backwards));
     }
 
     else if (name == "sequence-ping-pong")
     {
-        tokens.push(new GroupOrder(ControllerGroup::OrderEnum::PingPong));
+        tokens.push(new GroupOrder(startLine, startCharacter, ControllerGroup::OrderEnum::PingPong));
     }
 
     else if (name == "sequence-random")
     {
-        tokens.push(new GroupOrder(ControllerGroup::OrderEnum::Random));
+        tokens.push(new GroupOrder(startLine, startCharacter, ControllerGroup::OrderEnum::Random));
     }
 
     else if (name == "random-step")
     {
-        tokens.push(new RandomType(Random::TypeEnum::Step));
+        tokens.push(new RandomType(startLine, startCharacter, Random::TypeEnum::Step));
     }
 
     else if (name == "random-linear")
     {
-        tokens.push(new RandomType(Random::TypeEnum::Linear));
+        tokens.push(new RandomType(startLine, startCharacter, Random::TypeEnum::Linear));
     }
 
     else
     {
-        tokens.push(new Name(name));
+        tokens.push(new Name(startLine, startCharacter, name));
     }
 }
 
@@ -628,17 +653,22 @@ void Parser::parseConstant()
 
     if (!isdigit(code[pos]) && code[pos] != '-')
     {
-        Utils::error("Expected number, received '" + std::string(1, code[pos]) + "'.");
+        parseError("Expected number, received '" + std::string(1, code[pos]) + "'.", line, character);
     }
+
+    int startLine = line;
+    int startCharacter = character;
 
     std::string constant;
 
     while (pos < code.size() && (isdigit(code[pos]) || code[pos] == '.' || code[pos] == '-'))
     {
-        constant += code[pos++];
+        constant += code[pos];
+
+        nextCharacter();
     }
 
-    tokens.push(new Constant(std::stod(constant)));
+    tokens.push(new Constant(startLine, startCharacter, std::stod(constant)));
 }
 
 void Parser::parseSingleChar(char c)
@@ -647,8 +677,13 @@ void Parser::parseSingleChar(char c)
 
     if (code[pos] != c)
     {
-        Utils::error("Expected '" + std::string(1, c) + "', received '" + std::string(1, code[pos]) + "'.");
+        parseError("Expected '" + std::string(1, c) + "', received '" + std::string(1, code[pos]) + "'.", line, character);
     }
 
-    pos++;
+    nextCharacter();
+}
+
+void Parser::parseError(const std::string message, const int line, const int character)
+{
+    Utils::error("Parse error in \"" + sourcePath + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ": " + message);
 }

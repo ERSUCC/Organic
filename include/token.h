@@ -13,12 +13,17 @@ struct ProgramVisitor;
 
 struct Token
 {
+    Token(int line, int character);
+
     virtual void accept(ProgramVisitor* visitor) {}
+
+    int line;
+    int character;
 };
 
 struct Constant : public Token
 {
-    Constant(double value);
+    Constant(int line, int character, double value);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -27,21 +32,21 @@ struct Constant : public Token
 
 struct Name : public Token
 {
-    Name(std::string name);
+    Name(int line, int character, std::string name);
 
     std::string name;
 };
 
 struct VariableRef : public Name
 {
-    VariableRef(std::string name);
+    VariableRef(int line, int character, std::string name);
 
     void accept(ProgramVisitor* visitor) override;
 };
 
 struct Argument : public Token
 {
-    Argument(Name* name, Token* value);
+    Argument(int line, int character, Name* name, Token* value);
 
     Name* name;
     Token* value;
@@ -49,12 +54,14 @@ struct Argument : public Token
 
 struct List : public Token
 {
+    List(int line, int character);
+
     std::vector<Token*> items;
 };
 
 struct CreateValueCombination : public Token
 {
-    CreateValueCombination(Token* value1, Token* value2);
+    CreateValueCombination(int line, int character, Token* value1, Token* value2);
 
     Token* value1;
     Token* value2;
@@ -62,37 +69,40 @@ struct CreateValueCombination : public Token
 
 struct CreateValueAdd : public CreateValueCombination
 {
-    CreateValueAdd(Token* value1, Token* value2);
+    CreateValueAdd(int line, int character, Token* value1, Token* value2);
 
     void accept(ProgramVisitor* visitor) override;
 };
 
 struct CreateValueSubtract : public CreateValueCombination
 {
-    CreateValueSubtract(Token* value1, Token* value2);
+    CreateValueSubtract(int line, int character, Token* value1, Token* value2);
 
     void accept(ProgramVisitor* visitor) override;
 };
 
 struct CreateValueMultiply : public CreateValueCombination
 {
-    CreateValueMultiply(Token* value1, Token* value2);
+    CreateValueMultiply(int line, int character, Token* value1, Token* value2);
 
     void accept(ProgramVisitor* visitor) override;
 };
 
 struct CreateValueDivide : public CreateValueCombination
 {
-    CreateValueDivide(Token* value1, Token* value2);
+    CreateValueDivide(int line, int character, Token* value1, Token* value2);
 
     void accept(ProgramVisitor* visitor) override;
 };
 
-struct Instruction : public Token {};
+struct Instruction : public Token
+{
+    Instruction(int line, int character);
+};
 
 struct Assign : public Instruction
 {
-    Assign(std::string variable, Token* value);
+    Assign(int line, int character, std::string variable, Token* value);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -102,7 +112,7 @@ struct Assign : public Instruction
 
 struct CreateAudioSource : public Instruction
 {
-    CreateAudioSource(Token* volume, Token* pan, List* effects);
+    CreateAudioSource(int line, int character, Token* volume, Token* pan, List* effects);
 
     Token* volume;
     Token* pan;
@@ -111,42 +121,42 @@ struct CreateAudioSource : public Instruction
 
 struct CreateOscillator : public CreateAudioSource
 {
-    CreateOscillator(Token* volume, Token* pan, Token* frequency, List* effects);
+    CreateOscillator(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
 
     Token* frequency;
 };
 
 struct CreateSine : public CreateOscillator
 {
-    CreateSine(Token* volume, Token* pan, Token* frequency, List* effects);
+    CreateSine(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
 
     void accept(ProgramVisitor* visitor) override;
 };
 
 struct CreateSquare : public CreateOscillator
 {
-    CreateSquare(Token* volume, Token* pan, Token* frequency, List* effects);
+    CreateSquare(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
 
     void accept(ProgramVisitor* visitor) override;
 };
 
 struct CreateSaw : public CreateOscillator
 {
-    CreateSaw(Token* volume, Token* pan, Token* frequency, List* effects);
+    CreateSaw(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
 
     void accept(ProgramVisitor* visitor) override;
 };
 
 struct CreateTriangle : public CreateOscillator
 {
-    CreateTriangle(Token* volume, Token* pan, Token* frequency, List* effects);
+    CreateTriangle(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
 
     void accept(ProgramVisitor* visitor) override;
 };
 
 struct CreateHold : public Instruction
 {
-    CreateHold(Token* value, Token* length);
+    CreateHold(int line, int character, Token* value, Token* length);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -156,7 +166,7 @@ struct CreateHold : public Instruction
 
 struct CreateSweep : public Instruction
 {
-    CreateSweep(Token* repeats, Token* from, Token* to, Token* length);
+    CreateSweep(int line, int character, Token* repeats, Token* from, Token* to, Token* length);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -168,7 +178,7 @@ struct CreateSweep : public Instruction
 
 struct CreateLFO : public Instruction
 {
-    CreateLFO(Token* repeats, Token* from, Token* to, Token* length);
+    CreateLFO(int line, int character, Token* repeats, Token* from, Token* to, Token* length);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -180,7 +190,7 @@ struct CreateLFO : public Instruction
 
 struct GroupOrder : public Token
 {
-    GroupOrder(ControllerGroup::OrderEnum order);
+    GroupOrder(int line, int character, ControllerGroup::OrderEnum order);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -189,7 +199,7 @@ struct GroupOrder : public Token
 
 struct CreateControllerGroup : public Instruction
 {
-    CreateControllerGroup(Token* repeats, List* controllers, Token* order);
+    CreateControllerGroup(int line, int character, Token* repeats, List* controllers, Token* order);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -200,7 +210,7 @@ struct CreateControllerGroup : public Instruction
 
 struct RandomType : public Token
 {
-    RandomType(Random::TypeEnum type);
+    RandomType(int line, int character, Random::TypeEnum type);
 
     void accept(ProgramVisitor* visitor) override;
     
@@ -209,7 +219,7 @@ struct RandomType : public Token
 
 struct CreateRandom : public Instruction
 {
-    CreateRandom(Token* repeats, Token* from, Token* to, Token* length, RandomType* type);
+    CreateRandom(int line, int character, Token* repeats, Token* from, Token* to, Token* length, RandomType* type);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -222,14 +232,14 @@ struct CreateRandom : public Instruction
 
 struct CreateEffect : public Instruction
 {
-    CreateEffect(Token* mix);
+    CreateEffect(int line, int character, Token* mix);
 
     Token* mix;
 };
 
 struct CreateDelay : public CreateEffect
 {
-    CreateDelay(Token* mix, Token* delay, Token* feedback);
+    CreateDelay(int line, int character, Token* mix, Token* delay, Token* feedback);
 
     void accept(ProgramVisitor* visitor) override;
 
@@ -237,8 +247,10 @@ struct CreateDelay : public CreateEffect
     Token* feedback;
 };
 
-struct Program : public Token
+struct Program
 {
+    void accept(ProgramVisitor* visitor);
+
     std::vector<Instruction*> instructions;
 };
 

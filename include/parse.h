@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include <filesystem>
 
 #include "token.h"
 #include "object.h"
@@ -20,6 +21,7 @@ private:
     template <typename T> T* getToken();
 
     void skipWhitespace();
+    void nextCharacter();
 
     void parseInstruction();
     void parseComment();
@@ -32,6 +34,9 @@ private:
     void parseConstant();
     void parseSingleChar(char c);
 
+    void parseError(const std::string message, const int line, const int character);
+
+    std::string sourcePath;
     std::string code;
 
     Program* program;
@@ -39,5 +44,7 @@ private:
     std::stack<Token*> tokens;
 
     int pos = 0;
+    int line = 1;
+    int character = 1;
 
 };
