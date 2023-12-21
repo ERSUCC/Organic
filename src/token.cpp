@@ -342,9 +342,9 @@ void ProgramVisitor::visit(GroupOrder* token)
 
 void ProgramVisitor::visit(CreateSequence* token)
 {
-    Sequence* group = new Sequence();
+    Sequence* sequence = new Sequence();
 
-    visitWithSlot(token->repeats, (Object**)&group->repeats);
+    visitWithSlot(token->repeats, (Object**)&sequence->repeats);
 
     for (Token* controller : token->controllers->items)
     {
@@ -352,12 +352,12 @@ void ProgramVisitor::visit(CreateSequence* token)
 
         visitWithSlot(controller, (Object**)&result);
 
-        group->controllers.push_back(result);
+        sequence->controllers.push_back(result);
     }
 
-    visitWithSlot(token->order, (Object**)&group->order);
+    visitWithSlot(token->order, (Object**)&sequence->order);
 
-    setLastSlot(group);
+    setLastSlot(sequence);
 }
 
 void ProgramVisitor::visit(RandomType* token)
