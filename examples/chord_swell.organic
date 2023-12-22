@@ -3,11 +3,11 @@ max_volume = 0.3
 
 swell = sequence(values:
 [
-    sweep(from: 0, to: max_volume, length: note_length / 2, repeats: 1),
-    sweep(from: max_volume, to: 0, length: note_length / 2, repeats: 1)
-], repeats: 1)
+    sweep(from: 0, to: max_volume, length: note_length / 2),
+    sweep(from: max_volume, to: 0, length: note_length / 2)
+])
 
-swell_repeat = sequence(values: [ swell ])
+swell_repeat = repeat(value: swell)
 
 sine(frequency: af2, volume: swell_repeat)
 sine(frequency: c3, volume: swell_repeat)

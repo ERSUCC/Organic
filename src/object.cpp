@@ -77,7 +77,7 @@ double Variable::syncLength()
 
 void Variable::finishStart()
 {
-    value->start();
+    value->start(startTime);
 }
 
 void Variable::finishStop()
@@ -113,8 +113,8 @@ double ValueCombination::syncLength()
 
 void ValueCombination::finishStart()
 {
-    value1->start();
-    value2->start();
+    value1->start(startTime);
+    value2->start(startTime);
 }
 
 void ValueCombination::finishStop()
