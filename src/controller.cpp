@@ -14,43 +14,62 @@ double Sequence::syncLength()
     return length;
 }
 
+double Sequence::getValue()
+{
+    if (utils->time - startTime >= controllers[current]->syncLength())
+    {
+        stop();
+    }
+
+    return controllers[current]->getValue();
+}
+
 void Sequence::finishStart()
 {
-    udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
-
-    if (order->order == OrderEnum::PingPong)
+    if (switches == 0)
     {
-        max_switches = controllers.size() * 2 - 1;
+        udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
+
+        if (order->order == OrderEnum::PingPong)
+        {
+            max_switches = controllers.size() * 2 - 1;
+        }
+
+        else
+        {
+            max_switches = controllers.size();
+        }
+
+        if (order->order == OrderEnum::Backwards)
+        {
+            current = controllers.size() - 1;
+        }
+
+        else if (order->order == OrderEnum::Random)
+        {
+            current = udist(utils->rng);
+
+            if (current == last)
+            {
+                current = (current + 1) % controllers.size();
+            }
+
+            chosen.insert(current);
+        }
+
+        else
+        {
+            current = 0;
+        }
     }
 
-    else
-    {
-        max_switches = controllers.size();
-    }
-
-    if (order->order == OrderEnum::Backwards)
-    {
-        current = controllers.size() - 1;
-    }
-
-    else if (order->order == OrderEnum::Random)
-    {
-        current = udist(utils->rng);
-    }
-
-    else
-    {
-        current = 0;
-    }
-
-    switches = 0;
-
+    controllers[current]->stop();
     controllers[current]->start(startTime);
 }
 
-double Sequence::getValueUnchecked()
+void Sequence::finishStop()
 {
-    if (!controllers[current]->enabled)
+    if (++switches < max_switches)
     {
         last = current;
 
@@ -87,46 +106,61 @@ double Sequence::getValueUnchecked()
 
             case OrderEnum::Random:
             {
-                current = udist(utils->rng);
-
-                if (current == last)
+                if (chosen.size() < controllers.size())
                 {
-                    current = (current + 1) % controllers.size();
+                    current = udist(utils->rng);
+
+                    while (chosen.count(current))
+                    {
+                        current = (current + 1) % controllers.size();
+                    }
+
+                    chosen.insert(current);
                 }
 
                 break;
             }
         }
 
-        if (++switches >= max_switches)
-        {
-            double value = controllers[last]->getValue();
-
-            stop();
-
-            return value;
-        }
-
-        controllers[current]->start(controllers[last]->getStartTime() + controllers[last]->syncLength());
+        start(startTime + controllers[last]->syncLength());
     }
 
-    return controllers[current]->getValue();
+    else
+    {
+        switches = 0;
+
+        chosen.clear();
+    }
 }
 
 double Repeat::syncLength()
 {
-    return value->syncLength() * repeats->getValue(true);
+    return value->syncLength() * repeats->getValue();
 }
 
 double Repeat::getStartTime()
 {
+    if (times == 0)
+    {
+        return startTime - syncLength();
+    }
+
     return startTime - value->syncLength() * (times - 1);
+}
+
+double Repeat::getValue()
+{
+    if (utils->time - startTime >= value->syncLength())
+    {
+        stop();
+    }
+
+    return value->getValue();
 }
 
 void Repeat::finishStart()
 {
     value->stop();
-
     value->start(startTime);
     repeats->start(startTime);
 }
@@ -137,30 +171,33 @@ void Repeat::finishStop()
     {
         start(startTime + value->syncLength());
     }
-}
 
-double Repeat::getValueUnchecked()
-{
-    double val = value->getValue();
-
-    if (utils->time - startTime >= value->syncLength())
+    else
     {
-        stop();
+        times = 0;
     }
-
-    return val;
 }
 
 Value::Value(double value) : value(value) {}
 
-double Value::getValueUnchecked()
+double Value::getValue()
 {
     return value;
 }
 
 double Hold::syncLength()
 {
-    return length->getValue(true);
+    return length->getValue();
+}
+
+double Hold::getValue()
+{
+    if (utils->time - startTime >= syncLength())
+    {
+        stop();
+    }
+
+    return value->getValue();
 }
 
 void Hold::finishStart()
@@ -169,21 +206,19 @@ void Hold::finishStart()
     length->start(startTime);
 }
 
-double Hold::getValueUnchecked()
+double Sweep::syncLength()
 {
-    double val = value->getValue();
+    return length->getValue();
+}
 
-    if (utils->time - startTime >= length->getValue())
+double Sweep::getValue()
+{
+    if (utils->time - startTime >= syncLength())
     {
         stop();
     }
 
-    return val;
-}
-
-double Sweep::syncLength()
-{
-    return length->getValue(true);
+    return from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / syncLength();
 }
 
 void Sweep::finishStart()
@@ -193,21 +228,19 @@ void Sweep::finishStart()
     length->start(startTime);
 }
 
-double Sweep::getValueUnchecked()
+double LFO::syncLength()
 {
-    double value = from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / length->getValue();
+    return length->getValue();
+}
 
-    if (utils->time - startTime >= length->getValue())
+double LFO::getValue()
+{
+    if (utils->time - startTime >= syncLength())
     {
         stop();
     }
 
-    return value;
-}
-
-double LFO::syncLength()
-{
-    return length->getValue(true);
+    return from->getValue() + (to->getValue() - from->getValue()) * (-cos(utils->twoPi * (utils->time - startTime) / syncLength()) / 2 + 0.5);
 }
 
 void LFO::finishStart()
@@ -217,23 +250,28 @@ void LFO::finishStart()
     length->start(startTime);
 }
 
-double LFO::getValueUnchecked()
-{
-    double value = from->getValue() + (to->getValue() - from->getValue()) * (-cos(utils->twoPi * (utils->time - startTime) / length->getValue()) / 2 + 0.5);
-
-    if (utils->time >= startTime + length->getValue())
-    {
-        stop();
-    }
-
-    return value;
-}
-
 Random::Type::Type(TypeEnum type) : type(type) {}
 
 double Random::syncLength()
 {
-    return length->getValue(true);
+    return length->getValue();
+}
+
+double Random::getValue()
+{
+    if (utils->time - startTime >= syncLength())
+    {
+        stop();
+    }
+
+    switch (type->type)
+    {
+        case TypeEnum::Step:
+            return current;
+
+        case TypeEnum::Linear:
+            return current + (next - current) * (utils->time - startTime) / syncLength();
+    }
 }
 
 void Random::finishStart()
@@ -257,25 +295,4 @@ void Random::finishStart()
     next = udist(utils->rng);
 
     first = false;
-}
-
-double Random::getValueUnchecked()
-{
-    double value = 0;
-
-    switch (type->type)
-    {
-        case TypeEnum::Step:
-            return current;
-
-        case TypeEnum::Linear:
-            return current + (next - current) * (utils->time - startTime) / length->getValue();
-    }
-    
-    if (utils->time >= startTime + length->getValue())
-    {
-        stop();
-    }
-
-    return value;
 }

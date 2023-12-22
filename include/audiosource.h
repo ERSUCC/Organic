@@ -48,34 +48,22 @@ protected:
 
 struct Sine : public Oscillator
 {
-
-protected:
-    double getValueUnchecked() override;
-    
+    double getValue() override;
 };
 
 struct Square : public Oscillator
 {
-
-protected:
-    double getValueUnchecked() override;
-    
+    double getValue() override;
 };
 
 struct Saw : public Oscillator
 {
-
-protected:
-    double getValueUnchecked() override;
-    
+    double getValue() override;
 };
 
 struct Triangle : public Oscillator
 {
-
-protected:
-    double getValueUnchecked() override;
-    
+    double getValue() override;
 };
 
 struct Noise : AudioSource

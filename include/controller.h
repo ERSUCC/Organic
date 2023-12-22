@@ -1,7 +1,6 @@
 #pragma once
 
 #include <unordered_set>
-#include <unordered_map>
 #include <vector>
 #include <random>
 
@@ -30,15 +29,17 @@ struct Sequence : public ValueController
     };
 
     double syncLength() override;
+    double getValue() override;
 
     std::vector<ValueObject*> controllers;
+
+    std::unordered_set<int> chosen;
 
     Order* order;
 
 protected:
     void finishStart() override;
-
-    double getValueUnchecked() override;
+    void finishStop() override;
 
 private:
     int current = 0;
@@ -55,6 +56,7 @@ struct Repeat : public ValueController
 {
     double syncLength() override;
     double getStartTime() override;
+    double getValue() override;
 
     ValueObject* value;
     ValueObject* repeats;
@@ -62,8 +64,6 @@ struct Repeat : public ValueController
 protected:
     void finishStart() override;
     void finishStop() override;
-
-    double getValueUnchecked() override;
 
 private:
     int times = 0;
@@ -74,16 +74,15 @@ struct Value : public ValueController
 {
     Value(double value);
 
+    double getValue() override;
+
     double value;
-
-protected:
-    double getValueUnchecked() override;
-
 };
 
 struct Hold : public ValueController
 {
     double syncLength() override;
+    double getValue() override;
 
     ValueObject* value;
     ValueObject* length;
@@ -91,13 +90,12 @@ struct Hold : public ValueController
 protected:
     void finishStart() override;
 
-    double getValueUnchecked() override;
-
 };
 
 struct Sweep : public ValueController
 {
     double syncLength() override;
+    double getValue() override;
 
     ValueObject* from;
     ValueObject* to;
@@ -105,14 +103,13 @@ struct Sweep : public ValueController
 
 protected:
     void finishStart() override;
-
-    double getValueUnchecked() override;
 
 };
 
 struct LFO : public ValueController
 {
     double syncLength() override;
+    double getValue() override;
 
     ValueObject* from;
     ValueObject* to;
@@ -120,8 +117,6 @@ struct LFO : public ValueController
 
 protected:
     void finishStart() override;
-
-    double getValueUnchecked() override;
 
 };
 
@@ -141,6 +136,7 @@ struct Random : public ValueController
     };
 
     double syncLength() override;
+    double getValue() override;
 
     ValueObject* from;
     ValueObject* to;
@@ -150,8 +146,6 @@ struct Random : public ValueController
 
 protected:
     void finishStart() override;
-
-    double getValueUnchecked() override;
 
 private:
     double current;

@@ -82,12 +82,12 @@ void Oscillator::prepareForEffects(unsigned int bufferLength)
     phase = fmod(phase, utils->twoPi);
 }
 
-double Sine::getValueUnchecked()
+double Sine::getValue()
 {
     return sin(phase);
 }
 
-double Square::getValueUnchecked()
+double Square::getValue()
 {
     if (sin(phase) > 0)
     {
@@ -97,12 +97,12 @@ double Square::getValueUnchecked()
     return 1;
 }
 
-double Saw::getValueUnchecked()
+double Saw::getValue()
 {
     return fmod(phase, utils->twoPi) / M_PI - 1;
 }
 
-double Triangle::getValueUnchecked()
+double Triangle::getValue()
 {
     if (sin(phase) < 0)
     {

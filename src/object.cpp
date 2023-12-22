@@ -21,11 +21,6 @@ void Sync::start(double time)
         enabled = true;
 
         finishStart();
-
-        if (parent)
-        {
-            parent->childStart(this);
-        }
     }
 }
 
@@ -36,11 +31,6 @@ void Sync::stop()
         enabled = false;
 
         finishStop();
-
-        if (parent)
-        {
-            parent->childStop(this);
-        }
     }
 }
 
@@ -57,22 +47,19 @@ double Sync::getStartTime()
 void Sync::finishStart() {}
 void Sync::finishStop() {}
 
-void Sync::childStart(Sync* child) {}
-void Sync::childStop(Sync* child) {}
-
-double ValueObject::getValue(bool force)
+double ValueObject::getValue()
 {
-    if (force || enabled)
-    {
-        return getValueUnchecked();
-    }
-
     return 0;
 }
 
 double Variable::syncLength()
 {
     return value->syncLength();
+}
+
+double Variable::getValue()
+{
+    return value->getValue();
 }
 
 void Variable::finishStart()
@@ -83,27 +70,6 @@ void Variable::finishStart()
 void Variable::finishStop()
 {
     value->stop();
-}
-
-void Variable::childStart(Sync* child)
-{
-    if (!enabled)
-    {
-        enabled = true;
-    }
-}
-
-void Variable::childStop(Sync* child)
-{
-    if (enabled)
-    {
-        enabled = false;
-    }
-}
-
-double Variable::getValueUnchecked()
-{
-    return value->getValue();
 }
 
 double ValueCombination::syncLength()
@@ -123,22 +89,22 @@ void ValueCombination::finishStop()
     value2->stop();
 }
 
-double ValueAdd::getValueUnchecked()
+double ValueAdd::getValue()
 {
     return value1->getValue() + value2->getValue();
 }
 
-double ValueSubtract::getValueUnchecked()
+double ValueSubtract::getValue()
 {
     return value1->getValue() - value2->getValue();
 }
 
-double ValueMultiply::getValueUnchecked()
+double ValueMultiply::getValue()
 {
     return value1->getValue() * value2->getValue();
 }
 
-double ValueDivide::getValueUnchecked()
+double ValueDivide::getValue()
 {
     return value1->getValue() / value2->getValue();
 }

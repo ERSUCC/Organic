@@ -1,5 +1,0 @@
-triangle(frequency: 220, volume: repeat(value: sequence(values:
-[
-    sweep(from: 1, to: 0, length: 1000),
-    sweep(from: 0, to: 1, length: 1000)
-])))

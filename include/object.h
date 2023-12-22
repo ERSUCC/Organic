@@ -18,8 +18,6 @@ struct Sync : public Object
     virtual double syncLength();
     virtual double getStartTime();
 
-    Sync* parent = nullptr;
-
     double startTime = 0;
 
     bool enabled = false;
@@ -28,36 +26,25 @@ protected:
     virtual void finishStart();
     virtual void finishStop();
 
-    virtual void childStart(Sync* child);
-    virtual void childStop(Sync* child);
-
     Utils* utils;
 
 };
 
 struct ValueObject : public Sync
 {
-    double getValue(bool force = false);
-
-protected:
-    virtual double getValueUnchecked() = 0;
-
+    virtual double getValue();
 };
 
 struct Variable : public ValueObject
 {
     double syncLength() override;
+    double getValue() override;
 
     ValueObject* value;
 
 protected:
     void finishStart() override;
     void finishStop() override;
-
-    void childStart(Sync* child) override;
-    void childStop(Sync* child) override;
-
-    double getValueUnchecked() override;
 
 };
 
@@ -76,32 +63,20 @@ protected:
 
 struct ValueAdd : public ValueCombination
 {
-
-protected:
-    double getValueUnchecked() override;
-
+    double getValue() override;
 };
 
 struct ValueSubtract : public ValueCombination
 {
-
-protected:
-    double getValueUnchecked() override;
-
+    double getValue() override;
 };
 
 struct ValueMultiply : public ValueCombination
 {
-
-protected:
-    double getValueUnchecked() override;
-
+    double getValue() override;
 };
 
 struct ValueDivide : public ValueCombination
 {
-
-protected:
-    double getValueUnchecked() override;
-
+    double getValue() override;
 };

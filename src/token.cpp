@@ -251,8 +251,6 @@ Object* ProgramVisitor::visit(Assign* token)
 
     variables[token->variable]->value = (ValueObject*)token->value->accept(this);
 
-    variables[token->variable]->value->parent = variables[token->variable];
-
     return variables[token->variable];
 }
 

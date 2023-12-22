@@ -1,0 +1,19 @@
+note_attack = 15
+note_length = 100
+
+peak = repeat(value: sequence(values:
+[
+    hold(value: 0.5, length: note_length),
+    hold(value: 0.5, length: note_length),
+    hold(value: 1, length: note_length),
+    hold(value: 1, length: note_length)
+], order: sequence-random))
+
+attack = repeat(value: sequence(values:
+[
+    sweep(from: 0, to: peak, length: note_attack),
+    sweep(from: peak, to: 0, length: note_length - note_attack)
+])) * 0.5
+
+saw(frequency: 55, volume: attack)
+saw(frequency: 110, volume: attack)
