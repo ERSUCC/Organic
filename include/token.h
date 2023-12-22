@@ -165,11 +165,10 @@ struct CreateHold : public Instruction
 
 struct CreateSweep : public Instruction
 {
-    CreateSweep(int line, int character, Token* repeats, Token* from, Token* to, Token* length);
+    CreateSweep(int line, int character, Token* from, Token* to, Token* length);
 
     Object* accept(ProgramVisitor* visitor) override;
 
-    Token* repeats;
     Token* from;
     Token* to;
     Token* length;
@@ -177,11 +176,10 @@ struct CreateSweep : public Instruction
 
 struct CreateLFO : public Instruction
 {
-    CreateLFO(int line, int character, Token* repeats, Token* from, Token* to, Token* length);
+    CreateLFO(int line, int character, Token* from, Token* to, Token* length);
 
     Object* accept(ProgramVisitor* visitor) override;
 
-    Token* repeats;
     Token* from;
     Token* to;
     Token* length;
@@ -198,13 +196,22 @@ struct GroupOrder : public Token
 
 struct CreateSequence : public Instruction
 {
-    CreateSequence(int line, int character, Token* repeats, List* controllers, Token* order);
+    CreateSequence(int line, int character, List* controllers, Token* order);
 
     Object* accept(ProgramVisitor* visitor) override;
 
-    Token* repeats;
     List* controllers;
     Token* order;
+};
+
+struct CreateRepeat : public Instruction
+{
+    CreateRepeat(int line, int character, Token* value, Token* repeats);
+
+    Object* accept(ProgramVisitor* visitor) override;
+
+    Token* value;
+    Token* repeats;
 };
 
 struct RandomType : public Token
@@ -218,11 +225,10 @@ struct RandomType : public Token
 
 struct CreateRandom : public Instruction
 {
-    CreateRandom(int line, int character, Token* repeats, Token* from, Token* to, Token* length, RandomType* type);
+    CreateRandom(int line, int character, Token* from, Token* to, Token* length, RandomType* type);
 
     Object* accept(ProgramVisitor* visitor) override;
 
-    Token* repeats;
     Token* from;
     Token* to;
     Token* length;
@@ -275,6 +281,7 @@ struct ProgramVisitor
     Object* visit(CreateSequence* token);
     Object* visit(RandomType* token);
     Object* visit(CreateRandom* token);
+    Object* visit(CreateRepeat* token);
     Object* visit(CreateDelay* token);
     Object* visit(Program* token);
 

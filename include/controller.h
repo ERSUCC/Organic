@@ -10,14 +10,6 @@
 struct ValueController : public ValueObject
 {
     friend struct Sequence;
-
-    ValueObject* repeats;
-
-protected:
-    void finishStop() override;
-
-    int times = 0;
-
 };
 
 struct Sequence : public ValueController
@@ -59,6 +51,24 @@ private:
 
 };
 
+struct Repeat : public ValueController
+{
+    double syncLength() override;
+
+    ValueObject* value;
+    ValueObject* repeats;
+
+protected:
+    void finishStart() override;
+    void finishStop() override;
+
+    double getValueUnchecked() override;
+
+private:
+    int times = 0;
+
+};
+
 struct Value : public ValueController
 {
     Value(double value);
@@ -72,8 +82,6 @@ protected:
 
 struct Hold : public ValueController
 {
-    Hold();
-
     double syncLength() override;
 
     ValueObject* value;

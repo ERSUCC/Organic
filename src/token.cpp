@@ -118,16 +118,16 @@ Object* CreateHold::accept(ProgramVisitor* visitor)
     return visitor->visit(this);
 }
 
-CreateSweep::CreateSweep(int line, int character, Token* repeats, Token* from, Token* to, Token* length) :
-    Instruction(line, character), repeats(repeats), from(from), to(to), length(length) {}
+CreateSweep::CreateSweep(int line, int character, Token* from, Token* to, Token* length) :
+    Instruction(line, character), from(from), to(to), length(length) {}
 
 Object* CreateSweep::accept(ProgramVisitor* visitor)
 {
     return visitor->visit(this);
 }
 
-CreateLFO::CreateLFO(int line, int character, Token* repeats, Token* from, Token* to, Token* length) :
-    Instruction(line, character), repeats(repeats), from(from), to(to), length(length) {}
+CreateLFO::CreateLFO(int line, int character, Token* from, Token* to, Token* length) :
+    Instruction(line, character), from(from), to(to), length(length) {}
 
 Object* CreateLFO::accept(ProgramVisitor* visitor)
 {
@@ -142,10 +142,18 @@ Object* GroupOrder::accept(ProgramVisitor* visitor)
     return visitor->visit(this);
 }
 
-CreateSequence::CreateSequence(int line, int character, Token* repeats, List* controllers, Token* order) :
-    Instruction(line, character), repeats(repeats), controllers(controllers), order(order) {}
+CreateSequence::CreateSequence(int line, int character, List* controllers, Token* order) :
+    Instruction(line, character), controllers(controllers), order(order) {}
 
 Object* CreateSequence::accept(ProgramVisitor* visitor)
+{
+    return visitor->visit(this);
+}
+
+CreateRepeat::CreateRepeat(int line, int character, Token* value, Token* repeats) :
+    Instruction(line, character), value(value), repeats(repeats) {}
+
+Object* CreateRepeat::accept(ProgramVisitor* visitor)
 {
     return visitor->visit(this);
 }
@@ -158,8 +166,8 @@ Object* RandomType::accept(ProgramVisitor* visitor)
     return visitor->visit(this);
 }
 
-CreateRandom::CreateRandom(int line, int character, Token* repeats, Token* from, Token* to, Token* length, RandomType* type) :
-    Instruction(line, character), repeats(repeats), from(from), to(to), length(length), type(type) {}
+CreateRandom::CreateRandom(int line, int character, Token* from, Token* to, Token* length, RandomType* type) :
+    Instruction(line, character), from(from), to(to), length(length), type(type) {}
 
 Object* CreateRandom::accept(ProgramVisitor* visitor)
 {
@@ -334,7 +342,6 @@ Object* ProgramVisitor::visit(CreateSweep* token)
 {
     Sweep* sweep = new Sweep();
 
-    sweep->repeats = (ValueObject*)token->repeats->accept(this);
     sweep->from = (ValueObject*)token->from->accept(this);
     sweep->to = (ValueObject*)token->to->accept(this);
     sweep->length = (ValueObject*)token->length->accept(this);
@@ -346,7 +353,6 @@ Object* ProgramVisitor::visit(CreateLFO* token)
 {
     LFO* lfo = new LFO();
 
-    lfo->repeats = (ValueObject*)token->repeats->accept(this);
     lfo->from = (ValueObject*)token->from->accept(this);
     lfo->to = (ValueObject*)token->to->accept(this);
     lfo->length = (ValueObject*)token->length->accept(this);
@@ -363,8 +369,6 @@ Object* ProgramVisitor::visit(CreateSequence* token)
 {
     Sequence* sequence = new Sequence();
 
-    sequence->repeats = (ValueObject*)token->repeats->accept(this);
-
     for (Token* controller : token->controllers->items)
     {
         sequence->controllers.push_back((ValueObject*)controller->accept(this));
@@ -373,6 +377,16 @@ Object* ProgramVisitor::visit(CreateSequence* token)
     sequence->order = (Sequence::Order*)token->order->accept(this);
 
     return sequence;
+}
+
+Object* ProgramVisitor::visit(CreateRepeat* token)
+{
+    Repeat* repeat = new Repeat();
+
+    repeat->value = (ValueObject*)token->value->accept(this);
+    repeat->repeats = (ValueObject*)token->repeats->accept(this);
+
+    return repeat;
 }
 
 Object* ProgramVisitor::visit(RandomType* token)
@@ -384,7 +398,6 @@ Object* ProgramVisitor::visit(CreateRandom* token)
 {
     Random* random = new Random();
 
-    random->repeats = (ValueObject*)token->repeats->accept(this);
     random->from = (ValueObject*)token->from->accept(this);
     random->to = (ValueObject*)token->to->accept(this);
     random->length = (ValueObject*)token->length->accept(this);

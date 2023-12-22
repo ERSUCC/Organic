@@ -82,12 +82,18 @@ void Variable::finishStop()
 
 void Variable::childStart(Sync* child)
 {
-    start();
+    if (!enabled)
+    {
+        enabled = true;
+    }
 }
 
 void Variable::childStop(Sync* child)
 {
-    stop();
+    if (enabled)
+    {
+        enabled = false;
+    }
 }
 
 double Variable::getValueUnchecked()

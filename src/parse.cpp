@@ -366,7 +366,6 @@ void Parser::parseCall()
 
     else if (name->name == "lfo" || name->name == "sweep")
     {
-        Token* repeats = new Constant(name->line, name->character, 0);
         Token* from = new Constant(name->line, name->character, 0);
         Token* to = new Constant(name->line, name->character, 1);
         Token* length = new Constant(name->line, name->character, 0);
@@ -377,12 +376,7 @@ void Parser::parseCall()
 
             Argument* argument = getToken<Argument>();
 
-            if (argument->name->name == "repeats")
-            {
-                repeats = argument->value;
-            }
-
-            else if (argument->name->name == "from")
+            if (argument->name->name == "from")
             {
                 from = argument->value;
             }
@@ -407,18 +401,17 @@ void Parser::parseCall()
 
         if (name->name == "lfo")
         {
-            tokens.push(new CreateLFO(name->line, name->character, repeats, from, to, length));
+            tokens.push(new CreateLFO(name->line, name->character, from, to, length));
         }
 
         else if (name->name == "sweep")
         {
-            tokens.push(new CreateSweep(name->line, name->character, repeats, from, to, length));
+            tokens.push(new CreateSweep(name->line, name->character, from, to, length));
         }
     }
 
     else if (name->name == "sequence")
     {
-        Token* repeats = new Constant(name->line, name->character, 0);
         List* values = new List(name->line, name->character);
         Token* order = new GroupOrder(name->line, name->character, Sequence::OrderEnum::Forwards);
 
@@ -428,12 +421,7 @@ void Parser::parseCall()
 
             Argument* argument = getToken<Argument>();
 
-            if (argument->name->name == "repeats")
-            {
-                repeats = argument->value;
-            }
-
-            else if (argument->name->name == "values")
+            if (argument->name->name == "values")
             {
                 values = (List*)argument->value;
             }
@@ -451,12 +439,43 @@ void Parser::parseCall()
             skipWhitespace();
         }
 
-        tokens.push(new CreateSequence(name->line, name->character, repeats, values, order));
+        tokens.push(new CreateSequence(name->line, name->character, values, order));
+    }
+
+    else if (name->name == "repeat")
+    {
+        Token* value = new Constant(name->line, name->character, 0);
+        Token* repeats = new Constant(name->line, name->character, 0);
+
+        while (code[pos] != ')')
+        {
+            parseArgument();
+
+            Argument* argument = getToken<Argument>();
+
+            if (argument->name->name == "value")
+            {
+                value = argument->value;
+            }
+
+            else if (argument->name->name == "repeats")
+            {
+                repeats = argument->value;
+            }
+
+            else
+            {
+                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
+            }
+
+            skipWhitespace();
+        }
+
+        tokens.push(new CreateRepeat(name->line, name->character, value, repeats));
     }
 
     else if (name->name == "random")
     {
-        Token* repeats = new Constant(name->line, name->character, 0);
         Token* from = new Constant(name->line, name->character, 0);
         Token* to = new Constant(name->line, name->character, 1);
         Token* length = new Constant(name->line, name->character, 0);
@@ -468,12 +487,7 @@ void Parser::parseCall()
 
             Argument* argument = getToken<Argument>();
 
-            if (argument->name->name == "repeats")
-            {
-                repeats = argument->value;
-            }
-
-            else if (argument->name->name == "from")
+            if (argument->name->name == "from")
             {
                 from = argument->value;
             }
@@ -501,7 +515,7 @@ void Parser::parseCall()
             skipWhitespace();
         }
 
-        tokens.push(new CreateRandom(name->line, name->character, repeats, from, to, length, type));
+        tokens.push(new CreateRandom(name->line, name->character, from, to, length, type));
     }
 
     else if (name->name == "delay")

@@ -1,0 +1,20 @@
+note_length = 8000
+max_volume = 0.3
+
+swell = sequence(values:
+[
+    sweep(from: 0, to: max_volume, length: note_length / 2, repeats: 1),
+    sweep(from: max_volume, to: 0, length: note_length / 2, repeats: 1)
+], repeats: 1)
+
+swell_repeat = sequence(values: [ swell ])
+
+sine(frequency: af2, volume: swell_repeat)
+sine(frequency: c3, volume: swell_repeat)
+sine(frequency: ef3, volume: swell_repeat)
+
+sine(frequency: g3, volume: sequence(values:
+[
+    swell,
+    hold(value: 0, length: note_length)
+], order: sequence-random))

@@ -1,0 +1,5 @@
+triangle(frequency: 220, volume: sequence(values:
+[
+    repeat(value: sweep(from: 1, to: 0, length: 1000), repeats: 2),
+    sweep(from: 0, to: 1, length: 1000)
+]))

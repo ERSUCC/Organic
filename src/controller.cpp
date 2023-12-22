@@ -1,13 +1,5 @@
 #include "../include/controller.h"
 
-void ValueController::finishStop()
-{
-    if (repeats->getValue() == 0 || ++times < repeats->getValue())
-    {
-        start(startTime + syncLength());
-    }
-}
-
 Sequence::Order::Order(OrderEnum order) : order(order) {}
 
 double Sequence::syncLength()
@@ -24,8 +16,6 @@ double Sequence::syncLength()
 
 void Sequence::finishStart()
 {
-    repeats->start(startTime);
-
     udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
 
     if (order->order == OrderEnum::PingPong)
@@ -123,16 +113,42 @@ double Sequence::getValueUnchecked()
     return controllers[current]->getValue();
 }
 
+double Repeat::syncLength()
+{
+    return value->syncLength() * repeats->getValue();
+}
+
+void Repeat::finishStart()
+{
+    value->start(startTime);
+    repeats->start(startTime);
+}
+
+void Repeat::finishStop()
+{
+    if (repeats->getValue() == 0 || ++times < repeats->getValue())
+    {
+        start(startTime + value->syncLength());
+    }
+}
+
+double Repeat::getValueUnchecked()
+{
+    double val = value->getValue();
+
+    if (utils->time - startTime >= value->syncLength())
+    {
+        stop();
+    }
+
+    return val;
+}
+
 Value::Value(double value) : value(value) {}
 
 double Value::getValueUnchecked()
 {
     return value;
-}
-
-Hold::Hold()
-{
-    repeats = new Value(1);
 }
 
 double Hold::syncLength()
@@ -142,7 +158,6 @@ double Hold::syncLength()
 
 void Hold::finishStart()
 {
-    repeats->start(startTime);
     value->start(startTime);
     length->start(startTime);
 }
@@ -166,7 +181,6 @@ double Sweep::syncLength()
 
 void Sweep::finishStart()
 {
-    repeats->start(startTime);
     from->start(startTime);
     to->start(startTime);
     length->start(startTime);
@@ -191,7 +205,6 @@ double LFO::syncLength()
 
 void LFO::finishStart()
 {
-    repeats->start(startTime);
     from->start(startTime);
     to->start(startTime);
     length->start(startTime);
