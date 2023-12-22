@@ -55,9 +55,9 @@ void Sync::finishStop() {}
 void Sync::childStart(Sync* child) {}
 void Sync::childStop(Sync* child) {}
 
-double ValueObject::getValue()
+double ValueObject::getValue(bool force)
 {
-    if (enabled)
+    if (force || enabled)
     {
         return getValueUnchecked();
     }

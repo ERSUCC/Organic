@@ -36,7 +36,7 @@ protected:
 
 struct ValueObject : public Sync
 {
-    double getValue();
+    double getValue(bool force = false);
 
 protected:
     virtual double getValueUnchecked() = 0;

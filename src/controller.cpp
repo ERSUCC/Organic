@@ -115,7 +115,7 @@ double Sequence::getValueUnchecked()
 
 double Repeat::syncLength()
 {
-    return value->syncLength() * repeats->getValue();
+    return value->syncLength() * repeats->getValue(true);
 }
 
 void Repeat::finishStart()
@@ -153,7 +153,7 @@ double Value::getValueUnchecked()
 
 double Hold::syncLength()
 {
-    return length->getValue();
+    return length->getValue(true);
 }
 
 void Hold::finishStart()
@@ -176,7 +176,7 @@ double Hold::getValueUnchecked()
 
 double Sweep::syncLength()
 {
-    return length->getValue();
+    return length->getValue(true);
 }
 
 void Sweep::finishStart()
@@ -200,7 +200,7 @@ double Sweep::getValueUnchecked()
 
 double LFO::syncLength()
 {
-    return length->getValue();
+    return length->getValue(true);
 }
 
 void LFO::finishStart()
@@ -226,7 +226,7 @@ Random::Type::Type(TypeEnum type) : type(type) {}
 
 double Random::syncLength()
 {
-    return length->getValue();
+    return length->getValue(true);
 }
 
 void Random::finishStart()
