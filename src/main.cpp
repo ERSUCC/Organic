@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 {
     if (argc < 2)
     {
-        Utils::error("Not enough arguments specified.");
+        Utils::argumentError("Not enough arguments specified.");
     }
 
     std::vector<const std::string> flags;
