@@ -7,16 +7,6 @@ void rtAudioError(RtAudioErrorType type, const std::string& message)
 
 int processAudio(void* output, void* input, unsigned int frames, double streamTime, RtAudioStreamStatus status, void* userData)
 {
-    if (status == RTAUDIO_INPUT_OVERFLOW)
-    {
-        Utils::warning("Stream overflow detected.");
-    }
-
-    if (status == RTAUDIO_OUTPUT_UNDERFLOW)
-    {
-        Utils::warning("Stream underflow detected.");
-    }
-
     AudioData* data = (AudioData*)userData;
 
     double* buffer = (double*)output;
