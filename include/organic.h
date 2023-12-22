@@ -26,7 +26,7 @@ struct Organic
 {
     Organic(std::vector<AudioSource*> audioSources, EventQueue* eventQueue, InterpreterOptions options);
 
-    static void init(const char* program, std::vector<const char*> flags);
+    static void init(const std::string program, const std::vector<const std::string>& flags);
 
     void start();
     void startTest();

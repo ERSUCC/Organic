@@ -47,7 +47,7 @@ Organic::Organic(std::vector<AudioSource*> audioSources, EventQueue* eventQueue,
     utils = Utils::get();
 }
 
-void Organic::init(const char* program, std::vector<const char*> flags)
+void Organic::init(const std::string program, const std::vector<const std::string>& flags)
 {
     InterpreterResult result = Interpreter::interpret(program, flags);
 

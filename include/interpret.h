@@ -26,9 +26,9 @@ struct InterpreterResult
 
 struct Interpreter
 {
-    static InterpreterResult interpret(const char* path, std::vector<const char*> flags);
+    static InterpreterResult interpret(const std::string path, const std::vector<const std::string>& flags);
 
 private:
-    static void checkNextOption(std::vector<const char*>& flags, int* pos);
+    static void checkNextOption(const std::vector<const std::string>& flags, int* pos);
 
 };

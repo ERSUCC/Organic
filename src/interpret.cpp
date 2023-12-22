@@ -1,26 +1,34 @@
 #include "../include/interpret.h"
 
-InterpreterResult Interpreter::interpret(const char* path, std::vector<const char*> flags)
+InterpreterResult Interpreter::interpret(const std::string path, const std::vector<const std::string>& flags)
 {
     InterpreterOptions options;
 
     for (int i = 0; i < flags.size(); i++)
     {
-        if (!strncmp(flags[i], "-t", 2) || !strncmp(flags[i], "--test", 6))
+        if (flags[i] == "-t" || flags[i] == "--test")
         {
             options.test = true;
             options.setTest = true;
         }
 
-        else if (!strncmp(flags[i], "-i", 2) || !strncmp(flags[i], "--time", 6))
+        else if (flags[i] == "-i" || flags[i] == "--time")
         {
             checkNextOption(flags, &i);
 
-            options.time = strtod(flags[i], nullptr);
+            char* end;
+
+            options.time = strtod(flags[i].c_str(), &end);
+
+            if (*end != '\0')
+            {
+                Utils::argumentError("Expected number, received \"" + flags[i] + "\".");
+            }
+
             options.setTime = true;
         }
 
-        else if (!strncmp(flags[i], "-f", 2) || !strncmp(flags[i], "--file", 6))
+        else if (flags[i] == "-f" || flags[i] == "--file")
         {
             checkNextOption(flags, &i);
 
@@ -30,40 +38,40 @@ InterpreterResult Interpreter::interpret(const char* path, std::vector<const cha
 
         else
         {
-            Utils::error("Unknown option '" + std::string(flags[i]) + "'.");
+            Utils::argumentError("Unknown option \"" + flags[i] + "\".");
         }
     }
 
     if (!options.setTest && options.setTime)
     {
-        Utils::error("Cannot set time option in normal playback mode.");
+        Utils::argumentError("Cannot set time option in normal playback mode.");
     }
 
     if (options.setTest && !options.setTestFile)
     {
-        Utils::error("Test file must be specified in test mode.");
+        Utils::argumentError("Test file must be specified in test mode.");
     }
 
     Parser* parser = new Parser(path);
 
     Program* program = parser->parse();
 
-    ProgramVisitor* visitor = new ProgramVisitor();
+    ProgramVisitor* visitor = new ProgramVisitor(path);
 
     visitor->visit(program);
 
     if (visitor->sources.size() == 0)
     {
-        Utils::error("Invalid program, no audio sources detected.");
+        Utils::parseError("Invalid program, no audio sources detected.", path, 0, 0);
     }
 
     return { visitor->sources, visitor->eventQueue, options };
 }
 
-void Interpreter::checkNextOption(std::vector<const char*>& flags, int* pos)
+void Interpreter::checkNextOption(const std::vector<const std::string>& flags, int* pos)
 {
     if (++*pos >= flags.size())
     {
-        Utils::error("Value must be provided for option '" + std::string(flags[*pos - 1]) + "'.");
+        Utils::argumentError("Value must be provided for option \"" + flags[*pos - 1] + "\".");
     }
 }

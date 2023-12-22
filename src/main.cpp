@@ -11,7 +11,7 @@ int main(int argc, char** argv)
         Utils::error("Not enough arguments specified.");
     }
 
-    std::vector<const char*> flags;
+    std::vector<const std::string> flags;
 
     for (int i = 2; i < argc; i++)
     {

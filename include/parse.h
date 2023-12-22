@@ -12,13 +12,11 @@
 
 struct Parser
 {
-    Parser(const char* path);
+    Parser(const std::string path);
 
     Program* parse();
 
 private:
-    void parseError(const std::string message, const int line, const int character);
-
     Token* getToken();
     template <typename T> T* getToken();
 

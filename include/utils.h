@@ -16,8 +16,11 @@ struct Utils
 {
     static Utils* get();
 
-    static void warning(std::string message);
-    static void error(std::string message);
+    static void warning(const std::string message);
+    static void error(const std::string message);
+
+    static void parseError(const std::string message, const std::string file, const int line, const int character);
+    static void argumentError(const std::string message);
 
     const unsigned int sampleRate = 44100;
     const unsigned int channels = 2;
