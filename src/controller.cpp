@@ -107,7 +107,7 @@ double Sequence::getValueUnchecked()
             return value;
         }
 
-        controllers[current]->start(controllers[last]->startTime + controllers[last]->syncLength());
+        controllers[current]->start(controllers[last]->getStartTime() + controllers[last]->syncLength());
     }
 
     return controllers[current]->getValue();
@@ -116,6 +116,11 @@ double Sequence::getValueUnchecked()
 double Repeat::syncLength()
 {
     return value->syncLength() * repeats->getValue(true);
+}
+
+double Repeat::getStartTime()
+{
+    return startTime - value->syncLength() * (times - 1);
 }
 
 void Repeat::finishStart()

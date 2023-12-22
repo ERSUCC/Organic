@@ -54,6 +54,7 @@ private:
 struct Repeat : public ValueController
 {
     double syncLength() override;
+    double getStartTime() override;
 
     ValueObject* value;
     ValueObject* repeats;

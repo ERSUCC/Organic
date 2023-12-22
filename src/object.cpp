@@ -49,6 +49,11 @@ double Sync::syncLength()
     return 0;
 }
 
+double Sync::getStartTime()
+{
+    return startTime;
+}
+
 void Sync::finishStart() {}
 void Sync::finishStop() {}
 

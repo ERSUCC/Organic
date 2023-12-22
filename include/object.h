@@ -16,6 +16,7 @@ struct Sync : public Object
     void stop();
 
     virtual double syncLength();
+    virtual double getStartTime();
 
     Sync* parent = nullptr;
 
