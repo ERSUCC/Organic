@@ -125,6 +125,8 @@ double Repeat::getStartTime()
 
 void Repeat::finishStart()
 {
+    value->stop();
+
     value->start(startTime);
     repeats->start(startTime);
 }
