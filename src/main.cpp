@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <filesystem>
 
 #include "../include/organic.h"
 #include "../include/utils.h"
@@ -11,6 +12,13 @@ int main(int argc, char** argv)
         Utils::argumentError("Not enough arguments specified.");
     }
 
+    if (!std::filesystem::exists(argv[1]))
+    {
+        Utils::argumentError("Specified program file does not exist.");
+    }
+
+    const std::string path = std::filesystem::canonical(argv[1]).string();
+
     std::vector<const std::string> flags;
 
     for (int i = 2; i < argc; i++)
@@ -18,7 +26,7 @@ int main(int argc, char** argv)
         flags.push_back(argv[i]);
     }
 
-    Organic::init(argv[1], flags);
+    Organic::init(path, flags);
 
     return 0;
 }

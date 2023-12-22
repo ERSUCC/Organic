@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <stack>
-#include <filesystem>
 
 #include "token.h"
 #include "object.h"
@@ -36,7 +35,7 @@ private:
 
     double getFrequency(double note);
 
-    std::string sourcePath;
+    const std::string path;
     std::string code;
 
     Program* program;

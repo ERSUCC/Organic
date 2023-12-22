@@ -1,14 +1,12 @@
 #include "../include/parse.h"
 
-Parser::Parser(const std::string path)
+Parser::Parser(const std::string path) : path(path)
 {
-    sourcePath = std::filesystem::canonical(path).string();
-
     std::ifstream file(path);
     
     if (!file.is_open())
     {
-        Utils::error("Could not open \"" + sourcePath + "\".");
+        Utils::argumentError("Could not open \"" + path + "\".");
     }
 
     std::getline(file, code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
@@ -114,7 +112,7 @@ void Parser::parseAssign()
 
     if (!name)
     {
-        Utils::parseError("Cannot define a variable with a reserved name.", sourcePath, token->line, token->character);
+        Utils::parseError("Cannot define a variable with a reserved name.", path, token->line, token->character);
     }
 
     tokens.push(new Assign(name->line, name->character, name->name, getToken()));
@@ -269,7 +267,7 @@ void Parser::parseCall()
 
     if (!name)
     {
-        Utils::parseError("Reserved names cannot be used as functions.", sourcePath, token->line, token->character);
+        Utils::parseError("Reserved names cannot be used as functions.", path, token->line, token->character);
     }
 
     if (name->name == "sine" || name->name == "square" || name->name == "saw" || name->name == "triangle")
@@ -307,7 +305,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", sourcePath, argument->line, argument->character);
+                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -357,7 +355,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", sourcePath, argument->line, argument->character);
+                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -401,7 +399,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", sourcePath, argument->line, argument->character);
+                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -447,7 +445,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", sourcePath, argument->line, argument->character);
+                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -497,7 +495,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", sourcePath, argument->line, argument->character);
+                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -535,7 +533,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", sourcePath, argument->line, argument->character);
+                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -546,7 +544,7 @@ void Parser::parseCall()
 
     else
     {
-        Utils::parseError("Unknown function '" + name->name + "'.", sourcePath, name->line, name->character);
+        Utils::parseError("Unknown function '" + name->name + "'.", path, name->line, name->character);
     }
 
     parseSingleChar(')');
@@ -581,7 +579,7 @@ void Parser::parseList()
 
     if (list->items.size() == 0)
     {
-        Utils::parseError("Lists cannot be empty.", sourcePath, list->line, list->character);
+        Utils::parseError("Lists cannot be empty.", path, list->line, list->character);
     }
 
     tokens.push(list);
@@ -615,7 +613,7 @@ void Parser::parseName()
 
     if (!isalpha(code[pos]) && code[pos] != '_')
     {
-        Utils::parseError("Expected letter or '_', received '" + std::string(1, code[pos]) + "'.", sourcePath, line, character);
+        Utils::parseError("Expected letter or '_', received '" + std::string(1, code[pos]) + "'.", path, line, character);
     }
 
     int startLine = line;
@@ -731,7 +729,7 @@ void Parser::parseConstant()
 
     if (!isdigit(code[pos]) && code[pos] != '-')
     {
-        Utils::parseError("Expected number, received '" + std::string(1, code[pos]) + "'.", sourcePath, line, character);
+        Utils::parseError("Expected number, received '" + std::string(1, code[pos]) + "'.", path, line, character);
     }
 
     int startLine = line;
@@ -759,7 +757,7 @@ void Parser::parseSingleChar(char c)
 
     if (code[pos] != c)
     {
-        Utils::parseError("Expected '" + std::string(1, c) + "', received '" + std::string(1, code[pos]) + "'.", sourcePath, line, character);
+        Utils::parseError("Expected '" + std::string(1, c) + "', received '" + std::string(1, code[pos]) + "'.", path, line, character);
     }
 
     nextCharacter();
