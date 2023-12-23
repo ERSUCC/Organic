@@ -196,7 +196,12 @@ Object* ProgramVisitor::visit(VariableRef* token)
 {
     if (!variables.count(token->name))
     {
-        Utils::parseError("Variable '" + token->name + "' not defined.", sourcePath, token->line, token->character);
+        Utils::parseError("Variable \"" + token->name + "\" not defined.", sourcePath, token->line, token->character);
+    }
+
+    if (currentVariable == token->name)
+    {
+        Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", sourcePath, token->line, token->character);
     }
 
     return variables[token->name];
@@ -249,7 +254,11 @@ Object* ProgramVisitor::visit(Assign* token)
         variables.insert(std::make_pair(token->variable, new Variable()));
     }
 
+    currentVariable = token->variable;
+
     variables[token->variable]->value = (ValueObject*)token->value->accept(this);
+
+    currentVariable = "";
 
     return variables[token->variable];
 }

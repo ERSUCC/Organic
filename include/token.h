@@ -293,4 +293,6 @@ private:
 
     const std::string sourcePath;
 
+    std::string currentVariable;
+
 };
