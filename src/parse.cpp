@@ -305,7 +305,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
+                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -355,7 +355,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
+                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -393,7 +393,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
+                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -433,7 +433,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
+                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -465,7 +465,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
+                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -509,7 +509,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
+                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -547,7 +547,7 @@ void Parser::parseCall()
 
             else
             {
-                Utils::parseError("Unknown input name '" + argument->name->name + "'.", path, argument->line, argument->character);
+                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
             }
 
             skipWhitespace();
@@ -558,7 +558,7 @@ void Parser::parseCall()
 
     else
     {
-        Utils::parseError("Unknown function '" + name->name + "'.", path, name->line, name->character);
+        Utils::parseError("Unknown function \"" + name->name + "\".", path, name->line, name->character);
     }
 
     parseSingleChar(')');
@@ -627,7 +627,7 @@ void Parser::parseName()
 
     if (!isalpha(code[pos]) && code[pos] != '_')
     {
-        Utils::parseError("Expected letter or '_', received '" + std::string(1, code[pos]) + "'.", path, line, character);
+        Utils::parseError("Expected letter or \"_\", received \"" + std::string(1, code[pos]) + "\".", path, line, character);
     }
 
     int startLine = line;
@@ -743,7 +743,7 @@ void Parser::parseConstant()
 
     if (!isdigit(code[pos]) && code[pos] != '-')
     {
-        Utils::parseError("Expected number, received '" + std::string(1, code[pos]) + "'.", path, line, character);
+        Utils::parseError("Expected number, received \"" + std::string(1, code[pos]) + "\".", path, line, character);
     }
 
     int startLine = line;
@@ -771,7 +771,7 @@ void Parser::parseSingleChar(char c)
 
     if (code[pos] != c)
     {
-        Utils::parseError("Expected '" + std::string(1, c) + "', received '" + std::string(1, code[pos]) + "'.", path, line, character);
+        Utils::parseError("Expected \"" + std::string(1, c) + "\", received \"" + std::string(1, code[pos]) + "\".", path, line, character);
     }
 
     nextCharacter();
