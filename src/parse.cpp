@@ -41,6 +41,11 @@ template <typename T> T* Parser::getToken()
     return dynamic_cast<T*>(getToken());
 }
 
+template <typename T> bool Parser::nextTokenIs()
+{
+    return dynamic_cast<T*>(tokens.top());
+}
+
 void Parser::skipWhitespace()
 {
     while (pos < code.size() && isspace(code[pos]))
@@ -102,18 +107,18 @@ void Parser::parseComment()
 
 void Parser::parseAssign()
 {
-    Token* token = getToken();
+    if (!nextTokenIs<Name>())
+    {
+        Token* token = getToken();
 
-    Name* name = dynamic_cast<Name*>(token);
+        Utils::parseError("Cannot define a variable with a reserved name.", path, token->line, token->character);
+    }
+
+    Name* name = getToken<Name>();
 
     skipWhitespace();
     parseSingleChar('=');
     parseExpression();
-
-    if (!name)
-    {
-        Utils::parseError("Cannot define a variable with a reserved name.", path, token->line, token->character);
-    }
 
     tokens.push(new Assign(name->line, name->character, name->name, getToken()));
 }
@@ -122,7 +127,17 @@ void Parser::parseExpression()
 {
     skipWhitespace();
 
-    if (isalpha(code[pos]))
+    int opens = 0;
+
+    while (code[pos] == '(')
+    {
+        parseSingleChar('(');
+        skipWhitespace();
+
+        opens++;
+    }
+
+    if (isalpha(code[pos]) || code[pos] == '_')
     {
         parseName();
         skipWhitespace();
@@ -132,81 +147,22 @@ void Parser::parseExpression()
             parseCall();
         }
 
-        else
+        else if (nextTokenIs<Name>())
         {
-            Token* token = getToken();
+            Name* name = getToken<Name>();
 
-            if (dynamic_cast<Name*>(token))
-            {
-                tokens.push(new VariableRef(token->line, token->character, dynamic_cast<Name*>(token)->name));
-            }
-
-            else
-            {
-                tokens.push(token);
-            }
-
-            if (code[pos] == '+')
-            {
-                Token* value1 = getToken();
-
-                parseSingleChar('+');
-                skipWhitespace();
-                parseExpression();
-
-                tokens.push(new CreateValueAdd(value1->line, value1->character, value1, getToken()));
-            }
-
-            else if (code[pos] == '-')
-            {
-                Token* value1 = getToken();
-
-                parseSingleChar('-');
-                skipWhitespace();
-                parseExpression();
-
-                tokens.push(new CreateValueSubtract(value1->line, value1->character, value1, getToken()));
-            }
-
-            else if (code[pos] == '*')
-            {
-                Token* value1 = getToken();
-
-                parseSingleChar('*');
-                skipWhitespace();
-                parseExpression();
-
-                tokens.push(new CreateValueMultiply(value1->line, value1->character, value1, getToken()));
-            }
-
-            else if (code[pos] == '/')
-            {
-                Token* value1 = getToken();
-
-                parseSingleChar('/');
-                skipWhitespace();
-                parseExpression();
-
-                tokens.push(new CreateValueDivide(value1->line, value1->character, value1, getToken()));
-            }
+            tokens.push(new VariableRef(name->line, name->character, name->name));
         }
     }
 
-    else if (code[pos] == '[')
+    else if (isdigit(code[pos]))
     {
-        parseList();
-    }
-
-    else if (code[pos] == '(')
-    {
-        parseSingleChar('(');
-        parseExpression();
-        parseSingleChar(')');
+        parseConstant();
     }
 
     else
     {
-        parseConstant();
+        Utils::parseError("Illegal start of expression.", path, line, character);
     }
 
     skipWhitespace();
@@ -254,21 +210,53 @@ void Parser::parseExpression()
 
         tokens.push(new CreateValueDivide(value1->line, value1->character, value1, getToken()));
     }
+
+    else if (code[pos] == ',' && opens > 0)
+    {
+        Token* value1 = getToken();
+
+        int n = 0;
+
+        while (code[pos] == ',')
+        {
+            parseSingleChar(',');
+            skipWhitespace();
+            parseExpression();
+
+            n++;
+        }
+
+        List* list = new List(value1->line, value1->character);
+
+        list->items.push_back(value1);
+
+        for (; n > 0; n--)
+        {
+            list->items.push_back(getToken());
+        }
+
+        tokens.push(list);
+    }
+
+    for (; opens > 0; opens--)
+    {
+        parseSingleChar(')');
+    }
 }
 
 void Parser::parseCall()
 {
-    skipWhitespace();
-    parseSingleChar('(');
-
-    Token* token = getToken();
-
-    Name* name = dynamic_cast<Name*>(token);
-
-    if (!name)
+    if (!nextTokenIs<Name>())
     {
+        Token* token = getToken();
+        
         Utils::parseError("Reserved names cannot be used as functions.", path, token->line, token->character);
     }
+
+    Name* name = getToken<Name>();
+
+    skipWhitespace();
+    parseSingleChar('(');
 
     if (name->name == "sine" || name->name == "square" || name->name == "saw" || name->name == "triangle")
     {
@@ -564,43 +552,6 @@ void Parser::parseCall()
     parseSingleChar(')');
 }
 
-void Parser::parseList()
-{
-    skipWhitespace();
-
-    int startLine = line;
-    int startCharacter = character;
-
-    parseSingleChar('[');
-    skipWhitespace();
-
-    List* list = new List(startLine, startCharacter);
-
-    while (code[pos] != ']')
-    {
-        parseExpression();
-
-        list->items.push_back(getToken());
-
-        skipWhitespace();
-
-        if (code[pos] != ']')
-        {
-            parseSingleChar(',');
-            skipWhitespace();
-        }
-    }
-
-    if (list->items.size() == 0)
-    {
-        Utils::parseError("Lists cannot be empty.", path, list->line, list->character);
-    }
-
-    tokens.push(list);
-
-    parseSingleChar(']');
-}
-
 void Parser::parseArgument()
 {
     skipWhitespace();
@@ -618,6 +569,12 @@ void Parser::parseArgument()
     if (code[pos] != ')')
     {
         parseSingleChar(',');
+        skipWhitespace();
+
+        if (code[pos] == ')')
+        {
+            Utils::parseError("Expected expression, received \")\".", path, line, character);
+        }
     }
 }
 

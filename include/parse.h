@@ -18,6 +18,7 @@ struct Parser
 private:
     Token* getToken();
     template <typename T> T* getToken();
+    template <typename T> bool nextTokenIs();
 
     void skipWhitespace();
     void nextCharacter();
@@ -27,7 +28,6 @@ private:
     void parseAssign();
     void parseExpression();
     void parseCall();
-    void parseList();
     void parseArgument();
     void parseName();
     void parseConstant();
