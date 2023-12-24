@@ -6,13 +6,7 @@ InterpreterResult Interpreter::interpret(const std::string path, const std::vect
 
     for (int i = 0; i < flags.size(); i++)
     {
-        if (flags[i] == "-t" || flags[i] == "--test")
-        {
-            options.test = true;
-            options.setTest = true;
-        }
-
-        else if (flags[i] == "-i" || flags[i] == "--time")
+        if (flags[i] == "-t" || flags[i] == "--time")
         {
             checkNextOption(flags, &i);
 
@@ -28,28 +22,10 @@ InterpreterResult Interpreter::interpret(const std::string path, const std::vect
             options.setTime = true;
         }
 
-        else if (flags[i] == "-f" || flags[i] == "--file")
-        {
-            checkNextOption(flags, &i);
-
-            options.testFile = flags[i];
-            options.setTestFile = true;
-        }
-
         else
         {
             Utils::argumentError("Unknown option \"" + flags[i] + "\".");
         }
-    }
-
-    if (!options.setTest && options.setTime)
-    {
-        Utils::argumentError("Cannot set time option in normal playback mode.");
-    }
-
-    if (options.setTest && !options.setTestFile)
-    {
-        Utils::argumentError("Test file must be specified in test mode.");
     }
 
     ProgramVisitor* visitor = new ProgramVisitor(path);

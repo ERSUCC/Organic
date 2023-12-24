@@ -8,13 +8,9 @@
 
 struct InterpreterOptions
 {
-    bool test = false;
     double time = 0;
-    std::string testFile;
 
-    bool setTest = false;
     bool setTime = false;
-    bool setTestFile = false;
 };
 
 struct InterpreterResult

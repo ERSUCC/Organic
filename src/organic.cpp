@@ -53,63 +53,7 @@ void Organic::start()
         audioSource->start();
     }
 
-    if (options.test)
-    {
-        startTest();
-    }
-
-    else
-    {
-        startPlayback();
-    }
-}
-
-void Organic::startTest()
-{
-    std::ostringstream result;
-
-    for (double frame = 0; frame <= options.time * utils->sampleRate; frame++)
-    {
-        utils->time = frame / utils->sampleRate;
-
-        double* buffer = (double*)calloc(utils->channels, sizeof(double));
-
-        for (AudioSource* source : audioSources)
-        {
-            source->fillBuffer(buffer, 1);
-        }
-
-        char value[21];
-
-        snprintf(value, 21, "%0.20f", buffer[0] * utils->volume);
-
-        result << value;
-
-        if (utils->channels == 2)
-        {
-            snprintf(value, 21, "%0.20f", buffer[1] * utils->volume);
-
-            result << value;
-        }
-    }
-
-    std::ifstream input(options.testFile);
-
-    if (!input.is_open())
-    {
-        Utils::error("Could not open testing file.");
-    }
-
-    std::stringstream compare;
-
-    compare << input.rdbuf();
-
-    input.close();
-
-    if (compare.str() != result.str())
-    {
-        Utils::error("Failed test.");
-    }
+    startPlayback();
 }
 
 void Organic::startPlayback()
@@ -150,7 +94,7 @@ void Organic::startPlayback()
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
 
-    while (true)
+    while (!options.setTime || utils->time < options.time)
     {
         utils->time = (clock.now() - start).count() / 1000000.0;
 
