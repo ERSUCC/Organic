@@ -36,12 +36,12 @@ void Sequence::finishStart()
 
         if (order->order == OrderEnum::PingPong)
         {
-            max_switches = controllers.size() * 2 - 1;
+            max_switches = controllers.size() * 2 - 2;
         }
 
         else
         {
-            max_switches = controllers.size();
+            max_switches = controllers.size() - 1;
         }
 
         if (order->order == OrderEnum::Backwards)
@@ -73,10 +73,10 @@ void Sequence::finishStart()
 
 void Sequence::finishStop()
 {
-    if (++switches < max_switches)
-    {
-        last = current;
+    last = current;
 
+    if (++switches <= max_switches)
+    {
         switch (order->order)
         {
             case OrderEnum::Forwards:
