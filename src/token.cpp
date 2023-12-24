@@ -452,6 +452,45 @@ Object* ProgramVisitor::visit(const Call* token)
         return oscillator;
     }
 
+    else if (name == "noise")
+    {
+        ValueObject* volume = new Value(0);
+        ValueObject* pan = new Value(0);
+        std::vector<Effect*> effects;
+
+        for (std::pair<const std::string, const Argument*> argument : arguments)
+        {
+            if (argument.first == "volume")
+            {
+                volume = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "pan")
+            {
+                pan = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "effects")
+            {
+                for (const Token* value : ((List*)argument.second->value)->values)
+                {
+                    effects.push_back((Effect*)value->accept(this));
+                }
+            }
+
+            else
+            {
+                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
+            }
+        }
+
+        Noise* noise = new Noise(volume, pan, effects);
+
+        sources.push_back(noise);
+
+        return noise;
+    }
+
     else if (name == "hold")
     {
         ValueObject* value = new Value(0);
