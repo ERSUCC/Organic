@@ -52,13 +52,9 @@ InterpreterResult Interpreter::interpret(const std::string path, const std::vect
         Utils::argumentError("Test file must be specified in test mode.");
     }
 
-    Parser* parser = new Parser(path);
-
-    Program* program = parser->parse();
-
     ProgramVisitor* visitor = new ProgramVisitor(path);
 
-    visitor->visit(program);
+    visitor->visit((new Parser(path))->parse());
 
     if (visitor->sources.size() == 0)
     {

@@ -1,5 +1,11 @@
 #include "../include/effect.h"
 
+Effect::Effect(ValueObject* mix) :
+    mix(mix) {}
+
+Delay::Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
+    Effect(mix), delay(delay), feedback(feedback) {}
+
 void Delay::apply(double* buffer, unsigned int bufferLength)
 {
     for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
@@ -52,6 +58,9 @@ void Delay::finishStop()
     delay->stop();
     feedback->stop();
 }
+
+LowPassFilter::LowPassFilter(ValueObject* mix, ValueObject* cutoff) :
+    Effect(mix), cutoff(cutoff) {}
 
 void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
 {

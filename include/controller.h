@@ -6,10 +6,7 @@
 
 #include "object.h"
 
-struct ValueController : public ValueObject
-{
-    friend struct Sequence;
-};
+struct ValueController : public ValueObject {};
 
 struct Sequence : public ValueController
 {
@@ -27,6 +24,8 @@ struct Sequence : public ValueController
         
         OrderEnum order;
     };
+
+    Sequence(std::vector<ValueObject*> controllers, Order* order);
 
     double syncLength() override;
     double getValue() override;
@@ -54,6 +53,8 @@ private:
 
 struct Repeat : public ValueController
 {
+    Repeat(ValueObject* value, ValueObject* repeats);
+
     double syncLength() override;
     double getStartTime() override;
     double getValue() override;
@@ -81,6 +82,8 @@ struct Value : public ValueController
 
 struct Hold : public ValueController
 {
+    Hold(ValueObject* value, ValueObject* length);
+
     double syncLength() override;
     double getValue() override;
 
@@ -94,6 +97,8 @@ protected:
 
 struct Sweep : public ValueController
 {
+    Sweep(ValueObject* from, ValueObject* to, ValueObject* length);
+
     double syncLength() override;
     double getValue() override;
 
@@ -108,6 +113,8 @@ protected:
 
 struct LFO : public ValueController
 {
+    LFO(ValueObject* from, ValueObject* to, ValueObject* length);
+
     double syncLength() override;
     double getValue() override;
 
@@ -134,6 +141,8 @@ struct Random : public ValueController
         
         TypeEnum type;
     };
+
+    Random(ValueObject* from, ValueObject* to, ValueObject* length, Type* type);
 
     double syncLength() override;
     double getValue() override;

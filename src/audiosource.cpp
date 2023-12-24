@@ -1,6 +1,7 @@
 #include "../include/audiosource.h"
 
-AudioSource::AudioSource()
+AudioSource::AudioSource(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects) :
+    volume(volume), pan(pan), effects(effects)
 {
     effectBuffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
 }
@@ -28,15 +29,8 @@ void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
     }
 }
 
-void AudioSource::addEffect(Effect* effect)
-{
-    effects.push_back(effect);
-}
-
-void AudioSource::removeEffect(Effect* effect)
-{
-    effects.erase(std::find(effects.begin(), effects.end(), effect));
-}
+Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency) :
+    AudioSource(volume, pan, effects), frequency(frequency) {}
 
 void Oscillator::finishStart()
 {
@@ -82,10 +76,16 @@ void Oscillator::prepareForEffects(unsigned int bufferLength)
     phase = fmod(phase, utils->twoPi);
 }
 
+Sine::Sine(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency) :
+    Oscillator(volume, pan, effects, frequency) {}
+
 double Sine::getValue()
 {
     return sin(phase);
 }
+
+Square::Square(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency) :
+    Oscillator(volume, pan, effects, frequency) {}
 
 double Square::getValue()
 {
@@ -97,10 +97,16 @@ double Square::getValue()
     return 1;
 }
 
+Saw::Saw(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency) :
+    Oscillator(volume, pan, effects, frequency) {}
+
 double Saw::getValue()
 {
     return fmod(phase, utils->twoPi) / M_PI - 1;
 }
+
+Triangle::Triangle(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency) :
+    Oscillator(volume, pan, effects, frequency) {}
 
 double Triangle::getValue()
 {
@@ -111,6 +117,9 @@ double Triangle::getValue()
 
     return fmod(phase, M_PI) * 2 / M_PI - 1;
 }
+
+Noise::Noise(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects) :
+    AudioSource(volume, pan, effects) {}
 
 void Noise::prepareForEffects(unsigned int bufferLength)
 {
@@ -131,7 +140,8 @@ void Noise::prepareForEffects(unsigned int bufferLength)
     }
 }
 
-Sample::Sample(double volume, double pan, std::string path, int grains, bool looping) : grains(grains), looping(looping)
+Sample::Sample(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, std::string path, int grains, bool looping) :
+    AudioSource(volume, pan, effects), grains(grains), looping(looping)
 {
     for (int i = 0; i < grains; i++)
     {

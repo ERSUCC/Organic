@@ -16,39 +16,27 @@ Parser::Parser(const std::string path) : path(path)
 
 Program* Parser::parse()
 {
-    program = new Program();
+    tokenize();
 
-    while (pos < code.size())
+    current = 0;
+
+    std::vector<const Instruction*> instructions;
+
+    while (current < tokens.size())
     {
-        parseInstruction();
-        skipWhitespace();
+        TokenRange* range = parseInstruction(current);
+
+        instructions.push_back((Instruction*)range->token);
+
+        current = range->end;
     }
 
-    return program;
-}
-
-Token* Parser::getToken()
-{
-    Token* token = tokens.top();
-
-    tokens.pop();
-
-    return token;
-}
-
-template <typename T> T* Parser::getToken()
-{
-    return dynamic_cast<T*>(getToken());
-}
-
-template <typename T> bool Parser::nextTokenIs()
-{
-    return dynamic_cast<T*>(tokens.top());
+    return new Program(instructions);
 }
 
 void Parser::skipWhitespace()
 {
-    while (pos < code.size() && isspace(code[pos]))
+    while (current < code.size() && isspace(code[current]))
     {
         nextCharacter();
     }
@@ -56,685 +44,390 @@ void Parser::skipWhitespace()
 
 void Parser::nextCharacter()
 {
-    if (code[pos] == '\n')
+    if (code[current] == '\n')
     {
         line++;
         character = 0;
     }
 
-    pos++;
+    current++;
     character++;
 }
 
-void Parser::parseInstruction()
+void Parser::tokenize()
 {
-    skipWhitespace();
-
-    if (code[pos] == '#')
+    while (current < code.size())
     {
-        parseComment();
-    }
-
-    else
-    {
-        parseName();
         skipWhitespace();
 
-        if (code[pos] == '(')
+        int startLine = line;
+        int startCharacter = character;
+
+        if (code[current] == '#')
         {
-            parseCall();
+            while (current < code.size() && code[current] != '\n')
+            {
+                nextCharacter();
+            }
+        }
+
+        else if (code[current] == '(')
+        {
+            tokens.push_back(new OpenParenthesis(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (code[current] == ')')
+        {
+            tokens.push_back(new CloseParenthesis(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (code[current] == ':')
+        {
+            tokens.push_back(new Colon(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (code[current] == ',')
+        {
+            tokens.push_back(new Comma(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (code[current] == '=')
+        {
+            tokens.push_back(new Equals(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (code[current] == '+')
+        {
+            tokens.push_back(new AddToken(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (code[current] == '-')
+        {
+            tokens.push_back(new SubtractToken(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (code[current] == '*')
+        {
+            tokens.push_back(new MultiplyToken(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (code[current] == '/')
+        {
+            tokens.push_back(new DivideToken(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (isalpha(code[current]) || code[current] == '_')
+        {
+            std::string name;
+
+            while (current < code.size() && (isalnum(code[current]) || code[current] == '-' || code[current] == '_'))
+            {
+                name += code[current];
+
+                nextCharacter();
+            }
+
+            tokens.push_back(new Name(startLine, startCharacter, name));
+        }
+
+        else if (isdigit(code[current]))
+        {
+            std::string constant;
+
+            bool period = false;
+
+            while (current < code.size() && (isdigit(code[current]) || code[current] == '.'))
+            {
+                if (code[current] == '.')
+                {
+                    if (period)
+                    {
+                        Utils::parseError("Constants must contain at most one decimal point.", path, startLine, startCharacter);
+                    }
+
+                    period = true;
+                }
+
+                constant += code[current];
+
+                nextCharacter();
+            }
+
+            tokens.push_back(new Constant(startLine, startCharacter, constant));
         }
 
         else
         {
-            parseAssign();
+            Utils::parseError("Unrecognized symbol \"" + std::to_string(code[current]) + "\".", path, startLine, startCharacter);
         }
 
-        program->instructions.push_back(getToken<Instruction>());
-    }
-}
-
-void Parser::parseComment()
-{
-    skipWhitespace();
-    parseSingleChar('#');
-
-    while (pos < code.size() && code[pos] != '\n')
-    {
-        nextCharacter();
-    }
-}
-
-void Parser::parseAssign()
-{
-    if (!nextTokenIs<Name>())
-    {
-        Token* token = getToken();
-
-        Utils::parseError("Cannot define a variable with a reserved name.", path, token->line, token->character);
-    }
-
-    Name* name = getToken<Name>();
-
-    skipWhitespace();
-    parseSingleChar('=');
-    parseExpression();
-
-    tokens.push(new Assign(name->line, name->character, name->name, getToken()));
-}
-
-void Parser::parseExpression()
-{
-    skipWhitespace();
-
-    int opens = 0;
-
-    while (code[pos] == '(')
-    {
-        parseSingleChar('(');
         skipWhitespace();
-
-        opens++;
-    }
-
-    if (isalpha(code[pos]) || code[pos] == '_')
-    {
-        parseName();
-        skipWhitespace();
-
-        if (code[pos] == '(')
-        {
-            parseCall();
-        }
-
-        else if (nextTokenIs<Name>())
-        {
-            Name* name = getToken<Name>();
-
-            tokens.push(new VariableRef(name->line, name->character, name->name));
-        }
-    }
-
-    else if (isdigit(code[pos]))
-    {
-        parseConstant();
-    }
-
-    else
-    {
-        Utils::parseError("Illegal start of expression.", path, line, character);
-    }
-
-    skipWhitespace();
-
-    if (code[pos] == '+')
-    {
-        Token* value1 = getToken();
-
-        parseSingleChar('+');
-        skipWhitespace();
-        parseExpression();
-
-        tokens.push(new CreateValueAdd(value1->line, value1->character, value1, getToken()));
-    }
-
-    else if (code[pos] == '-')
-    {
-        Token* value1 = getToken();
-
-        parseSingleChar('-');
-        skipWhitespace();
-        parseExpression();
-
-        tokens.push(new CreateValueSubtract(value1->line, value1->character, value1, getToken()));
-    }
-
-    else if (code[pos] == '*')
-    {
-        Token* value1 = getToken();
-
-        parseSingleChar('*');
-        skipWhitespace();
-        parseExpression();
-
-        tokens.push(new CreateValueMultiply(value1->line, value1->character, value1, getToken()));
-    }
-
-    else if (code[pos] == '/')
-    {
-        Token* value1 = getToken();
-
-        parseSingleChar('/');
-        skipWhitespace();
-        parseExpression();
-
-        tokens.push(new CreateValueDivide(value1->line, value1->character, value1, getToken()));
-    }
-
-    else if (code[pos] == ',' && opens > 0)
-    {
-        Token* value1 = getToken();
-
-        int n = 0;
-
-        while (code[pos] == ',')
-        {
-            parseSingleChar(',');
-            skipWhitespace();
-            parseExpression();
-
-            n++;
-        }
-
-        List* list = new List(value1->line, value1->character);
-
-        list->items.push_back(value1);
-
-        for (; n > 0; n--)
-        {
-            list->items.push_back(getToken());
-        }
-
-        tokens.push(list);
-    }
-
-    for (; opens > 0; opens--)
-    {
-        parseSingleChar(')');
     }
 }
 
-void Parser::parseCall()
+Token* Parser::getToken(const int pos)
 {
-    if (!nextTokenIs<Name>())
-    {
-        Token* token = getToken();
-        
-        Utils::parseError("Reserved names cannot be used as functions.", path, token->line, token->character);
-    }
-
-    Name* name = getToken<Name>();
-
-    skipWhitespace();
-    parseSingleChar('(');
-
-    if (name->name == "sine" || name->name == "square" || name->name == "saw" || name->name == "triangle")
-    {
-        Token* volume = new Constant(name->line, name->character, 1);
-        Token* pan = new Constant(name->line, name->character, 0);
-        Token* frequency = new Constant(name->line, name->character, 0);
-        List* effects = new List(name->line, name->character);
-
-        while (code[pos] != ')')
-        {
-            parseArgument();
-
-            Argument* argument = getToken<Argument>();
-
-            if (argument->name->name == "volume")
-            {
-                volume = argument->value;
-            }
-
-            else if (argument->name->name == "pan")
-            {
-                pan = argument->value;
-            }
-
-            else if (argument->name->name == "frequency")
-            {
-                frequency = argument->value;
-            }
-
-            else if (argument->name->name == "effects")
-            {
-                effects = (List*)argument->value;
-            }
-
-            else
-            {
-                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
-            }
-
-            skipWhitespace();
-        }
-
-        if (name->name == "sine")
-        {
-            tokens.push(new CreateSine(name->line, name->character, volume, pan, frequency, effects));
-        }
-        
-        else if (name->name == "square")
-        {
-            tokens.push(new CreateSquare(name->line, name->character, volume, pan, frequency, effects));
-        }
-
-        else if (name->name == "saw")
-        {
-            tokens.push(new CreateSaw(name->line, name->character, volume, pan, frequency, effects));
-        }
-
-        else if (name->name == "triangle")
-        {
-            tokens.push(new CreateTriangle(name->line, name->character, volume, pan, frequency, effects));
-        }
-    }
-
-    else if (name->name == "hold")
-    {
-        Token* value = new Constant(name->line, name->character, 0);
-        Token* length = new Constant(name->line, name->character, 0);
-
-        while (code[pos] != ')')
-        {
-            parseArgument();
-
-            Argument* argument = getToken<Argument>();
-
-            if (argument->name->name == "value")
-            {
-                value = argument->value;
-            }
-
-            else if (argument->name->name == "length")
-            {
-                length = argument->value;
-            }
-
-            else
-            {
-                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
-            }
-
-            skipWhitespace();
-        }
-
-        tokens.push(new CreateHold(name->line, name->character, value, length));
-    }
-
-    else if (name->name == "lfo" || name->name == "sweep")
-    {
-        Token* from = new Constant(name->line, name->character, 0);
-        Token* to = new Constant(name->line, name->character, 1);
-        Token* length = new Constant(name->line, name->character, 0);
-
-        while (code[pos] != ')')
-        {
-            parseArgument();
-
-            Argument* argument = getToken<Argument>();
-
-            if (argument->name->name == "from")
-            {
-                from = argument->value;
-            }
-
-            else if (argument->name->name == "to")
-            {
-                to = argument->value;
-            }
-
-            else if (argument->name->name == "length")
-            {
-                length = argument->value;
-            }
-
-            else
-            {
-                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
-            }
-
-            skipWhitespace();
-        }
-
-        if (name->name == "lfo")
-        {
-            tokens.push(new CreateLFO(name->line, name->character, from, to, length));
-        }
-
-        else if (name->name == "sweep")
-        {
-            tokens.push(new CreateSweep(name->line, name->character, from, to, length));
-        }
-    }
-
-    else if (name->name == "sequence")
-    {
-        List* values = new List(name->line, name->character);
-        Token* order = new GroupOrder(name->line, name->character, Sequence::OrderEnum::Forwards);
-
-        while (code[pos] != ')')
-        {
-            parseArgument();
-
-            Argument* argument = getToken<Argument>();
-
-            if (argument->name->name == "values")
-            {
-                values = (List*)argument->value;
-            }
-
-            else if (argument->name->name == "order")
-            {
-                order = argument->value;
-            }
-
-            else
-            {
-                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
-            }
-
-            skipWhitespace();
-        }
-
-        tokens.push(new CreateSequence(name->line, name->character, values, order));
-    }
-
-    else if (name->name == "repeat")
-    {
-        Token* value = new Constant(name->line, name->character, 0);
-        Token* repeats = new Constant(name->line, name->character, 0);
-
-        while (code[pos] != ')')
-        {
-            parseArgument();
-
-            Argument* argument = getToken<Argument>();
-
-            if (argument->name->name == "value")
-            {
-                value = argument->value;
-            }
-
-            else if (argument->name->name == "repeats")
-            {
-                repeats = argument->value;
-            }
-
-            else
-            {
-                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
-            }
-
-            skipWhitespace();
-        }
-
-        tokens.push(new CreateRepeat(name->line, name->character, value, repeats));
-    }
-
-    else if (name->name == "random")
-    {
-        Token* from = new Constant(name->line, name->character, 0);
-        Token* to = new Constant(name->line, name->character, 1);
-        Token* length = new Constant(name->line, name->character, 0);
-        RandomType* type = new RandomType(name->line, name->character, Random::TypeEnum::Step);
-
-        while (code[pos] != ')')
-        {
-            parseArgument();
-
-            Argument* argument = getToken<Argument>();
-
-            if (argument->name->name == "from")
-            {
-                from = argument->value;
-            }
-
-            else if (argument->name->name == "to")
-            {
-                to = argument->value;
-            }
-
-            else if (argument->name->name == "length")
-            {
-                length = argument->value;
-            }
-
-            else if (argument->name->name == "type")
-            {
-                type = dynamic_cast<RandomType*>(argument->value);
-            }
-
-            else
-            {
-                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
-            }
-
-            skipWhitespace();
-        }
-
-        tokens.push(new CreateRandom(name->line, name->character, from, to, length, type));
-    }
-
-    else if (name->name == "delay")
-    {
-        Token* mix = new Constant(name->line, name->character, 1);
-        Token* delay = new Constant(name->line, name->character, 0);
-        Token* feedback = new Constant(name->line, name->character, 0);
-
-        while (code[pos] != ')')
-        {
-            parseArgument();
-
-            Argument* argument = getToken<Argument>();
-
-            if (argument->name->name == "mix")
-            {
-                mix = argument->value;
-            }
-
-            else if (argument->name->name == "delay")
-            {
-                delay = argument->value;
-            }
-
-            else if (argument->name->name == "feedback")
-            {
-                feedback = argument->value;
-            }
-
-            else
-            {
-                Utils::parseError("Unknown input name \"" + argument->name->name + "\".", path, argument->line, argument->character);
-            }
-
-            skipWhitespace();
-        }
-
-        tokens.push(new CreateDelay(name->line, name->character, mix, delay, feedback));
-    }
-
-    else
-    {
-        Utils::parseError("Unknown function \"" + name->name + "\".", path, name->line, name->character);
-    }
-
-    parseSingleChar(')');
+    return tokens[pos];
 }
 
-void Parser::parseArgument()
+template <typename T> T* Parser::getToken(const int pos)
 {
-    skipWhitespace();
-    parseName();
-
-    Name* name = getToken<Name>();
-
-    parseSingleChar(':');
-    parseExpression();
-
-    tokens.push(new Argument(name->line, name->character, name, getToken()));
-
-    skipWhitespace();
-
-    if (code[pos] != ')')
-    {
-        parseSingleChar(',');
-        skipWhitespace();
-
-        if (code[pos] == ')')
-        {
-            Utils::parseError("Expected expression, received \")\".", path, line, character);
-        }
-    }
+    return dynamic_cast<T*>(tokens[pos]);
 }
 
-void Parser::parseName()
+template <typename T> bool Parser::tokenIs(const int pos)
 {
-    skipWhitespace();
+    return dynamic_cast<T*>(tokens[pos]);
+}
 
-    if (!isalpha(code[pos]) && code[pos] != '_')
+void Parser::tokenError(const Token* token, const std::string expected)
+{
+    Utils::parseError("Expected " + expected + ", received \"" + token->string() + "\".", path, token->line, token->character);
+}
+
+TokenRange* Parser::parseInstruction(int pos)
+{
+    if (!tokenIs<Name>(pos))
     {
-        Utils::parseError("Expected letter or \"_\", received \"" + std::string(1, code[pos]) + "\".", path, line, character);
+        tokenError(getToken(pos), "name");
     }
 
-    int startLine = line;
-    int startCharacter = character;
-
-    std::string name;
-
-    while (pos < code.size() && (isalnum(code[pos]) || code[pos] == '-' || code[pos] == '_'))
+    if (tokenIs<Equals>(pos + 1))
     {
-        name += code[pos];
-
-        nextCharacter();
+        return parseAssign(pos);
     }
 
-    if (name == "sequence-forwards")
+    if (tokenIs<OpenParenthesis>(pos + 1))
     {
-        tokens.push(new GroupOrder(startLine, startCharacter, Sequence::OrderEnum::Forwards));
+        return parseCall(pos);
     }
 
-    else if (name == "sequence-backwards")
-    {
-        tokens.push(new GroupOrder(startLine, startCharacter, Sequence::OrderEnum::Backwards));
-    }
+    tokenError(getToken(pos + 1), "\"=\" or \"(\"");
 
-    else if (name == "sequence-ping-pong")
-    {
-        tokens.push(new GroupOrder(startLine, startCharacter, Sequence::OrderEnum::PingPong));
-    }
+    return nullptr;
+}
 
-    else if (name == "sequence-random")
-    {
-        tokens.push(new GroupOrder(startLine, startCharacter, Sequence::OrderEnum::Random));
-    }
+TokenRange* Parser::parseAssign(int pos)
+{
+    TokenRange* range = parseExpression(pos + 2);
 
-    else if (name == "random-step")
-    {
-        tokens.push(new RandomType(startLine, startCharacter, Random::TypeEnum::Step));
-    }
+    return new TokenRange(pos, range->end, new Assign(getToken<Name>(pos), range->token));
+}
 
-    else if (name == "random-linear")
-    {
-        tokens.push(new RandomType(startLine, startCharacter, Random::TypeEnum::Linear));
-    }
+TokenRange* Parser::parseCall(int pos)
+{
+    int start = pos;
 
-    else
-    {
-        double base = 0;
+    pos += 2;
 
-        switch (name[0])
+    std::vector<const Argument*> arguments;
+
+    if (tokenIs<Name>(pos))
+    {
+        pos -= 1;
+
+        do
         {
-            case 'c':
-                break;
+            TokenRange* range = parseArgument(pos + 1);
 
-            case 'd':
-                base = 2;
+            arguments.push_back((Argument*)range->token);
 
-                break;
+            pos = range->end;
+        } while (tokenIs<Comma>(pos));
+    }
 
-            case 'e':
-                base = 4;
+    if (tokenIs<CloseParenthesis>(pos))
+    {
+        return new TokenRange(start, pos + 1, new Call(getToken<Name>(start), arguments));
+    }
 
-                break;
+    tokenError(getToken(pos), "\")\"");
 
-            case 'f':
-                base = 5;
+    return nullptr;
+}
 
-                break;
+TokenRange* Parser::parseArgument(int pos)
+{
+    if (!tokenIs<Name>(pos))
+    {
+        tokenError(getToken(pos), "input name");
+    }
 
-            case 'g':
-                base = 7;
+    if (!tokenIs<Colon>(pos + 1))
+    {
+        tokenError(getToken(pos + 1), "\":\"");
+    }
 
-                break;
+    TokenRange* range = parseExpression(pos + 2);
 
-            case 'a':
-                base = 9;
+    return new TokenRange(pos, range->end, new Argument(getToken<Name>(pos), range->token));
+}
 
-                break;
+TokenRange* Parser::parseExpression(int pos)
+{
+    if (tokenIs<OpenParenthesis>(pos) && tokenIs<Comma>(parseExpression(pos + 1)->end))
+    {
+        int start = pos;
 
-            case 'b':
-                base = 11;
+        std::vector<const Token*> list;
 
-                break;
+        do
+        {
+            TokenRange* range = parseExpression(pos + 1);
 
-            default:
-                return tokens.push(new Name(startLine, startCharacter, name));
+            list.push_back(range->token);
+
+            pos = range->end;
+        } while (tokenIs<Comma>(pos));
+
+        if (!tokenIs<CloseParenthesis>(pos))
+        {
+            tokenError(getToken(pos), "\")\"");
         }
 
-        if (name.size() == 2 && isdigit(name[1]))
+        Token* token = getToken(start);
+
+        if (list.size() == 0)
         {
-            return tokens.push(new Constant(startLine, startCharacter, getFrequency(base + 12 * (name[1] - 48))));
+            tokenError(token, "expression");
         }
 
-        if (name.size() == 3 && isdigit(name[2]))
+        return new TokenRange(start, pos + 1, new List(token->line, token->character, list));
+    }
+
+    return parseTerms(pos);
+}
+
+TokenRange* Parser::parseTerms(int pos)
+{
+    int start = pos;
+
+    std::vector<TokenRange*> terms;
+
+    do
+    {
+        if (tokenIs<Operator>(pos) && terms.size() > 0)
         {
-            if (name[1] == 's')
+            terms.push_back(new TokenRange(pos, pos + 1, getToken(pos)));
+
+            TokenRange* range = parseTerms(pos + 1);
+
+            terms.push_back(range);
+
+            pos = range->end;
+        }
+
+        else if (tokenIs<OpenParenthesis>(pos))
+        {
+            int pStart = pos;
+
+            TokenRange* range = parseTerms(pos + 1);
+
+            terms.push_back(range);
+
+            pos = range->end;
+
+            if (!tokenIs<CloseParenthesis>(pos))
             {
-                return tokens.push(new Constant(startLine, startCharacter, getFrequency(base + 12 * (name[2] - 48) + 1)));
+                tokenError(getToken(pos), "\")\"");
+
+                return nullptr;
             }
 
-            if (name[1] == 'f')
-            {
-                return tokens.push(new Constant(startLine, startCharacter, getFrequency(base + 12 * (name[2] - 48) - 1)));
-            }
+            pos++;
         }
 
-        tokens.push(new Name(startLine, startCharacter, name));
+        else
+        {
+            TokenRange* range = parseTerm(pos);
+
+            terms.push_back(range);
+
+            pos = range->end;
+        }
+    } while (tokenIs<Operator>(pos));
+
+    for (int i = 1; i < terms.size() - 1; i++)
+    {
+        if (dynamic_cast<const MultiplyToken*>(terms[i]->token))
+        {
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new Multiply(terms[i - 1]->token, terms[i + 1]->token));
+
+            terms.erase(terms.begin() + i, terms.begin() + i + 2);
+
+            i--;
+        }
+
+        else if (dynamic_cast<const DivideToken*>(terms[i]->token))
+        {
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new Divide(terms[i - 1]->token, terms[i + 1]->token));
+
+            terms.erase(terms.begin() + i, terms.begin() + i + 2);
+
+            i--;
+        }
     }
+
+    for (int i = 1; i < terms.size() - 1; i++)
+    {
+        if (dynamic_cast<const AddToken*>(terms[i]->token))
+        {
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new Add(terms[i - 1]->token, terms[i + 1]->token));
+
+            terms.erase(terms.begin() + i, terms.begin() + i + 2);
+
+            i--;
+        }
+
+        else if (dynamic_cast<const SubtractToken*>(terms[i]->token))
+        {
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new Subtract(terms[i - 1]->token, terms[i + 1]->token));
+
+            terms.erase(terms.begin() + i, terms.begin() + i + 2);
+
+            i--;
+        }
+    }
+
+    return new TokenRange(start, pos, terms[0]->token);
 }
 
-void Parser::parseConstant()
+TokenRange* Parser::parseTerm(int pos)
 {
-    skipWhitespace();
-
-    if (!isdigit(code[pos]) && code[pos] != '-')
+    if (tokenIs<Name>(pos))
     {
-        Utils::parseError("Expected number, received \"" + std::string(1, code[pos]) + "\".", path, line, character);
+        if (tokenIs<OpenParenthesis>(pos + 1))
+        {
+            return parseCall(pos);
+        }
+
+        return new TokenRange(pos, pos + 1, getToken(pos));
     }
 
-    int startLine = line;
-    int startCharacter = character;
-
-    std::string constant;
-
-    constant += code[pos];
-
-    nextCharacter();
-
-    while (pos < code.size() && (isdigit(code[pos]) || code[pos] == '.'))
+    else if (tokenIs<Constant>(pos))
     {
-        constant += code[pos];
-
-        nextCharacter();
+        return new TokenRange(pos, pos + 1, getToken(pos));
     }
 
-    tokens.push(new Constant(startLine, startCharacter, std::stod(constant)));
-}
+    tokenError(getToken(pos), "expression term");
 
-void Parser::parseSingleChar(char c)
-{
-    skipWhitespace();
-
-    if (code[pos] != c)
-    {
-        Utils::parseError("Expected \"" + std::string(1, c) + "\", received \"" + std::string(1, code[pos]) + "\".", path, line, character);
-    }
-
-    nextCharacter();
-}
-
-double Parser::getFrequency(double note)
-{
-    return 440 * pow(2, (note - 45) / 12);
+    return nullptr;
 }

@@ -1,6 +1,10 @@
 #include "../include/controller.h"
 
-Sequence::Order::Order(OrderEnum order) : order(order) {}
+Sequence::Order::Order(OrderEnum order) :
+    order(order) {}
+
+Sequence::Sequence(std::vector<ValueObject*> controllers, Order* order) :
+    controllers(controllers), order(order) {}
 
 double Sequence::syncLength()
 {
@@ -133,6 +137,9 @@ void Sequence::finishStop()
     }
 }
 
+Repeat::Repeat(ValueObject* value, ValueObject* repeats) :
+    value(value), repeats(repeats) {}
+
 double Repeat::syncLength()
 {
     return value->syncLength() * repeats->getValue();
@@ -178,12 +185,16 @@ void Repeat::finishStop()
     }
 }
 
-Value::Value(double value) : value(value) {}
+Value::Value(double value) :
+    value(value) {}
 
 double Value::getValue()
 {
     return value;
 }
+
+Hold::Hold(ValueObject* value, ValueObject* length) :
+    value(value), length(length) {}
 
 double Hold::syncLength()
 {
@@ -205,6 +216,9 @@ void Hold::finishStart()
     value->start(startTime);
     length->start(startTime);
 }
+
+Sweep::Sweep(ValueObject* from, ValueObject* to, ValueObject* length) :
+    from(from), to(to), length(length) {}
 
 double Sweep::syncLength()
 {
@@ -228,6 +242,9 @@ void Sweep::finishStart()
     length->start(startTime);
 }
 
+LFO::LFO(ValueObject* from, ValueObject* to, ValueObject* length) :
+    from(from), to(to), length(length) {}
+
 double LFO::syncLength()
 {
     return length->getValue();
@@ -250,7 +267,11 @@ void LFO::finishStart()
     length->start(startTime);
 }
 
-Random::Type::Type(TypeEnum type) : type(type) {}
+Random::Type::Type(TypeEnum type) :
+    type(type) {}
+
+Random::Random(ValueObject* from, ValueObject* to, ValueObject* length, Type* type) :
+    from(from), to(to), length(length), type(type) {}
 
 double Random::syncLength()
 {

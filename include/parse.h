@@ -4,7 +4,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <stack>
 
 #include "token.h"
 #include "object.h"
@@ -16,33 +15,31 @@ struct Parser
     Program* parse();
 
 private:
-    Token* getToken();
-    template <typename T> T* getToken();
-    template <typename T> bool nextTokenIs();
-
     void skipWhitespace();
     void nextCharacter();
 
-    void parseInstruction();
-    void parseComment();
-    void parseAssign();
-    void parseExpression();
-    void parseCall();
-    void parseArgument();
-    void parseName();
-    void parseConstant();
-    void parseSingleChar(char c);
+    void tokenize();
 
-    double getFrequency(double note);
+    Token* getToken(const int pos);
+    template <typename T> T* getToken(const int pos);
+    template <typename T> bool tokenIs(const int pos);
+
+    void tokenError(const Token* token, const std::string message);
+
+    TokenRange* parseInstruction(int pos);
+    TokenRange* parseExpression(int pos);
+    TokenRange* parseTerms(int pos);
+    TokenRange* parseTerm(int pos);
+    TokenRange* parseAssign(int pos);
+    TokenRange* parseCall(int pos);
+    TokenRange* parseArgument(int pose);
 
     const std::string path;
     std::string code;
 
-    Program* program;
+    std::vector<Token*> tokens;
 
-    std::stack<Token*> tokens;
-
-    int pos = 0;
+    int current = 0;
     int line = 1;
     int character = 1;
 

@@ -50,6 +50,8 @@ protected:
 
 struct ValueCombination : public ValueObject
 {
+    ValueCombination(ValueObject* value1, ValueObject* value2);
+
     double syncLength() override;
 
     ValueObject* value1;
@@ -63,20 +65,28 @@ protected:
 
 struct ValueAdd : public ValueCombination
 {
+    ValueAdd(ValueObject* value1, ValueObject* value2);
+
     double getValue() override;
 };
 
 struct ValueSubtract : public ValueCombination
 {
+    ValueSubtract(ValueObject* value1, ValueObject* value2);
+
     double getValue() override;
 };
 
 struct ValueMultiply : public ValueCombination
 {
+    ValueMultiply(ValueObject* value1, ValueObject* value2);
+
     double getValue() override;
 };
 
 struct ValueDivide : public ValueCombination
 {
+    ValueDivide(ValueObject* value1, ValueObject* value2);
+
     double getValue() override;
 };

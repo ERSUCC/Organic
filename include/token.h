@@ -6,284 +6,211 @@
 
 #include "audiosource.h"
 #include "controller.h"
+#include "effect.h"
 #include "event.h"
 
 struct ProgramVisitor;
 
 struct Token
 {
-    Token(int line, int character);
+    Token(const int line, const int character, const std::string str = "");
 
-    virtual Object* accept(ProgramVisitor* visitor);
+    virtual std::string string() const;
 
-    int line;
-    int character;
+    virtual Object* accept(ProgramVisitor* visitor) const;
+
+    const int line;
+    const int character;
+
+private:
+    const std::string str;
+
 };
 
-struct Constant : public Token
+struct TokenRange
 {
-    Constant(int line, int character, double value);
+    TokenRange(const int start, const int end, const Token* token);
 
-    Object* accept(ProgramVisitor* visitor) override;
+    const int start;
+    const int end;
+    
+    const Token* token;
+};
 
-    double value;
+struct OpenParenthesis : public Token
+{
+    OpenParenthesis(const int line, const int character);
+};
+
+struct CloseParenthesis : public Token
+{
+    CloseParenthesis(const int line, const int character);
+};
+
+struct Colon : public Token
+{
+    Colon(const int line, const int character);
+};
+
+struct Comma : public Token
+{
+    Comma(const int line, const int character);
+};
+
+struct Equals : public Token
+{
+    Equals(const int line, const int character);
+};
+
+struct Operator : public Token
+{
+    Operator(const int line, const int character, std::string str);
+};
+
+struct AddToken : public Operator
+{
+    AddToken(const int line, const int character);
+};
+
+struct SubtractToken : public Operator
+{
+    SubtractToken(const int line, const int character);
+};
+
+struct MultiplyToken : public Operator
+{
+    MultiplyToken(const int line, const int character);
+};
+
+struct DivideToken : public Operator
+{
+    DivideToken(const int line, const int character);
 };
 
 struct Name : public Token
 {
-    Name(int line, int character, std::string name);
+    Name(const int line, const int character, const std::string str);
 
-    std::string name;
+    Object* accept(ProgramVisitor* visitor) const override;
+
+    const std::string name;
 };
 
-struct VariableRef : public Name
+struct Constant : public Token
 {
-    VariableRef(int line, int character, std::string name);
+    Constant(const int line, const int character, const std::string str);
 
-    Object* accept(ProgramVisitor* visitor) override;
+    Object* accept(ProgramVisitor* visitor) const override;
+
+    const double value;
 };
 
 struct Argument : public Token
 {
-    Argument(int line, int character, Name* name, Token* value);
+    Argument(const Name* name, const Token* value);
 
-    Name* name;
-    Token* value;
+    const std::string name;
+    const Token* value;
 };
 
 struct List : public Token
 {
-    List(int line, int character);
+    List(const int line, const int character, const std::vector<const Token*> values);
 
-    std::vector<Token*> items;
+    std::string string() const override;
+
+    const std::vector<const Token*> values;
 };
 
-struct CreateValueCombination : public Token
+struct Combine : public Token
 {
-    CreateValueCombination(int line, int character, Token* value1, Token* value2);
+    Combine(const Token* value1, const Token* value2, const std::string op);
 
-    Token* value1;
-    Token* value2;
+    const Token* value1;
+    const Token* value2;
 };
 
-struct CreateValueAdd : public CreateValueCombination
+struct Add : public Combine
 {
-    CreateValueAdd(int line, int character, Token* value1, Token* value2);
+    Add(const Token* value1, const Token* value2);
 
-    Object* accept(ProgramVisitor* visitor) override;
+    Object* accept(ProgramVisitor* visitor) const override;
 };
 
-struct CreateValueSubtract : public CreateValueCombination
+struct Subtract : public Combine
 {
-    CreateValueSubtract(int line, int character, Token* value1, Token* value2);
+    Subtract(const Token* value1, const Token* value2);
 
-    Object* accept(ProgramVisitor* visitor) override;
+    Object* accept(ProgramVisitor* visitor) const override;
 };
 
-struct CreateValueMultiply : public CreateValueCombination
+struct Multiply : public Combine
 {
-    CreateValueMultiply(int line, int character, Token* value1, Token* value2);
+    Multiply(const Token* value1, const Token* value2);
 
-    Object* accept(ProgramVisitor* visitor) override;
+    Object* accept(ProgramVisitor* visitor) const override;
 };
 
-struct CreateValueDivide : public CreateValueCombination
+struct Divide : public Combine
 {
-    CreateValueDivide(int line, int character, Token* value1, Token* value2);
+    Divide(const Token* value1, const Token* value2);
 
-    Object* accept(ProgramVisitor* visitor) override;
+    Object* accept(ProgramVisitor* visitor) const override;
 };
 
 struct Instruction : public Token
 {
-    Instruction(int line, int character);
+    Instruction(const int line, const int character, const std::string str = "");
 };
 
 struct Assign : public Instruction
 {
-    Assign(int line, int character, std::string variable, Token* value);
+    Assign(const Name* variable, const Token* value);
 
-    Object* accept(ProgramVisitor* visitor) override;
+    Object* accept(ProgramVisitor* visitor) const override;
 
-    std::string variable;
-    Token* value;
+    const Name* variable;
+    const Token* value;
 };
 
-struct CreateAudioSource : public Instruction
+struct Call : public Instruction
 {
-    CreateAudioSource(int line, int character, Token* volume, Token* pan, List* effects);
+    Call(const Name* name, const std::vector<const Argument*> arguments);
 
-    Token* volume;
-    Token* pan;
-    List* effects;
+    std::string string() const override;
+
+    Object* accept(ProgramVisitor* visitor) const override;
+
+    const std::string name;
+    const std::vector<const Argument*> arguments;
 };
 
-struct CreateOscillator : public CreateAudioSource
+struct Program : public Token
 {
-    CreateOscillator(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
+    Program(const std::vector<const Instruction*> instructions);
 
-    Token* frequency;
-};
-
-struct CreateSine : public CreateOscillator
-{
-    CreateSine(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
-
-    Object* accept(ProgramVisitor* visitor) override;
-};
-
-struct CreateSquare : public CreateOscillator
-{
-    CreateSquare(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
-
-    Object* accept(ProgramVisitor* visitor) override;
-};
-
-struct CreateSaw : public CreateOscillator
-{
-    CreateSaw(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
-
-    Object* accept(ProgramVisitor* visitor) override;
-};
-
-struct CreateTriangle : public CreateOscillator
-{
-    CreateTriangle(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects);
-
-    Object* accept(ProgramVisitor* visitor) override;
-};
-
-struct CreateHold : public Instruction
-{
-    CreateHold(int line, int character, Token* value, Token* length);
-
-    Object* accept(ProgramVisitor* visitor) override;
-
-    Token* value;
-    Token* length;
-};
-
-struct CreateSweep : public Instruction
-{
-    CreateSweep(int line, int character, Token* from, Token* to, Token* length);
-
-    Object* accept(ProgramVisitor* visitor) override;
-
-    Token* from;
-    Token* to;
-    Token* length;
-};
-
-struct CreateLFO : public Instruction
-{
-    CreateLFO(int line, int character, Token* from, Token* to, Token* length);
-
-    Object* accept(ProgramVisitor* visitor) override;
-
-    Token* from;
-    Token* to;
-    Token* length;
-};
-
-struct GroupOrder : public Token
-{
-    GroupOrder(int line, int character, Sequence::OrderEnum order);
-
-    Object* accept(ProgramVisitor* visitor) override;
-
-    Sequence::OrderEnum order;
-};
-
-struct CreateSequence : public Instruction
-{
-    CreateSequence(int line, int character, List* controllers, Token* order);
-
-    Object* accept(ProgramVisitor* visitor) override;
-
-    List* controllers;
-    Token* order;
-};
-
-struct CreateRepeat : public Instruction
-{
-    CreateRepeat(int line, int character, Token* value, Token* repeats);
-
-    Object* accept(ProgramVisitor* visitor) override;
-
-    Token* value;
-    Token* repeats;
-};
-
-struct RandomType : public Token
-{
-    RandomType(int line, int character, Random::TypeEnum type);
-
-    Object* accept(ProgramVisitor* visitor) override;
+    std::string string() const override;
     
-    Random::TypeEnum type;
-};
+    Object* accept(ProgramVisitor* visitor) const override;
 
-struct CreateRandom : public Instruction
-{
-    CreateRandom(int line, int character, Token* from, Token* to, Token* length, RandomType* type);
-
-    Object* accept(ProgramVisitor* visitor) override;
-
-    Token* from;
-    Token* to;
-    Token* length;
-    RandomType* type;
-};
-
-struct CreateEffect : public Instruction
-{
-    CreateEffect(int line, int character, Token* mix);
-
-    Token* mix;
-};
-
-struct CreateDelay : public CreateEffect
-{
-    CreateDelay(int line, int character, Token* mix, Token* delay, Token* feedback);
-
-    Object* accept(ProgramVisitor* visitor) override;
-
-    Token* delay;
-    Token* feedback;
-};
-
-struct Program
-{
-    Object* accept(ProgramVisitor* visitor);
-
-    std::vector<Instruction*> instructions;
+    const std::vector<const Instruction*> instructions;
 };
 
 struct ProgramVisitor
 {
     ProgramVisitor(const std::string sourcePath);
 
-    Object* visit(Constant* token);
-    Object* visit(VariableRef* token);
-    Object* visit(CreateValueAdd* token);
-    Object* visit(CreateValueSubtract* token);
-    Object* visit(CreateValueMultiply* token);
-    Object* visit(CreateValueDivide* token);
-    Object* visit(Assign* token);
-    Object* visit(CreateSine* token);
-    Object* visit(CreateSquare* token);
-    Object* visit(CreateSaw* token);
-    Object* visit(CreateTriangle* token);
-    Object* visit(CreateHold* token);
-    Object* visit(CreateSweep* token);
-    Object* visit(CreateLFO* token);
-    Object* visit(GroupOrder* token);
-    Object* visit(CreateSequence* token);
-    Object* visit(RandomType* token);
-    Object* visit(CreateRandom* token);
-    Object* visit(CreateRepeat* token);
-    Object* visit(CreateDelay* token);
-    Object* visit(Program* token);
+    Object* visit(const Name* token);
+    Object* visit(const Constant* token);
+    Object* visit(const Add* token);
+    Object* visit(const Subtract* token);
+    Object* visit(const Multiply* token);
+    Object* visit(const Divide* token);
+    Object* visit(const Assign* token);
+    Object* visit(const Call* token);
+    Object* visit(const Program* token);
+
+    double getFrequency(double note);
 
     std::vector<AudioSource*> sources;
     EventQueue* eventQueue = new EventQueue();
@@ -291,7 +218,7 @@ struct ProgramVisitor
 private:
     std::unordered_map<std::string, Variable*> variables;
 
-    const std::string sourcePath;
+    const std::string path;
 
     std::string currentVariable;
 

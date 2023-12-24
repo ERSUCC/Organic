@@ -1,435 +1,687 @@
 #include "../include/token.h"
 
-Token::Token(int line, int character) : line(line), character(character) {}
+Token::Token(const int line, const int character, const std::string str) :
+    line(line), character(character), str(str) {}
 
-Object* Token::accept(ProgramVisitor* visitor)
+std::string Token::string() const
+{
+    return str;
+}
+
+Object* Token::accept(ProgramVisitor* visitor) const
 {
     return nullptr;
 }
 
-Constant::Constant(int line, int character, double value) : Token(line, character), value(value) {}
+TokenRange::TokenRange(const int start, const int end, const Token* token) :
+    start(start), end(end), token(token) {}
 
-Object* Constant::accept(ProgramVisitor* visitor)
+OpenParenthesis::OpenParenthesis(const int line, const int character) :
+    Token(line, character, "(") {}
+
+CloseParenthesis::CloseParenthesis(const int line, const int character) :
+    Token(line, character, ")") {}
+
+Colon::Colon(const int line, const int character) :
+    Token(line, character, ":") {}
+
+Comma::Comma(const int line, const int character) :
+    Token(line, character, ",") {}
+
+Equals::Equals(const int line, const int character) :
+    Token(line, character, "=") {}
+
+Operator::Operator(const int line, const int character, const std::string str) :
+    Token(line, character, str) {}
+
+AddToken::AddToken(const int line, const int character) :
+    Operator(line, character, "+") {}
+
+SubtractToken::SubtractToken(const int line, const int character) :
+    Operator(line, character, "-") {}
+
+MultiplyToken::MultiplyToken(const int line, const int character) :
+    Operator(line, character, "*") {}
+
+DivideToken::DivideToken(const int line, const int character) :
+    Operator(line, character, "/") {}
+
+Name::Name(const int line, const int character, const std::string str) :
+    Token(line, character, str), name(str) {}
+
+Object* Name::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-Name::Name(int line, int character, std::string name) : Token(line, character), name(name) {}
+Constant::Constant(const int line, const int character, const std::string str) :
+    Token(line, character, str), value(std::stod(str)) {}
 
-VariableRef::VariableRef(int line, int character, std::string name) : Name(line, character, name) {}
-
-Object* VariableRef::accept(ProgramVisitor* visitor)
+Object* Constant::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-Argument::Argument(int line, int character, Name* name, Token* value) : Token(line, character), name(name), value(value) {}
+Argument::Argument(const Name* name, const Token* value) :
+    Token(name->line, name->character, name->string() + ": " + value->string()), name(name->name), value(value) {}
 
-List::List(int line, int character) : Token(line, character) {}
+List::List(const int line, const int character, const std::vector<const Token*> values) :
+    Token(line, character), values(values) {}
 
-CreateValueCombination::CreateValueCombination(int line, int character, Token* value1, Token* value2) :
-    Token(line, character), value1(value1), value2(value2) {}
+std::string List::string() const
+{
+    if (values.size() == 0)
+    {
+        return "()";
+    }
 
-CreateValueAdd::CreateValueAdd(int line, int character, Token* value1, Token* value2) :
-    CreateValueCombination(line, character, value1, value2) {}
+    std::string result = "(" + values[0]->string();
 
-Object* CreateValueAdd::accept(ProgramVisitor* visitor)
+    for (int i = 1; i < values.size(); i++)
+    {
+        result += ", " + values[i]->string();
+    }
+
+    return result + ")";
+}
+
+Combine::Combine(const Token* value1, const Token* value2, const std::string op) :
+    Token(value1->line, value1->character, value1->string() + " " + op + " " + value2->string()), value1(value1), value2(value2) {}
+
+Add::Add(const Token* value1, const Token* value2) :
+    Combine(value1, value2, "+") {}
+
+Object* Add::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-CreateValueSubtract::CreateValueSubtract(int line, int character, Token* value1, Token* value2) :
-    CreateValueCombination(line, character, value1, value2) {}
+Subtract::Subtract(const Token* value1, const Token* value2) :
+    Combine(value1, value2, "-") {}
 
-Object* CreateValueSubtract::accept(ProgramVisitor* visitor)
+Object* Subtract::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-CreateValueMultiply::CreateValueMultiply(int line, int character, Token* value1, Token* value2) :
-    CreateValueCombination(line, character, value1, value2) {}
+Multiply::Multiply(const Token* value1, const Token* value2) :
+    Combine(value1, value2, "*") {}
 
-Object* CreateValueMultiply::accept(ProgramVisitor* visitor)
+Object* Multiply::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-CreateValueDivide::CreateValueDivide(int line, int character, Token* value1, Token* value2) :
-    CreateValueCombination(line, character, value1, value2) {}
+Divide::Divide(const Token* value1, const Token* value2) :
+    Combine(value1, value2, "/") {}
 
-Object* CreateValueDivide::accept(ProgramVisitor* visitor)
+Object* Divide::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-Instruction::Instruction(int line, int character) : Token(line, character) {}
+Instruction::Instruction(const int line, const int character, const std::string str) :
+    Token(line, character, str) {}
 
-Assign::Assign(int line, int character, std::string variable, Token* value) :
-    Instruction(line, character), variable(variable), value(value) {}
+Assign::Assign(const Name* variable, const Token* value) :
+    Instruction(variable->line, variable->character, variable->string() + " = " + value->string()), variable(variable), value(value) {}
 
-Object* Assign::accept(ProgramVisitor* visitor)
+Object* Assign::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-CreateAudioSource::CreateAudioSource(int line, int character, Token* volume, Token* pan, List* effects) :
-    Instruction(line, character), volume(volume), pan(pan), effects(effects) {}
+Call::Call(const Name* name, const std::vector<const Argument*> arguments) :
+    Instruction(name->line, name->character), name(name->name), arguments(arguments) {}
 
-CreateOscillator::CreateOscillator(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateAudioSource(line, character, volume, pan, effects), frequency(frequency) {}
+std::string Call::string() const
+{
+    std::string result = name + "(";
 
-CreateSine::CreateSine(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateOscillator(line, character, volume, pan, frequency, effects) {}
+    if (arguments.size() == 0)
+    {
+        return result + ")";
+    }
 
-Object* CreateSine::accept(ProgramVisitor* visitor)
+    result += arguments[0]->string();
+
+    for (int i = 1; i < arguments.size(); i++)
+    {
+        result += ", " + arguments[i]->string();
+    }
+
+    return result + ")";
+}
+
+Object* Call::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-CreateSquare::CreateSquare(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateOscillator(line, character, volume, pan, frequency, effects) {}
+Program::Program(const std::vector<const Instruction*> instructions) :
+    Token(0, 0), instructions(instructions) {}
 
-Object* CreateSquare::accept(ProgramVisitor* visitor)
+std::string Program::string() const
+{
+    if (instructions.size() == 0)
+    {
+        return "";
+    }
+
+    std::string result = instructions[0]->string();
+
+    for (int i = 1; i < instructions.size(); i++)
+    {
+        result += "\n" + instructions[i]->string();
+    }
+
+    return result;
+}
+
+Object* Program::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-CreateSaw::CreateSaw(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateOscillator(line, character, volume, pan, frequency, effects) {}
+ProgramVisitor::ProgramVisitor(const std::string path) : path(path) {}
 
-Object* CreateSaw::accept(ProgramVisitor* visitor)
+Object* ProgramVisitor::visit(const Name* token)
 {
-    return visitor->visit(this);
+    if (variables.count(token->name))
+    {
+        if (currentVariable == token->name)
+        {
+            Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", path, token->line, token->character);
+        }
+
+        return variables[token->name];
+    }
+
+    if (token->name == "sequence-forwards")
+    {
+        return new Sequence::Order(Sequence::OrderEnum::Forwards);
+    }
+
+    if (token->name == "sequence-backwards")
+    {
+        return new Sequence::Order(Sequence::OrderEnum::Backwards);
+    }
+
+    if (token->name == "sequence-ping-pong")
+    {
+        return new Sequence::Order(Sequence::OrderEnum::PingPong);
+    }
+
+    if (token->name == "sequence-random")
+    {
+        return new Sequence::Order(Sequence::OrderEnum::Random);
+    }
+
+    if (token->name == "random-step")
+    {
+        return new Random::Type(Random::TypeEnum::Step);
+    }
+
+    if (token->name == "random-linear")
+    {
+       return new Random::Type(Random::TypeEnum::Linear);
+    }
+
+    else
+    {
+        double base = 0;
+
+        switch (token->name[0])
+        {
+            case 'c':
+                break;
+
+            case 'd':
+                base = 2;
+
+                break;
+
+            case 'e':
+                base = 4;
+
+                break;
+
+            case 'f':
+                base = 5;
+
+                break;
+
+            case 'g':
+                base = 7;
+
+                break;
+
+            case 'a':
+                base = 9;
+
+                break;
+
+            case 'b':
+                base = 11;
+
+                break;
+
+            default:
+            {
+                Utils::parseError("Variable \"" + token->name + "\" not defined.", path, token->line, token->character);
+
+                return nullptr;
+            }
+        }
+
+        if (token->name.size() == 2 && isdigit(token->name[1]))
+        {
+            return new Value(getFrequency(base + 12 * (token->name[1] - 48)));
+        }
+
+        if (token->name.size() == 3 && isdigit(token->name[2]))
+        {
+            if (token->name[1] == 's')
+            {
+                return new Value(getFrequency(base + 12 * (token->name[2] - 48) + 1));
+            }
+
+            if (token->name[1] == 'f')
+            {
+                return new Value(getFrequency(base + 12 * (token->name[2] - 48) - 1));
+            }
+        }
+    }
+
+    Utils::parseError("Unrecognized symbol \"" + token->name + "\".", path, token->line, token->character);
+
+    return nullptr;
 }
 
-CreateTriangle::CreateTriangle(int line, int character, Token* volume, Token* pan, Token* frequency, List* effects) :
-    CreateOscillator(line, character, volume, pan, frequency, effects) {}
-
-Object* CreateTriangle::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-CreateHold::CreateHold(int line, int character, Token* value, Token* length) :
-    Instruction(line, character), value(value), length(length) {}
-
-Object* CreateHold::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-CreateSweep::CreateSweep(int line, int character, Token* from, Token* to, Token* length) :
-    Instruction(line, character), from(from), to(to), length(length) {}
-
-Object* CreateSweep::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-CreateLFO::CreateLFO(int line, int character, Token* from, Token* to, Token* length) :
-    Instruction(line, character), from(from), to(to), length(length) {}
-
-Object* CreateLFO::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-GroupOrder::GroupOrder(int line, int character, Sequence::OrderEnum order) :
-    Token(line, character), order(order) {}
-
-Object* GroupOrder::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-CreateSequence::CreateSequence(int line, int character, List* controllers, Token* order) :
-    Instruction(line, character), controllers(controllers), order(order) {}
-
-Object* CreateSequence::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-CreateRepeat::CreateRepeat(int line, int character, Token* value, Token* repeats) :
-    Instruction(line, character), value(value), repeats(repeats) {}
-
-Object* CreateRepeat::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-RandomType::RandomType(int line, int character, Random::TypeEnum type) :
-    Token(line, character), type(type) {}
-
-Object* RandomType::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-CreateRandom::CreateRandom(int line, int character, Token* from, Token* to, Token* length, RandomType* type) :
-    Instruction(line, character), from(from), to(to), length(length), type(type) {}
-
-Object* CreateRandom::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-CreateEffect::CreateEffect(int line, int character, Token* mix) :
-    Instruction(line, character), mix(mix) {}
-
-CreateDelay::CreateDelay(int line, int character, Token* mix, Token* delay, Token* feedback) :
-    CreateEffect(line, character, mix), delay(delay), feedback(feedback) {}
-
-Object* CreateDelay::accept(ProgramVisitor* visitor)
-{
-    return visitor->visit(this);
-}
-
-ProgramVisitor::ProgramVisitor(const std::string sourcePath) : sourcePath(sourcePath) {}
-
-Object* ProgramVisitor::visit(Constant* token)
+Object* ProgramVisitor::visit(const Constant* token)
 {
     return new Value(token->value);
 }
 
-Object* ProgramVisitor::visit(VariableRef* token)
+Object* ProgramVisitor::visit(const Add* token)
 {
-    if (!variables.count(token->name))
+    ValueObject* value1 = (ValueObject*)token->value1->accept(this);
+    ValueObject* value2 = (ValueObject*)token->value2->accept(this);
+
+    if (dynamic_cast<Value*>(value1) && dynamic_cast<Value*>(value2))
     {
-        Utils::parseError("Variable \"" + token->name + "\" not defined.", sourcePath, token->line, token->character);
+        return new Value(value1->getValue() + value2->getValue());
     }
 
-    if (currentVariable == token->name)
+    return new ValueAdd(value1, value2);
+}
+
+Object* ProgramVisitor::visit(const Subtract* token)
+{
+    ValueObject* value1 = (ValueObject*)token->value1->accept(this);
+    ValueObject* value2 = (ValueObject*)token->value2->accept(this);
+
+    if (dynamic_cast<Value*>(value1) && dynamic_cast<Value*>(value2))
     {
-        Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", sourcePath, token->line, token->character);
+        return new Value(value1->getValue() - value2->getValue());
     }
 
-    return variables[token->name];
+    return new ValueSubtract(value1, value2);
 }
 
-Object* ProgramVisitor::visit(CreateValueAdd* token)
+Object* ProgramVisitor::visit(const Multiply* token)
 {
-    ValueAdd* add = new ValueAdd();
+    ValueObject* value1 = (ValueObject*)token->value1->accept(this);
+    ValueObject* value2 = (ValueObject*)token->value2->accept(this);
 
-    add->value1 = (ValueObject*)token->value1->accept(this);
-    add->value2 = (ValueObject*)token->value2->accept(this);
-
-    return add;
-}
-
-Object* ProgramVisitor::visit(CreateValueSubtract* token)
-{
-    ValueSubtract* subtract = new ValueSubtract();
-
-    subtract->value1 = (ValueObject*)token->value1->accept(this);
-    subtract->value2 = (ValueObject*)token->value2->accept(this);
-
-    return subtract;
-}
-
-Object* ProgramVisitor::visit(CreateValueMultiply* token)
-{
-    ValueMultiply* multiply = new ValueMultiply();
-
-    multiply->value1 = (ValueObject*)token->value1->accept(this);
-    multiply->value2 = (ValueObject*)token->value2->accept(this);
-
-    return multiply;
-}
-
-Object* ProgramVisitor::visit(CreateValueDivide* token)
-{
-    ValueDivide* divide = new ValueDivide();
-
-    divide->value1 = (ValueObject*)token->value1->accept(this);
-    divide->value2 = (ValueObject*)token->value2->accept(this);
-
-    return divide;
-}
-
-Object* ProgramVisitor::visit(Assign* token)
-{
-    if (!variables.count(token->variable))
+    if (dynamic_cast<Value*>(value1) && dynamic_cast<Value*>(value2))
     {
-        variables.insert(std::make_pair(token->variable, new Variable()));
+        return new Value(value1->getValue() * value2->getValue());
     }
 
-    currentVariable = token->variable;
+    return new ValueMultiply(value1, value2);
+}
 
-    variables[token->variable]->value = (ValueObject*)token->value->accept(this);
+Object* ProgramVisitor::visit(const Divide* token)
+{
+    ValueObject* value1 = (ValueObject*)token->value1->accept(this);
+    ValueObject* value2 = (ValueObject*)token->value2->accept(this);
+
+    if (dynamic_cast<Value*>(value1) && dynamic_cast<Value*>(value2))
+    {
+        return new Value(value1->getValue() / value2->getValue());
+    }
+
+    return new ValueDivide(value1, value2);
+}
+
+Object* ProgramVisitor::visit(const Assign* token)
+{
+    if (!variables.count(token->variable->name))
+    {
+        variables.insert(std::make_pair(token->variable->name, new Variable()));
+    }
+
+    currentVariable = token->variable->name;
+
+    variables[token->variable->name]->value = (ValueObject*)token->value->accept(this);
 
     currentVariable = "";
 
-    return variables[token->variable];
+    return variables[token->variable->name];
 }
 
-Object* ProgramVisitor::visit(CreateSine* token)
+Object* ProgramVisitor::visit(const Call* token)
 {
-    Sine* sine = new Sine();
+    std::unordered_map<std::string, const Argument*> arguments;
 
-    sine->volume = (ValueObject*)token->volume->accept(this);
-    sine->pan = (ValueObject*)token->pan->accept(this);
-    sine->frequency = (ValueObject*)token->frequency->accept(this);
-
-    for (Token* effect : token->effects->items)
+    for (const Argument* argument : token->arguments)
     {
-        sine->addEffect((Effect*)effect->accept(this));
+        if (arguments.count(argument->name))
+        {
+            Utils::parseError("Input \"" + argument->name + "\" specified more than once.", path, argument->line, argument->character);
+        }
+
+        arguments[argument->name] = argument;
     }
 
-    sources.push_back(sine);
+    const std::string name = token->name;
 
-    return sine;
-}
-
-Object* ProgramVisitor::visit(CreateSquare* token)
-{
-    Square* square = new Square();
-
-    square->volume = (ValueObject*)token->volume->accept(this);
-    square->pan = (ValueObject*)token->pan->accept(this);
-    square->frequency = (ValueObject*)token->frequency->accept(this);
-
-    for (Token* effect : token->effects->items)
+    if (name == "sine" || name == "square" || name == "saw" || name == "triangle")
     {
-        square->addEffect((Effect*)effect->accept(this));
+        ValueObject* volume = new Value(0);
+        ValueObject* pan = new Value(0);
+        std::vector<Effect*> effects;
+        ValueObject* frequency = new Value(0);
+
+        for (std::pair<const std::string, const Argument*> argument : arguments)
+        {
+            if (argument.first == "volume")
+            {
+                volume = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "pan")
+            {
+                pan = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "effects")
+            {
+                for (const Token* value : ((List*)argument.second->value)->values)
+                {
+                    effects.push_back((Effect*)value->accept(this));
+                }
+            }
+
+            else if (argument.first == "frequency")
+            {
+                frequency = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else
+            {
+                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
+            }
+        }
+
+        Oscillator* oscillator;
+
+        if (name == "sine")
+        {
+            oscillator = new Sine(volume, pan, effects, frequency);
+        }
+        
+        else if (name == "square")
+        {
+            oscillator = new Square(volume, pan, effects, frequency);
+        }
+
+        else if (name == "saw")
+        {
+            oscillator = new Saw(volume, pan, effects, frequency);
+        }
+
+        else if (name == "triangle")
+        {
+            oscillator = new Triangle(volume, pan, effects, frequency);
+        }
+
+        sources.push_back(oscillator);
+
+        return oscillator;
     }
 
-    sources.push_back(square);
-
-    return square;
-}
-
-Object* ProgramVisitor::visit(CreateSaw* token)
-{
-    Saw* saw = new Saw();
-
-    saw->volume = (ValueObject*)token->volume->accept(this);
-    saw->pan = (ValueObject*)token->pan->accept(this);
-    saw->frequency = (ValueObject*)token->frequency->accept(this);
-
-    for (Token* effect : token->effects->items)
+    else if (name == "hold")
     {
-        saw->addEffect((Effect*)effect->accept(this));
+        ValueObject* value = new Value(0);
+        ValueObject* length = new Value(0);
+
+        for (std::pair<const std::string, const Argument*> argument : arguments)
+        {
+            if (argument.first == "value")
+            {
+                value = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "length")
+            {
+                length = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else
+            {
+                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
+            }
+        }
+
+        return new Hold(value, length);
     }
 
-    sources.push_back(saw);
-
-    return saw;
-}
-
-Object* ProgramVisitor::visit(CreateTriangle* token)
-{
-    Triangle* triangle = new Triangle();
-
-    triangle->volume = (ValueObject*)token->volume->accept(this);
-    triangle->pan = (ValueObject*)token->pan->accept(this);
-    triangle->frequency = (ValueObject*)token->frequency->accept(this);
-
-    for (Token* effect : token->effects->items)
+    else if (name == "lfo" || name == "sweep")
     {
-        triangle->addEffect((Effect*)effect->accept(this));
+        ValueObject* from = new Value(0);
+        ValueObject* to = new Value(1);
+        ValueObject* length = new Value(0);
+
+        for (std::pair<const std::string, const Argument*> argument : arguments)
+        {
+            if (argument.first == "from")
+            {
+                from = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "to")
+            {
+                to = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "length")
+            {
+                length = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else
+            {
+                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
+            }
+        }
+
+        if (name == "lfo")
+        {
+            return new LFO(from, to, length);
+        }
+
+        return new Sweep(from, to, length);
     }
 
-    sources.push_back(triangle);
-
-    return triangle;
-}
-
-Object* ProgramVisitor::visit(CreateHold* token)
-{
-    Hold* hold = new Hold();
-
-    hold->value = (ValueObject*)token->value->accept(this);
-    hold->length = (ValueObject*)token->length->accept(this);
-
-    return hold;
-}
-
-Object* ProgramVisitor::visit(CreateSweep* token)
-{
-    Sweep* sweep = new Sweep();
-
-    sweep->from = (ValueObject*)token->from->accept(this);
-    sweep->to = (ValueObject*)token->to->accept(this);
-    sweep->length = (ValueObject*)token->length->accept(this);
-
-    return sweep;
-}
-
-Object* ProgramVisitor::visit(CreateLFO* token)
-{
-    LFO* lfo = new LFO();
-
-    lfo->from = (ValueObject*)token->from->accept(this);
-    lfo->to = (ValueObject*)token->to->accept(this);
-    lfo->length = (ValueObject*)token->length->accept(this);
-
-    return lfo;
-}
-
-Object* ProgramVisitor::visit(GroupOrder* token)
-{
-    return new Sequence::Order(token->order);
-}
-
-Object* ProgramVisitor::visit(CreateSequence* token)
-{
-    Sequence* sequence = new Sequence();
-
-    for (Token* controller : token->controllers->items)
+    else if (name == "sequence")
     {
-        sequence->controllers.push_back((ValueObject*)controller->accept(this));
+        std::vector<ValueObject*> values;
+        Sequence::Order* order = new Sequence::Order(Sequence::OrderEnum::Forwards);
+
+        for (std::pair<const std::string, const Argument*> argument : arguments)
+        {
+            if (argument.first == "values")
+            {
+                for (const Token* token : ((List*)argument.second->value)->values)
+                {
+                    values.push_back((ValueObject*)token->accept(this));
+                }
+            }
+
+            else if (argument.first == "order")
+            {
+                order = (Sequence::Order*)argument.second->value->accept(this);
+            }
+
+            else
+            {
+                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
+            }
+        }
+
+        return new Sequence(values, order);
     }
 
-    sequence->order = (Sequence::Order*)token->order->accept(this);
+    else if (name == "repeat")
+    {
+        ValueObject* value = new Value(0);
+        ValueObject* repeats = new Value(0);
 
-    return sequence;
+        for (std::pair<const std::string, const Argument*> argument : arguments)
+        {
+            if (argument.first == "value")
+            {
+                value = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "repeats")
+            {
+                repeats = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else
+            {
+                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
+            }
+        }
+
+        return new Repeat(value, repeats);
+    }
+
+    else if (name == "random")
+    {
+        ValueObject* from = new Value(0);
+        ValueObject* to = new Value(1);
+        ValueObject* length = new Value(0);
+        Random::Type* type = new Random::Type(Random::TypeEnum::Step);
+
+        for (std::pair<const std::string, const Argument*> argument : arguments)
+        {
+            if (argument.first == "from")
+            {
+                from = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "to")
+            {
+                to = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "length")
+            {
+                length = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "type")
+            {
+                type = (Random::Type*)argument.second->value->accept(this);
+            }
+
+            else
+            {
+                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
+            }
+        }
+
+        return new Random(from, to, length, type);
+    }
+
+    else if (name == "delay")
+    {
+        ValueObject* mix = new Value(1);
+        ValueObject* delay = new Value(0);
+        ValueObject* feedback = new Value(0);
+
+        for (std::pair<const std::string, const Argument*> argument : arguments)
+        {
+            if (argument.first == "mix")
+            {
+                mix = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "delay")
+            {
+                delay = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "feedback")
+            {
+                feedback = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else
+            {
+                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
+            }
+        }
+
+        return new Delay(mix, delay, feedback);
+    }
+
+    else if (name == "cutoff")
+    {
+        ValueObject* mix = new Value(1);
+        ValueObject* cutoff = new Value(0);
+
+        for (std::pair<const std::string, const Argument*> argument : arguments)
+        {
+            if (argument.first == "mix")
+            {
+                mix = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else if (argument.first == "cutoff")
+            {
+                cutoff = (ValueObject*)argument.second->value->accept(this);
+            }
+
+            else
+            {
+                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
+            }
+        }
+
+        return new LowPassFilter(mix, cutoff);
+    }
+
+    Utils::parseError("Unknown function name \"" + name + "\".", path, token->line, token->character);
+
+    return nullptr;
 }
 
-Object* ProgramVisitor::visit(CreateRepeat* token)
+Object* ProgramVisitor::visit(const Program* token)
 {
-    Repeat* repeat = new Repeat();
-
-    repeat->value = (ValueObject*)token->value->accept(this);
-    repeat->repeats = (ValueObject*)token->repeats->accept(this);
-
-    return repeat;
-}
-
-Object* ProgramVisitor::visit(RandomType* token)
-{
-    return new Random::Type(token->type);
-}
-
-Object* ProgramVisitor::visit(CreateRandom* token)
-{
-    Random* random = new Random();
-
-    random->from = (ValueObject*)token->from->accept(this);
-    random->to = (ValueObject*)token->to->accept(this);
-    random->length = (ValueObject*)token->length->accept(this);
-    random->type = (Random::Type*)token->type->accept(this);
-
-    return random;
-}
-
-Object* ProgramVisitor::visit(CreateDelay* token)
-{
-    Delay* delay = new Delay();
-
-    delay->mix = (ValueObject*)token->mix->accept(this);
-    delay->delay = (ValueObject*)token->delay->accept(this);
-    delay->feedback = (ValueObject*)token->feedback->accept(this);
-
-    return delay;
-}
-
-Object* ProgramVisitor::visit(Program* token)
-{
-    for (Instruction* instruction : token->instructions)
+    for (const Instruction* instruction : token->instructions)
     {
         instruction->accept(this);
     }
 
     return nullptr;
+}
+
+double ProgramVisitor::getFrequency(double note)
+{
+    return 440 * pow(2, (note - 45) / 12);
 }
