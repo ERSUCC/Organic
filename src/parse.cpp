@@ -185,17 +185,24 @@ void Parser::tokenize()
 
 Token* Parser::getToken(const int pos)
 {
+    if (pos >= tokens.size())
+    {
+        Utils::parseError("Unexpected end of file.", path, line, character);
+
+        return nullptr;
+    }
+
     return tokens[pos];
 }
 
 template <typename T> T* Parser::getToken(const int pos)
 {
-    return dynamic_cast<T*>(tokens[pos]);
+    return dynamic_cast<T*>(getToken(pos));
 }
 
 template <typename T> bool Parser::tokenIs(const int pos)
 {
-    return dynamic_cast<T*>(tokens[pos]);
+    return dynamic_cast<T*>(getToken(pos));
 }
 
 void Parser::tokenError(const Token* token, const std::string expected)
