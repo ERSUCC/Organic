@@ -20,7 +20,7 @@ Program* Parser::parse()
 
     current = 0;
 
-    std::vector<const Instruction*> instructions;
+    std::vector<Instruction*> instructions;
 
     while (current < tokens.size())
     {
@@ -245,7 +245,7 @@ TokenRange* Parser::parseCall(int pos)
 
     pos += 2;
 
-    std::vector<const Argument*> arguments;
+    std::vector<Argument*> arguments;
 
     if (tokenIs<Name>(pos))
     {
@@ -294,7 +294,7 @@ TokenRange* Parser::parseExpression(int pos)
     {
         int start = pos;
 
-        std::vector<const Token*> list;
+        std::vector<Token*> list;
 
         do
         {

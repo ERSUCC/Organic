@@ -29,12 +29,12 @@ private:
 
 struct TokenRange
 {
-    TokenRange(const int start, const int end, const Token* token);
+    TokenRange(const int start, const int end, Token* token);
 
     const int start;
     const int end;
     
-    const Token* token;
+    Token* token;
 };
 
 struct OpenParenthesis : public Token
@@ -115,11 +115,11 @@ struct Argument : public Token
 
 struct List : public Token
 {
-    List(const int line, const int character, const std::vector<const Token*> values);
+    List(const int line, const int character, const std::vector<Token*> values);
 
     std::string string() const override;
 
-    const std::vector<const Token*> values;
+    const std::vector<Token*> values;
 };
 
 struct Combine : public Token
@@ -175,25 +175,25 @@ struct Assign : public Instruction
 
 struct Call : public Instruction
 {
-    Call(const Name* name, const std::vector<const Argument*> arguments);
+    Call(const Name* name, const std::vector<Argument*> arguments);
 
     std::string string() const override;
 
     Object* accept(ProgramVisitor* visitor) const override;
 
     const std::string name;
-    const std::vector<const Argument*> arguments;
+    const std::vector<Argument*> arguments;
 };
 
 struct Program : public Token
 {
-    Program(const std::vector<const Instruction*> instructions);
+    Program(const std::vector<Instruction*> instructions);
 
     std::string string() const override;
     
     Object* accept(ProgramVisitor* visitor) const override;
 
-    const std::vector<const Instruction*> instructions;
+    const std::vector<Instruction*> instructions;
 };
 
 struct ProgramVisitor

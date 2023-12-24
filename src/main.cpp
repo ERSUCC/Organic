@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 
     const std::string path = std::filesystem::canonical(argv[1]).string();
 
-    std::vector<const std::string> flags;
+    std::vector<std::string> flags;
 
     for (int i = 2; i < argc; i++)
     {

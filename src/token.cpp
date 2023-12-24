@@ -13,7 +13,7 @@ Object* Token::accept(ProgramVisitor* visitor) const
     return nullptr;
 }
 
-TokenRange::TokenRange(const int start, const int end, const Token* token) :
+TokenRange::TokenRange(const int start, const int end, Token* token) :
     start(start), end(end), token(token) {}
 
 OpenParenthesis::OpenParenthesis(const int line, const int character) :
@@ -65,7 +65,7 @@ Object* Constant::accept(ProgramVisitor* visitor) const
 Argument::Argument(const Name* name, const Token* value) :
     Token(name->line, name->character, name->string() + ": " + value->string()), name(name->name), value(value) {}
 
-List::List(const int line, const int character, const std::vector<const Token*> values) :
+List::List(const int line, const int character, const std::vector<Token*> values) :
     Token(line, character), values(values) {}
 
 std::string List::string() const
@@ -131,7 +131,7 @@ Object* Assign::accept(ProgramVisitor* visitor) const
     return visitor->visit(this);
 }
 
-Call::Call(const Name* name, const std::vector<const Argument*> arguments) :
+Call::Call(const Name* name, const std::vector<Argument*> arguments) :
     Instruction(name->line, name->character), name(name->name), arguments(arguments) {}
 
 std::string Call::string() const
@@ -158,7 +158,7 @@ Object* Call::accept(ProgramVisitor* visitor) const
     return visitor->visit(this);
 }
 
-Program::Program(const std::vector<const Instruction*> instructions) :
+Program::Program(const std::vector<Instruction*> instructions) :
     Token(0, 0), instructions(instructions) {}
 
 std::string Program::string() const
