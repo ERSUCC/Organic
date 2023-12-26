@@ -176,7 +176,7 @@ void Parser::tokenize()
 
         else
         {
-            Utils::parseError("Unrecognized symbol \"" + std::to_string(code[current]) + "\".", path, startLine, startCharacter);
+            Utils::parseError("Unrecognized symbol \"" + std::string(1, code[current]) + "\".", path, startLine, startCharacter);
         }
 
         skipWhitespace();
