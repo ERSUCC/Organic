@@ -14,13 +14,13 @@ struct AudioSource : public ValueObject
     AudioSource(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects);
     ~AudioSource();
 
-    void fillBuffer(double* buffer, unsigned int bufferLength);
+    void fillBuffer(double* buffer, const unsigned int bufferLength, const double masterVolume);
 
     ValueObject* volume;
     ValueObject* pan;
 
 protected:
-    virtual void prepareForEffects(unsigned int bufferLength) = 0;
+    virtual void prepareForEffects(const unsigned int bufferLength) = 0;
 
     double* effectBuffer;
 
@@ -41,7 +41,7 @@ protected:
     void finishStart() override;
     void finishStop() override;
 
-    void prepareForEffects(unsigned int bufferLength) override;
+    void prepareForEffects(const unsigned int bufferLength) override;
 
 };
 
@@ -78,7 +78,7 @@ struct Noise : public AudioSource
     Noise(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects);
 
 protected:
-    void prepareForEffects(unsigned int bufferLength) override;
+    void prepareForEffects(const unsigned int bufferLength) override;
 
 private:
     std::uniform_real_distribution<> udist = std::uniform_real_distribution<>(-1, 1);
@@ -93,7 +93,7 @@ struct Sample : public AudioSource
 protected:
     void finishStart() override;
 
-    void prepareForEffects(unsigned int bufferLength) override;
+    void prepareForEffects(const unsigned int bufferLength) override;
 
 private:
     double* data;

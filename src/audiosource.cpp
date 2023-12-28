@@ -11,7 +11,7 @@ AudioSource::~AudioSource()
     free(effectBuffer);
 }
 
-void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
+void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength, const double masterVolume)
 {
     if (enabled)
     {
@@ -24,7 +24,7 @@ void AudioSource::fillBuffer(double* buffer, unsigned int bufferLength)
 
         for (int i = 0; i < bufferLength * utils->channels; i++)
         {
-            buffer[i] += effectBuffer[i];
+            buffer[i] += effectBuffer[i] * masterVolume;
         }
     }
 }
@@ -51,7 +51,7 @@ void Oscillator::finishStop()
     frequency->stop();
 }
 
-void Oscillator::prepareForEffects(unsigned int bufferLength)
+void Oscillator::prepareForEffects(const unsigned int bufferLength)
 {
     phaseDelta = utils->twoPi * frequency->getValue() / utils->sampleRate;
 
@@ -121,7 +121,7 @@ double Triangle::getValue()
 Noise::Noise(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects) :
     AudioSource(volume, pan, effects) {}
 
-void Noise::prepareForEffects(unsigned int bufferLength)
+void Noise::prepareForEffects(const unsigned int bufferLength)
 {
     for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
@@ -204,7 +204,7 @@ void Sample::finishStart()
     }
 }
 
-void Sample::prepareForEffects(unsigned int bufferLength)
+void Sample::prepareForEffects(const unsigned int bufferLength)
 {
     for (int i = 0; i < bufferLength * utils->channels; i++)
     {

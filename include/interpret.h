@@ -8,9 +8,11 @@
 
 struct InterpreterOptions
 {
-    double time = 0;
+    double time;
+    std::string exportPath;
 
     bool setTime = false;
+    bool setExport = false;
 };
 
 struct InterpreterResult

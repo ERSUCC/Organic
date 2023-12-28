@@ -2,10 +2,9 @@
 
 #include <string>
 #include <vector>
-#include <fstream>
-#include <sstream>
 #include <chrono>
 
+#include "AudioFile.h"
 #include "RtAudio.h"
 
 #include "audiosource.h"
@@ -29,8 +28,8 @@ struct Organic
     static void init(const std::string program, const std::vector<std::string>& flags);
 
     void start();
-    void startTest();
     void startPlayback();
+    void startExport();
 
 private:
     Utils* utils;

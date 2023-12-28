@@ -1,0 +1,6 @@
+note_length = repeat(value: random(from: 50, to: 2000, length: 5000, type: random-linear))
+
+sine(volume: 0.5, frequency: repeat(value: random(from: 0, to: 250, length: note_length, type: random-linear)))
+sine(volume: 0.5, frequency: repeat(value: random(from: 0, to: 500, length: note_length, type: random-linear)))
+sine(volume: 0.25, frequency: repeat(value: random(from: 0, to: 750, length: note_length, type: random-linear)))
+sine(volume: 0.25, frequency: repeat(value: random(from: 0, to: 1000, length: note_length, type: random-linear)))

@@ -17,9 +17,13 @@ Organic is a command-line interpreter, run from the Command Prompt (Windows) or 
 ./organic /Users/johndoe/Documents/play_a_sine.organic
 ```
 
+The following section details the optional inputs, for more advanced use of Organic.
+
 ### Program Arguments
 
-TODO
+--time *number*: Set the runtime of the program in milliseconds.
+
+--export *string*: Render the program to the specified audio file instead of playing back in time. Must be used in conjunction with --time.
 
 ## Organic Syntax
 

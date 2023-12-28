@@ -6,7 +6,7 @@ InterpreterResult Interpreter::interpret(const std::string path, const std::vect
 
     for (int i = 0; i < flags.size(); i++)
     {
-        if (flags[i] == "-t" || flags[i] == "--time")
+        if (flags[i] == "--time")
         {
             checkNextOption(flags, &i);
 
@@ -22,10 +22,23 @@ InterpreterResult Interpreter::interpret(const std::string path, const std::vect
             options.setTime = true;
         }
 
+        else if (flags[i] == "--export")
+        {
+            checkNextOption(flags, &i);
+
+            options.exportPath = flags[i];
+            options.setExport = true;
+        }
+
         else
         {
             Utils::argumentError("Unknown option \"" + flags[i] + "\".");
         }
+    }
+
+    if (options.setExport && !options.setTime)
+    {
+        Utils::argumentError("Cannot export without a time limit.");
     }
 
     ProgramVisitor* visitor = new ProgramVisitor(path);

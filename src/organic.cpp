@@ -15,17 +15,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
     for (AudioSource* source : data->audioSources)
     {
-        source->fillBuffer(buffer, frames);
-    }
-
-    for (int i = 0; i < frames * data->utils->channels; i += data->utils->channels)
-    {
-        buffer[i] *= data->utils->volume;
-
-        if (data->utils->channels == 2)
-        {
-            buffer[i + 1] *= data->utils->volume;
-        }
+        source->fillBuffer(buffer, frames, data->utils->volume);
     }
 
     return 0;
@@ -53,7 +43,15 @@ void Organic::start()
         audioSource->start();
     }
 
-    startPlayback();
+    if (options.setExport)
+    {
+        startExport();
+    }
+
+    else
+    {
+        startPlayback();
+    }
 }
 
 void Organic::startPlayback()
@@ -110,4 +108,47 @@ void Organic::startPlayback()
     {
         audio.closeStream();
     }
+}
+
+void Organic::startExport()
+{
+    int steps = (options.time / 1000) * utils->sampleRate;
+
+    AudioFile<double>::AudioBuffer fileBuffer;
+
+    fileBuffer.resize(utils->bufferLength);
+
+    fileBuffer[0].resize(steps);
+
+    if (utils->channels == 2)
+    {
+        fileBuffer[1].resize(steps);
+    }
+
+    double* buffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
+
+    for (int i = 0; i < steps; i += utils->bufferLength)
+    {
+        std::fill(buffer, buffer + utils->bufferLength * utils->channels, 0);
+
+        for (AudioSource* source : audioSources)
+        {
+            source->fillBuffer(buffer, utils->bufferLength, utils->volume);
+        }
+
+        for (int j = 0; j < utils->bufferLength; j++)
+        {
+            fileBuffer[0][i + j] = buffer[j * utils->channels];
+
+            if (utils->channels == 2)
+            {
+                fileBuffer[1][i + j] = buffer[j * 2 + 1];
+            }
+        }
+    }
+
+    AudioFile<double> file;
+
+    file.setAudioBuffer(fileBuffer);
+    file.save(options.exportPath);
 }
