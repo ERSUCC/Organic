@@ -114,21 +114,17 @@ void Organic::startExport()
 {
     int steps = (options.time / 1000) * utils->sampleRate;
 
-    AudioFile<double>::AudioBuffer fileBuffer;
+    AudioFile<double> file;
 
-    fileBuffer.resize(utils->bufferLength);
-
-    fileBuffer[0].resize(steps);
-
-    if (utils->channels == 2)
-    {
-        fileBuffer[1].resize(steps);
-    }
+    file.setNumChannels(utils->channels);
+    file.setNumSamplesPerChannel(steps);
 
     double* buffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
 
     for (int i = 0; i < steps; i += utils->bufferLength)
     {
+        utils->time = i * 1000.0 / utils->sampleRate;
+
         std::fill(buffer, buffer + utils->bufferLength * utils->channels, 0);
 
         for (AudioSource* source : audioSources)
@@ -138,17 +134,14 @@ void Organic::startExport()
 
         for (int j = 0; j < utils->bufferLength; j++)
         {
-            fileBuffer[0][i + j] = buffer[j * utils->channels];
+            file.samples[0][i + j] = buffer[j * utils->channels];
 
             if (utils->channels == 2)
             {
-                fileBuffer[1][i + j] = buffer[j * 2 + 1];
+                file.samples[1][i + j] = buffer[j * 2 + 1];
             }
         }
     }
 
-    AudioFile<double> file;
-
-    file.setAudioBuffer(fileBuffer);
     file.save(options.exportPath);
 }
