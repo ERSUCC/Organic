@@ -38,6 +38,11 @@ void Organic::init(const std::string program, const std::vector<std::string>& fl
 
 void Organic::start()
 {
+    if (options.setMono)
+    {
+        utils->channels = 1;
+    }
+
     for (AudioSource* audioSource : audioSources)
     {
         audioSource->start();

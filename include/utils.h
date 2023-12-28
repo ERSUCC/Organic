@@ -23,9 +23,9 @@ struct Utils
     static void parseError(const std::string message, const std::string file, const int line, const int character);
     static void argumentError(const std::string message);
 
-    const unsigned int sampleRate = 44100;
-    const unsigned int channels = 2;
-    const unsigned int bufferLength = 128;
+    unsigned int sampleRate = 44100;
+    unsigned int channels = 2;
+    unsigned int bufferLength = 128;
 
     const double twoPi = M_PI * 2;
     double volume = 0.25;

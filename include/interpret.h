@@ -10,9 +10,11 @@ struct InterpreterOptions
 {
     double time;
     std::string exportPath;
+    bool mono;
 
     bool setTime = false;
     bool setExport = false;
+    bool setMono = false;
 };
 
 struct InterpreterResult

@@ -30,6 +30,12 @@ InterpreterResult Interpreter::interpret(const std::string path, const std::vect
             options.setExport = true;
         }
 
+        else if (flags[i] == "--mono")
+        {
+            options.mono = true;
+            options.setMono = true;
+        }
+
         else
         {
             Utils::argumentError("Unknown option \"" + flags[i] + "\".");
