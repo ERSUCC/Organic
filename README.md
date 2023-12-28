@@ -48,4 +48,6 @@ This will create the `organic` binary in the `build` directory. Move it wherever
 
 ## Credits
 
-Organic relies on RtAudio for cross-platform audio output, which can be found here: [https://github.com/thestk/rtaudio](https://github.com/thestk/rtaudio).
+Organic uses RtAudio for cross-platform real-time audio output, which can be found here: [https://github.com/thestk/rtaudio](https://github.com/thestk/rtaudio).
+
+Organic uses AudioFile for audio file input and output, which can be found here: [https://github.com/adamstark/AudioFile](https://github.com/adamstark/AudioFile)
