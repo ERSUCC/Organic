@@ -17,12 +17,14 @@ struct Token
 
     virtual std::string string() const;
 
+    virtual Token* copy() const;
+
     virtual Object* accept(ProgramVisitor* visitor) const;
 
     const int line;
     const int character;
 
-private:
+protected:
     const std::string str;
 
 };
@@ -40,26 +42,36 @@ struct TokenRange
 struct OpenParenthesis : public Token
 {
     OpenParenthesis(const int line, const int character);
+
+    Token* copy() const override;
 };
 
 struct CloseParenthesis : public Token
 {
     CloseParenthesis(const int line, const int character);
+
+    Token* copy() const override;
 };
 
 struct Colon : public Token
 {
     Colon(const int line, const int character);
+
+    Token* copy() const override;
 };
 
 struct Comma : public Token
 {
     Comma(const int line, const int character);
+
+    Token* copy() const override;
 };
 
 struct Equals : public Token
 {
     Equals(const int line, const int character);
+
+    Token* copy() const override;
 };
 
 struct Operator : public Token
@@ -70,26 +82,36 @@ struct Operator : public Token
 struct AddToken : public Operator
 {
     AddToken(const int line, const int character);
+
+    Token* copy() const override;
 };
 
 struct SubtractToken : public Operator
 {
     SubtractToken(const int line, const int character);
+
+    Token* copy() const override;
 };
 
 struct MultiplyToken : public Operator
 {
     MultiplyToken(const int line, const int character);
+
+    Token* copy() const override;
 };
 
 struct DivideToken : public Operator
 {
     DivideToken(const int line, const int character);
+
+    Token* copy() const override;
 };
 
 struct Name : public Token
 {
-    Name(const int line, const int character, const std::string str);
+    Name(const int line, const int character, const std::string name);
+
+    Token* copy() const override;
 
     Object* accept(ProgramVisitor* visitor) const override;
 
@@ -100,6 +122,8 @@ struct Constant : public Token
 {
     Constant(const int line, const int character, const std::string str);
 
+    Token* copy() const override;
+
     Object* accept(ProgramVisitor* visitor) const override;
 
     const double value;
@@ -107,7 +131,9 @@ struct Constant : public Token
 
 struct Argument : public Token
 {
-    Argument(const Name* name, const Token* value);
+    Argument(const int line, const int character, const std::string name, const Token* value);
+
+    Token* copy() const override;
 
     const std::string name;
     const Token* value;
@@ -116,6 +142,8 @@ struct Argument : public Token
 struct List : public Token
 {
     List(const int line, const int character, const std::vector<Token*> values);
+
+    Token* copy() const override;
 
     std::string string() const override;
 
@@ -134,12 +162,16 @@ struct Add : public Combine
 {
     Add(const Token* value1, const Token* value2);
 
+    Token* copy() const override;
+
     Object* accept(ProgramVisitor* visitor) const override;
 };
 
 struct Subtract : public Combine
 {
     Subtract(const Token* value1, const Token* value2);
+
+    Token* copy() const override;
 
     Object* accept(ProgramVisitor* visitor) const override;
 };
@@ -148,12 +180,16 @@ struct Multiply : public Combine
 {
     Multiply(const Token* value1, const Token* value2);
 
+    Token* copy() const override;
+
     Object* accept(ProgramVisitor* visitor) const override;
 };
 
 struct Divide : public Combine
 {
     Divide(const Token* value1, const Token* value2);
+
+    Token* copy() const override;
 
     Object* accept(ProgramVisitor* visitor) const override;
 };
@@ -167,6 +203,8 @@ struct Assign : public Instruction
 {
     Assign(const Name* variable, const Token* value);
 
+    Token* copy() const override;
+
     Object* accept(ProgramVisitor* visitor) const override;
 
     const Name* variable;
@@ -175,7 +213,9 @@ struct Assign : public Instruction
 
 struct Call : public Instruction
 {
-    Call(const Name* name, const std::vector<Argument*> arguments);
+    Call(const int line, const int character, const std::string name, const std::vector<Argument*> arguments);
+
+    Token* copy() const override;
 
     std::string string() const override;
 
@@ -188,6 +228,8 @@ struct Call : public Instruction
 struct Program : public Token
 {
     Program(const std::vector<Instruction*> instructions);
+
+    Token* copy() const override;
 
     std::string string() const override;
     
@@ -210,7 +252,9 @@ struct ProgramVisitor
     Object* visit(const Call* token);
     Object* visit(const Program* token);
 
-    double getFrequency(double note);
+    const std::vector<Token*> getList(const Token* token) const;
+
+    double getFrequency(const double note) const;
 
     std::vector<AudioSource*> sources;
     EventQueue* eventQueue = new EventQueue();

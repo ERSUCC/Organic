@@ -263,7 +263,9 @@ TokenRange* Parser::parseCall(int pos)
 
     if (tokenIs<CloseParenthesis>(pos))
     {
-        return new TokenRange(start, pos + 1, new Call(getToken<Name>(start), arguments));
+        Name* name = getToken<Name>(start);
+
+        return new TokenRange(start, pos + 1, new Call(name->line, name->character, name->name, arguments));
     }
 
     tokenError(getToken(pos), "\")\"");
@@ -285,7 +287,9 @@ TokenRange* Parser::parseArgument(int pos)
 
     TokenRange* range = parseExpression(pos + 2);
 
-    return new TokenRange(pos, range->end, new Argument(getToken<Name>(pos), range->token));
+    Name* name = getToken<Name>(pos);
+
+    return new TokenRange(pos, range->end, new Argument(name->line, name->character, name->name, range->token));
 }
 
 TokenRange* Parser::parseExpression(int pos)

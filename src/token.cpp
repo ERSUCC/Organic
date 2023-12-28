@@ -8,6 +8,11 @@ std::string Token::string() const
     return str;
 }
 
+Token* Token::copy() const
+{
+    return new Token(line, character, str);
+}
+
 Object* Token::accept(ProgramVisitor* visitor) const
 {
     return nullptr;
@@ -19,17 +24,42 @@ TokenRange::TokenRange(const int start, const int end, Token* token) :
 OpenParenthesis::OpenParenthesis(const int line, const int character) :
     Token(line, character, "(") {}
 
+Token* OpenParenthesis::copy() const
+{
+    return new OpenParenthesis(line, character);
+}
+
 CloseParenthesis::CloseParenthesis(const int line, const int character) :
     Token(line, character, ")") {}
+
+Token* CloseParenthesis::copy() const
+{
+    return new CloseParenthesis(line, character);
+}
 
 Colon::Colon(const int line, const int character) :
     Token(line, character, ":") {}
 
+Token* Colon::copy() const
+{
+    return new Colon(line, character);
+}
+
 Comma::Comma(const int line, const int character) :
     Token(line, character, ",") {}
 
+Token* Comma::copy() const
+{
+    return new Comma(line, character);
+}
+
 Equals::Equals(const int line, const int character) :
     Token(line, character, "=") {}
+
+Token* Equals::copy() const
+{
+    return new Equals(line, character);
+}
 
 Operator::Operator(const int line, const int character, const std::string str) :
     Token(line, character, str) {}
@@ -37,17 +67,42 @@ Operator::Operator(const int line, const int character, const std::string str) :
 AddToken::AddToken(const int line, const int character) :
     Operator(line, character, "+") {}
 
+Token* AddToken::copy() const
+{
+    return new AddToken(line, character);
+}
+
 SubtractToken::SubtractToken(const int line, const int character) :
     Operator(line, character, "-") {}
+
+Token* SubtractToken::copy() const
+{
+    return new SubtractToken(line, character);
+}
 
 MultiplyToken::MultiplyToken(const int line, const int character) :
     Operator(line, character, "*") {}
 
+Token* MultiplyToken::copy() const
+{
+    return new MultiplyToken(line, character);
+}
+
 DivideToken::DivideToken(const int line, const int character) :
     Operator(line, character, "/") {}
 
-Name::Name(const int line, const int character, const std::string str) :
-    Token(line, character, str), name(str) {}
+Token* DivideToken::copy() const
+{
+    return new DivideToken(line, character);
+}
+
+Name::Name(const int line, const int character, const std::string name) :
+    Token(line, character, name), name(name) {}
+
+Token* Name::copy() const
+{
+    return new Name(line, character, name);
+}
 
 Object* Name::accept(ProgramVisitor* visitor) const
 {
@@ -57,13 +112,23 @@ Object* Name::accept(ProgramVisitor* visitor) const
 Constant::Constant(const int line, const int character, const std::string str) :
     Token(line, character, str), value(std::stod(str)) {}
 
+Token* Constant::copy() const
+{
+    return new Constant(line, character, str);
+}
+
 Object* Constant::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-Argument::Argument(const Name* name, const Token* value) :
-    Token(name->line, name->character, name->string() + ": " + value->string()), name(name->name), value(value) {}
+Argument::Argument(const int line, const int character, const std::string name, const Token* value) :
+    Token(line, character, name + ": " + value->string()), name(name), value(value) {}
+
+Token* Argument::copy() const
+{
+    return new Argument(line, character, name, value);
+}
 
 List::List(const int line, const int character, const std::vector<Token*> values) :
     Token(line, character), values(values) {}
@@ -85,11 +150,21 @@ std::string List::string() const
     return result + ")";
 }
 
+Token* List::copy() const
+{
+    return new List(line, character, values);
+}
+
 Combine::Combine(const Token* value1, const Token* value2, const std::string op) :
     Token(value1->line, value1->character, value1->string() + " " + op + " " + value2->string()), value1(value1), value2(value2) {}
 
 Add::Add(const Token* value1, const Token* value2) :
     Combine(value1, value2, "+") {}
+
+Token* Add::copy() const
+{
+    return new Add(value1, value2);
+}
 
 Object* Add::accept(ProgramVisitor* visitor) const
 {
@@ -99,6 +174,11 @@ Object* Add::accept(ProgramVisitor* visitor) const
 Subtract::Subtract(const Token* value1, const Token* value2) :
     Combine(value1, value2, "-") {}
 
+Token* Subtract::copy() const
+{
+    return new Subtract(value1, value2);
+}
+
 Object* Subtract::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
@@ -107,6 +187,11 @@ Object* Subtract::accept(ProgramVisitor* visitor) const
 Multiply::Multiply(const Token* value1, const Token* value2) :
     Combine(value1, value2, "*") {}
 
+Token* Multiply::copy() const
+{
+    return new Multiply(value1, value2);
+}
+
 Object* Multiply::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
@@ -114,6 +199,11 @@ Object* Multiply::accept(ProgramVisitor* visitor) const
 
 Divide::Divide(const Token* value1, const Token* value2) :
     Combine(value1, value2, "/") {}
+
+Token* Divide::copy() const
+{
+    return new Divide(value1, value2);
+}
 
 Object* Divide::accept(ProgramVisitor* visitor) const
 {
@@ -126,13 +216,18 @@ Instruction::Instruction(const int line, const int character, const std::string 
 Assign::Assign(const Name* variable, const Token* value) :
     Instruction(variable->line, variable->character, variable->string() + " = " + value->string()), variable(variable), value(value) {}
 
+Token* Assign::copy() const
+{
+    return new Assign(variable, value);
+}
+
 Object* Assign::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-Call::Call(const Name* name, const std::vector<Argument*> arguments) :
-    Instruction(name->line, name->character), name(name->name), arguments(arguments) {}
+Call::Call(const int line, const int character, const std::string name, const std::vector<Argument*> arguments) :
+    Instruction(line, character), name(name), arguments(arguments) {}
 
 std::string Call::string() const
 {
@@ -151,6 +246,11 @@ std::string Call::string() const
     }
 
     return result + ")";
+}
+
+Token* Call::copy() const
+{
+    return new Call(line, character, name, arguments);
 }
 
 Object* Call::accept(ProgramVisitor* visitor) const
@@ -176,6 +276,11 @@ std::string Program::string() const
     }
 
     return result;
+}
+
+Token* Program::copy() const
+{
+    return new Program(instructions);
 }
 
 Object* Program::accept(ProgramVisitor* visitor) const
@@ -408,7 +513,7 @@ Object* ProgramVisitor::visit(const Call* token)
 
             else if (argument.first == "effects")
             {
-                for (const Token* value : ((List*)argument.second->value)->values)
+                for (const Token* value : getList(argument.second->value))
                 {
                     effects.push_back((Effect*)value->accept(this));
                 }
@@ -472,7 +577,7 @@ Object* ProgramVisitor::visit(const Call* token)
 
             else if (argument.first == "effects")
             {
-                for (const Token* value : ((List*)argument.second->value)->values)
+                for (const Token* value : getList(argument.second->value))
                 {
                     effects.push_back((Effect*)value->accept(this));
                 }
@@ -563,7 +668,7 @@ Object* ProgramVisitor::visit(const Call* token)
         {
             if (argument.first == "values")
             {
-                for (const Token* token : ((List*)argument.second->value)->values)
+                for (const Token* token : getList(argument.second->value))
                 {
                     values.push_back((ValueObject*)token->accept(this));
                 }
@@ -720,7 +825,17 @@ Object* ProgramVisitor::visit(const Program* token)
     return nullptr;
 }
 
-double ProgramVisitor::getFrequency(double note)
+const std::vector<Token*> ProgramVisitor::getList(const Token* token) const
+{
+    if (dynamic_cast<const List*>(token))
+    {
+        return ((List*)token)->values;
+    }
+
+    return std::vector<Token*> { token->copy() };
+}
+
+double ProgramVisitor::getFrequency(const double note) const
 {
     return 440 * pow(2, (note - 45) / 12);
 }
