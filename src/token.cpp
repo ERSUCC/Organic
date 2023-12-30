@@ -96,8 +96,8 @@ Token* DivideToken::copy() const
     return new DivideToken(line, character);
 }
 
-Name::Name(const int line, const int character, const std::string name) :
-    Token(line, character, name), name(name) {}
+Name::Name(const int line, const int character, const std::string name, const bool value) :
+    Token(line, character, name), name(name), value(value) {}
 
 Token* Name::copy() const
 {
@@ -297,6 +297,11 @@ Object* ProgramVisitor::visit(const Name* token)
         if (currentVariable == token->name)
         {
             Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", path, token->line, token->character);
+        }
+
+        if (token->value)
+        {
+            return variables[token->name]->value;
         }
 
         return variables[token->name];

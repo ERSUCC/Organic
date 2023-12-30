@@ -27,12 +27,12 @@ private:
     void tokenError(const Token* token, const std::string message);
 
     TokenRange* parseInstruction(int pos);
-    TokenRange* parseExpression(int pos);
-    TokenRange* parseTerms(int pos);
-    TokenRange* parseTerm(int pos);
     TokenRange* parseAssign(int pos);
     TokenRange* parseCall(int pos);
     TokenRange* parseArgument(int pose);
+    TokenRange* parseExpression(int pos);
+    TokenRange* parseTerms(int pos);
+    TokenRange* parseTerm(int pos);
 
     const std::string path;
     std::string code;

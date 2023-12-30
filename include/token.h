@@ -109,13 +109,15 @@ struct DivideToken : public Operator
 
 struct Name : public Token
 {
-    Name(const int line, const int character, const std::string name);
+    Name(const int line, const int character, const std::string name, const bool value = false);
 
     Token* copy() const override;
 
     Object* accept(ProgramVisitor* visitor) const override;
 
     const std::string name;
+
+    const bool value;
 };
 
 struct Constant : public Token

@@ -63,7 +63,7 @@ void Parser::tokenize()
         int startLine = line;
         int startCharacter = character;
 
-        if (code[current] == '#')
+        if (code[current] == '/' && current < code.size() - 1 && code[current + 1] == '/')
         {
             while (current < code.size() && code[current] != '\n')
             {
@@ -134,20 +134,6 @@ void Parser::tokenize()
             nextCharacter();
         }
 
-        else if (isalpha(code[current]) || code[current] == '_')
-        {
-            std::string name;
-
-            while (current < code.size() && (isalnum(code[current]) || code[current] == '-' || code[current] == '_'))
-            {
-                name += code[current];
-
-                nextCharacter();
-            }
-
-            tokens.push_back(new Name(startLine, startCharacter, name));
-        }
-
         else if (isdigit(code[current]))
         {
             std::string constant;
@@ -176,7 +162,41 @@ void Parser::tokenize()
 
         else
         {
-            Utils::parseError("Unrecognized symbol \"" + std::string(1, code[current]) + "\".", path, startLine, startCharacter);
+            bool value = false;
+
+            if (code[current] == '#')
+            {
+                value = true;
+
+                nextCharacter();
+            }
+
+            if (isalpha(code[current]) || code[current] == '_')
+            {
+                std::string name;
+
+                while (current < code.size() && (isalnum(code[current]) || code[current] == '-' || code[current] == '_'))
+                {
+                    name += code[current];
+
+                    nextCharacter();
+                }
+
+                tokens.push_back(new Name(startLine, startCharacter, name, value));
+            }
+
+            else
+            {
+                if (value)
+                {
+                    Utils::parseError("\"#\" can only precede variable names.", path, line, character);
+                }
+
+                else
+                {
+                    Utils::parseError("Unrecognized symbol \"" + std::string(1, code[current]) + "\".", path, line, character);
+                }
+            }
         }
 
         skipWhitespace();
@@ -202,6 +222,11 @@ template <typename T> T* Parser::getToken(const int pos)
 
 template <typename T> bool Parser::tokenIs(const int pos)
 {
+    if (pos >= tokens.size())
+    {
+        return false;
+    }
+
     return dynamic_cast<T*>(getToken(pos));
 }
 
