@@ -45,7 +45,6 @@ struct Variable : public ValueObject
 
 protected:
     void finishStart() override;
-    void finishRepeat() override;
     void finishStop() override;
 
 };
@@ -61,7 +60,6 @@ struct ValueCombination : public ValueObject
 
 protected:
     void finishStart() override;
-    void finishRepeat() override;
     void finishStop() override;
 
 };

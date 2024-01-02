@@ -66,11 +66,6 @@ void Variable::finishStart()
     value->start(startTime);
 }
 
-void Variable::finishRepeat()
-{
-    value->repeat(repeatTime);
-}
-
 void Variable::finishStop()
 {
     value->stop();
@@ -88,12 +83,6 @@ void ValueCombination::finishStart()
 {
     value1->start(startTime);
     value2->start(startTime);
-}
-
-void ValueCombination::finishRepeat()
-{
-    value1->repeat(repeatTime);
-    value2->repeat(repeatTime);
 }
 
 void ValueCombination::finishStop()
