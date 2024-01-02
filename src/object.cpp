@@ -7,21 +7,24 @@ Sync::Sync()
     utils = Utils::get();
 }
 
-void Sync::start()
-{
-    start(utils->time);
-}
-
 void Sync::start(double time)
 {
     if (!enabled)
     {
         startTime = time;
+        repeatTime = time;
 
         enabled = true;
 
         finishStart();
     }
+}
+
+void Sync::repeat(double time)
+{
+    repeatTime = time;
+
+    finishRepeat();
 }
 
 void Sync::stop()
@@ -39,12 +42,8 @@ double Sync::syncLength()
     return 0;
 }
 
-double Sync::getStartTime()
-{
-    return startTime;
-}
-
 void Sync::finishStart() {}
+void Sync::finishRepeat() {}
 void Sync::finishStop() {}
 
 double ValueObject::getValue()
@@ -67,6 +66,11 @@ void Variable::finishStart()
     value->start(startTime);
 }
 
+void Variable::finishRepeat()
+{
+    value->repeat(repeatTime);
+}
+
 void Variable::finishStop()
 {
     value->stop();
@@ -84,6 +88,12 @@ void ValueCombination::finishStart()
 {
     value1->start(startTime);
     value2->start(startTime);
+}
+
+void ValueCombination::finishRepeat()
+{
+    value1->repeat(repeatTime);
+    value2->repeat(repeatTime);
 }
 
 void ValueCombination::finishStop()

@@ -11,19 +11,20 @@ struct Sync : public Object
 {
     Sync();
 
-    void start();
     void start(double time);
+    void repeat(double time);
     void stop();
 
     virtual double syncLength();
-    virtual double getStartTime();
 
     double startTime = 0;
+    double repeatTime = 0;
 
     bool enabled = false;
 
 protected:
     virtual void finishStart();
+    virtual void finishRepeat();
     virtual void finishStop();
 
     Utils* utils;
@@ -44,6 +45,7 @@ struct Variable : public ValueObject
 
 protected:
     void finishStart() override;
+    void finishRepeat() override;
     void finishStop() override;
 
 };
@@ -59,6 +61,7 @@ struct ValueCombination : public ValueObject
 
 protected:
     void finishStart() override;
+    void finishRepeat() override;
     void finishStop() override;
 
 };

@@ -38,7 +38,7 @@ struct Sequence : public ValueController
 
 protected:
     void finishStart() override;
-    void finishStop() override;
+    void finishRepeat() override;
 
 private:
     int current = 0;
@@ -56,7 +56,6 @@ struct Repeat : public ValueController
     Repeat(ValueObject* value, ValueObject* repeats);
 
     double syncLength() override;
-    double getStartTime() override;
     double getValue() override;
 
     ValueObject* value;
@@ -64,7 +63,7 @@ struct Repeat : public ValueController
 
 protected:
     void finishStart() override;
-    void finishStop() override;
+    void finishRepeat() override;
 
 private:
     int times = 0;

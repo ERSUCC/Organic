@@ -45,7 +45,7 @@ void Organic::start()
 
     for (AudioSource* audioSource : audioSources)
     {
-        audioSource->start();
+        audioSource->start(0);
     }
 
     if (options.setExport)

@@ -20,9 +20,19 @@ double Sequence::syncLength()
 
 double Sequence::getValue()
 {
-    if (utils->time - startTime >= controllers[current]->syncLength())
+    if (!controllers[current]->enabled)
     {
-        stop();
+        last = current;
+
+        if (++switches <= max_switches)
+        {
+            repeat(repeatTime + controllers[current]->syncLength());
+        }
+
+        else
+        {
+            stop();
+        }
     }
 
     return controllers[current]->getValue();
@@ -30,111 +40,99 @@ double Sequence::getValue()
 
 void Sequence::finishStart()
 {
-    if (switches == 0)
+    switches = 0;
+
+    chosen.clear();
+
+    udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
+
+    if (order->order == OrderEnum::PingPong)
     {
-        udist = std::uniform_int_distribution<>(0, controllers.size() - 1);
-
-        if (order->order == OrderEnum::PingPong)
-        {
-            max_switches = controllers.size() * 2 - 2;
-        }
-
-        else
-        {
-            max_switches = controllers.size() - 1;
-        }
-
-        if (order->order == OrderEnum::Backwards)
-        {
-            current = controllers.size() - 1;
-        }
-
-        else if (order->order == OrderEnum::Random)
-        {
-            current = udist(utils->rng);
-
-            if (current == last)
-            {
-                current = (current + 1) % controllers.size();
-            }
-
-            chosen.insert(current);
-        }
-
-        else
-        {
-            current = 0;
-        }
-    }
-
-    controllers[current]->stop();
-    controllers[current]->start(startTime);
-}
-
-void Sequence::finishStop()
-{
-    last = current;
-
-    if (++switches <= max_switches)
-    {
-        switch (order->order)
-        {
-            case OrderEnum::Forwards:
-                current = (current + 1) % controllers.size();
-
-                break;
-
-            case OrderEnum::Backwards:
-            {
-                current -= 1;
-
-                if (current < 0)
-                {
-                    current = controllers.size() - 1;
-                }
-
-                break;
-            }
-
-            case OrderEnum::PingPong:
-            {
-                if ((direction == -1 && current <= 0) || current >= controllers.size() - 1)
-                {
-                    direction *= -1;
-                }
-
-                current += direction;
-
-                break;
-            }
-
-            case OrderEnum::Random:
-            {
-                if (chosen.size() < controllers.size())
-                {
-                    current = udist(utils->rng);
-
-                    while (chosen.count(current))
-                    {
-                        current = (current + 1) % controllers.size();
-                    }
-
-                    chosen.insert(current);
-                }
-
-                break;
-            }
-        }
-
-        start(startTime + controllers[last]->syncLength());
+        max_switches = controllers.size() * 2 - 2;
     }
 
     else
     {
-        switches = 0;
-
-        chosen.clear();
+        max_switches = controllers.size() - 1;
     }
+
+    if (order->order == OrderEnum::Backwards)
+    {
+        current = controllers.size() - 1;
+    }
+
+    else if (order->order == OrderEnum::Random)
+    {
+        current = udist(utils->rng);
+
+        if (current == last)
+        {
+            current = (current + 1) % controllers.size();
+        }
+
+        chosen.insert(current);
+    }
+
+    else
+    {
+        current = 0;
+    }
+
+    controllers[current]->start(startTime);
+}
+
+void Sequence::finishRepeat()
+{
+    switch (order->order)
+    {
+        case OrderEnum::Forwards:
+            current = (current + 1) % controllers.size();
+
+            break;
+
+        case OrderEnum::Backwards:
+        {
+            current -= 1;
+
+            if (current < 0)
+            {
+                current = controllers.size() - 1;
+            }
+
+            break;
+        }
+
+        case OrderEnum::PingPong:
+        {
+            if ((direction == -1 && current <= 0) || current >= controllers.size() - 1)
+            {
+                direction *= -1;
+            }
+
+            current += direction;
+
+            break;
+        }
+
+        case OrderEnum::Random:
+        {
+            if (chosen.size() < controllers.size())
+            {
+                current = udist(utils->rng);
+
+                while (chosen.count(current))
+                {
+                    current = (current + 1) % controllers.size();
+                }
+
+                chosen.insert(current);
+            }
+
+            break;
+        }
+    }
+
+    controllers[current]->start(repeatTime);
 }
 
 Repeat::Repeat(ValueObject* value, ValueObject* repeats) :
@@ -145,21 +143,19 @@ double Repeat::syncLength()
     return value->syncLength() * repeats->getValue();
 }
 
-double Repeat::getStartTime()
-{
-    if (times == 0)
-    {
-        return startTime - syncLength();
-    }
-
-    return startTime - value->syncLength() * (times - 1);
-}
-
 double Repeat::getValue()
 {
-    if (utils->time - startTime >= value->syncLength())
+    if (!value->enabled)
     {
-        stop();
+        if (repeats->getValue() == 0 || ++times < repeats->getValue())
+        {
+            repeat(repeatTime + value->syncLength());
+        }
+
+        else
+        {
+            stop();
+        }
     }
 
     return value->getValue();
@@ -167,22 +163,15 @@ double Repeat::getValue()
 
 void Repeat::finishStart()
 {
-    value->stop();
     value->start(startTime);
     repeats->start(startTime);
+
+    times = 0;
 }
 
-void Repeat::finishStop()
+void Repeat::finishRepeat()
 {
-    if (repeats->getValue() == 0 || ++times < repeats->getValue())
-    {
-        start(startTime + value->syncLength());
-    }
-
-    else
-    {
-        times = 0;
-    }
+    value->start(repeatTime);
 }
 
 Value::Value(double value) :
@@ -230,6 +219,8 @@ double Sweep::getValue()
     if (utils->time - startTime >= syncLength())
     {
         stop();
+
+        return to->getValue();
     }
 
     return from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / syncLength();
@@ -255,6 +246,8 @@ double LFO::getValue()
     if (utils->time - startTime >= syncLength())
     {
         stop();
+
+        return to->getValue();
     }
 
     return from->getValue() + (to->getValue() - from->getValue()) * (-cos(utils->twoPi * (utils->time - startTime) / syncLength()) / 2 + 0.5);
