@@ -7,6 +7,11 @@ double Variable::syncLength()
 
 double Variable::getValue()
 {
+    if (!value->enabled)
+    {
+        stop();
+    }
+
     return value->getValue();
 }
 
