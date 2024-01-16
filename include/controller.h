@@ -8,6 +8,62 @@
 
 struct ValueController : public ValueObject {};
 
+struct Variable : public ValueController
+{
+    double syncLength() override;
+    double getValue() override;
+
+    ValueObject* value;
+
+protected:
+    void finishStart() override;
+    void finishStop() override;
+
+};
+
+struct ValueCombination : public ValueController
+{
+    ValueCombination(ValueObject* value1, ValueObject* value2);
+
+    double syncLength() override;
+
+    ValueObject* value1;
+    ValueObject* value2;
+
+protected:
+    void finishStart() override;
+    void finishStop() override;
+
+};
+
+struct ValueAdd : public ValueCombination
+{
+    ValueAdd(ValueObject* value1, ValueObject* value2);
+
+    double getValue() override;
+};
+
+struct ValueSubtract : public ValueCombination
+{
+    ValueSubtract(ValueObject* value1, ValueObject* value2);
+
+    double getValue() override;
+};
+
+struct ValueMultiply : public ValueCombination
+{
+    ValueMultiply(ValueObject* value1, ValueObject* value2);
+
+    double getValue() override;
+};
+
+struct ValueDivide : public ValueCombination
+{
+    ValueDivide(ValueObject* value1, ValueObject* value2);
+
+    double getValue() override;
+};
+
 struct Sequence : public ValueController
 {
     enum OrderEnum
