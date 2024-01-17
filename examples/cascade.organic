@@ -26,5 +26,5 @@ triangle(volume: repeat(value: sequence(values: (
     hold(value: b2, length: note_length),
     hold(value: c3, length: note_length)
 ), order: sequence-random)), effects: (
-    delay(delay: 375, feedback: 0.75)
+    delay(mix: 1, delay: 375, feedback: 0.75)
 ))

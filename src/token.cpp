@@ -130,10 +130,74 @@ Token* Argument::copy() const
     return new Argument(line, character, name, value);
 }
 
-List::List(const int line, const int character, const std::vector<Token*> values) :
+ArgumentList::ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path) :
+    argumentsOrdered(arguments), name(name), path(path)
+{
+    for (const Argument* argument : arguments)
+    {
+        if (this->arguments.count(argument->name))
+        {
+            Utils::parseError("Input \"" + argument->name + "\" specified more than once.", path, argument->line, argument->character);
+        }
+
+        this->arguments[argument->name] = argument;
+    }
+}
+
+Object* ArgumentList::get(const std::string name, Object* defaultValue, ProgramVisitor* visitor)
+{
+    if (arguments.count(name))
+    {
+        Object* value = arguments[name]->value->accept(visitor);
+
+        arguments.erase(name);
+
+        int i = 0;
+
+        while (i < argumentsOrdered.size() && argumentsOrdered[i]->name != name)
+        {
+            i++;
+        }
+
+        argumentsOrdered.erase(argumentsOrdered.begin() + i);
+
+        return value;
+    }
+
+    return defaultValue;
+}
+
+void ArgumentList::confirmEmpty() const
+{
+    if (!arguments.empty())
+    {
+        Argument* argument = argumentsOrdered[0];
+
+        Utils::parseError("Invalid input name \"" + argument->name + "\" for function \"" + name + "\".", path, argument->line, argument->character);
+    }
+}
+
+std::string ArgumentList::string() const
+{
+    if (argumentsOrdered.empty())
+    {
+        return "";
+    }
+
+    std::string result = argumentsOrdered[0]->string();
+
+    for (int i = 1; i < argumentsOrdered.size(); i++)
+    {
+        result += ", " + argumentsOrdered[i]->string();
+    }
+
+    return result;
+}
+
+ListToken::ListToken(const int line, const int character, const std::vector<Token*> values) :
     Token(line, character), values(values) {}
 
-std::string List::string() const
+std::string ListToken::string() const
 {
     if (values.size() == 0)
     {
@@ -150,9 +214,14 @@ std::string List::string() const
     return result + ")";
 }
 
-Token* List::copy() const
+Token* ListToken::copy() const
 {
-    return new List(line, character, values);
+    return new ListToken(line, character, values);
+}
+
+Object* ListToken::accept(ProgramVisitor* visitor) const
+{
+    return visitor->visit(this);
 }
 
 Combine::Combine(const Token* value1, const Token* value2, const std::string op) :
@@ -226,26 +295,12 @@ Object* Assign::accept(ProgramVisitor* visitor) const
     return visitor->visit(this);
 }
 
-Call::Call(const Name* name, const std::vector<Argument*> arguments) :
+Call::Call(const Name* name, ArgumentList* arguments) :
     Instruction(name->line, name->character), name(name), arguments(arguments) {}
 
 std::string Call::string() const
 {
-    std::string result = name->name + "(";
-
-    if (arguments.size() == 0)
-    {
-        return result + ")";
-    }
-
-    result += arguments[0]->string();
-
-    for (int i = 1; i < arguments.size(); i++)
-    {
-        result += ", " + arguments[i]->string();
-    }
-
-    return result + ")";
+    return name->name + "(" + arguments->string() + ")";
 }
 
 Token* Call::copy() const
@@ -420,6 +475,18 @@ Object* ProgramVisitor::visit(const Constant* token)
     return new Value(token->value);
 }
 
+Object* ProgramVisitor::visit(const ListToken* token)
+{
+    std::vector<Object*> objects;
+
+    for (Token* token : token->values)
+    {
+        objects.push_back(token->accept(this));
+    }
+
+    return new List<Object>(objects);
+}
+
 Object* ProgramVisitor::visit(const Add* token)
 {
     ValueObject* value1 = (ValueObject*)token->value1->accept(this);
@@ -495,341 +562,126 @@ Object* ProgramVisitor::visit(const Call* token)
         Utils::parseError("\"#\" can only precede variable names.", path, token->name->line, token->name->character);
     }
 
-    std::unordered_map<std::string, const Argument*> arguments;
-
-    for (const Argument* argument : token->arguments)
-    {
-        if (arguments.count(argument->name))
-        {
-            Utils::parseError("Input \"" + argument->name + "\" specified more than once.", path, argument->line, argument->character);
-        }
-
-        arguments[argument->name] = argument;
-    }
-
     const std::string name = token->name->name;
 
-    if (name == "sine" || name == "square" || name == "saw" || name == "triangle")
+    Object* object = nullptr;
+
+    if (name == "sine")
     {
-        ValueObject* volume = new Value(0);
-        ValueObject* pan = new Value(0);
-        std::vector<Effect*> effects;
-        ValueObject* frequency = new Value(0);
+        Sine* sine = new Sine((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                              (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                              getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)),
+                              (ValueObject*)token->arguments->get("frequency", new Value(0), this));
 
-        for (std::pair<const std::string, const Argument*> argument : arguments)
-        {
-            if (argument.first == "volume")
-            {
-                volume = (ValueObject*)argument.second->value->accept(this);
-            }
+        sources.push_back(sine);
 
-            else if (argument.first == "pan")
-            {
-                pan = (ValueObject*)argument.second->value->accept(this);
-            }
+        object = sine;
+    }
 
-            else if (argument.first == "effects")
-            {
-                for (const Token* value : getList(argument.second->value))
-                {
-                    effects.push_back((Effect*)value->accept(this));
-                }
-            }
+    else if (name == "square")
+    {
+        Square* square = new Square((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                                    (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                                    getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)),
+                                    (ValueObject*)token->arguments->get("frequency", new Value(0), this));
 
-            else if (argument.first == "frequency")
-            {
-                frequency = (ValueObject*)argument.second->value->accept(this);
-            }
+        sources.push_back(square);
 
-            else
-            {
-                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
-            }
-        }
+        object = square;
+    }
 
-        Oscillator* oscillator;
+    else if (name == "saw")
+    {
+        Saw* saw = new Saw((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                           (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                           getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)),
+                           (ValueObject*)token->arguments->get("frequency", new Value(0), this));
 
-        if (name == "sine")
-        {
-            oscillator = new Sine(volume, pan, effects, frequency);
-        }
-        
-        else if (name == "square")
-        {
-            oscillator = new Square(volume, pan, effects, frequency);
-        }
+        sources.push_back(saw);
 
-        else if (name == "saw")
-        {
-            oscillator = new Saw(volume, pan, effects, frequency);
-        }
+        object = saw;
+    }
 
-        else if (name == "triangle")
-        {
-            oscillator = new Triangle(volume, pan, effects, frequency);
-        }
+    else if (name == "triangle")
+    {
+        Triangle* triangle = new Triangle((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                                          (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                                          getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)),
+                                          (ValueObject*)token->arguments->get("frequency", new Value(0), this));
 
-        sources.push_back(oscillator);
+        sources.push_back(triangle);
 
-        return oscillator;
+        object = triangle;
     }
 
     else if (name == "noise")
     {
-        ValueObject* volume = new Value(0);
-        ValueObject* pan = new Value(0);
-        std::vector<Effect*> effects;
-
-        for (std::pair<const std::string, const Argument*> argument : arguments)
-        {
-            if (argument.first == "volume")
-            {
-                volume = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "pan")
-            {
-                pan = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "effects")
-            {
-                for (const Token* value : getList(argument.second->value))
-                {
-                    effects.push_back((Effect*)value->accept(this));
-                }
-            }
-
-            else
-            {
-                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
-            }
-        }
-
-        Noise* noise = new Noise(volume, pan, effects);
+        Noise* noise = new Noise((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                                 (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                                 getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)));
 
         sources.push_back(noise);
 
-        return noise;
+        object = noise;
     }
 
     else if (name == "hold")
     {
-        ValueObject* value = new Value(0);
-        ValueObject* length = new Value(0);
-
-        for (std::pair<const std::string, const Argument*> argument : arguments)
-        {
-            if (argument.first == "value")
-            {
-                value = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "length")
-            {
-                length = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else
-            {
-                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
-            }
-        }
-
-        return new Hold(value, length);
+        object = new Hold((ValueObject*)token->arguments->get("value", new Value(0), this),
+                          (ValueObject*)token->arguments->get("length", new Value(0), this));
     }
 
-    else if (name == "lfo" || name == "sweep")
+    else if (name == "lfo")
     {
-        ValueObject* from = new Value(0);
-        ValueObject* to = new Value(1);
-        ValueObject* length = new Value(0);
+        object = new LFO((ValueObject*)token->arguments->get("from", new Value(0), this),
+                         (ValueObject*)token->arguments->get("to", new Value(0), this),
+                         (ValueObject*)token->arguments->get("length", new Value(0), this));
+    }
 
-        for (std::pair<const std::string, const Argument*> argument : arguments)
-        {
-            if (argument.first == "from")
-            {
-                from = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "to")
-            {
-                to = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "length")
-            {
-                length = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else
-            {
-                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
-            }
-        }
-
-        if (name == "lfo")
-        {
-            return new LFO(from, to, length);
-        }
-
-        return new Sweep(from, to, length);
+    else if (name == "sweep")
+    {
+        object = new Sweep((ValueObject*)token->arguments->get("from", new Value(0), this),
+                           (ValueObject*)token->arguments->get("to", new Value(0), this),
+                           (ValueObject*)token->arguments->get("length", new Value(0), this));
     }
 
     else if (name == "sequence")
     {
-        std::vector<ValueObject*> values;
-        Sequence::Order* order = new Sequence::Order(Sequence::OrderEnum::Forwards);
-
-        for (std::pair<const std::string, const Argument*> argument : arguments)
-        {
-            if (argument.first == "values")
-            {
-                for (const Token* token : getList(argument.second->value))
-                {
-                    values.push_back((ValueObject*)token->accept(this));
-                }
-            }
-
-            else if (argument.first == "order")
-            {
-                order = (Sequence::Order*)argument.second->value->accept(this);
-            }
-
-            else
-            {
-                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
-            }
-        }
-
-        return new Sequence(values, order);
+        object = new Sequence(getList<ValueObject>(token->arguments->get("values", new List<ValueObject>(std::vector<ValueObject*>()), this)),
+                              (Sequence::Order*)token->arguments->get("order", new Sequence::Order(Sequence::OrderEnum::Forwards), this));
     }
 
     else if (name == "repeat")
     {
-        ValueObject* value = new Value(0);
-        ValueObject* repeats = new Value(0);
-
-        for (std::pair<const std::string, const Argument*> argument : arguments)
-        {
-            if (argument.first == "value")
-            {
-                value = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "repeats")
-            {
-                repeats = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else
-            {
-                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
-            }
-        }
-
-        return new Repeat(value, repeats);
+        object = new Repeat((ValueObject*)token->arguments->get("value", new Value(0), this),
+                            (ValueObject*)token->arguments->get("repeats", new Value(0), this));
     }
 
     else if (name == "random")
     {
-        ValueObject* from = new Value(0);
-        ValueObject* to = new Value(1);
-        ValueObject* length = new Value(0);
-        Random::Type* type = new Random::Type(Random::TypeEnum::Step);
-
-        for (std::pair<const std::string, const Argument*> argument : arguments)
-        {
-            if (argument.first == "from")
-            {
-                from = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "to")
-            {
-                to = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "length")
-            {
-                length = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "type")
-            {
-                type = (Random::Type*)argument.second->value->accept(this);
-            }
-
-            else
-            {
-                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
-            }
-        }
-
-        return new Random(from, to, length, type);
+        object = new Random((ValueObject*)token->arguments->get("from", new Value(0), this),
+                            (ValueObject*)token->arguments->get("to", new Value(0), this),
+                            (ValueObject*)token->arguments->get("length", new Value(0), this),
+                            (Random::Type*)token->arguments->get("type", new Random::Type(Random::TypeEnum::Step), this));
     }
 
     else if (name == "delay")
     {
-        ValueObject* mix = new Value(1);
-        ValueObject* delay = new Value(0);
-        ValueObject* feedback = new Value(0);
-
-        for (std::pair<const std::string, const Argument*> argument : arguments)
-        {
-            if (argument.first == "mix")
-            {
-                mix = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "delay")
-            {
-                delay = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "feedback")
-            {
-                feedback = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else
-            {
-                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
-            }
-        }
-
-        return new Delay(mix, delay, feedback);
+        object = new Delay((ValueObject*)token->arguments->get("mix", new Value(0), this),
+                           (ValueObject*)token->arguments->get("delay", new Value(0), this),
+                           (ValueObject*)token->arguments->get("feedback", new Value(0), this));
     }
 
-    else if (name == "cutoff")
+    // low pass filter
+
+    else
     {
-        ValueObject* mix = new Value(1);
-        ValueObject* cutoff = new Value(0);
-
-        for (std::pair<const std::string, const Argument*> argument : arguments)
-        {
-            if (argument.first == "mix")
-            {
-                mix = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else if (argument.first == "cutoff")
-            {
-                cutoff = (ValueObject*)argument.second->value->accept(this);
-            }
-
-            else
-            {
-                Utils::parseError("Invalid input name \"" + argument.first + "\" for function \"" + name + "\".", path, argument.second->line, argument.second->character);
-            }
-        }
-
-        return new LowPassFilter(mix, cutoff);
+        Utils::parseError("Unknown function name \"" + name + "\".", path, token->line, token->character);
     }
 
-    Utils::parseError("Unknown function name \"" + name + "\".", path, token->line, token->character);
+    token->arguments->confirmEmpty();
 
-    return nullptr;
+    return object;
 }
 
 Object* ProgramVisitor::visit(const Program* token)
@@ -850,14 +702,24 @@ Object* ProgramVisitor::visit(const Program* token)
     return nullptr;
 }
 
-const std::vector<Token*> ProgramVisitor::getList(const Token* token) const
+template <typename T> List<T>* ProgramVisitor::getList(Object* object) const
 {
-    if (dynamic_cast<const List*>(token))
+    std::vector<T*> objects;
+
+    if (List<Object>* list = dynamic_cast<List<Object>*>(object))
     {
-        return ((List*)token)->values;
+        for (Object* object : list->objects)
+        {
+            objects.push_back(dynamic_cast<T*>(object));
+        }
     }
 
-    return std::vector<Token*> { token->copy() };
+    else
+    {
+        objects.push_back(dynamic_cast<T*>(object));
+    }
+
+    return new List<T>(objects);
 }
 
 double ProgramVisitor::getFrequency(const double note) const

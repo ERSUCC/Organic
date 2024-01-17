@@ -7,6 +7,13 @@ struct Object
     virtual ~Object();
 };
 
+template <typename T> struct List : public Object
+{
+    List(const std::vector<T*> objects) : objects(objects) {}
+
+    const std::vector<T*> objects;
+};
+
 struct Sync : public Object
 {
     Sync();

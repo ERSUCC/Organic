@@ -142,13 +142,34 @@ struct Argument : public Token
     const Token* value;
 };
 
-struct List : public Token
+struct ArgumentList
 {
-    List(const int line, const int character, const std::vector<Token*> values);
+    ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path);
+
+    Object* get(const std::string name, Object* defaultValue, ProgramVisitor* visitor);
+
+    void confirmEmpty() const;
+
+    std::string string() const;
+
+private:
+    std::unordered_map<std::string, const Argument*> arguments;
+    std::vector<Argument*> argumentsOrdered;
+
+    const std::string name;
+    const std::string path;
+
+};
+
+struct ListToken : public Token
+{
+    ListToken(const int line, const int character, const std::vector<Token*> values);
 
     Token* copy() const override;
 
     std::string string() const override;
+
+    Object* accept(ProgramVisitor* visitor) const override;
 
     const std::vector<Token*> values;
 };
@@ -216,7 +237,7 @@ struct Assign : public Instruction
 
 struct Call : public Instruction
 {
-    Call(const Name* name, const std::vector<Argument*> arguments);
+    Call(const Name* name, ArgumentList* arguments);
 
     Token* copy() const override;
 
@@ -225,7 +246,7 @@ struct Call : public Instruction
     Object* accept(ProgramVisitor* visitor) const override;
 
     const Name* name;
-    const std::vector<Argument*> arguments;
+    ArgumentList* arguments;
 };
 
 struct Program : public Token
@@ -247,6 +268,7 @@ struct ProgramVisitor
 
     Object* visit(const Name* token);
     Object* visit(const Constant* token);
+    Object* visit(const ListToken* token);
     Object* visit(const Add* token);
     Object* visit(const Subtract* token);
     Object* visit(const Multiply* token);
@@ -255,14 +277,14 @@ struct ProgramVisitor
     Object* visit(const Call* token);
     Object* visit(const Program* token);
 
-    const std::vector<Token*> getList(const Token* token) const;
-
-    double getFrequency(const double note) const;
-
     std::vector<AudioSource*> sources;
     EventQueue* eventQueue = new EventQueue();
 
 private:
+    template <typename T> List<T>* getList(Object* object) const;
+
+    double getFrequency(const double note) const;
+
     std::unordered_map<std::string, Variable*> variables;
     std::unordered_set<std::string> variablesUsed;
 

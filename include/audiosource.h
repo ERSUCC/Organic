@@ -11,7 +11,7 @@
 
 struct AudioSource : public ValueObject
 {
-    AudioSource(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects);
+    AudioSource(ValueObject* volume, ValueObject* pan, List<Effect>* effects);
     ~AudioSource();
 
     void fillBuffer(double* buffer, const unsigned int bufferLength, const double masterVolume);
@@ -24,13 +24,13 @@ protected:
 
     double* effectBuffer;
 
-    std::vector<Effect*> effects;
+    List<Effect>* effects;
 
 };
 
 struct Oscillator : public AudioSource
 {
-    Oscillator(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency);
+    Oscillator(ValueObject* volume, ValueObject* pan, List<Effect>* effects, ValueObject* frequency);
 
     ValueObject* frequency;
 
@@ -47,35 +47,35 @@ protected:
 
 struct Sine : public Oscillator
 {
-    Sine(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency);
+    Sine(ValueObject* volume, ValueObject* pan, List<Effect>* effects, ValueObject* frequency);
 
     double getValue() override;
 };
 
 struct Square : public Oscillator
 {
-    Square(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency);
+    Square(ValueObject* volume, ValueObject* pan, List<Effect>* effects, ValueObject* frequency);
 
     double getValue() override;
 };
 
 struct Saw : public Oscillator
 {
-    Saw(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency);
+    Saw(ValueObject* volume, ValueObject* pan, List<Effect>* effects, ValueObject* frequency);
 
     double getValue() override;
 };
 
 struct Triangle : public Oscillator
 {
-    Triangle(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, ValueObject* frequency);
+    Triangle(ValueObject* volume, ValueObject* pan, List<Effect>* effects, ValueObject* frequency);
 
     double getValue() override;
 };
 
 struct Noise : public AudioSource
 {
-    Noise(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects);
+    Noise(ValueObject* volume, ValueObject* pan, List<Effect>* effects);
 
 protected:
     void prepareForEffects(const unsigned int bufferLength) override;
@@ -87,7 +87,7 @@ private:
 
 struct Sample : public AudioSource
 {
-    Sample(ValueObject* volume, ValueObject* pan, std::vector<Effect*> effects, std::string path, int grains, bool looping);
+    Sample(ValueObject* volume, ValueObject* pan, List<Effect>* effects, std::string path, int grains, bool looping);
     ~Sample();
 
 protected:

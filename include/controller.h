@@ -92,12 +92,12 @@ struct Sequence : public ValueController
         OrderEnum order;
     };
 
-    Sequence(std::vector<ValueObject*> controllers, Order* order);
+    Sequence(List<ValueObject>* controllers, Order* order);
 
     double syncLength() override;
     double getValue() override;
 
-    std::vector<ValueObject*> controllers;
+    List<ValueObject>* controllers;
 
     std::unordered_set<int> chosen;
 

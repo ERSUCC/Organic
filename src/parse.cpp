@@ -304,7 +304,7 @@ TokenRange* Parser::parseCall(int pos)
     {
         Name* name = getToken<Name>(start);
 
-        return new TokenRange(start, pos + 1, new Call(name, arguments));
+        return new TokenRange(start, pos + 1, new Call(name, new ArgumentList(arguments, name->name, path)));
     }
 
     tokenError(getToken(pos), "\")\"");
@@ -360,7 +360,7 @@ TokenRange* Parser::parseExpression(int pos)
             tokenError(token, "expression");
         }
 
-        return new TokenRange(start, pos + 1, new List(token->line, token->character, list));
+        return new TokenRange(start, pos + 1, new ListToken(token->line, token->character, list));
     }
 
     return parseTerms(pos);
