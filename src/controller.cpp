@@ -33,6 +33,16 @@ double ValueCombination::syncLength()
     return value1->syncLength();
 }
 
+double ValueCombination::getValue()
+{
+    if (!value1->enabled && !value2->enabled)
+    {
+        stop();
+    }
+
+    return getValueInternal();
+}
+
 void ValueCombination::finishStart()
 {
     value1->start(startTime);
@@ -48,7 +58,7 @@ void ValueCombination::finishStop()
 ValueAdd::ValueAdd(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueAdd::getValue()
+double ValueAdd::getValueInternal()
 {
     return value1->getValue() + value2->getValue();
 }
@@ -56,7 +66,7 @@ double ValueAdd::getValue()
 ValueSubtract::ValueSubtract(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueSubtract::getValue()
+double ValueSubtract::getValueInternal()
 {
     return value1->getValue() - value2->getValue();
 }
@@ -64,7 +74,7 @@ double ValueSubtract::getValue()
 ValueMultiply::ValueMultiply(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueMultiply::getValue()
+double ValueMultiply::getValueInternal()
 {
     return value1->getValue() * value2->getValue();
 }
@@ -72,7 +82,7 @@ double ValueMultiply::getValue()
 ValueDivide::ValueDivide(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueDivide::getValue()
+double ValueDivide::getValueInternal()
 {
     return value1->getValue() / value2->getValue();
 }

@@ -26,6 +26,7 @@ struct ValueCombination : public ValueController
     ValueCombination(ValueObject* value1, ValueObject* value2);
 
     double syncLength() override;
+    double getValue() override;
 
     ValueObject* value1;
     ValueObject* value2;
@@ -34,34 +35,44 @@ protected:
     void finishStart() override;
     void finishStop() override;
 
+    virtual double getValueInternal() = 0;
+
 };
 
 struct ValueAdd : public ValueCombination
 {
     ValueAdd(ValueObject* value1, ValueObject* value2);
 
-    double getValue() override;
+protected:
+    double getValueInternal() override;
+
 };
 
 struct ValueSubtract : public ValueCombination
 {
     ValueSubtract(ValueObject* value1, ValueObject* value2);
 
-    double getValue() override;
+protected:
+    double getValueInternal() override;
+
 };
 
 struct ValueMultiply : public ValueCombination
 {
     ValueMultiply(ValueObject* value1, ValueObject* value2);
 
-    double getValue() override;
+protected:
+    double getValueInternal() override;
+    
 };
 
 struct ValueDivide : public ValueCombination
 {
     ValueDivide(ValueObject* value1, ValueObject* value2);
 
-    double getValue() override;
+protected:
+    double getValueInternal() override;
+    
 };
 
 struct Sequence : public ValueController
