@@ -46,7 +46,7 @@ cmake ..
 cmake --build .
 ```
 
-This will create the `organic` binary in the `build` directory. Move it wherever you would like, then return to [Using Organic](#using-organic) to continue.
+This will create the `organic` binary in the `build` directory (Mac/Linux) or the `build/Debug` directory (Windows). Move it wherever you would like, then return to [Using Organic](#using-organic) to continue.
 
 ## Credits
 
