@@ -226,12 +226,12 @@ Object* Assign::accept(ProgramVisitor* visitor) const
     return visitor->visit(this);
 }
 
-Call::Call(const int line, const int character, const std::string name, const std::vector<Argument*> arguments) :
-    Instruction(line, character), name(name), arguments(arguments) {}
+Call::Call(const Name* name, const std::vector<Argument*> arguments) :
+    Instruction(name->line, name->character), name(name), arguments(arguments) {}
 
 std::string Call::string() const
 {
-    std::string result = name + "(";
+    std::string result = name->name + "(";
 
     if (arguments.size() == 0)
     {
@@ -250,7 +250,7 @@ std::string Call::string() const
 
 Token* Call::copy() const
 {
-    return new Call(line, character, name, arguments);
+    return new Call(name, arguments);
 }
 
 Object* Call::accept(ProgramVisitor* visitor) const
@@ -307,6 +307,11 @@ Object* ProgramVisitor::visit(const Name* token)
         }
 
         return variables[token->name];
+    }
+
+    if (token->value)
+    {
+        Utils::parseError("\"#\" can only precede variable names.", path, token->line, token->character);
     }
 
     if (token->name == "sequence-forwards")
@@ -485,6 +490,11 @@ Object* ProgramVisitor::visit(const Assign* token)
 
 Object* ProgramVisitor::visit(const Call* token)
 {
+    if (token->name->value)
+    {
+        Utils::parseError("\"#\" can only precede variable names.", path, token->name->line, token->name->character);
+    }
+
     std::unordered_map<std::string, const Argument*> arguments;
 
     for (const Argument* argument : token->arguments)
@@ -497,7 +507,7 @@ Object* ProgramVisitor::visit(const Call* token)
         arguments[argument->name] = argument;
     }
 
-    const std::string name = token->name;
+    const std::string name = token->name->name;
 
     if (name == "sine" || name == "square" || name == "saw" || name == "triangle")
     {

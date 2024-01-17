@@ -203,7 +203,7 @@ void Parser::tokenize()
             {
                 if (value)
                 {
-                    Utils::parseError("\"#\" can only precede variable names.", path, line, character);
+                    Utils::parseError("Expected variable name, received \"" + std::string(1, code[current]) + "\".", path, line, character);
                 }
 
                 else
@@ -304,7 +304,7 @@ TokenRange* Parser::parseCall(int pos)
     {
         Name* name = getToken<Name>(start);
 
-        return new TokenRange(start, pos + 1, new Call(name->line, name->character, name->name, arguments));
+        return new TokenRange(start, pos + 1, new Call(name, arguments));
     }
 
     tokenError(getToken(pos), "\")\"");

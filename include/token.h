@@ -216,7 +216,7 @@ struct Assign : public Instruction
 
 struct Call : public Instruction
 {
-    Call(const int line, const int character, const std::string name, const std::vector<Argument*> arguments);
+    Call(const Name* name, const std::vector<Argument*> arguments);
 
     Token* copy() const override;
 
@@ -224,7 +224,7 @@ struct Call : public Instruction
 
     Object* accept(ProgramVisitor* visitor) const override;
 
-    const std::string name;
+    const Name* name;
     const std::vector<Argument*> arguments;
 };
 
