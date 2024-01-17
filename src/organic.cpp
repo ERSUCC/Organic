@@ -21,19 +21,17 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
     return 0;
 }
 
-Organic::Organic(std::vector<AudioSource*> audioSources, EventQueue* eventQueue, InterpreterOptions options) :
-    audioSources(audioSources), eventQueue(eventQueue), options(options)
+Organic::Organic(const std::string program, const std::vector<std::string> flags)
 {
     utils = Utils::get();
-}
 
-void Organic::init(const std::string program, const std::vector<std::string>& flags)
-{
-    InterpreterResult result = Interpreter::interpret(program, flags);
+    Interpreter* interpreter = new Interpreter(program, flags);
 
-    Organic* instance = new Organic(result.sources, result.eventQueue, result.options);
+    interpreter->interpret();
 
-    instance->start();
+    audioSources = interpreter->sources;
+    eventQueue = interpreter->eventQueue;
+    options = interpreter->options;
 }
 
 void Organic::start()

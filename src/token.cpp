@@ -689,6 +689,11 @@ Object* ProgramVisitor::visit(const Program* token)
         instruction->accept(this);
     }
 
+    if (sources.size() == 0)
+    {
+        Utils::parseError("Invalid program, no audio sources detected.", path, 0, 0);
+    }
+
     for (std::pair<std::string, Variable*> pair : variables)
     {
         if (!variablesUsed.count(pair.first))

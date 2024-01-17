@@ -26,7 +26,7 @@ int main(int argc, char** argv)
         flags.push_back(argv[i]);
     }
 
-    Organic::init(path, flags);
+    (new Organic(path, flags))->start();
 
     return 0;
 }

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 
 #include "parse.h"
 #include "token.h"
@@ -17,18 +18,21 @@ struct InterpreterOptions
     bool setMono = false;
 };
 
-struct InterpreterResult
+struct Interpreter
 {
+    Interpreter(const std::string path, const std::vector<std::string> flags);
+
+    void interpret();
+
     std::vector<AudioSource*> sources;
     EventQueue* eventQueue;
     InterpreterOptions options;
-};
-
-struct Interpreter
-{
-    static InterpreterResult interpret(const std::string path, const std::vector<std::string>& flags);
 
 private:
-    static void checkNextOption(const std::vector<std::string>& flags, int* pos);
+    std::string nextOption();
+
+    const std::string path;
+
+    std::queue<std::string> flags;
 
 };

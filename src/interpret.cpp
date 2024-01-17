@@ -1,36 +1,42 @@
 #include "../include/interpret.h"
 
-InterpreterResult Interpreter::interpret(const std::string path, const std::vector<std::string>& flags)
+Interpreter::Interpreter(const std::string path, const std::vector<std::string> flags) : path(path)
 {
-    InterpreterOptions options;
-
-    for (int i = 0; i < flags.size(); i++)
+    for (std::string flag : flags)
     {
-        if (flags[i] == "--time")
+        this->flags.push(flag);
+    }
+}
+
+void Interpreter::interpret()
+{
+    while (!flags.empty())
+    {
+        std::string next = nextOption();
+
+        if (next == "--time")
         {
-            checkNextOption(flags, &i);
+            std::string next = nextOption();
 
-            char* end;
+            size_t end;
 
-            options.time = strtod(flags[i].c_str(), &end);
+            options.time = std::stod(next, &end);
 
-            if (*end != '\0')
+            if (end < next.size())
             {
-                Utils::argumentError("Expected number, received \"" + flags[i] + "\".");
+                Utils::argumentError("Expected number, received \"" + next + "\".");
             }
 
             options.setTime = true;
         }
 
-        else if (flags[i] == "--export")
+        else if (next == "--export")
         {
-            checkNextOption(flags, &i);
-
-            options.exportPath = flags[i];
+            options.exportPath = nextOption();
             options.setExport = true;
         }
 
-        else if (flags[i] == "--mono")
+        else if (next == "--mono")
         {
             options.mono = true;
             options.setMono = true;
@@ -38,7 +44,7 @@ InterpreterResult Interpreter::interpret(const std::string path, const std::vect
 
         else
         {
-            Utils::argumentError("Unknown option \"" + flags[i] + "\".");
+            Utils::argumentError("Unknown option \"" + next + "\".");
         }
     }
 
@@ -51,18 +57,20 @@ InterpreterResult Interpreter::interpret(const std::string path, const std::vect
 
     visitor->visit((new Parser(path))->parse());
 
-    if (visitor->sources.size() == 0)
-    {
-        Utils::parseError("Invalid program, no audio sources detected.", path, 0, 0);
-    }
-
-    return { visitor->sources, visitor->eventQueue, options };
+    sources = visitor->sources;
+    eventQueue = visitor->eventQueue;
 }
 
-void Interpreter::checkNextOption(const std::vector<std::string>& flags, int* pos)
+std::string Interpreter::nextOption()
 {
-    if (++*pos >= flags.size())
+    if (flags.empty())
     {
-        Utils::argumentError("Value must be provided for option \"" + flags[*pos - 1] + "\".");
+        Utils::argumentError("Value must be provided for option \"" + flags.front() + "\".");
     }
+
+    std::string flag = flags.front();
+
+    flags.pop();
+
+    return flag;
 }

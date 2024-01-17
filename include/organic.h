@@ -23,9 +23,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
 struct Organic
 {
-    Organic(std::vector<AudioSource*> audioSources, EventQueue* eventQueue, InterpreterOptions options);
-
-    static void init(const std::string program, const std::vector<std::string>& flags);
+    Organic(const std::string program, const std::vector<std::string> flags);
 
     void start();
     void startPlayback();
