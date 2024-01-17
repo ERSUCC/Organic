@@ -131,35 +131,35 @@ Token* Argument::copy() const
 }
 
 ArgumentList::ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path) :
-    argumentsOrdered(arguments), name(name), path(path)
+    arguments(arguments), name(name), path(path)
 {
-    for (const Argument* argument : arguments)
+    std::unordered_set<std::string> defined;
+
+    for (Argument* argument : arguments)
     {
-        if (this->arguments.count(argument->name))
+        if (defined.count(argument->name))
         {
             Utils::parseError("Input \"" + argument->name + "\" specified more than once.", path, argument->line, argument->character);
         }
 
-        this->arguments[argument->name] = argument;
+        defined.insert(argument->name);
     }
 }
 
 Object* ArgumentList::get(const std::string name, Object* defaultValue, ProgramVisitor* visitor)
 {
-    if (arguments.count(name))
+    int i = 0;
+
+    while (i < arguments.size() && arguments[i]->name != name)
     {
-        Object* value = arguments[name]->value->accept(visitor);
+        i++;
+    }
 
-        arguments.erase(name);
+    if (i < arguments.size())
+    {
+        Object* value = arguments[i]->value->accept(visitor);
 
-        int i = 0;
-
-        while (i < argumentsOrdered.size() && argumentsOrdered[i]->name != name)
-        {
-            i++;
-        }
-
-        argumentsOrdered.erase(argumentsOrdered.begin() + i);
+        arguments.erase(arguments.begin() + i);
 
         return value;
     }
@@ -171,7 +171,7 @@ void ArgumentList::confirmEmpty() const
 {
     if (!arguments.empty())
     {
-        Argument* argument = argumentsOrdered[0];
+        Argument* argument = arguments[0];
 
         Utils::parseError("Invalid input name \"" + argument->name + "\" for function \"" + name + "\".", path, argument->line, argument->character);
     }
@@ -179,16 +179,16 @@ void ArgumentList::confirmEmpty() const
 
 std::string ArgumentList::string() const
 {
-    if (argumentsOrdered.empty())
+    if (arguments.empty())
     {
         return "";
     }
 
-    std::string result = argumentsOrdered[0]->string();
+    std::string result = arguments[0]->string();
 
-    for (int i = 1; i < argumentsOrdered.size(); i++)
+    for (int i = 1; i < arguments.size(); i++)
     {
-        result += ", " + argumentsOrdered[i]->string();
+        result += ", " + arguments[i]->string();
     }
 
     return result;

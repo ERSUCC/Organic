@@ -153,8 +153,7 @@ struct ArgumentList
     std::string string() const;
 
 private:
-    std::unordered_map<std::string, const Argument*> arguments;
-    std::vector<Argument*> argumentsOrdered;
+    std::vector<Argument*> arguments;
 
     const std::string name;
     const std::string path;
