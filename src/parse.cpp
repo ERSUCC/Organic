@@ -71,6 +71,20 @@ void Parser::tokenize()
             }
         }
 
+        else if (code[current] == '/' && current < code.size() - 1 && code[current + 1] == '*')
+        {
+            nextCharacter();
+            nextCharacter();
+
+            while (current < code.size() - 1 && !(code[current] == '*' && code[current + 1] == '/'))
+            {
+                nextCharacter();
+            }
+
+            nextCharacter();
+            nextCharacter();
+        }
+
         else if (code[current] == '(')
         {
             tokens.push_back(new OpenParenthesis(startLine, startCharacter));
