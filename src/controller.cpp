@@ -334,7 +334,7 @@ double LFO::getValue()
     {
         stop();
 
-        return to->getValue();
+        return from->getValue();
     }
 
     return from->getValue() + (to->getValue() - from->getValue()) * (-cos(utils->twoPi * (utils->time - startTime) / syncLength()) / 2 + 0.5);

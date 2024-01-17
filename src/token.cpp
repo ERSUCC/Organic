@@ -704,6 +704,11 @@ Object* ProgramVisitor::visit(const Program* token)
 
 template <typename T> List<T>* ProgramVisitor::getList(Object* object) const
 {
+    if (List<T>* list = dynamic_cast<List<T>*>(object))
+    {
+        return list;
+    }
+
     std::vector<T*> objects;
 
     if (List<Object>* list = dynamic_cast<List<Object>*>(object))
