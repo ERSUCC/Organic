@@ -360,7 +360,7 @@ TokenRange* Parser::parseTerms(int pos)
 
     do
     {
-        if (tokenIs<Operator>(pos) && terms.size() > 0)
+        if (tokenIs<Operator>(pos) && terms.size() > 0 && !tokenIs<Operator>(pos - 1))
         {
             terms.push_back(new TokenRange(pos, pos + 1, getToken(pos)));
 
@@ -461,6 +461,13 @@ TokenRange* Parser::parseTerm(int pos)
     else if (tokenIs<Constant>(pos))
     {
         return new TokenRange(pos, pos + 1, getToken(pos));
+    }
+
+    else if (tokenIs<SubtractToken>(pos) && tokenIs<Constant>(pos + 1))
+    {
+        Token* start = getToken(pos);
+
+        return new TokenRange(pos, pos + 2, new Constant(start->line, start->character, "-" + getToken<Constant>(pos + 1)->string()));
     }
 
     tokenError(getToken(pos), "expression term");
