@@ -29,7 +29,7 @@ struct Interpreter
     InterpreterOptions options;
 
 private:
-    std::string nextOption();
+    std::string nextOption(const std::string previous);
 
     const std::string path;
 

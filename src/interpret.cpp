@@ -12,15 +12,23 @@ void Interpreter::interpret()
 {
     while (!flags.empty())
     {
-        std::string next = nextOption();
+        std::string flag = nextOption("");
 
-        if (next == "--time")
+        if (flag == "--time")
         {
-            std::string next = nextOption();
+            std::string next = nextOption(flag);
 
             size_t end;
 
-            options.time = std::stod(next, &end);
+            try
+            {
+                options.time = std::stod(next, &end);
+            }
+
+            catch (std::invalid_argument error)
+            {
+                Utils::argumentError("Expected number, received \"" + next + "\".");
+            }
 
             if (end < next.size())
             {
@@ -30,13 +38,13 @@ void Interpreter::interpret()
             options.setTime = true;
         }
 
-        else if (next == "--export")
+        else if (flag == "--export")
         {
-            options.exportPath = nextOption();
+            options.exportPath = nextOption(flag);
             options.setExport = true;
         }
 
-        else if (next == "--mono")
+        else if (flag == "--mono")
         {
             options.mono = true;
             options.setMono = true;
@@ -44,7 +52,7 @@ void Interpreter::interpret()
 
         else
         {
-            Utils::argumentError("Unknown option \"" + next + "\".");
+            Utils::argumentError("Unknown option \"" + flag + "\".");
         }
     }
 
@@ -61,11 +69,11 @@ void Interpreter::interpret()
     eventQueue = visitor->eventQueue;
 }
 
-std::string Interpreter::nextOption()
+std::string Interpreter::nextOption(const std::string previous)
 {
     if (flags.empty())
     {
-        Utils::argumentError("Value must be provided for option \"" + flags.front() + "\".");
+        Utils::argumentError("Value must be provided for option \"" + previous + "\".");
     }
 
     std::string flag = flags.front();
