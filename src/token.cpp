@@ -171,9 +171,7 @@ void ArgumentList::confirmEmpty() const
 {
     if (!arguments.empty())
     {
-        Argument* argument = arguments[0];
-
-        Utils::parseError("Invalid input name \"" + argument->name + "\" for function \"" + name + "\".", path, argument->line, argument->character);
+        Utils::parseError("Invalid input name \"" + arguments[0]->name + "\" for function \"" + name + "\".", path, arguments[0]->line, arguments[0]->character);
     }
 }
 
