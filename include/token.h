@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "audiosource.h"
 #include "controller.h"
@@ -263,6 +264,7 @@ struct ProgramVisitor
 
 private:
     std::unordered_map<std::string, Variable*> variables;
+    std::unordered_set<std::string> variablesUsed;
 
     const std::string path;
 

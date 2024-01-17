@@ -299,6 +299,8 @@ Object* ProgramVisitor::visit(const Name* token)
             Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", path, token->line, token->character);
         }
 
+        variablesUsed.insert(token->name);
+
         if (token->value)
         {
             return variables[token->name]->value;
@@ -825,6 +827,14 @@ Object* ProgramVisitor::visit(const Program* token)
     for (const Instruction* instruction : token->instructions)
     {
         instruction->accept(this);
+    }
+
+    for (std::pair<std::string, Variable*> pair : variables)
+    {
+        if (!variablesUsed.count(pair.first))
+        {
+            Utils::warning("Warning: Unused variable \"" + pair.first + "\".");
+        }
     }
 
     return nullptr;
