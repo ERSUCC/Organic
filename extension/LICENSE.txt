@@ -1,0 +1,4 @@
+Copyright (C) 2023 by Isaac Brown
+
+All Organic software, source code, and other associated assets may not be
+copied or distributed without the explicit permission of the author.

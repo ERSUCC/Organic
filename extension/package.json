@@ -1,0 +1,42 @@
+{
+  "name": "organic",
+  "displayName": "Organic",
+  "description": "Syntax highlighting for Organic",
+  "version": "0.1.0",
+  "publisher": "Isaac Brown",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "license": "See LICENSE.txt",
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "organic",
+    "music",
+    "sound",
+    "audio"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "organic",
+      "aliases": ["Organic", "organic"],
+      "extensions": [".organic"],
+      "configuration": "./language-configuration.json",
+      "icon": {
+        "light": "icon.png",
+        "dark": "icon.png"
+      }
+    }],
+    "grammars": [{
+      "language": "organic",
+      "scopeName": "source.organic",
+      "path": "./syntaxes/organic.tmLanguage.json"
+    }]
+  },
+  "repository": {
+  	"type": "git",
+  	"url": "https://github.com/ERSUCC/Organic-Syntax-Highlighting"
+  },
+  "icon": "icon.png"
+}
