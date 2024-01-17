@@ -35,7 +35,7 @@ double ValueCombination::syncLength()
 
 double ValueCombination::getValue()
 {
-    if (!value1->enabled && !value2->enabled)
+    if (!value1->enabled || !value2->enabled)
     {
         stop();
     }
