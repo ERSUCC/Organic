@@ -4,7 +4,13 @@
 
 struct Object
 {
+    Object();
+
     virtual ~Object();
+
+protected:
+    Utils* utils;
+
 };
 
 template <typename T> struct List : public Object
@@ -16,8 +22,6 @@ template <typename T> struct List : public Object
 
 struct Sync : public Object
 {
-    Sync();
-
     void start(double time);
     void repeat(double time);
     void stop();
@@ -34,11 +38,22 @@ protected:
     virtual void finishRepeat();
     virtual void finishStop();
 
-    Utils* utils;
-
 };
 
 struct ValueObject : public Sync
 {
     virtual double getValue();
+};
+
+struct Variable : public ValueObject
+{
+    double syncLength() override;
+    double getValue() override;
+
+    ValueObject* value;
+
+protected:
+    void finishStart() override;
+    void finishStop() override;
+
 };

@@ -99,6 +99,20 @@ void Parser::tokenize()
             nextCharacter();
         }
 
+        else if (code[current] == '{')
+        {
+            tokens.push_back(new OpenCurlyBracket(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
+        else if (code[current] == '}')
+        {
+            tokens.push_back(new CloseCurlyBracket(startLine, startCharacter));
+
+            nextCharacter();
+        }
+
         else if (code[current] == ':')
         {
             tokens.push_back(new Colon(startLine, startCharacter));
@@ -278,6 +292,26 @@ TokenRange* Parser::parseAssign(int pos)
     return new TokenRange(pos, range->end, new Assign(getToken<Name>(pos), range->token));
 }
 
+TokenRange* Parser::parseCodeBlock(int pos)
+{
+    int start = pos;
+
+    OpenCurlyBracket* open = getToken<OpenCurlyBracket>(pos++);
+
+    std::vector<Instruction*> instructions;
+
+    while (!tokenIs<CloseCurlyBracket>(pos))
+    {
+        TokenRange* range = parseInstruction(pos);
+
+        instructions.push_back((Instruction*)range->token);
+
+        pos = range->end;
+    }
+
+    return new TokenRange(start, pos + 1, new CodeBlock(open->line, open->character, instructions));
+}
+
 TokenRange* Parser::parseCall(int pos)
 {
     int start = pos;
@@ -333,6 +367,11 @@ TokenRange* Parser::parseArgument(int pos)
 
 TokenRange* Parser::parseExpression(int pos)
 {
+    if (tokenIs<OpenCurlyBracket>(pos))
+    {
+        return parseCodeBlock(pos);
+    }
+
     if (tokenIs<OpenParenthesis>(pos) && tokenIs<Comma>(parseExpression(pos + 1)->end))
     {
         int start = pos;

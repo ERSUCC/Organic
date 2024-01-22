@@ -3,6 +3,9 @@
 Utils::Utils()
 {
     rng = std::mt19937(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+
+    audioSourceManager = new AudioSourceManager();
+    eventManager = new EventManager();
 }
 
 Utils* Utils::get()

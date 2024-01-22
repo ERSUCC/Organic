@@ -7,16 +7,9 @@ void rtAudioError(RtAudioErrorType type, const std::string& message)
 
 int processAudio(void* output, void* input, unsigned int frames, double streamTime, RtAudioStreamStatus status, void* userData)
 {
-    AudioData* data = (AudioData*)userData;
+    Utils* utils = (Utils*)userData;
 
-    double* buffer = (double*)output;
-
-    std::fill(buffer, buffer + frames * data->utils->channels, 0);
-
-    for (AudioSource* source : data->audioSources)
-    {
-        source->fillBuffer(buffer, frames, data->utils->volume);
-    }
+    utils->audioSourceManager->fillBuffer((double*)output, frames, utils->channels, utils->volume);
 
     return 0;
 }
@@ -25,13 +18,7 @@ Organic::Organic(const std::string program, const std::vector<std::string> flags
 {
     utils = Utils::get();
 
-    Interpreter* interpreter = new Interpreter(program, flags);
-
-    interpreter->interpret();
-
-    audioSources = interpreter->sources;
-    eventQueue = interpreter->eventQueue;
-    options = interpreter->options;
+    options = (new Interpreter(program, flags))->interpret();
 }
 
 void Organic::start()
@@ -39,11 +26,6 @@ void Organic::start()
     if (options.setMono)
     {
         utils->channels = 1;
-    }
-
-    for (AudioSource* audioSource : audioSources)
-    {
-        audioSource->start(0);
     }
 
     if (options.setExport)
@@ -75,9 +57,7 @@ void Organic::startPlayback()
 
     unsigned int bufferFrames = utils->bufferLength;
 
-    AudioData data { audioSources, utils };
-
-    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)&data))
+    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)utils))
     {
         Utils::error(audio.getErrorText());
     }
@@ -99,7 +79,7 @@ void Organic::startPlayback()
     {
         utils->time = (clock.now() - start).count() / 1000000.0;
 
-        eventQueue->performEvents();
+        utils->eventManager->performEvents();
     }
 
     if (audio.isStreamRunning())
@@ -128,12 +108,7 @@ void Organic::startExport()
     {
         utils->time = i * 1000.0 / utils->sampleRate;
 
-        std::fill(buffer, buffer + utils->bufferLength * utils->channels, 0);
-
-        for (AudioSource* source : audioSources)
-        {
-            source->fillBuffer(buffer, utils->bufferLength, utils->volume);
-        }
+        utils->audioSourceManager->fillBuffer(buffer, utils->bufferLength, utils->channels, utils->volume);
 
         for (int j = 0; j < utils->bufferLength; j++)
         {

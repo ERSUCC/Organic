@@ -1,48 +1,72 @@
 #pragma once
 
-#include <functional>
-#include <queue>
-
-#include "controller.h"
+#include "audiosource.h"
+#include "management.h"
 #include "object.h"
 
-struct Event : public Sync
+struct Event : public Sync, public EventTrait
 {
-    friend struct EventQueue;
+    Event();
 
-    Event(std::function<void(double)> event, std::function<void(double)> end, double startDelay, int repeats);
+    bool ready() override;
+    bool getNext() override;
 
-    bool ready();
-    void perform();
-    bool getNext();
-    void finish();
+    double next;
+};
 
-    ValueObject* interval;
+struct AssignEvent : public Event
+{
+    AssignEvent(Variable* variable, ValueObject* value);
+
+    void perform() override;
 
 private:
-    std::function<void(double)> event;
-    std::function<void(double)> end;
-
-    double startTime;
-    double next;
-
-    int repeats;
-    int times = 0;
+    Variable* variable;
+    ValueObject* value;
 
 };
 
-struct EventQueue
+struct CopyEvent : public Event
 {
-    void addEvent(Event* event);
+    CopyEvent(Variable* from, Variable* to);
 
-    void performEvents();
+    void perform() override;
 
 private:
-    struct cmp
-    {
-        bool operator()(Event* left, Event* right);
-    };
+    Variable* from;
+    Variable* to;
 
-    std::priority_queue<Event*, std::vector<Event*>, cmp> events;
+};
+
+struct AudioSourceEvent : public Event
+{
+    AudioSourceEvent(AudioSource* audioSource);
+
+    void perform() override;
+
+private:
+    AudioSource* audioSource;
+
+};
+
+struct GroupEvent : public Event
+{
+    GroupEvent(std::vector<Event*> events);
+
+    void perform() override;
+
+private:
+    std::vector<Event*> events;
+
+};
+
+struct VariableGroupEvent : public Event
+{
+    VariableGroupEvent(Variable* variable);
+
+    void perform() override;
+
+private:
+    Variable* variable;
 
 };

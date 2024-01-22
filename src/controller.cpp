@@ -1,30 +1,5 @@
 #include "../include/controller.h"
 
-double Variable::syncLength()
-{
-    return value->syncLength();
-}
-
-double Variable::getValue()
-{
-    if (!value->enabled)
-    {
-        stop();
-    }
-
-    return value->getValue();
-}
-
-void Variable::finishStart()
-{
-    value->start(startTime);
-}
-
-void Variable::finishStop()
-{
-    value->stop();
-}
-
 ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
     value1(value1), value2(value2) {}
 

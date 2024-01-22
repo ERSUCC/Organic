@@ -22,11 +22,7 @@ struct Interpreter
 {
     Interpreter(const std::string path, const std::vector<std::string> flags);
 
-    void interpret();
-
-    std::vector<AudioSource*> sources;
-    EventQueue* eventQueue;
-    InterpreterOptions options;
+    InterpreterOptions interpret();
 
 private:
     std::string nextOption(const std::string previous);

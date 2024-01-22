@@ -8,19 +8,6 @@
 
 struct ValueController : public ValueObject {};
 
-struct Variable : public ValueController
-{
-    double syncLength() override;
-    double getValue() override;
-
-    ValueObject* value;
-
-protected:
-    void finishStart() override;
-    void finishStop() override;
-
-};
-
 struct ValueCombination : public ValueController
 {
     ValueCombination(ValueObject* value1, ValueObject* value2);

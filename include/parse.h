@@ -28,6 +28,7 @@ private:
 
     TokenRange* parseInstruction(int pos);
     TokenRange* parseAssign(int pos);
+    TokenRange* parseCodeBlock(int pos);
     TokenRange* parseCall(int pos);
     TokenRange* parseArgument(int pose);
     TokenRange* parseExpression(int pos);

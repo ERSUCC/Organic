@@ -1,11 +1,11 @@
 #include "../include/object.h"
 
-Object::~Object() {}
-
-Sync::Sync()
+Object::Object()
 {
     utils = Utils::get();
 }
+
+Object::~Object() {}
 
 void Sync::start(double time)
 {
@@ -49,4 +49,29 @@ void Sync::finishStop() {}
 double ValueObject::getValue()
 {
     return 0;
+}
+
+double Variable::syncLength()
+{
+    return value->syncLength();
+}
+
+double Variable::getValue()
+{
+    if (!value->enabled)
+    {
+        stop();
+    }
+
+    return value->getValue();
+}
+
+void Variable::finishStart()
+{
+    value->start(startTime);
+}
+
+void Variable::finishStop()
+{
+    value->stop();
 }

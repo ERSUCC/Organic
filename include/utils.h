@@ -13,6 +13,8 @@
 #include <random>
 #include <chrono>
 
+#include "management.h"
+
 struct Utils
 {
     static Utils* get();
@@ -32,6 +34,9 @@ struct Utils
     double time = 0;
 
     std::mt19937 rng;
+
+    AudioSourceManager* audioSourceManager;
+    EventManager* eventManager;
 
 private:
     Utils();

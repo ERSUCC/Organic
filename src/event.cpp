@@ -1,9 +1,8 @@
 #include "../include/event.h"
 
-Event::Event(std::function<void(double)> event, std::function<void(double)> end, double startDelay, int repeats) :
-    event(event), end(end), startTime(utils->time), repeats(repeats)
+Event::Event()
 {
-    next = startTime + startDelay;
+    next = startTime;
 }
 
 bool Event::ready()
@@ -11,59 +10,56 @@ bool Event::ready()
     return utils->time >= next;
 }
 
-void Event::perform()
-{
-    event(next);
-}
-
 bool Event::getNext()
 {
-    if (interval)
-    {
-        next += interval->getValue();
-
-        if (!repeats || ++times < repeats)
-        {
-            return true;
-        }
-    }
-
     return false;
 }
 
-void Event::finish()
+AssignEvent::AssignEvent(Variable* variable, ValueObject* value) :
+    variable(variable), value(value) {}
+
+void AssignEvent::perform()
 {
-    end(next);
+    variable->value = value;
+
+    value->start(next);
 }
 
-void EventQueue::addEvent(Event* event)
+CopyEvent::CopyEvent(Variable* from, Variable* to) :
+    from(from), to(to) {}
+
+void CopyEvent::perform()
 {
-    events.push(event);
+    to->value = from->value;
+
+    to->value->start(next);
 }
 
-void EventQueue::performEvents()
+AudioSourceEvent::AudioSourceEvent(AudioSource* audioSource) :
+    audioSource(audioSource) {}
+
+void AudioSourceEvent::perform()
 {
-    while (!events.empty() && events.top()->ready())
+    utils->audioSourceManager->addAudioSource(audioSource);
+
+    audioSource->start(next);
+}
+
+GroupEvent::GroupEvent(std::vector<Event*> events) :
+    events(events) {}
+
+void GroupEvent::perform()
+{
+    for (Event* event : events)
     {
-        Event* event = events.top();
-
-        events.pop();
-
-        event->perform();
-
-        if (event->getNext())
-        {
-            addEvent(event);
-        }
-
-        else
-        {
-            event->finish();
-        }
+        utils->eventManager->addEvent(event);
     }
 }
 
-bool EventQueue::cmp::operator()(Event* left, Event* right)
+VariableGroupEvent::VariableGroupEvent(Variable* variable) :
+    variable(variable) {}
+
+void VariableGroupEvent::perform()
 {
-    return left->next > right->next;
+    ((GroupEvent*)variable->value)->perform();
 }

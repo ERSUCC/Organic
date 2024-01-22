@@ -8,11 +8,6 @@ std::string Token::string() const
     return str;
 }
 
-Token* Token::copy() const
-{
-    return new Token(line, character, str);
-}
-
 Object* Token::accept(ProgramVisitor* visitor) const
 {
     return nullptr;
@@ -24,42 +19,23 @@ TokenRange::TokenRange(const int start, const int end, Token* token) :
 OpenParenthesis::OpenParenthesis(const int line, const int character) :
     Token(line, character, "(") {}
 
-Token* OpenParenthesis::copy() const
-{
-    return new OpenParenthesis(line, character);
-}
-
 CloseParenthesis::CloseParenthesis(const int line, const int character) :
     Token(line, character, ")") {}
 
-Token* CloseParenthesis::copy() const
-{
-    return new CloseParenthesis(line, character);
-}
+OpenCurlyBracket::OpenCurlyBracket(const int line, const int character) :
+    Token(line, character, "{") {}
+
+CloseCurlyBracket::CloseCurlyBracket(const int line, const int character) :
+    Token(line, character, "}") {}
 
 Colon::Colon(const int line, const int character) :
     Token(line, character, ":") {}
 
-Token* Colon::copy() const
-{
-    return new Colon(line, character);
-}
-
 Comma::Comma(const int line, const int character) :
     Token(line, character, ",") {}
 
-Token* Comma::copy() const
-{
-    return new Comma(line, character);
-}
-
 Equals::Equals(const int line, const int character) :
     Token(line, character, "=") {}
-
-Token* Equals::copy() const
-{
-    return new Equals(line, character);
-}
 
 Operator::Operator(const int line, const int character, const std::string str) :
     Token(line, character, str) {}
@@ -67,42 +43,17 @@ Operator::Operator(const int line, const int character, const std::string str) :
 AddToken::AddToken(const int line, const int character) :
     Operator(line, character, "+") {}
 
-Token* AddToken::copy() const
-{
-    return new AddToken(line, character);
-}
-
 SubtractToken::SubtractToken(const int line, const int character) :
     Operator(line, character, "-") {}
-
-Token* SubtractToken::copy() const
-{
-    return new SubtractToken(line, character);
-}
 
 MultiplyToken::MultiplyToken(const int line, const int character) :
     Operator(line, character, "*") {}
 
-Token* MultiplyToken::copy() const
-{
-    return new MultiplyToken(line, character);
-}
-
 DivideToken::DivideToken(const int line, const int character) :
     Operator(line, character, "/") {}
 
-Token* DivideToken::copy() const
-{
-    return new DivideToken(line, character);
-}
-
 Name::Name(const int line, const int character, const std::string name, const bool value) :
     Token(line, character, name), name(name), value(value) {}
-
-Token* Name::copy() const
-{
-    return new Name(line, character, name);
-}
 
 Object* Name::accept(ProgramVisitor* visitor) const
 {
@@ -112,11 +63,6 @@ Object* Name::accept(ProgramVisitor* visitor) const
 Constant::Constant(const int line, const int character, const std::string str) :
     Token(line, character, str), value(std::stod(str)) {}
 
-Token* Constant::copy() const
-{
-    return new Constant(line, character, str);
-}
-
 Object* Constant::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
@@ -124,11 +70,6 @@ Object* Constant::accept(ProgramVisitor* visitor) const
 
 Argument::Argument(const int line, const int character, const std::string name, const Token* value) :
     Token(line, character, name + ": " + value->string()), name(name), value(value) {}
-
-Token* Argument::copy() const
-{
-    return new Argument(line, character, name, value);
-}
 
 ArgumentList::ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path) :
     arguments(arguments), name(name), path(path)
@@ -212,11 +153,6 @@ std::string ListToken::string() const
     return result + ")";
 }
 
-Token* ListToken::copy() const
-{
-    return new ListToken(line, character, values);
-}
-
 Object* ListToken::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
@@ -228,11 +164,6 @@ Combine::Combine(const Token* value1, const Token* value2, const std::string op)
 Add::Add(const Token* value1, const Token* value2) :
     Combine(value1, value2, "+") {}
 
-Token* Add::copy() const
-{
-    return new Add(value1, value2);
-}
-
 Object* Add::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
@@ -240,11 +171,6 @@ Object* Add::accept(ProgramVisitor* visitor) const
 
 Subtract::Subtract(const Token* value1, const Token* value2) :
     Combine(value1, value2, "-") {}
-
-Token* Subtract::copy() const
-{
-    return new Subtract(value1, value2);
-}
 
 Object* Subtract::accept(ProgramVisitor* visitor) const
 {
@@ -254,11 +180,6 @@ Object* Subtract::accept(ProgramVisitor* visitor) const
 Multiply::Multiply(const Token* value1, const Token* value2) :
     Combine(value1, value2, "*") {}
 
-Token* Multiply::copy() const
-{
-    return new Multiply(value1, value2);
-}
-
 Object* Multiply::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
@@ -266,11 +187,6 @@ Object* Multiply::accept(ProgramVisitor* visitor) const
 
 Divide::Divide(const Token* value1, const Token* value2) :
     Combine(value1, value2, "/") {}
-
-Token* Divide::copy() const
-{
-    return new Divide(value1, value2);
-}
 
 Object* Divide::accept(ProgramVisitor* visitor) const
 {
@@ -282,11 +198,6 @@ Instruction::Instruction(const int line, const int character, const std::string 
 
 Assign::Assign(const Name* variable, const Token* value) :
     Instruction(variable->line, variable->character, variable->string() + " = " + value->string()), variable(variable), value(value) {}
-
-Token* Assign::copy() const
-{
-    return new Assign(variable, value);
-}
 
 Object* Assign::accept(ProgramVisitor* visitor) const
 {
@@ -301,14 +212,77 @@ std::string Call::string() const
     return name->name + "(" + arguments->string() + ")";
 }
 
-Token* Call::copy() const
-{
-    return new Call(name, arguments);
-}
-
 Object* Call::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
+}
+
+CodeBlock::CodeBlock(const int line, const int character, const std::vector<Instruction*> instructions) :
+    Token(line, character), instructions(instructions) {}
+
+std::string CodeBlock::string() const
+{
+    std::string result = "{\n";
+
+    for (const Instruction* instruction : instructions)
+    {
+        result += "\t" + instruction->string() + "\n";
+    }
+
+    return result + "}";
+}
+
+Object* CodeBlock::accept(ProgramVisitor* visitor) const
+{
+    return visitor->visit(this);
+}
+
+Scope::Scope(Scope* parent) :
+    parent(parent) {}
+
+Variable* Scope::getVariable(const std::string name)
+{
+    if (variables.count(name))
+    {
+        variablesUsed.insert(name);
+
+        return variables[name];
+    }
+
+    if (parent)
+    {
+        if (Variable* variable = parent->getVariable(name))
+        {
+            return variable;
+        }
+    }
+
+    return nullptr;
+}
+
+Variable* Scope::addVariable(const std::string name)
+{
+    Variable* variable = getVariable(name);
+
+    if (!variable)
+    {
+        variable = new Variable();
+
+        variables[name] = variable;
+    }
+
+    return variable;
+}
+
+void Scope::checkVariableUses() const
+{
+    for (std::pair<std::string, Variable*> pair : variables)
+    {
+        if (!variablesUsed.count(pair.first))
+        {
+            Utils::warning("Warning: Unused variable \"" + pair.first + "\".");
+        }
+    }
 }
 
 Program::Program(const std::vector<Instruction*> instructions) :
@@ -331,35 +305,36 @@ std::string Program::string() const
     return result;
 }
 
-Token* Program::copy() const
-{
-    return new Program(instructions);
-}
-
 Object* Program::accept(ProgramVisitor* visitor) const
 {
     return visitor->visit(this);
 }
 
-ProgramVisitor::ProgramVisitor(const std::string path) : path(path) {}
+ProgramVisitor::ProgramVisitor(const std::string path) :
+    path(path)
+{
+    currentScope = new Scope();
+}
 
 Object* ProgramVisitor::visit(const Name* token)
 {
-    if (variables.count(token->name))
+    if (Variable* variable = currentScope->getVariable(token->name))
     {
         if (currentVariable == token->name)
         {
             Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", path, token->line, token->character);
         }
 
-        variablesUsed.insert(token->name);
-
         if (token->value)
         {
-            return variables[token->name]->value;
+            Variable* copy = new Variable();
+
+            currentScope->events.push_back(new CopyEvent(variable, copy));
+
+            return copy;
         }
 
-        return variables[token->name];
+        return variable;
     }
 
     if (token->value)
@@ -539,18 +514,15 @@ Object* ProgramVisitor::visit(const Divide* token)
 
 Object* ProgramVisitor::visit(const Assign* token)
 {
-    if (!variables.count(token->variable->name))
-    {
-        variables.insert(std::make_pair(token->variable->name, new Variable()));
-    }
-
     currentVariable = token->variable->name;
 
-    variables[token->variable->name]->value = (ValueObject*)token->value->accept(this);
+    Variable* variable = currentScope->addVariable(token->variable->name);
 
     currentVariable = "";
 
-    return variables[token->variable->name];
+    currentScope->events.push_back(new AssignEvent(variable, (ValueObject*)token->value->accept(this)));
+
+    return variable;
 }
 
 Object* ProgramVisitor::visit(const Call* token)
@@ -566,61 +538,51 @@ Object* ProgramVisitor::visit(const Call* token)
 
     if (name == "sine")
     {
-        Sine* sine = new Sine((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                              (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                              getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)),
-                              (ValueObject*)token->arguments->get("frequency", new Value(0), this));
-
-        sources.push_back(sine);
-
-        object = sine;
+        object = new Sine((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                          (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                          getList<Effect>(token->arguments->get("effects", nullptr, this)),
+                          (ValueObject*)token->arguments->get("frequency", new Value(0), this));
+        
+        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
     }
 
     else if (name == "square")
     {
-        Square* square = new Square((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                                    (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                                    getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)),
-                                    (ValueObject*)token->arguments->get("frequency", new Value(0), this));
+        object = new Square((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                            (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                            getList<Effect>(token->arguments->get("effects", nullptr, this)),
+                            (ValueObject*)token->arguments->get("frequency", new Value(0), this));
 
-        sources.push_back(square);
-
-        object = square;
+        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
     }
 
     else if (name == "saw")
     {
-        Saw* saw = new Saw((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                           (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                           getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)),
-                           (ValueObject*)token->arguments->get("frequency", new Value(0), this));
-
-        sources.push_back(saw);
-
-        object = saw;
+        object = new Saw((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                         (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                         getList<Effect>(token->arguments->get("effects", nullptr, this)),
+                         (ValueObject*)token->arguments->get("frequency", new Value(0), this));
+        
+        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
     }
 
     else if (name == "triangle")
     {
-        Triangle* triangle = new Triangle((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                                          (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                                          getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)),
-                                          (ValueObject*)token->arguments->get("frequency", new Value(0), this));
+        object = new Triangle((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                              (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                              getList<Effect>(token->arguments->get("effects", nullptr, this)),
+                              (ValueObject*)token->arguments->get("frequency", new Value(0), this));
 
-        sources.push_back(triangle);
-
-        object = triangle;
+        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
     }
 
     else if (name == "noise")
     {
-        Noise* noise = new Noise((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                                 (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                                 getList<Effect>(token->arguments->get("effects", new List<Effect>(std::vector<Effect*>()), this)));
+        object = new Noise((ValueObject*)token->arguments->get("volume", new Value(0), this),
+                           (ValueObject*)token->arguments->get("pan", new Value(0), this),
+                           getList<Effect>(token->arguments->get("effects", nullptr, this)));
 
-        sources.push_back(noise);
-
-        object = noise;
+        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
     }
 
     else if (name == "hold")
@@ -645,7 +607,7 @@ Object* ProgramVisitor::visit(const Call* token)
 
     else if (name == "sequence")
     {
-        object = new Sequence(getList<ValueObject>(token->arguments->get("values", new List<ValueObject>(std::vector<ValueObject*>()), this)),
+        object = new Sequence(getList<ValueObject>(token->arguments->get("values", nullptr, this)),
                               (Sequence::Order*)token->arguments->get("order", new Sequence::Order(Sequence::OrderEnum::Forwards), this));
     }
 
@@ -672,6 +634,21 @@ Object* ProgramVisitor::visit(const Call* token)
 
     // low pass filter
 
+    else if (name == "perform")
+    {
+        object = token->arguments->get("function", nullptr, this);
+
+        if (dynamic_cast<GroupEvent*>(object))
+        {
+            currentScope->events.push_back((GroupEvent*)object);
+        }
+
+        else
+        {
+            currentScope->events.push_back(new VariableGroupEvent((Variable*)object));
+        }
+    }
+
     else
     {
         Utils::parseError("Unknown function name \"" + name + "\".", path, token->line, token->character);
@@ -682,6 +659,24 @@ Object* ProgramVisitor::visit(const Call* token)
     return object;
 }
 
+Object* ProgramVisitor::visit(const CodeBlock* token)
+{
+    Scope* scope = new Scope(currentScope);
+
+    currentScope = scope;
+
+    for (const Instruction* instruction : token->instructions)
+    {
+        instruction->accept(this);
+    }
+
+    currentScope->checkVariableUses();
+
+    currentScope = currentScope->parent;
+
+    return new GroupEvent(scope->events);
+}
+
 Object* ProgramVisitor::visit(const Program* token)
 {
     for (const Instruction* instruction : token->instructions)
@@ -689,17 +684,11 @@ Object* ProgramVisitor::visit(const Program* token)
         instruction->accept(this);
     }
 
-    if (sources.size() == 0)
-    {
-        Utils::parseError("Invalid program, no audio sources detected.", path, 0, 0);
-    }
+    currentScope->checkVariableUses();
 
-    for (std::pair<std::string, Variable*> pair : variables)
+    for (Event* event : currentScope->events)
     {
-        if (!variablesUsed.count(pair.first))
-        {
-            Utils::warning("Warning: Unused variable \"" + pair.first + "\".");
-        }
+        event->perform();
     }
 
     return nullptr;
@@ -707,11 +696,6 @@ Object* ProgramVisitor::visit(const Program* token)
 
 template <typename T> List<T>* ProgramVisitor::getList(Object* object) const
 {
-    if (List<T>* list = dynamic_cast<List<T>*>(object))
-    {
-        return list;
-    }
-
     std::vector<T*> objects;
 
     if (List<Object>* list = dynamic_cast<List<Object>*>(object))
@@ -722,7 +706,7 @@ template <typename T> List<T>* ProgramVisitor::getList(Object* object) const
         }
     }
 
-    else
+    else if (object)
     {
         objects.push_back(dynamic_cast<T*>(object));
     }

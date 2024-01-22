@@ -8,8 +8,10 @@ Interpreter::Interpreter(const std::string path, const std::vector<std::string> 
     }
 }
 
-void Interpreter::interpret()
+InterpreterOptions Interpreter::interpret()
 {
+    InterpreterOptions options;
+
     while (!flags.empty())
     {
         std::string flag = nextOption("");
@@ -61,12 +63,9 @@ void Interpreter::interpret()
         Utils::argumentError("Cannot export without a time limit.");
     }
 
-    ProgramVisitor* visitor = new ProgramVisitor(path);
+    (new ProgramVisitor(path))->visit((new Parser(path))->parse());
 
-    visitor->visit((new Parser(path))->parse());
-
-    sources = visitor->sources;
-    eventQueue = visitor->eventQueue;
+    return options;
 }
 
 std::string Interpreter::nextOption(const std::string previous)

@@ -7,14 +7,15 @@
 
 #include "controller.h"
 #include "effect.h"
+#include "management.h"
 #include "object.h"
 
-struct AudioSource : public ValueObject
+struct AudioSource : public ValueObject, public AudioSourceTrait
 {
     AudioSource(ValueObject* volume, ValueObject* pan, List<Effect>* effects);
     ~AudioSource();
 
-    void fillBuffer(double* buffer, const unsigned int bufferLength, const double masterVolume);
+    void fillBuffer(double* buffer, const unsigned int bufferLength, const double masterVolume) override;
 
     ValueObject* volume;
     ValueObject* pan;
