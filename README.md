@@ -29,23 +29,55 @@ The following section details the optional inputs, for more advanced use of Orga
 
 ## Organic Language Specification
 
+Functions are used to create various audio-related objects, such as audio sources like sine waves or modulators like LFOs. Each function has various inputs, all of which are optional and have default values if not specified. See the following example for a few different ways to call a function.
+
+```
+# a valid call to the sine function, but will create a sine wave with the defaults of 0 volume and 0 frequency
+
+sine()
+
+# creates a sine wave at full volume with a frequency of 220 hz
+
+sine(volume: 1, frequency: 220)
+```
+
 Variables are defined and assigned to using the equals sign, as in the following example:
 
 ```
 my_var = 440
 ```
 
-Functions are used to create various audio-related objects, such as audio sources like sine waves or modulators like LFOs. Each function has various inputs, all of which are optional and have default values if not specified. See the following example for a few different ways to call a function.
+Variables can only be used after they are defined, but they can be assigned to multiple times. Note that assigning a new value to a variable after using it will also cause the prior uses to be reassigned. To prevent this, type a '#' in front of the variable name when it is used. The following two examples show this key difference:
 
 ```
-sine() # a valid call to the sine function, but will create a sine wave with the defaults of 0 volume and 0 frequency
-sine(volume: 1, frequency: 220) # creates a sine wave at full volume with a frequency of 220 hz
-my_sine = sine(volume: 1, frequency: 220) # creates the same sine wave as before, but additionally assigns it to a variable
+note = 220
+
+sine(volume: 1, frequency: note)
+
+# this reassignment will affect both sine waves, creating two of the same frequency, 440 hz
+
+note = 440
+
+sine(volume: 1, frequency: note)
 ```
 
-As shown at the end of the previous example, functions that return a value can be assigned to variables for later use. This can be especially useful when creating complex modulations that will be used in multiple places, as in the following example:
+```
+note = 220
+
+sine(volume: 1, frequency: #note)
+
+# this reassignment will only affect the second sine wave, creating one of each frequency
+
+note = 440
+
+sine(volume: 1, frequency: note)
+```
+
+Some functions return a value, which can be assigned to a variable or used as an input to another function. This can be especially useful when creating complex modulations that will be used in multiple places, as in the following example:
 
 ```
+# note that sequence accepts a list of modulators as an input, defined with parentheses and separated with commas
+
 freq = sequence(values: (
     sweep(from: 110, to: 220, length: 1000),
     sweep(from: 220, to: 110, length: 1000)
@@ -60,11 +92,15 @@ sine(volume: 1, frequency: freq * 8)
 One special function, `perform`, allows you to schedule code to be run in the future, rather than being executed immediately. You can use `perform` as follows:
 
 ```
-triangle(volume: 1, frequency: 220) # start a note
+# start a note
+
+triangle(volume: 1, frequency: 220)
+
+# wait 5 seconds, then double the first note up an octave
 
 perform(function: {
     triangle(volume: 1, frequency: 440)
-}, delay: 5000) # wait 5 seconds, then double the first note up an octave
+}, delay: 5000)
 ```
 
 The examples above show minimal examples of all key aspects of the language and its syntax. More examples and detailed descriptions of functions can be found in the Organic documentation (TODO).
