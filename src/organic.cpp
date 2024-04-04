@@ -19,6 +19,8 @@ Organic::Organic(const std::string program, const std::vector<std::string> flags
     utils = Utils::get();
 
     options = (new Interpreter(program, flags))->interpret();
+
+    machine = new Machine(options.bytecodePath);
 }
 
 void Organic::start()
@@ -71,6 +73,8 @@ void Organic::startPlayback()
 
         Utils::error(audio.getErrorText());
     }
+
+    machine->execute(4);
 
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();

@@ -24,6 +24,7 @@ struct Utils
 
     static void parseError(const std::string message, const std::string file, const int line, const int character);
     static void argumentError(const std::string message);
+    static void machineError(const std::string message, const std::string file);
 
     unsigned int sampleRate = 44100;
     unsigned int channels = 2;

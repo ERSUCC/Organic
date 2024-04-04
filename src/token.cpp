@@ -8,7 +8,7 @@ std::string Token::string() const
     return str;
 }
 
-Object* Token::accept(ProgramVisitor* visitor) const
+Object* Token::accept(BytecodeTransformer* visitor) const
 {
     return nullptr;
 }
@@ -55,7 +55,7 @@ DivideToken::DivideToken(const int line, const int character) :
 Name::Name(const int line, const int character, const std::string name, const bool value) :
     Token(line, character, name), name(name), value(value) {}
 
-Object* Name::accept(ProgramVisitor* visitor) const
+Object* Name::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -63,7 +63,7 @@ Object* Name::accept(ProgramVisitor* visitor) const
 Constant::Constant(const int line, const int character, const std::string str) :
     Token(line, character, str), value(std::stod(str)) {}
 
-Object* Constant::accept(ProgramVisitor* visitor) const
+Object* Constant::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -87,7 +87,7 @@ ArgumentList::ArgumentList(const std::vector<Argument*> arguments, const std::st
     }
 }
 
-Object* ArgumentList::get(const std::string name, Object* defaultValue, ProgramVisitor* visitor)
+Object* ArgumentList::get(const std::string name, Object* defaultValue, BytecodeTransformer* visitor)
 {
     int i = 0;
 
@@ -153,7 +153,7 @@ std::string ListToken::string() const
     return result + ")";
 }
 
-Object* ListToken::accept(ProgramVisitor* visitor) const
+Object* ListToken::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -164,7 +164,7 @@ Combine::Combine(const Token* value1, const Token* value2, const std::string op)
 Add::Add(const Token* value1, const Token* value2) :
     Combine(value1, value2, "+") {}
 
-Object* Add::accept(ProgramVisitor* visitor) const
+Object* Add::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -172,7 +172,7 @@ Object* Add::accept(ProgramVisitor* visitor) const
 Subtract::Subtract(const Token* value1, const Token* value2) :
     Combine(value1, value2, "-") {}
 
-Object* Subtract::accept(ProgramVisitor* visitor) const
+Object* Subtract::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -180,7 +180,7 @@ Object* Subtract::accept(ProgramVisitor* visitor) const
 Multiply::Multiply(const Token* value1, const Token* value2) :
     Combine(value1, value2, "*") {}
 
-Object* Multiply::accept(ProgramVisitor* visitor) const
+Object* Multiply::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -188,7 +188,7 @@ Object* Multiply::accept(ProgramVisitor* visitor) const
 Divide::Divide(const Token* value1, const Token* value2) :
     Combine(value1, value2, "/") {}
 
-Object* Divide::accept(ProgramVisitor* visitor) const
+Object* Divide::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -199,7 +199,7 @@ Instruction::Instruction(const int line, const int character, const std::string 
 Assign::Assign(const Name* variable, const Token* value) :
     Instruction(variable->line, variable->character, variable->string() + " = " + value->string()), variable(variable), value(value) {}
 
-Object* Assign::accept(ProgramVisitor* visitor) const
+Object* Assign::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -212,7 +212,7 @@ std::string Call::string() const
     return name->name + "(" + arguments->string() + ")";
 }
 
-Object* Call::accept(ProgramVisitor* visitor) const
+Object* Call::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -232,7 +232,7 @@ std::string CodeBlock::string() const
     return result + "}";
 }
 
-Object* CodeBlock::accept(ProgramVisitor* visitor) const
+Object* CodeBlock::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
@@ -305,24 +305,33 @@ std::string Program::string() const
     return result;
 }
 
-Object* Program::accept(ProgramVisitor* visitor) const
+Object* Program::accept(BytecodeTransformer* visitor) const
 {
     return visitor->visit(this);
 }
 
-ProgramVisitor::ProgramVisitor(const std::string path) :
-    path(path)
+BytecodeTransformer::BytecodeTransformer(const std::string path) :
+    sourcePath(path)
 {
+    outputPath = std::filesystem::path(path).replace_extension("obc").string();
+
     currentScope = new Scope();
 }
 
-Object* ProgramVisitor::visit(const Name* token)
+std::string BytecodeTransformer::transform(const Program* program)
+{
+    visit(program);
+
+    return outputPath;
+}
+
+Object* BytecodeTransformer::visit(const Name* token)
 {
     if (Variable* variable = currentScope->getVariable(token->name))
     {
         if (currentVariable == token->name)
         {
-            Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", path, token->line, token->character);
+            Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", sourcePath, token->line, token->character);
         }
 
         if (token->value)
@@ -339,7 +348,7 @@ Object* ProgramVisitor::visit(const Name* token)
 
     if (token->value)
     {
-        Utils::parseError("\"#\" can only precede variable names.", path, token->line, token->character);
+        Utils::parseError("\"#\" can only precede variable names.", sourcePath, token->line, token->character);
     }
 
     if (token->name == "sequence-forwards")
@@ -413,7 +422,7 @@ Object* ProgramVisitor::visit(const Name* token)
 
             default:
             {
-                Utils::parseError("Variable \"" + token->name + "\" not defined.", path, token->line, token->character);
+                Utils::parseError("Variable \"" + token->name + "\" not defined.", sourcePath, token->line, token->character);
 
                 return nullptr;
             }
@@ -438,17 +447,17 @@ Object* ProgramVisitor::visit(const Name* token)
         }
     }
 
-    Utils::parseError("Unrecognized symbol \"" + token->name + "\".", path, token->line, token->character);
+    Utils::parseError("Unrecognized symbol \"" + token->name + "\".", sourcePath, token->line, token->character);
 
     return nullptr;
 }
 
-Object* ProgramVisitor::visit(const Constant* token)
+Object* BytecodeTransformer::visit(const Constant* token)
 {
     return new Value(token->value);
 }
 
-Object* ProgramVisitor::visit(const ListToken* token)
+Object* BytecodeTransformer::visit(const ListToken* token)
 {
     std::vector<Object*> objects;
 
@@ -460,7 +469,7 @@ Object* ProgramVisitor::visit(const ListToken* token)
     return new List<Object>(objects);
 }
 
-Object* ProgramVisitor::visit(const Add* token)
+Object* BytecodeTransformer::visit(const Add* token)
 {
     ValueObject* value1 = (ValueObject*)token->value1->accept(this);
     ValueObject* value2 = (ValueObject*)token->value2->accept(this);
@@ -473,7 +482,7 @@ Object* ProgramVisitor::visit(const Add* token)
     return new ValueAdd(value1, value2);
 }
 
-Object* ProgramVisitor::visit(const Subtract* token)
+Object* BytecodeTransformer::visit(const Subtract* token)
 {
     ValueObject* value1 = (ValueObject*)token->value1->accept(this);
     ValueObject* value2 = (ValueObject*)token->value2->accept(this);
@@ -486,7 +495,7 @@ Object* ProgramVisitor::visit(const Subtract* token)
     return new ValueSubtract(value1, value2);
 }
 
-Object* ProgramVisitor::visit(const Multiply* token)
+Object* BytecodeTransformer::visit(const Multiply* token)
 {
     ValueObject* value1 = (ValueObject*)token->value1->accept(this);
     ValueObject* value2 = (ValueObject*)token->value2->accept(this);
@@ -499,7 +508,7 @@ Object* ProgramVisitor::visit(const Multiply* token)
     return new ValueMultiply(value1, value2);
 }
 
-Object* ProgramVisitor::visit(const Divide* token)
+Object* BytecodeTransformer::visit(const Divide* token)
 {
     ValueObject* value1 = (ValueObject*)token->value1->accept(this);
     ValueObject* value2 = (ValueObject*)token->value2->accept(this);
@@ -512,7 +521,7 @@ Object* ProgramVisitor::visit(const Divide* token)
     return new ValueDivide(value1, value2);
 }
 
-Object* ProgramVisitor::visit(const Assign* token)
+Object* BytecodeTransformer::visit(const Assign* token)
 {
     currentVariable = token->variable->name;
 
@@ -525,11 +534,11 @@ Object* ProgramVisitor::visit(const Assign* token)
     return variable;
 }
 
-Object* ProgramVisitor::visit(const Call* token)
+Object* BytecodeTransformer::visit(const Call* token)
 {
     if (token->name->value)
     {
-        Utils::parseError("\"#\" can only precede variable names.", path, token->name->line, token->name->character);
+        Utils::parseError("\"#\" can only precede variable names.", sourcePath, token->name->line, token->name->character);
     }
 
     const std::string name = token->name->name;
@@ -651,7 +660,7 @@ Object* ProgramVisitor::visit(const Call* token)
 
     else
     {
-        Utils::parseError("Unknown function name \"" + name + "\".", path, token->line, token->character);
+        Utils::parseError("Unknown function name \"" + name + "\".", sourcePath, token->line, token->character);
     }
 
     token->arguments->confirmEmpty();
@@ -659,7 +668,7 @@ Object* ProgramVisitor::visit(const Call* token)
     return object;
 }
 
-Object* ProgramVisitor::visit(const CodeBlock* token)
+Object* BytecodeTransformer::visit(const CodeBlock* token)
 {
     Scope* scope = new Scope(currentScope);
 
@@ -677,7 +686,7 @@ Object* ProgramVisitor::visit(const CodeBlock* token)
     return new GroupEvent(scope->events);
 }
 
-Object* ProgramVisitor::visit(const Program* token)
+Object* BytecodeTransformer::visit(const Program* token)
 {
     for (const Instruction* instruction : token->instructions)
     {
@@ -691,10 +700,21 @@ Object* ProgramVisitor::visit(const Program* token)
         event->perform();
     }
 
+    std::ofstream output(outputPath);
+
+    if (!output.is_open())
+    {
+        Utils::error("Could not create intermediate file \"" + outputPath + "\".");
+    }
+
+    resolver->output(output);
+
+    output.close();
+
     return nullptr;
 }
 
-template <typename T> List<T>* ProgramVisitor::getList(Object* object) const
+template <typename T> List<T>* BytecodeTransformer::getList(Object* object) const
 {
     std::vector<T*> objects;
 
@@ -714,7 +734,7 @@ template <typename T> List<T>* ProgramVisitor::getList(Object* object) const
     return new List<T>(objects);
 }
 
-double ProgramVisitor::getFrequency(const double note) const
+double BytecodeTransformer::getFrequency(const double note) const
 {
     return 440 * pow(2, (note - 45) / 12);
 }

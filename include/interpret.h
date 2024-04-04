@@ -16,6 +16,8 @@ struct InterpreterOptions
     bool setTime = false;
     bool setExport = false;
     bool setMono = false;
+
+    std::string bytecodePath;
 };
 
 struct Interpreter

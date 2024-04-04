@@ -41,3 +41,8 @@ void Utils::argumentError(const std::string message)
 {
     error("Argument error: " + message);
 }
+
+void Utils::machineError(const std::string message, const std::string file)
+{
+    error("Virtual machine error in \"" + file + "\": " + message);
+}

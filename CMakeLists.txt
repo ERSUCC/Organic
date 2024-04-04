@@ -6,10 +6,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(organic src/audiosource.cpp
+                       src/bytecode.cpp
                        src/controller.cpp
                        src/effect.cpp
                        src/event.cpp
                        src/interpret.cpp
+                       src/machine.cpp
                        src/main.cpp
                        src/management.cpp
                        src/object.cpp

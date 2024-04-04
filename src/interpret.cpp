@@ -63,7 +63,7 @@ InterpreterOptions Interpreter::interpret()
         Utils::argumentError("Cannot export without a time limit.");
     }
 
-    (new ProgramVisitor(path))->visit((new Parser(path))->parse());
+    options.bytecodePath = (new BytecodeTransformer(path))->transform((new Parser(path))->parse());
 
     return options;
 }

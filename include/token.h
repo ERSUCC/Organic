@@ -4,14 +4,17 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <filesystem>
+#include <fstream>
 
 #include "audiosource.h"
+#include "bytecode.h"
 #include "controller.h"
 #include "effect.h"
 #include "event.h"
 #include "object.h"
 
-struct ProgramVisitor;
+struct BytecodeTransformer;
 
 struct Token
 {
@@ -19,7 +22,7 @@ struct Token
 
     virtual std::string string() const;
 
-    virtual Object* accept(ProgramVisitor* visitor) const;
+    virtual Object* accept(BytecodeTransformer* visitor) const;
 
     const int line;
     const int character;
@@ -103,7 +106,7 @@ struct Name : public Token
 {
     Name(const int line, const int character, const std::string name, const bool value = false);
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 
     const std::string name;
 
@@ -114,7 +117,7 @@ struct Constant : public Token
 {
     Constant(const int line, const int character, const std::string str);
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 
     const double value;
 };
@@ -131,7 +134,7 @@ struct ArgumentList
 {
     ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path);
 
-    Object* get(const std::string name, Object* defaultValue, ProgramVisitor* visitor);
+    Object* get(const std::string name, Object* defaultValue, BytecodeTransformer* visitor);
 
     void confirmEmpty() const;
 
@@ -151,7 +154,7 @@ struct ListToken : public Token
 
     std::string string() const override;
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 
     const std::vector<Token*> values;
 };
@@ -168,28 +171,28 @@ struct Add : public Combine
 {
     Add(const Token* value1, const Token* value2);
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 };
 
 struct Subtract : public Combine
 {
     Subtract(const Token* value1, const Token* value2);
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 };
 
 struct Multiply : public Combine
 {
     Multiply(const Token* value1, const Token* value2);
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 };
 
 struct Divide : public Combine
 {
     Divide(const Token* value1, const Token* value2);
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 };
 
 struct Instruction : public Token
@@ -201,7 +204,7 @@ struct Assign : public Instruction
 {
     Assign(const Name* variable, const Token* value);
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 
     const Name* variable;
     const Token* value;
@@ -213,7 +216,7 @@ struct Call : public Instruction
 
     std::string string() const override;
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 
     const Name* name;
     ArgumentList* arguments;
@@ -225,7 +228,7 @@ struct CodeBlock : public Token
 
     std::string string() const override;
 
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 
     const std::vector<Instruction*> instructions;
 };
@@ -255,14 +258,16 @@ struct Program : public Token
 
     std::string string() const override;
     
-    Object* accept(ProgramVisitor* visitor) const override;
+    Object* accept(BytecodeTransformer* visitor) const override;
 
     const std::vector<Instruction*> instructions;
 };
 
-struct ProgramVisitor
+struct BytecodeTransformer
 {
-    ProgramVisitor(const std::string sourcePath);
+    BytecodeTransformer(const std::string sourcePath);
+
+    std::string transform(const Program* program);
 
     Object* visit(const Name* token);
     Object* visit(const Constant* token);
@@ -283,8 +288,12 @@ private:
 
     double getFrequency(const double note) const;
 
-    const std::string path;
+    const std::string sourcePath;
+
+    std::string outputPath;
 
     std::string currentVariable;
+
+    BytecodeResolver* resolver = new BytecodeResolver();
 
 };
