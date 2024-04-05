@@ -4,6 +4,8 @@
 #include <vector>
 #include <fstream>
 
+#include "object.h"
+
 struct BytecodeInstruction
 {
     BytecodeInstruction(unsigned int size);
@@ -23,9 +25,31 @@ struct EndBlock : public BytecodeInstruction
     void output(std::ofstream& stream) const override;
 };
 
-struct StackPush : public BytecodeInstruction
+struct StackPushByte : public BytecodeInstruction
 {
+    StackPushByte(const unsigned char value);
+
     void output(std::ofstream& stream) const override;
+
+    const unsigned char value;
+};
+
+struct StackPushInt : public BytecodeInstruction
+{
+    StackPushInt(const unsigned int value);
+
+    void output(std::ofstream& stream) const override;
+
+    const unsigned int value;
+};
+
+struct StackPushDouble : public BytecodeInstruction
+{
+    StackPushDouble(const double value);
+
+    void output(std::ofstream& stream) const override;
+
+    const double value;
 };
 
 struct StackPop : public BytecodeInstruction
@@ -35,11 +59,11 @@ struct StackPop : public BytecodeInstruction
 
 struct SetVariable : public BytecodeInstruction
 {
-    SetVariable(std::string variable);
+    SetVariable(const std::string variable);
 
     void output(std::ofstream& stream) const override;
 
-    std::string variable;
+    const std::string variable;
 };
 
 struct GetVariable : public BytecodeInstruction

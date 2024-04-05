@@ -9,6 +9,8 @@ std::vector<unsigned char> BytecodeInstruction::intToBytes(unsigned int i, unsig
 
     for (int j = 0; j < n; j++)
     {
+        // this probably gets funky with different endianness and bit width, check on it later
+
         bytes.push_back((i >> (n * 8)) & 255);
     };
 
@@ -29,65 +31,79 @@ void EndBlock::output(std::ofstream& stream) const
     stream << 0x00;
 }
 
-void StackPush::output(std::ofstream& stream) const
+StackPushByte::StackPushByte(const unsigned char value) :
+    BytecodeInstruction(2), value(value) {}
+
+void StackPushByte::output(std::ofstream& stream) const
 {
-    stream << 0x01;
+    stream << 0x01 << value;
+}
+
+StackPushInt::StackPushInt(const unsigned int value) :
+    BytecodeInstruction(5), value(value) {}
+
+void StackPushInt::output(std::ofstream& stream) const
+{
+    stream << 0x02;
+
+    for (unsigned char b : intToBytes(value, 4))
+    {
+        stream << b;
+    }
+}
+
+StackPushDouble::StackPushDouble(const double value) :
+    BytecodeInstruction(9), value(value) {}
+
+void StackPushDouble::output(std::ofstream& stream) const
+{
+    stream << 0x03;
+
+    for (unsigned char b : doubleToBytes(value))
+    {
+        stream << b;
+    }
 }
 
 void StackPop::output(std::ofstream& stream) const
 {
-    stream << 0x02;
+    stream << 0x04;
 }
 
 SetVariable::SetVariable(std::string variable) :
-    BytecodeInstruction(5), variable(variable) {}
+    BytecodeInstruction(2), variable(variable) {}
 
 void SetVariable::output(std::ofstream& stream) const
 {
-    stream << 0x03;
-
     unsigned int id = 0;
 
-    // assign id
+    // get id
 
-    for (unsigned char b : intToBytes(id, 1))
-    {
-        stream << b;
-    }
+    stream << 0x05 << intToBytes(id, 1)[0];
 }
 
 GetVariable::GetVariable(std::string variable) :
-    BytecodeInstruction(5), variable(variable) {}
+    BytecodeInstruction(2), variable(variable) {}
 
 void GetVariable::output(std::ofstream& stream) const
 {
-    stream << 0x04;
-
     unsigned int id = 0;
 
-    // assign id
+    // get id
 
-    for (unsigned char b : intToBytes(id, 1))
-    {
-        stream << b;
-    }
+    stream << 0x06 << intToBytes(id, 1)[0];
 }
 
 GetVariableCopy::GetVariableCopy(std::string variable) :
-    BytecodeInstruction(5), variable(variable) {}
+    BytecodeInstruction(2), variable(variable) {}
 
 void GetVariableCopy::output(std::ofstream& stream) const
 {
-    stream << 0x05;
-
     unsigned int id = 0;
 
-    // assign id
+    // get id
 
-    for (unsigned char b : intToBytes(id, 1))
-    {
-        stream << b;
-    }
+    stream << 0x07 << intToBytes(id, 1)[0];
 }
 
 CallNative::CallNative(std::string function) :
@@ -95,28 +111,29 @@ CallNative::CallNative(std::string function) :
 
 void CallNative::output(std::ofstream& stream) const
 {
-    stream << 0x06;
-
     unsigned int id;
 
-    if (function == "sine") id = 0;
-    else if (function == "square") id = 1;
-    else if (function == "triangle") id = 2;
-    else if (function == "saw") id = 3;
-    else if (function == "noise") id = 4;
-    else if (function == "hold") id = 5;
-    else if (function == "lfo") id = 6;
-    else if (function == "sweep") id = 7;
-    else if (function == "sequence") id = 8;
-    else if (function == "repeat") id = 9;
-    else if (function == "random") id = 10;
-    else if (function == "delay") id = 11;
-    else if (function == "perform") id = 12;
+    if (function == "value") id = 0;
+    else if (function == "list") id = 1;
+    else if (function == "add") id = 2;
+    else if (function == "subtract") id = 3;
+    else if (function == "multiply") id = 4;
+    else if (function == "divide") id = 5;
+    else if (function == "sine") id = 6;
+    else if (function == "square") id = 7;
+    else if (function == "triangle") id = 8;
+    else if (function == "saw") id = 9;
+    else if (function == "noise") id = 10;
+    else if (function == "hold") id = 11;
+    else if (function == "lfo") id = 12;
+    else if (function == "sweep") id = 13;
+    else if (function == "sequence") id = 14;
+    else if (function == "repeat") id = 15;
+    else if (function == "random") id = 16;
+    else if (function == "delay") id = 17;
+    else if (function == "perform") id = 18;
 
-    for (unsigned char b : intToBytes(id, 1))
-    {
-        stream << b;
-    }
+    stream << 0x08 << intToBytes(id, 1)[0];
 }
 
 void BytecodeResolver::output(std::ofstream& stream)

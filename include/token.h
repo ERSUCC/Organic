@@ -1,11 +1,12 @@
 #pragma once
 
-#include <vector>
+#include <filesystem>
+#include <fstream>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <filesystem>
-#include <fstream>
+#include <vector>
 
 #include "audiosource.h"
 #include "bytecode.h"
@@ -134,7 +135,7 @@ struct ArgumentList
 {
     ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path);
 
-    Object* get(const std::string name, Object* defaultValue, BytecodeTransformer* visitor);
+    void get(const std::string name, Token* defaultValue, BytecodeTransformer* visitor);
 
     void confirmEmpty() const;
 
@@ -237,17 +238,19 @@ struct Scope
 {
     Scope(Scope* parent = nullptr);
 
-    Variable* getVariable(const std::string name);
-    Variable* addVariable(const std::string name);
+    bool getVariable(const std::string name);
+    void addVariable(const std::string name);
 
     void checkVariableUses() const;
 
+    BytecodeTransformer* visitor;
+
     Scope* parent;
 
-    std::vector<Event*> events;
+    BytecodeBlock* block = new BytecodeBlock();
 
 private:
-    std::unordered_map<std::string, Variable*> variables;
+    std::unordered_set<std::string> variables;
     std::unordered_set<std::string> variablesUsed;
 
 };

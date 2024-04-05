@@ -87,7 +87,7 @@ ArgumentList::ArgumentList(const std::vector<Argument*> arguments, const std::st
     }
 }
 
-Object* ArgumentList::get(const std::string name, Object* defaultValue, BytecodeTransformer* visitor)
+void ArgumentList::get(const std::string name, Token* defaultValue, BytecodeTransformer* visitor)
 {
     int i = 0;
 
@@ -98,14 +98,15 @@ Object* ArgumentList::get(const std::string name, Object* defaultValue, Bytecode
 
     if (i < arguments.size())
     {
-        Object* value = arguments[i]->value->accept(visitor);
+        arguments[i]->value->accept(visitor);
 
         arguments.erase(arguments.begin() + i);
-
-        return value;
     }
 
-    return defaultValue;
+    else
+    {
+        defaultValue->accept(visitor);
+    }
 }
 
 void ArgumentList::confirmEmpty() const
@@ -240,47 +241,38 @@ Object* CodeBlock::accept(BytecodeTransformer* visitor) const
 Scope::Scope(Scope* parent) :
     parent(parent) {}
 
-Variable* Scope::getVariable(const std::string name)
+bool Scope::getVariable(const std::string name)
 {
     if (variables.count(name))
     {
         variablesUsed.insert(name);
 
-        return variables[name];
+        return true;
     }
 
-    if (parent)
+    if (parent && parent->getVariable(name))
     {
-        if (Variable* variable = parent->getVariable(name))
-        {
-            return variable;
-        }
+        return true;
     }
 
-    return nullptr;
+    return false;
 }
 
-Variable* Scope::addVariable(const std::string name)
+void Scope::addVariable(const std::string name)
 {
-    Variable* variable = getVariable(name);
-
-    if (!variable)
+    if (!getVariable(name))
     {
-        variable = new Variable();
-
-        variables[name] = variable;
+        variables.insert(name);
     }
-
-    return variable;
 }
 
 void Scope::checkVariableUses() const
 {
-    for (std::pair<std::string, Variable*> pair : variables)
+    for (const std::string variable : variables)
     {
-        if (!variablesUsed.count(pair.first))
+        if (!variablesUsed.count(variable))
         {
-            Utils::warning("Warning: Unused variable \"" + pair.first + "\".");
+            Utils::warning("Warning: Unused variable \"" + variable + "\".");
         }
     }
 }
@@ -327,7 +319,7 @@ std::string BytecodeTransformer::transform(const Program* program)
 
 Object* BytecodeTransformer::visit(const Name* token)
 {
-    if (Variable* variable = currentScope->getVariable(token->name))
+    if (currentScope->getVariable(token->name))
     {
         if (currentVariable == token->name)
         {
@@ -336,14 +328,10 @@ Object* BytecodeTransformer::visit(const Name* token)
 
         if (token->value)
         {
-            Variable* copy = new Variable();
-
-            currentScope->events.push_back(new CopyEvent(variable, copy));
-
-            return copy;
+            currentScope->block->instructions.push_back(new GetVariableCopy(token->name));
         }
 
-        return variable;
+        return nullptr;
     }
 
     if (token->value)
@@ -351,34 +339,36 @@ Object* BytecodeTransformer::visit(const Name* token)
         Utils::parseError("\"#\" can only precede variable names.", sourcePath, token->line, token->character);
     }
 
+    // make sure to check constants earlier because here it could get mixed up with the numbers
+
     if (token->name == "sequence-forwards")
     {
-        return new Sequence::Order(Sequence::OrderEnum::Forwards);
+        currentScope->block->instructions.push_back(new StackPushByte(0x00));
     }
 
-    if (token->name == "sequence-backwards")
+    else if (token->name == "sequence-backwards")
     {
-        return new Sequence::Order(Sequence::OrderEnum::Backwards);
+        currentScope->block->instructions.push_back(new StackPushByte(0x01));
     }
 
-    if (token->name == "sequence-ping-pong")
+    else if (token->name == "sequence-ping-pong")
     {
-        return new Sequence::Order(Sequence::OrderEnum::PingPong);
+        currentScope->block->instructions.push_back(new StackPushByte(0x02));
     }
 
-    if (token->name == "sequence-random")
+    else if (token->name == "sequence-random")
     {
-        return new Sequence::Order(Sequence::OrderEnum::Random);
+        currentScope->block->instructions.push_back(new StackPushByte(0x03));
     }
 
-    if (token->name == "random-step")
+    else if (token->name == "random-step")
     {
-        return new Random::Type(Random::TypeEnum::Step);
+        currentScope->block->instructions.push_back(new StackPushByte(0x00));
     }
 
-    if (token->name == "random-linear")
+    else if (token->name == "random-linear")
     {
-       return new Random::Type(Random::TypeEnum::Linear);
+        currentScope->block->instructions.push_back(new StackPushByte(0x01));
     }
 
     else
@@ -423,115 +413,125 @@ Object* BytecodeTransformer::visit(const Name* token)
             default:
             {
                 Utils::parseError("Variable \"" + token->name + "\" not defined.", sourcePath, token->line, token->character);
-
-                return nullptr;
             }
         }
 
         if (token->name.size() == 2 && isdigit(token->name[1]))
         {
-            return new Value(getFrequency(base + 12 * (token->name[1] - 48)));
+            currentScope->block->instructions.push_back(new StackPushDouble(getFrequency(base + 12 * (token->name[2] - 48))));
+            currentScope->block->instructions.push_back(new CallNative("value"));
         }
 
-        if (token->name.size() == 3 && isdigit(token->name[2]))
+        else if (token->name.size() == 3 && isdigit(token->name[2]))
         {
             if (token->name[1] == 's')
             {
-                return new Value(getFrequency(base + 12 * (token->name[2] - 48) + 1));
+                currentScope->block->instructions.push_back(new StackPushDouble(getFrequency(base + 12 * (token->name[2] - 48) + 1)));
+                currentScope->block->instructions.push_back(new CallNative("value"));
             }
 
-            if (token->name[1] == 'f')
+            else if (token->name[1] == 'f')
             {
-                return new Value(getFrequency(base + 12 * (token->name[2] - 48) - 1));
+                currentScope->block->instructions.push_back(new StackPushDouble(getFrequency(base + 12 * (token->name[2] - 48) - 1)));
+                currentScope->block->instructions.push_back(new CallNative("value"));
             }
         }
-    }
 
-    Utils::parseError("Unrecognized symbol \"" + token->name + "\".", sourcePath, token->line, token->character);
+        else
+        {
+            Utils::parseError("Unrecognized symbol \"" + token->name + "\".", sourcePath, token->line, token->character);
+        }
+    }
 
     return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const Constant* token)
 {
-    return new Value(token->value);
+    currentScope->block->instructions.push_back(new StackPushDouble(token->value));
+    currentScope->block->instructions.push_back(new CallNative("value"));
+
+    return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const ListToken* token)
 {
-    std::vector<Object*> objects;
-
-    for (Token* token : token->values)
+    for (int i = token->values.size() - 1; i >= 0; i--)
     {
-        objects.push_back(token->accept(this));
+        token->values[i]->accept(this);
     }
 
-    return new List<Object>(objects);
+    currentScope->block->instructions.push_back(new StackPushInt(token->values.size()));
+    currentScope->block->instructions.push_back(new CallNative("list"));
+
+    return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const Add* token)
 {
-    ValueObject* value1 = (ValueObject*)token->value1->accept(this);
-    ValueObject* value2 = (ValueObject*)token->value2->accept(this);
+    token->value2->accept(this);
+    token->value1->accept(this);
 
-    if (dynamic_cast<Value*>(value1) && dynamic_cast<Value*>(value2))
-    {
-        return new Value(value1->getValue() + value2->getValue());
-    }
+    // used to constant fold here but it is now impossible
+    // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
-    return new ValueAdd(value1, value2);
+    currentScope->block->instructions.push_back(new CallNative("add"));
+
+    return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const Subtract* token)
 {
-    ValueObject* value1 = (ValueObject*)token->value1->accept(this);
-    ValueObject* value2 = (ValueObject*)token->value2->accept(this);
+    token->value2->accept(this);
+    token->value1->accept(this);
 
-    if (dynamic_cast<Value*>(value1) && dynamic_cast<Value*>(value2))
-    {
-        return new Value(value1->getValue() - value2->getValue());
-    }
+    // used to constant fold here but it is now impossible
+    // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
-    return new ValueSubtract(value1, value2);
+    currentScope->block->instructions.push_back(new CallNative("subtract"));
+
+    return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const Multiply* token)
 {
-    ValueObject* value1 = (ValueObject*)token->value1->accept(this);
-    ValueObject* value2 = (ValueObject*)token->value2->accept(this);
+    token->value2->accept(this);
+    token->value1->accept(this);
 
-    if (dynamic_cast<Value*>(value1) && dynamic_cast<Value*>(value2))
-    {
-        return new Value(value1->getValue() * value2->getValue());
-    }
+    // used to constant fold here but it is now impossible
+    // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
-    return new ValueMultiply(value1, value2);
+    currentScope->block->instructions.push_back(new CallNative("multiply"));
+
+    return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const Divide* token)
 {
-    ValueObject* value1 = (ValueObject*)token->value1->accept(this);
-    ValueObject* value2 = (ValueObject*)token->value2->accept(this);
+    token->value2->accept(this);
+    token->value1->accept(this);
 
-    if (dynamic_cast<Value*>(value1) && dynamic_cast<Value*>(value2))
-    {
-        return new Value(value1->getValue() / value2->getValue());
-    }
+    // used to constant fold here but it is now impossible
+    // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
-    return new ValueDivide(value1, value2);
+    currentScope->block->instructions.push_back(new CallNative("divide"));
+
+    return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const Assign* token)
 {
     currentVariable = token->variable->name;
 
-    Variable* variable = currentScope->addVariable(token->variable->name);
+    currentScope->addVariable(currentVariable);
+
+    token->value->accept(this);
+
+    currentScope->block->instructions.push_back(new SetVariable(currentVariable));
 
     currentVariable = "";
 
-    currentScope->events.push_back(new AssignEvent(variable, (ValueObject*)token->value->accept(this)));
-
-    return variable;
+    return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const Call* token)
@@ -543,119 +543,97 @@ Object* BytecodeTransformer::visit(const Call* token)
 
     const std::string name = token->name->name;
 
-    Object* object = nullptr;
-
     if (name == "sine")
     {
-        object = new Sine((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                          (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                          getList<Effect>(token->arguments->get("effects", nullptr, this)),
-                          (ValueObject*)token->arguments->get("frequency", new Value(0), this));
-        
-        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
+        token->arguments->get("frequency", new Constant(0, 0, "0"), this);
+        token->arguments->get("effects", nullptr, this); // fix lists later, maybe do in vm?
+        token->arguments->get("pan", new Constant(0, 0, "0"), this);
+        token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "square")
     {
-        object = new Square((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                            (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                            getList<Effect>(token->arguments->get("effects", nullptr, this)),
-                            (ValueObject*)token->arguments->get("frequency", new Value(0), this));
-
-        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
+        token->arguments->get("frequency", new Constant(0, 0, "0"), this);
+        token->arguments->get("effects", nullptr, this); // fix lists later, maybe do in vm?
+        token->arguments->get("pan", new Constant(0, 0, "0"), this);
+        token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "saw")
     {
-        object = new Saw((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                         (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                         getList<Effect>(token->arguments->get("effects", nullptr, this)),
-                         (ValueObject*)token->arguments->get("frequency", new Value(0), this));
-        
-        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
+        token->arguments->get("frequency", new Constant(0, 0, "0"), this);
+        token->arguments->get("effects", nullptr, this); // fix lists later, maybe do in vm?
+        token->arguments->get("pan", new Constant(0, 0, "0"), this);
+        token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "triangle")
     {
-        object = new Triangle((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                              (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                              getList<Effect>(token->arguments->get("effects", nullptr, this)),
-                              (ValueObject*)token->arguments->get("frequency", new Value(0), this));
-
-        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
+        token->arguments->get("frequency", new Constant(0, 0, "0"), this);
+        token->arguments->get("effects", nullptr, this); // fix lists later, maybe do in vm?
+        token->arguments->get("pan", new Constant(0, 0, "0"), this);
+        token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "noise")
     {
-        object = new Noise((ValueObject*)token->arguments->get("volume", new Value(0), this),
-                           (ValueObject*)token->arguments->get("pan", new Value(0), this),
-                           getList<Effect>(token->arguments->get("effects", nullptr, this)));
-
-        currentScope->events.push_back(new AudioSourceEvent((AudioSource*)object));
+        token->arguments->get("effects", nullptr, this);  // fix lists later, maybe do in vm?
+        token->arguments->get("pan", new Constant(0, 0, "0"), this);
+        token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "hold")
     {
-        object = new Hold((ValueObject*)token->arguments->get("value", new Value(0), this),
-                          (ValueObject*)token->arguments->get("length", new Value(0), this));
+        token->arguments->get("length", new Constant(0, 0, "0"), this);
+        token->arguments->get("value", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "lfo")
     {
-        object = new LFO((ValueObject*)token->arguments->get("from", new Value(0), this),
-                         (ValueObject*)token->arguments->get("to", new Value(0), this),
-                         (ValueObject*)token->arguments->get("length", new Value(0), this));
+        token->arguments->get("length", new Constant(0, 0, "0"), this);
+        token->arguments->get("to", new Constant(0, 0, "0"), this);
+        token->arguments->get("from", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "sweep")
     {
-        object = new Sweep((ValueObject*)token->arguments->get("from", new Value(0), this),
-                           (ValueObject*)token->arguments->get("to", new Value(0), this),
-                           (ValueObject*)token->arguments->get("length", new Value(0), this));
+        token->arguments->get("length", new Constant(0, 0, "0"), this);
+        token->arguments->get("to", new Constant(0, 0, "0"), this);
+        token->arguments->get("from", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "sequence")
     {
-        object = new Sequence(getList<ValueObject>(token->arguments->get("values", nullptr, this)),
-                              (Sequence::Order*)token->arguments->get("order", new Sequence::Order(Sequence::OrderEnum::Forwards), this));
+        token->arguments->get("order", new Name(0, 0, "sequence-forwards"), this);
+        token->arguments->get("values", nullptr, this);
     }
 
     else if (name == "repeat")
     {
-        object = new Repeat((ValueObject*)token->arguments->get("value", new Value(0), this),
-                            (ValueObject*)token->arguments->get("repeats", new Value(0), this));
+        token->arguments->get("repeats", new Constant(0, 0, "0"), this);
+        token->arguments->get("value", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "random")
     {
-        object = new Random((ValueObject*)token->arguments->get("from", new Value(0), this),
-                            (ValueObject*)token->arguments->get("to", new Value(0), this),
-                            (ValueObject*)token->arguments->get("length", new Value(0), this),
-                            (Random::Type*)token->arguments->get("type", new Random::Type(Random::TypeEnum::Step), this));
+        token->arguments->get("type", new Name(0, 0, "random-step"), this);
+        token->arguments->get("length", new Constant(0, 0, "0"), this);
+        token->arguments->get("to", new Constant(0, 0, "0"), this);
+        token->arguments->get("from", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "delay")
     {
-        object = new Delay((ValueObject*)token->arguments->get("mix", new Value(0), this),
-                           (ValueObject*)token->arguments->get("delay", new Value(0), this),
-                           (ValueObject*)token->arguments->get("feedback", new Value(0), this));
+        token->arguments->get("feedback", new Constant(0, 0, "0"), this);
+        token->arguments->get("delay", new Constant(0, 0, "0"), this);
+        token->arguments->get("mix", new Constant(0, 0, "0"), this);
     }
 
     // low pass filter
 
     else if (name == "perform")
     {
-        object = token->arguments->get("function", nullptr, this);
-
-        if (dynamic_cast<GroupEvent*>(object))
-        {
-            currentScope->events.push_back((GroupEvent*)object);
-        }
-
-        else
-        {
-            currentScope->events.push_back(new VariableGroupEvent((Variable*)object));
-        }
+        token->arguments->get("function", nullptr, this);
     }
 
     else
@@ -665,7 +643,9 @@ Object* BytecodeTransformer::visit(const Call* token)
 
     token->arguments->confirmEmpty();
 
-    return object;
+    currentScope->block->instructions.push_back(new CallNative(name));
+
+    return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const CodeBlock* token)
@@ -681,24 +661,23 @@ Object* BytecodeTransformer::visit(const CodeBlock* token)
 
     currentScope->checkVariableUses();
 
+    resolver->blocks.push_back(currentScope->block);
+
     currentScope = currentScope->parent;
 
-    return new GroupEvent(scope->events);
+    return nullptr;
 }
 
 Object* BytecodeTransformer::visit(const Program* token)
 {
+    resolver->blocks.push_back(currentScope->block);
+
     for (const Instruction* instruction : token->instructions)
     {
         instruction->accept(this);
     }
 
     currentScope->checkVariableUses();
-
-    for (Event* event : currentScope->events)
-    {
-        event->perform();
-    }
 
     std::ofstream output(outputPath);
 
