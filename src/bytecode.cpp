@@ -21,14 +21,14 @@ std::vector<unsigned char> BytecodeInstruction::doubleToBytes(double d) const
 {
     std::vector<unsigned char> bytes;
 
-    // fill in bytes
+    // fill in bytes, this is dummy for testing
+
+    for (int i = 0; i < 8; i++)
+    {
+        bytes.push_back(0);
+    }
 
     return bytes;
-}
-
-void EndBlock::output(std::ofstream& stream) const
-{
-    stream << 0x00;
 }
 
 StackPushByte::StackPushByte(const unsigned char value) :
@@ -36,7 +36,7 @@ StackPushByte::StackPushByte(const unsigned char value) :
 
 void StackPushByte::output(std::ofstream& stream) const
 {
-    stream << 0x01 << value;
+    stream << (unsigned char)0x01 << value;
 }
 
 StackPushInt::StackPushInt(const unsigned int value) :
@@ -44,7 +44,7 @@ StackPushInt::StackPushInt(const unsigned int value) :
 
 void StackPushInt::output(std::ofstream& stream) const
 {
-    stream << 0x02;
+    stream << (unsigned char)0x02;
 
     for (unsigned char b : intToBytes(value, 4))
     {
@@ -57,17 +57,12 @@ StackPushDouble::StackPushDouble(const double value) :
 
 void StackPushDouble::output(std::ofstream& stream) const
 {
-    stream << 0x03;
+    stream << (unsigned char)0x03;
 
     for (unsigned char b : doubleToBytes(value))
     {
         stream << b;
     }
-}
-
-void StackPop::output(std::ofstream& stream) const
-{
-    stream << 0x04;
 }
 
 SetVariable::SetVariable(std::string variable) :
@@ -79,7 +74,7 @@ void SetVariable::output(std::ofstream& stream) const
 
     // get id
 
-    stream << 0x05 << intToBytes(id, 1)[0];
+    stream << (unsigned char)0x04 << intToBytes(id, 1)[0];
 }
 
 GetVariable::GetVariable(std::string variable) :
@@ -91,7 +86,7 @@ void GetVariable::output(std::ofstream& stream) const
 
     // get id
 
-    stream << 0x06 << intToBytes(id, 1)[0];
+    stream << (unsigned char)0x05 << intToBytes(id, 1)[0];
 }
 
 GetVariableCopy::GetVariableCopy(std::string variable) :
@@ -103,7 +98,7 @@ void GetVariableCopy::output(std::ofstream& stream) const
 
     // get id
 
-    stream << 0x07 << intToBytes(id, 1)[0];
+    stream << (unsigned char)0x06 << intToBytes(id, 1)[0];
 }
 
 CallNative::CallNative(std::string function) :
@@ -133,7 +128,7 @@ void CallNative::output(std::ofstream& stream) const
     else if (function == "delay") id = 17;
     else if (function == "perform") id = 18;
 
-    stream << 0x08 << intToBytes(id, 1)[0];
+    stream << (unsigned char)0x07 << intToBytes(id, 1)[0];
 }
 
 void BytecodeResolver::output(std::ofstream& stream)
@@ -158,5 +153,7 @@ void BytecodeResolver::output(std::ofstream& stream)
         {
             instruction->output(stream);
         }
+
+        stream << (unsigned char)0x00;
     }
 }

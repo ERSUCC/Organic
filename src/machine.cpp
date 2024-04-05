@@ -67,32 +67,49 @@ void Machine::execute(unsigned int address)
                 return;
 
             case 0x01:
-                // stack push
+                // stack push byte
+
+                address += 2;
 
                 break;
 
             case 0x02:
-                stack.pop();
+                // stack push int
+
+                address += 5;
 
                 break;
 
             case 0x03:
-                // set variable
+                // stack push double
+
+                address += 9;
 
                 break;
 
             case 0x04:
-                // get variable
+                // set variable
+
+                address += 2;
 
                 break;
 
             case 0x05:
-                // get variable copy
+                // get variable
+
+                address += 2;
 
                 break;
 
             case 0x06:
+                // get variable copy
+
+                address += 6;
+
+            case 0x07:
                 // call native
+
+                address += 2;
 
                 break;
 

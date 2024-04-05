@@ -20,11 +20,6 @@ protected:
 
 };
 
-struct EndBlock : public BytecodeInstruction
-{
-    void output(std::ofstream& stream) const override;
-};
-
 struct StackPushByte : public BytecodeInstruction
 {
     StackPushByte(const unsigned char value);
@@ -50,11 +45,6 @@ struct StackPushDouble : public BytecodeInstruction
     void output(std::ofstream& stream) const override;
 
     const double value;
-};
-
-struct StackPop : public BytecodeInstruction
-{
-    void output(std::ofstream& stream) const override;
 };
 
 struct SetVariable : public BytecodeInstruction

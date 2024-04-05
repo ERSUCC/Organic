@@ -43,6 +43,6 @@ private:
 
     ObjectPool* objectPool;
 
-    std::stack<std::vector<unsigned char>> stack;
+    std::stack<Object*> stack;
 
 };
