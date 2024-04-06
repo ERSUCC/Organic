@@ -216,3 +216,19 @@ private:
     bool first = true;
 
 };
+
+struct Limit : public ValueController
+{
+    Limit(ValueObject* value, ValueObject* min, ValueObject* max);
+
+    double syncLength() override;
+    double getValue() override;
+
+    ValueObject* value;
+    ValueObject* min;
+    ValueObject* max;
+
+protected:
+    void finishStart() override;
+
+};

@@ -372,3 +372,42 @@ void Random::finishStart()
 
     first = false;
 }
+
+Limit::Limit(ValueObject* value, ValueObject* min, ValueObject* max) :
+    value(value), min(min), max(max) {}
+
+double Limit::syncLength()
+{
+    return value->syncLength();
+}
+
+double Limit::getValue()
+{
+    if (!value->enabled)
+    {
+        stop();
+    }
+
+    const double valueValue = value->getValue();
+    const double minValue = min->getValue();
+    const double maxValue = max->getValue();
+
+    if (valueValue < minValue)
+    {
+        return minValue;
+    }
+
+    if (valueValue > maxValue)
+    {
+        return maxValue;
+    }
+
+    return valueValue;
+}
+
+void Limit::finishStart()
+{
+    value->start(startTime);
+    min->start(startTime);
+    max->start(startTime);
+}

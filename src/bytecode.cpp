@@ -126,8 +126,9 @@ void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
     else if (function == "sequence") id = 0x0d;
     else if (function == "repeat") id = 0x0e;
     else if (function == "random") id = 0x0f;
-    else if (function == "delay") id = 0x10;
-    else if (function == "perform") id = 0x11;
+    else if (function == "limit") id = 0x10;
+    else if (function == "delay") id = 0x11;
+    else if (function == "perform") id = 0x12;
 
     stream << (unsigned char)0x07 << id;
 }

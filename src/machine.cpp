@@ -378,13 +378,20 @@ void Machine::execute(unsigned int address)
                     }
 
                     case 0x10:
-                        stack.push(new Delay(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new Limit(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
                         address += 2;
 
                         break;
 
                     case 0x11:
+                        stack.push(new Delay(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+
+                        address += 2;
+
+                        break;
+
+                    case 0x12:
                         // perform (get address, then call execute again at some point)
 
                         address += 2;

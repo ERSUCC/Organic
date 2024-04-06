@@ -605,6 +605,13 @@ void BytecodeTransformer::visit(const Call* token)
         token->arguments->get("from", new Constant(0, 0, "0"), this);
     }
 
+    else if (name == "limit")
+    {
+        token->arguments->get("max", new Constant(0, 0, "0"), this);
+        token->arguments->get("min", new Constant(0, 0, "0"), this);
+        token->arguments->get("value", new Constant(0, 0, "0"), this);
+    }
+
     else if (name == "delay")
     {
         token->arguments->get("feedback", new Constant(0, 0, "0"), this);
