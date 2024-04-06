@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "token.h"
-#include "object.h"
 
 struct Parser
 {
@@ -35,6 +34,7 @@ private:
     TokenRange* parseTerm(int pos);
 
     const std::string path;
+
     std::string code;
 
     std::vector<Token*> tokens;

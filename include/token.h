@@ -2,18 +2,11 @@
 
 #include <filesystem>
 #include <fstream>
-#include <optional>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-#include "audiosource.h"
 #include "bytecode.h"
-#include "controller.h"
-#include "effect.h"
-#include "event.h"
-#include "object.h"
 
 struct BytecodeTransformer;
 

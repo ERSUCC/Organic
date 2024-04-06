@@ -8,10 +8,10 @@
     #include <cmath>
 #endif
 
-#include <iostream>
-#include <string>
-#include <random>
 #include <chrono>
+#include <iostream>
+#include <random>
+#include <string>
 
 #include "management.h"
 

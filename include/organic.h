@@ -1,8 +1,8 @@
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <vector>
-#include <chrono>
 
 #include "../deps/AudioFile.h"
 #include "../deps/RtAudio.h"
