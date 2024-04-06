@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "AudioFile.h"
+#include "../deps/AudioFile.h"
 
 #include "controller.h"
 #include "effect.h"

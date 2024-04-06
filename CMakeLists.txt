@@ -20,7 +20,7 @@ add_executable(organic src/audiosource.cpp
                        src/token.cpp
                        src/utils.cpp)
 
-add_library(rtaudio STATIC src/RtAudio.cpp)
+add_library(rtaudio STATIC deps/RtAudio.cpp)
 
 if (WIN32)
     target_compile_options(rtaudio PRIVATE -D__WINDOWS_WASAPI__)

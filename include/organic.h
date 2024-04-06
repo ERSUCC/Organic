@@ -4,8 +4,8 @@
 #include <vector>
 #include <chrono>
 
-#include "AudioFile.h"
-#include "RtAudio.h"
+#include "../deps/AudioFile.h"
+#include "../deps/RtAudio.h"
 
 #include "interpret.h"
 #include "machine.h"
