@@ -23,7 +23,7 @@ struct Token
 
     virtual std::string string() const;
 
-    virtual Object* accept(BytecodeTransformer* visitor) const;
+    virtual void accept(BytecodeTransformer* visitor) const;
 
     const int line;
     const int character;
@@ -107,7 +107,7 @@ struct Name : public Token
 {
     Name(const int line, const int character, const std::string name, const bool value = false);
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 
     const std::string name;
 
@@ -118,7 +118,7 @@ struct Constant : public Token
 {
     Constant(const int line, const int character, const std::string str);
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 
     const double value;
 };
@@ -155,7 +155,7 @@ struct ListToken : public Token
 
     std::string string() const override;
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 
     const std::vector<Token*> values;
 };
@@ -172,28 +172,28 @@ struct Add : public Combine
 {
     Add(const Token* value1, const Token* value2);
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 };
 
 struct Subtract : public Combine
 {
     Subtract(const Token* value1, const Token* value2);
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 };
 
 struct Multiply : public Combine
 {
     Multiply(const Token* value1, const Token* value2);
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 };
 
 struct Divide : public Combine
 {
     Divide(const Token* value1, const Token* value2);
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 };
 
 struct Instruction : public Token
@@ -205,7 +205,7 @@ struct Assign : public Instruction
 {
     Assign(const Name* variable, const Token* value);
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 
     const Name* variable;
     const Token* value;
@@ -217,7 +217,7 @@ struct Call : public Instruction
 
     std::string string() const override;
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 
     const Name* name;
     ArgumentList* arguments;
@@ -229,7 +229,7 @@ struct CodeBlock : public Token
 
     std::string string() const override;
 
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 
     const std::vector<Instruction*> instructions;
 };
@@ -261,7 +261,7 @@ struct Program : public Token
 
     std::string string() const override;
     
-    Object* accept(BytecodeTransformer* visitor) const override;
+    void accept(BytecodeTransformer* visitor) const override;
 
     const std::vector<Instruction*> instructions;
 };
@@ -272,23 +272,21 @@ struct BytecodeTransformer
 
     std::string transform(const Program* program);
 
-    Object* visit(const Name* token);
-    Object* visit(const Constant* token);
-    Object* visit(const ListToken* token);
-    Object* visit(const Add* token);
-    Object* visit(const Subtract* token);
-    Object* visit(const Multiply* token);
-    Object* visit(const Divide* token);
-    Object* visit(const Assign* token);
-    Object* visit(const Call* token);
-    Object* visit(const CodeBlock* token);
-    Object* visit(const Program* token);
+    void visit(const Name* token);
+    void visit(const Constant* token);
+    void visit(const ListToken* token);
+    void visit(const Add* token);
+    void visit(const Subtract* token);
+    void visit(const Multiply* token);
+    void visit(const Divide* token);
+    void visit(const Assign* token);
+    void visit(const Call* token);
+    void visit(const CodeBlock* token);
+    void visit(const Program* token);
 
     Scope* currentScope;
 
 private:
-    template <typename T> List<T>* getList(Object* object) const;
-
     double getFrequency(const double note) const;
 
     const std::string sourcePath;

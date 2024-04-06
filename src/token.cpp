@@ -8,10 +8,7 @@ std::string Token::string() const
     return str;
 }
 
-Object* Token::accept(BytecodeTransformer* visitor) const
-{
-    return nullptr;
-}
+void Token::accept(BytecodeTransformer* visitor) const {}
 
 TokenRange::TokenRange(const int start, const int end, Token* token) :
     start(start), end(end), token(token) {}
@@ -55,17 +52,17 @@ DivideToken::DivideToken(const int line, const int character) :
 Name::Name(const int line, const int character, const std::string name, const bool value) :
     Token(line, character, name), name(name), value(value) {}
 
-Object* Name::accept(BytecodeTransformer* visitor) const
+void Name::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 Constant::Constant(const int line, const int character, const std::string str) :
     Token(line, character, str), value(std::stod(str)) {}
 
-Object* Constant::accept(BytecodeTransformer* visitor) const
+void Constant::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 Argument::Argument(const int line, const int character, const std::string name, const Token* value) :
@@ -154,9 +151,9 @@ std::string ListToken::string() const
     return result + ")";
 }
 
-Object* ListToken::accept(BytecodeTransformer* visitor) const
+void ListToken::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 Combine::Combine(const Token* value1, const Token* value2, const std::string op) :
@@ -165,33 +162,33 @@ Combine::Combine(const Token* value1, const Token* value2, const std::string op)
 Add::Add(const Token* value1, const Token* value2) :
     Combine(value1, value2, "+") {}
 
-Object* Add::accept(BytecodeTransformer* visitor) const
+void Add::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 Subtract::Subtract(const Token* value1, const Token* value2) :
     Combine(value1, value2, "-") {}
 
-Object* Subtract::accept(BytecodeTransformer* visitor) const
+void Subtract::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 Multiply::Multiply(const Token* value1, const Token* value2) :
     Combine(value1, value2, "*") {}
 
-Object* Multiply::accept(BytecodeTransformer* visitor) const
+void Multiply::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 Divide::Divide(const Token* value1, const Token* value2) :
     Combine(value1, value2, "/") {}
 
-Object* Divide::accept(BytecodeTransformer* visitor) const
+void Divide::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 Instruction::Instruction(const int line, const int character, const std::string str) :
@@ -200,9 +197,9 @@ Instruction::Instruction(const int line, const int character, const std::string 
 Assign::Assign(const Name* variable, const Token* value) :
     Instruction(variable->line, variable->character, variable->string() + " = " + value->string()), variable(variable), value(value) {}
 
-Object* Assign::accept(BytecodeTransformer* visitor) const
+void Assign::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 Call::Call(const Name* name, ArgumentList* arguments) :
@@ -213,9 +210,9 @@ std::string Call::string() const
     return name->name + "(" + arguments->string() + ")";
 }
 
-Object* Call::accept(BytecodeTransformer* visitor) const
+void Call::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 CodeBlock::CodeBlock(const int line, const int character, const std::vector<Instruction*> instructions) :
@@ -233,9 +230,9 @@ std::string CodeBlock::string() const
     return result + "}";
 }
 
-Object* CodeBlock::accept(BytecodeTransformer* visitor) const
+void CodeBlock::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 Scope::Scope(Scope* parent) :
@@ -297,9 +294,9 @@ std::string Program::string() const
     return result;
 }
 
-Object* Program::accept(BytecodeTransformer* visitor) const
+void Program::accept(BytecodeTransformer* visitor) const
 {
-    return visitor->visit(this);
+    visitor->visit(this);
 }
 
 BytecodeTransformer::BytecodeTransformer(const std::string path) :
@@ -317,13 +314,13 @@ std::string BytecodeTransformer::transform(const Program* program)
     return outputPath;
 }
 
-Object* BytecodeTransformer::visit(const Name* token)
+void BytecodeTransformer::visit(const Name* token)
 {
     if (currentScope->getVariable(token->name))
     {
         if (currentVariable == token->name)
         {
-            Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", sourcePath, token->line, token->character);
+            return Utils::parseError("Variable \"" + token->name + "\" referenced in its own definition.", sourcePath, token->line, token->character);
         }
 
         if (token->value)
@@ -331,12 +328,17 @@ Object* BytecodeTransformer::visit(const Name* token)
             currentScope->block->instructions.push_back(new GetVariableCopy(token->name));
         }
 
-        return nullptr;
+        else
+        {
+            currentScope->block->instructions.push_back(new GetVariable(token->name));
+        }
+
+        return;
     }
 
     if (token->value)
     {
-        Utils::parseError("\"#\" can only precede variable names.", sourcePath, token->line, token->character);
+        return Utils::parseError("\"#\" can only precede variable names.", sourcePath, token->line, token->character);
     }
 
     // make sure to check constants earlier because here it could get mixed up with the numbers
@@ -411,15 +413,14 @@ Object* BytecodeTransformer::visit(const Name* token)
                 break;
 
             default:
-            {
-                Utils::parseError("Variable \"" + token->name + "\" not defined.", sourcePath, token->line, token->character);
-            }
+                return Utils::parseError("Variable \"" + token->name + "\" not defined.", sourcePath, token->line, token->character);
         }
 
         if (token->name.size() == 2 && isdigit(token->name[1]))
         {
-            currentScope->block->instructions.push_back(new StackPushDouble(getFrequency(base + 12 * (token->name[2] - 48))));
-            currentScope->block->instructions.push_back(new CallNative("value"));
+            currentScope->block->instructions.push_back(new StackPushDouble(getFrequency(base + 12 * (token->name[1] - 48))));
+
+            return;
         }
 
         else if (token->name.size() == 3 && isdigit(token->name[2]))
@@ -427,34 +428,28 @@ Object* BytecodeTransformer::visit(const Name* token)
             if (token->name[1] == 's')
             {
                 currentScope->block->instructions.push_back(new StackPushDouble(getFrequency(base + 12 * (token->name[2] - 48) + 1)));
-                currentScope->block->instructions.push_back(new CallNative("value"));
+
+                return;
             }
 
             else if (token->name[1] == 'f')
             {
                 currentScope->block->instructions.push_back(new StackPushDouble(getFrequency(base + 12 * (token->name[2] - 48) - 1)));
-                currentScope->block->instructions.push_back(new CallNative("value"));
+
+                return;
             }
         }
 
-        else
-        {
-            Utils::parseError("Unrecognized symbol \"" + token->name + "\".", sourcePath, token->line, token->character);
-        }
+        return Utils::parseError("Unrecognized symbol \"" + token->name + "\".", sourcePath, token->line, token->character);
     }
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const Constant* token)
+void BytecodeTransformer::visit(const Constant* token)
 {
     currentScope->block->instructions.push_back(new StackPushDouble(token->value));
-    currentScope->block->instructions.push_back(new CallNative("value"));
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const ListToken* token)
+void BytecodeTransformer::visit(const ListToken* token)
 {
     for (int i = token->values.size() - 1; i >= 0; i--)
     {
@@ -463,11 +458,9 @@ Object* BytecodeTransformer::visit(const ListToken* token)
 
     currentScope->block->instructions.push_back(new StackPushInt(token->values.size()));
     currentScope->block->instructions.push_back(new CallNative("list"));
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const Add* token)
+void BytecodeTransformer::visit(const Add* token)
 {
     token->value2->accept(this);
     token->value1->accept(this);
@@ -476,11 +469,9 @@ Object* BytecodeTransformer::visit(const Add* token)
     // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
     currentScope->block->instructions.push_back(new CallNative("add"));
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const Subtract* token)
+void BytecodeTransformer::visit(const Subtract* token)
 {
     token->value2->accept(this);
     token->value1->accept(this);
@@ -489,11 +480,9 @@ Object* BytecodeTransformer::visit(const Subtract* token)
     // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
     currentScope->block->instructions.push_back(new CallNative("subtract"));
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const Multiply* token)
+void BytecodeTransformer::visit(const Multiply* token)
 {
     token->value2->accept(this);
     token->value1->accept(this);
@@ -502,11 +491,9 @@ Object* BytecodeTransformer::visit(const Multiply* token)
     // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
     currentScope->block->instructions.push_back(new CallNative("multiply"));
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const Divide* token)
+void BytecodeTransformer::visit(const Divide* token)
 {
     token->value2->accept(this);
     token->value1->accept(this);
@@ -515,11 +502,9 @@ Object* BytecodeTransformer::visit(const Divide* token)
     // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
     currentScope->block->instructions.push_back(new CallNative("divide"));
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const Assign* token)
+void BytecodeTransformer::visit(const Assign* token)
 {
     currentVariable = token->variable->name;
 
@@ -530,15 +515,13 @@ Object* BytecodeTransformer::visit(const Assign* token)
     currentScope->block->instructions.push_back(new SetVariable(currentVariable));
 
     currentVariable = "";
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const Call* token)
+void BytecodeTransformer::visit(const Call* token)
 {
     if (token->name->value)
     {
-        Utils::parseError("\"#\" can only precede variable names.", sourcePath, token->name->line, token->name->character);
+        return Utils::parseError("\"#\" can only precede variable names.", sourcePath, token->name->line, token->name->character);
     }
 
     const std::string name = token->name->name;
@@ -546,7 +529,7 @@ Object* BytecodeTransformer::visit(const Call* token)
     if (name == "sine")
     {
         token->arguments->get("frequency", new Constant(0, 0, "0"), this);
-        token->arguments->get("effects", nullptr, this); // fix lists later, maybe do in vm?
+        token->arguments->get("effects", new ListToken(0, 0, std::vector<Token*>()), this);
         token->arguments->get("pan", new Constant(0, 0, "0"), this);
         token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
@@ -554,7 +537,7 @@ Object* BytecodeTransformer::visit(const Call* token)
     else if (name == "square")
     {
         token->arguments->get("frequency", new Constant(0, 0, "0"), this);
-        token->arguments->get("effects", nullptr, this); // fix lists later, maybe do in vm?
+        token->arguments->get("effects", new ListToken(0, 0, std::vector<Token*>()), this);
         token->arguments->get("pan", new Constant(0, 0, "0"), this);
         token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
@@ -562,7 +545,7 @@ Object* BytecodeTransformer::visit(const Call* token)
     else if (name == "saw")
     {
         token->arguments->get("frequency", new Constant(0, 0, "0"), this);
-        token->arguments->get("effects", nullptr, this); // fix lists later, maybe do in vm?
+        token->arguments->get("effects", new ListToken(0, 0, std::vector<Token*>()), this);
         token->arguments->get("pan", new Constant(0, 0, "0"), this);
         token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
@@ -570,14 +553,14 @@ Object* BytecodeTransformer::visit(const Call* token)
     else if (name == "triangle")
     {
         token->arguments->get("frequency", new Constant(0, 0, "0"), this);
-        token->arguments->get("effects", nullptr, this); // fix lists later, maybe do in vm?
+        token->arguments->get("effects", new ListToken(0, 0, std::vector<Token*>()), this);
         token->arguments->get("pan", new Constant(0, 0, "0"), this);
         token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "noise")
     {
-        token->arguments->get("effects", nullptr, this);  // fix lists later, maybe do in vm?
+        token->arguments->get("effects", new ListToken(0, 0, std::vector<Token*>()), this);
         token->arguments->get("pan", new Constant(0, 0, "0"), this);
         token->arguments->get("volume", new Constant(0, 0, "0"), this);
     }
@@ -605,7 +588,7 @@ Object* BytecodeTransformer::visit(const Call* token)
     else if (name == "sequence")
     {
         token->arguments->get("order", new Name(0, 0, "sequence-forwards"), this);
-        token->arguments->get("values", nullptr, this);
+        token->arguments->get("values", new ListToken(0, 0, std::vector<Token*>()), this);
     }
 
     else if (name == "repeat")
@@ -629,7 +612,10 @@ Object* BytecodeTransformer::visit(const Call* token)
         token->arguments->get("mix", new Constant(0, 0, "0"), this);
     }
 
-    // low pass filter
+    else if (name == "lowpass")
+    {
+        // stuff idk haven't solidified yet
+    }
 
     else if (name == "perform")
     {
@@ -638,17 +624,15 @@ Object* BytecodeTransformer::visit(const Call* token)
 
     else
     {
-        Utils::parseError("Unknown function name \"" + name + "\".", sourcePath, token->line, token->character);
+        return Utils::parseError("Unknown function name \"" + name + "\".", sourcePath, token->line, token->character);
     }
 
     token->arguments->confirmEmpty();
 
     currentScope->block->instructions.push_back(new CallNative(name));
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const CodeBlock* token)
+void BytecodeTransformer::visit(const CodeBlock* token)
 {
     Scope* scope = new Scope(currentScope);
 
@@ -664,11 +648,9 @@ Object* BytecodeTransformer::visit(const CodeBlock* token)
     resolver->blocks.push_back(currentScope->block);
 
     currentScope = currentScope->parent;
-
-    return nullptr;
 }
 
-Object* BytecodeTransformer::visit(const Program* token)
+void BytecodeTransformer::visit(const Program* token)
 {
     resolver->blocks.push_back(currentScope->block);
 
@@ -679,41 +661,10 @@ Object* BytecodeTransformer::visit(const Program* token)
 
     currentScope->checkVariableUses();
 
-    std::ofstream output(outputPath);
-
-    if (!output.is_open())
-    {
-        Utils::error("Could not create intermediate file \"" + outputPath + "\".");
-    }
-
-    resolver->output(output);
-
-    output.close();
-
-    return nullptr;
-}
-
-template <typename T> List<T>* BytecodeTransformer::getList(Object* object) const
-{
-    std::vector<T*> objects;
-
-    if (List<Object>* list = dynamic_cast<List<Object>*>(object))
-    {
-        for (Object* object : list->objects)
-        {
-            objects.push_back(dynamic_cast<T*>(object));
-        }
-    }
-
-    else if (object)
-    {
-        objects.push_back(dynamic_cast<T*>(object));
-    }
-
-    return new List<T>(objects);
+    resolver->output(outputPath);
 }
 
 double BytecodeTransformer::getFrequency(const double note) const
 {
-    return 440 * pow(2, (note - 45) / 12);
+    return 440 * pow(2, (note - 57) / 12);
 }

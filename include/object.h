@@ -9,7 +9,7 @@ struct Object
     virtual ~Object();
 
 protected:
-    Utils* utils;
+    Utils* utils; // can this be moved to Sync or ValueObject?
 
 };
 
@@ -47,6 +47,8 @@ struct ValueObject : public Sync
 
 struct Variable : public ValueObject
 {
+    Variable(ValueObject* value);
+
     double syncLength() override;
     double getValue() override;
 

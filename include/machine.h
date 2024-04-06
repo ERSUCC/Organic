@@ -1,28 +1,16 @@
 #pragma once
 
 #include <fstream>
-#include <set>
 #include <sstream>
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
-#include "utils.h"
+#include "audiosource.h"
+#include "controller.h"
 #include "object.h"
-
-struct ObjectPool
-{
-    unsigned int allocate(Object* object);
-
-    void deallocate(unsigned int address);
-
-private:
-    std::unordered_map<unsigned int, Object*> heap;
-    std::set<unsigned int> free;
-
-    unsigned int end;
-
-};
+#include "utils.h"
 
 struct Machine
 {
@@ -31,9 +19,12 @@ struct Machine
     void execute(unsigned int address);
 
 private:
-    unsigned int addObject(Object* object);
+    unsigned int readInt(const unsigned int address) const;
+    double readDouble(const unsigned int address) const;
 
-    void removeObject(unsigned int address);
+    Object* popStack();
+    template <typename T> T* popStackAs();
+    template <typename T> List<T>* popStackAsList();
 
     Utils* utils;
 
@@ -41,8 +32,8 @@ private:
 
     std::string program;
 
-    ObjectPool* objectPool;
-
     std::stack<Object*> stack;
+
+    std::unordered_map<unsigned char, Variable*> variables;
 
 };

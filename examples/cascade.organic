@@ -17,14 +17,14 @@ triangle(volume: repeat(value: sequence(values: (
     hold,
     hold
 ), order: sequence-random)), frequency: repeat(value: sequence(values: (
-    hold(value: c2, length: note_length),
-    hold(value: d2, length: note_length),
-    hold(value: e2, length: note_length),
-    hold(value: fs2, length: note_length),
-    hold(value: g2, length: note_length),
-    hold(value: a2, length: note_length),
-    hold(value: b2, length: note_length),
-    hold(value: c3, length: note_length)
+    hold(value: c3, length: note_length),
+    hold(value: d3, length: note_length),
+    hold(value: e3, length: note_length),
+    hold(value: fs3, length: note_length),
+    hold(value: g3, length: note_length),
+    hold(value: a3, length: note_length),
+    hold(value: b3, length: note_length),
+    hold(value: c4, length: note_length)
 ), order: sequence-random)), effects: (
     delay(mix: 1, delay: 375, feedback: 0.75)
 ))

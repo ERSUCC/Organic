@@ -51,6 +51,9 @@ double ValueObject::getValue()
     return 0;
 }
 
+Variable::Variable(ValueObject* value) :
+    value(value) {}
+
 double Variable::syncLength()
 {
     return value->syncLength();
