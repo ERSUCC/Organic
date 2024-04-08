@@ -30,7 +30,7 @@ private:
 
     const std::string path;
 
-    std::string program;
+    std::vector<unsigned char> program;
 
     std::stack<Object*> stack;
 

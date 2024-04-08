@@ -9,11 +9,19 @@ Machine::Machine(const std::string path) : path(path)
         Utils::error("Could not open \"" + path + "\".");
     }
 
-    std::getline(file, program, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
+    std::ostringstream stream(std::ios::binary);
 
-    if (program.size() <= 4 || program.substr(0, 4) != "BACH")
+    stream << file.rdbuf();
+
+    file.close();
+
+    const std::string& str = stream.str();
+
+    program = std::vector<unsigned char>(str.begin(), str.end());
+
+    if (program.size() <= 4 || program[0] != 'B' || program[1] != 'A' || program[2] != 'C' || program[3] != 'H')
     {
-        Utils::machineError("Invalid bytecode.", path);
+        Utils::machineError("Invalid bytecode format.", path);
     }
 
     utils = Utils::get();
@@ -91,6 +99,8 @@ void Machine::execute(unsigned int address)
 {
     while (true)
     {
+        std::cout << address << " " << program.size() << "\n";
+
         if (address >= program.size())
         {
             return Utils::machineError("Invalid execution address.", path);
@@ -109,6 +119,8 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x02:
+                std::cout << "int\n";
+
                 stack.push(new Value(readInt(address + 1))); // probably shouldn't coerce these to double
 
                 address += 5;
@@ -116,6 +128,8 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x03:
+                std::cout << "double\n";
+
                 stack.push(new Value(readDouble(address + 1)));
 
                 address += 9;

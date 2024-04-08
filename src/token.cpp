@@ -514,7 +514,7 @@ void BytecodeTransformer::visit(const Assign* token)
 
     currentScope->block->instructions.push_back(new SetVariable(currentVariable));
 
-    currentVariable = "";
+    currentVariable = ""; // this breaks for multi-nested scopes, fix with stack
 }
 
 void BytecodeTransformer::visit(const Call* token)
