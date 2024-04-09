@@ -99,8 +99,6 @@ void Machine::execute(unsigned int address)
 {
     while (true)
     {
-        std::cout << address << " " << program.size() << "\n";
-
         if (address >= program.size())
         {
             return Utils::machineError("Invalid execution address.", path);
@@ -119,8 +117,6 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x02:
-                std::cout << "int\n";
-
                 stack.push(new Value(readInt(address + 1))); // probably shouldn't coerce these to double
 
                 address += 5;
@@ -128,8 +124,6 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x03:
-                std::cout << "double\n";
-
                 stack.push(new Value(readDouble(address + 1)));
 
                 address += 9;
