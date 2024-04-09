@@ -9,6 +9,7 @@
 
 #include "audiosource.h"
 #include "controller.h"
+#include "event.h"
 #include "object.h"
 #include "utils.h"
 
@@ -17,6 +18,9 @@ struct Machine
     Machine(const std::string path);
 
     void execute(unsigned int address);
+
+    void processAudioSources(double* buffer, const unsigned int bufferLength) const;
+    void performEvents();
 
 private:
     unsigned int readInt(const unsigned int address) const;
@@ -35,5 +39,8 @@ private:
     std::stack<Object*> stack;
 
     std::unordered_map<unsigned char, Variable*> variables;
+
+    std::vector<AudioSource*> audioSources;
+    std::vector<Event*> events;
 
 };

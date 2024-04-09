@@ -27,74 +27,6 @@ Machine::Machine(const std::string path) : path(path)
     utils = Utils::get();
 }
 
-unsigned int Machine::readInt(const unsigned int address) const
-{
-    unsigned char bytes[4];
-
-    bytes[0] = program[address];
-    bytes[1] = program[address + 1];
-    bytes[2] = program[address + 2];
-    bytes[3] = program[address + 3];
-
-    return *reinterpret_cast<unsigned int*>(bytes);
-}
-
-double Machine::readDouble(const unsigned int address) const
-{
-    unsigned char bytes[8];
-
-    bytes[0] = program[address];
-    bytes[1] = program[address + 1];
-    bytes[2] = program[address + 2];
-    bytes[3] = program[address + 3];
-    bytes[4] = program[address + 4];
-    bytes[5] = program[address + 5];
-    bytes[6] = program[address + 6];
-    bytes[7] = program[address + 7];
-
-    return *reinterpret_cast<double*>(bytes);
-}
-
-Object* Machine::popStack()
-{
-    Object* value = stack.top();
-
-    stack.pop();
-
-    return value;
-}
-
-template <typename T> T* Machine::popStackAs()
-{
-    T* value = dynamic_cast<T*>(stack.top());
-
-    stack.pop();
-
-    return value;
-}
-
-template <typename T> List<T>* Machine::popStackAsList()
-{
-    Object* object = popStack();
-
-    std::vector<T*> objects;
-
-    if (List<Object>* list = dynamic_cast<List<Object>*>(object))
-    {
-        for (Object* object : list->objects)
-        {
-            objects.push_back(dynamic_cast<T*>(object));
-        }
-    }
-
-    else if (object)
-    {
-        objects.push_back(dynamic_cast<T*>(object));
-    }
-
-    return new List<T>(objects);
-}
-
 void Machine::execute(unsigned int address)
 {
     while (true)
@@ -216,7 +148,7 @@ void Machine::execute(unsigned int address)
                     {
                         Sine* sine = new Sine(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
 
-                        utils->audioSourceManager->addAudioSource(sine);
+                        audioSources.push_back(sine);
 
                         sine->start(utils->time);
 
@@ -231,7 +163,7 @@ void Machine::execute(unsigned int address)
                     {
                         Square* square = new Square(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
 
-                        utils->audioSourceManager->addAudioSource(square);
+                        audioSources.push_back(square);
 
                         square->start(utils->time);
 
@@ -246,7 +178,7 @@ void Machine::execute(unsigned int address)
                     {
                         Triangle* triangle = new Triangle(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
 
-                        utils->audioSourceManager->addAudioSource(triangle);
+                        audioSources.push_back(triangle);
 
                         triangle->start(utils->time);
 
@@ -261,7 +193,7 @@ void Machine::execute(unsigned int address)
                     {
                         Saw* saw = new Saw(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
 
-                        utils->audioSourceManager->addAudioSource(saw);
+                        audioSources.push_back(saw);
 
                         saw->start(utils->time);
 
@@ -276,7 +208,7 @@ void Machine::execute(unsigned int address)
                     {
                         Noise* noise = new Noise(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>());
 
-                        utils->audioSourceManager->addAudioSource(noise);
+                        audioSources.push_back(noise);
 
                         noise->start(utils->time);
 
@@ -424,4 +356,100 @@ void Machine::execute(unsigned int address)
                 return Utils::machineError("Unrecognized instruction code \"" + code.str() + "\".", path);
         }
     }
+}
+
+void Machine::processAudioSources(double* buffer, const unsigned int bufferLength) const
+{
+    std::fill(buffer, buffer + bufferLength * utils->channels, 0);
+
+    for (AudioSource* audioSource : audioSources)
+    {
+        audioSource->fillBuffer(buffer, bufferLength);
+    }
+}
+
+void Machine::performEvents()
+{
+    for (int i = 0; i < events.size(); i++)
+    {
+        if (events[i]->ready())
+        {
+            events[i]->perform();
+
+            if (!events[i]->hasNext())
+            {
+                events.erase(events.begin() + i);
+
+                i--;
+            }
+        }
+    }
+}
+
+unsigned int Machine::readInt(const unsigned int address) const
+{
+    unsigned char bytes[4];
+
+    bytes[0] = program[address];
+    bytes[1] = program[address + 1];
+    bytes[2] = program[address + 2];
+    bytes[3] = program[address + 3];
+
+    return *reinterpret_cast<unsigned int*>(bytes);
+}
+
+double Machine::readDouble(const unsigned int address) const
+{
+    unsigned char bytes[8];
+
+    bytes[0] = program[address];
+    bytes[1] = program[address + 1];
+    bytes[2] = program[address + 2];
+    bytes[3] = program[address + 3];
+    bytes[4] = program[address + 4];
+    bytes[5] = program[address + 5];
+    bytes[6] = program[address + 6];
+    bytes[7] = program[address + 7];
+
+    return *reinterpret_cast<double*>(bytes);
+}
+
+Object* Machine::popStack()
+{
+    Object* value = stack.top();
+
+    stack.pop();
+
+    return value;
+}
+
+template <typename T> T* Machine::popStackAs()
+{
+    T* value = dynamic_cast<T*>(stack.top());
+
+    stack.pop();
+
+    return value;
+}
+
+template <typename T> List<T>* Machine::popStackAsList()
+{
+    Object* object = popStack();
+
+    std::vector<T*> objects;
+
+    if (List<Object>* list = dynamic_cast<List<Object>*>(object))
+    {
+        for (Object* object : list->objects)
+        {
+            objects.push_back(dynamic_cast<T*>(object));
+        }
+    }
+
+    else if (object)
+    {
+        objects.push_back(dynamic_cast<T*>(object));
+    }
+
+    return new List<T>(objects);
 }

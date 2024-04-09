@@ -5,12 +5,14 @@ Event::Event()
     next = startTime;
 }
 
-bool Event::ready()
+bool Event::ready() const
 {
     return utils->time >= next;
 }
 
-bool Event::getNext()
+bool Event::hasNext() const
 {
     return false;
 }
+
+void Event::perform() {}

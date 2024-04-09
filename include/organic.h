@@ -11,6 +11,12 @@
 #include "machine.h"
 #include "utils.h"
 
+struct AudioData
+{
+    Utils* utils;
+    Machine* machine;
+};
+
 void rtAudioError(RtAudioErrorType type, const std::string& message);
 int processAudio(void* output, void* input, unsigned int frames, double streamTime, RtAudioStreamStatus status, void* userData);
 

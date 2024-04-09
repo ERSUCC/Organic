@@ -11,7 +11,7 @@ AudioSource::~AudioSource()
     free(effectBuffer);
 }
 
-void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength, const double masterVolume)
+void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength)
 {
     if (enabled)
     {
@@ -24,7 +24,7 @@ void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength, co
 
         for (int i = 0; i < bufferLength * utils->channels; i++)
         {
-            buffer[i] += effectBuffer[i] * masterVolume;
+            buffer[i] += effectBuffer[i] * utils->volume;
         }
     }
 }

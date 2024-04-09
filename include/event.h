@@ -1,14 +1,18 @@
 #pragma once
 
-#include "management.h"
 #include "object.h"
 
-struct Event : public Sync, public EventTrait
+struct Event : public Sync
 {
     Event();
 
-    bool ready() override;
-    bool getNext() override;
+    bool ready() const;
 
+    virtual bool hasNext() const;
+
+    virtual void perform();
+
+protected:
     double next;
+
 };

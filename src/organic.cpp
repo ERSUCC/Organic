@@ -7,9 +7,9 @@ void rtAudioError(RtAudioErrorType type, const std::string& message)
 
 int processAudio(void* output, void* input, unsigned int frames, double streamTime, RtAudioStreamStatus status, void* userData)
 {
-    Utils* utils = (Utils*)userData;
+    AudioData* data = (AudioData*)userData;
 
-    utils->audioSourceManager->fillBuffer((double*)output, frames, utils->channels, utils->volume);
+    data->machine->processAudioSources((double*)output, frames);
 
     return 0;
 }
@@ -57,9 +57,11 @@ void Organic::startPlayback()
     parameters.deviceId = audio.getDefaultOutputDevice();
     parameters.nChannels = utils->channels;
 
+    AudioData audioData { utils, machine };
+
     unsigned int bufferFrames = utils->bufferLength;
 
-    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)utils))
+    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)&audioData))
     {
         Utils::error(audio.getErrorText());
     }
@@ -83,7 +85,7 @@ void Organic::startPlayback()
     {
         utils->time = (clock.now() - start).count() / 1000000.0;
 
-        utils->eventManager->performEvents();
+        // perform events
     }
 
     if (audio.isStreamRunning())
@@ -112,7 +114,7 @@ void Organic::startExport()
     {
         utils->time = i * 1000.0 / utils->sampleRate;
 
-        utils->audioSourceManager->fillBuffer(buffer, utils->bufferLength, utils->channels, utils->volume);
+        machine->processAudioSources(buffer, utils->bufferLength);
 
         for (int j = 0; j < utils->bufferLength; j++)
         {
