@@ -6,19 +6,21 @@ Effect::Effect(ValueObject* mix) :
 Delay::Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     Effect(mix), delay(delay), feedback(feedback) {}
 
-void Delay::apply(double* buffer, unsigned int bufferLength)
+void Delay::apply(double* buffer, const unsigned int bufferLength)
 {
-    for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
+    for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
+        const double delayValue = delay->getValue();
+
         if (utils->channels == 1)
         {
-            if (utils->time >= bufferTime + delay->getValue())
+            if (utils->time >= bufferTime + delayValue)
             {
                 buffer[i] += this->buffer.front() * mix->getValue() * feedback->getValue();
 
                 this->buffer.pop();
 
-                bufferTime = utils->time - delay->getValue();
+                bufferTime = utils->time - delayValue;
             }
 
             this->buffer.push(buffer[i]);
@@ -26,17 +28,20 @@ void Delay::apply(double* buffer, unsigned int bufferLength)
 
         else
         {
-            if (utils->time >= bufferTime + delay->getValue())
+            if (utils->time >= bufferTime + delayValue)
             {
-                buffer[i] += this->buffer.front() * mix->getValue() * feedback->getValue();
+                const double mixValue = mix->getValue();
+                const double feedbackValue = feedback->getValue();
+
+                buffer[i] += this->buffer.front() * mixValue * feedbackValue;
 
                 this->buffer.pop();
 
-                buffer[i + 1] += this->buffer.front() * mix->getValue() * feedback->getValue();
+                buffer[i + 1] += this->buffer.front() * mixValue * feedbackValue;
 
                 this->buffer.pop();
 
-                bufferTime = utils->time - delay->getValue();
+                bufferTime = utils->time - delayValue;
             }
 
             this->buffer.push(buffer[i]);
@@ -64,21 +69,23 @@ LowPassFilter::LowPassFilter(ValueObject* mix, ValueObject* cutoff) :
 
 void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
 {
-    double omega = tan(M_PI * cutoff->getValue() / utils->sampleRate);
-    double omega2 = omega * omega;
-    double c = 1 + 2 * cos(M_PI / 4) * omega + omega2;
-    double a0 = omega2 / c;
-    double a1 = 2 * a0;
-    double b1 = 2 * (omega2 - 1) / c;
-    double b2 = (1 - 2 * cos(M_PI / 4) * omega + omega2) / c;
+    const double omega = tan(M_PI * cutoff->getValue() / utils->sampleRate);
+    const double omega2 = omega * omega;
+    const double c = 1 + 2 * cos(M_PI / 4) * omega + omega2;
+    const double a0 = omega2 / c;
+    const double a1 = 2 * a0;
+    const double b1 = 2 * (omega2 - 1) / c;
+    const double b2 = (1 - 2 * cos(M_PI / 4) * omega + omega2) / c;
 
-    for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
+    for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
-        double rawl = buffer[i];
+        const double mixValue = mix->getValue();
+
+        const double rawl = buffer[i];
 
         if (utils->channels == 1)
         {
-            buffer[i] = mix->getValue() * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
+            buffer[i] = mixValue * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
 
             raw2[0] = raw1[0];
             raw1[0] = rawl;
@@ -89,10 +96,10 @@ void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
 
         else
         {
-            double rawr = buffer[i + 1];
+            const double rawr = buffer[i + 1];
 
-            buffer[i] = mix->getValue() * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
-            buffer[i + 1] = mix->getValue() * (a0 * buffer[i + 1] + a1 * raw1[1] + a0 * raw2[1] - b1 * filtered1[1] - b2 * filtered2[1]);
+            buffer[i] = mixValue * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
+            buffer[i + 1] = mixValue * (a0 * buffer[i + 1] + a1 * raw1[1] + a0 * raw2[1] - b1 * filtered1[1] - b2 * filtered2[1]);
 
             raw2[0] = raw1[0];
             raw2[1] = raw1[1];

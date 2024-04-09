@@ -13,7 +13,6 @@ add_executable(organic src/audiosource.cpp
                        src/interpret.cpp
                        src/machine.cpp
                        src/main.cpp
-                       src/management.cpp
                        src/object.cpp
                        src/organic.cpp
                        src/parse.cpp

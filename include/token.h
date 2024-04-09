@@ -12,14 +12,14 @@ struct BytecodeTransformer;
 
 struct Token
 {
-    Token(const int line, const int character, const std::string str = "");
+    Token(const unsigned int line, const unsigned int character, const std::string str = "");
 
     virtual std::string string() const;
 
     virtual void accept(BytecodeTransformer* visitor) const;
 
-    const int line;
-    const int character;
+    const unsigned int line;
+    const unsigned int character;
 
 protected:
     const std::string str;
@@ -28,77 +28,77 @@ protected:
 
 struct TokenRange
 {
-    TokenRange(const int start, const int end, Token* token);
+    TokenRange(const unsigned int start, const unsigned int end, Token* token);
 
-    const int start;
-    const int end;
+    const unsigned int start;
+    const unsigned int end;
     
     Token* token;
 };
 
 struct OpenParenthesis : public Token
 {
-    OpenParenthesis(const int line, const int character);
+    OpenParenthesis(const unsigned int line, const unsigned int character);
 };
 
 struct CloseParenthesis : public Token
 {
-    CloseParenthesis(const int line, const int character);
+    CloseParenthesis(const unsigned int line, const unsigned int character);
 };
 
 struct OpenCurlyBracket : public Token
 {
-    OpenCurlyBracket(const int line, const int character);
+    OpenCurlyBracket(const unsigned int line, const unsigned int character);
 };
 
 struct CloseCurlyBracket : public Token
 {
-    CloseCurlyBracket(const int line, const int character);
+    CloseCurlyBracket(const unsigned int line, const unsigned int character);
 };
 
 struct Colon : public Token
 {
-    Colon(const int line, const int character);
+    Colon(const unsigned int line, const unsigned int character);
 };
 
 struct Comma : public Token
 {
-    Comma(const int line, const int character);
+    Comma(const unsigned int line, const unsigned int character);
 };
 
 struct Equals : public Token
 {
-    Equals(const int line, const int character);
+    Equals(const unsigned int line, const unsigned int character);
 };
 
 struct Operator : public Token
 {
-    Operator(const int line, const int character, std::string str);
+    Operator(const unsigned int line, const unsigned int character, std::string str);
 };
 
 struct AddToken : public Operator
 {
-    AddToken(const int line, const int character);
+    AddToken(const unsigned int line, const unsigned int character);
 };
 
 struct SubtractToken : public Operator
 {
-    SubtractToken(const int line, const int character);
+    SubtractToken(const unsigned int line, const unsigned int character);
 };
 
 struct MultiplyToken : public Operator
 {
-    MultiplyToken(const int line, const int character);
+    MultiplyToken(const unsigned int line, const unsigned int character);
 };
 
 struct DivideToken : public Operator
 {
-    DivideToken(const int line, const int character);
+    DivideToken(const unsigned int line, const unsigned int character);
 };
 
 struct Name : public Token
 {
-    Name(const int line, const int character, const std::string name, const bool value = false);
+    Name(const unsigned int line, const unsigned int character, const std::string name, const bool value = false);
 
     void accept(BytecodeTransformer* visitor) const override;
 
@@ -109,7 +109,7 @@ struct Name : public Token
 
 struct Constant : public Token
 {
-    Constant(const int line, const int character, const std::string str);
+    Constant(const unsigned int line, const unsigned int character, const std::string str);
 
     void accept(BytecodeTransformer* visitor) const override;
 
@@ -118,7 +118,7 @@ struct Constant : public Token
 
 struct Argument : public Token
 {
-    Argument(const int line, const int character, const std::string name, const Token* value);
+    Argument(const unsigned int line, const unsigned int character, const std::string name, const Token* value);
 
     const std::string name;
     const Token* value;
@@ -144,7 +144,7 @@ private:
 
 struct ListToken : public Token
 {
-    ListToken(const int line, const int character, const std::vector<Token*> values);
+    ListToken(const unsigned int line, const unsigned int character, const std::vector<Token*> values);
 
     std::string string() const override;
 
@@ -191,7 +191,7 @@ struct Divide : public Combine
 
 struct Instruction : public Token
 {
-    Instruction(const int line, const int character, const std::string str = "");
+    Instruction(const unsigned int line, const unsigned int character, const std::string str = "");
 };
 
 struct Assign : public Instruction
@@ -218,7 +218,7 @@ struct Call : public Instruction
 
 struct CodeBlock : public Token
 {
-    CodeBlock(const int line, const int character, const std::vector<Instruction*> instructions);
+    CodeBlock(const unsigned int line, const unsigned int character, const std::vector<Instruction*> instructions);
 
     std::string string() const override;
 

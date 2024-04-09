@@ -11,15 +11,15 @@ struct BytecodeResolver;
 
 struct BytecodeInstruction
 {
-    BytecodeInstruction(unsigned int size);
+    BytecodeInstruction(const unsigned int size);
 
     virtual void output(std::ofstream& stream, BytecodeResolver* resolver) const = 0;
 
-    unsigned int size;
+    const unsigned int size;
 
 protected:
-    std::vector<unsigned char> intToBytes(unsigned int i) const;
-    std::vector<unsigned char> doubleToBytes(double d) const;
+    std::vector<unsigned char> intToBytes(const unsigned int i) const;
+    std::vector<unsigned char> doubleToBytes(const double d) const;
 
 };
 
@@ -61,29 +61,29 @@ struct SetVariable : public BytecodeInstruction
 
 struct GetVariable : public BytecodeInstruction
 {
-    GetVariable(std::string variable);
+    GetVariable(const std::string variable);
 
     void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
 
-    std::string variable;
+    const std::string variable;
 };
 
 struct GetVariableCopy : public BytecodeInstruction
 {
-    GetVariableCopy(std::string variable);
+    GetVariableCopy(const std::string variable);
 
     void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
 
-    std::string variable;
+    const std::string variable;
 };
 
 struct CallNative : public BytecodeInstruction
 {
-    CallNative(std::string function);
+    CallNative(const std::string function);
 
     void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
 
-    std::string function;
+    const std::string function;
 };
 
 struct BytecodeBlock

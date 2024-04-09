@@ -1,11 +1,9 @@
 #include "../include/object.h"
 
-Object::Object()
-{
-    utils = Utils::get();
-}
-
 Object::~Object() {}
+
+Sync::Sync() :
+    utils(Utils::get()) {}
 
 void Sync::start(double time)
 {

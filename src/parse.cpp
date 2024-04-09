@@ -24,7 +24,7 @@ Program* Parser::parse()
 
     while (current < tokens.size())
     {
-        TokenRange* range = parseInstruction(current);
+        const TokenRange* range = parseInstruction(current);
 
         instructions.push_back((Instruction*)range->token);
 
@@ -60,8 +60,8 @@ void Parser::tokenize()
     {
         skipWhitespace();
 
-        int startLine = line;
-        int startCharacter = character;
+        unsigned int startLine = line;
+        unsigned int startCharacter = character;
 
         if (code[current] == '/' && current < code.size() - 1 && code[current + 1] == '/')
         {
@@ -174,7 +174,7 @@ void Parser::tokenize()
                 {
                     if (period)
                     {
-                        Utils::parseError("Constants must contain at most one decimal point.", path, startLine, startCharacter);
+                        Utils::parseError("Constants cannot contain more than one decimal point.", path, startLine, startCharacter);
                     }
 
                     period = true;
@@ -231,7 +231,7 @@ void Parser::tokenize()
     }
 }
 
-Token* Parser::getToken(const int pos)
+Token* Parser::getToken(const unsigned int pos) const
 {
     if (pos >= tokens.size())
     {
@@ -243,12 +243,12 @@ Token* Parser::getToken(const int pos)
     return tokens[pos];
 }
 
-template <typename T> T* Parser::getToken(const int pos)
+template <typename T> T* Parser::getToken(const unsigned int pos) const
 {
     return dynamic_cast<T*>(getToken(pos));
 }
 
-template <typename T> bool Parser::tokenIs(const int pos)
+template <typename T> bool Parser::tokenIs(const unsigned int pos) const
 {
     if (pos >= tokens.size())
     {
@@ -258,12 +258,12 @@ template <typename T> bool Parser::tokenIs(const int pos)
     return dynamic_cast<T*>(getToken(pos));
 }
 
-void Parser::tokenError(const Token* token, const std::string expected)
+void Parser::tokenError(const Token* token, const std::string expected) const
 {
     Utils::parseError("Expected " + expected + ", received \"" + token->string() + "\".", path, token->line, token->character);
 }
 
-TokenRange* Parser::parseInstruction(int pos)
+TokenRange* Parser::parseInstruction(unsigned int pos) const
 {
     if (!tokenIs<Name>(pos))
     {
@@ -285,24 +285,24 @@ TokenRange* Parser::parseInstruction(int pos)
     return nullptr;
 }
 
-TokenRange* Parser::parseAssign(int pos)
+TokenRange* Parser::parseAssign(unsigned int pos) const
 {
-    TokenRange* range = parseExpression(pos + 2);
+    const TokenRange* range = parseExpression(pos + 2);
 
     return new TokenRange(pos, range->end, new Assign(getToken<Name>(pos), range->token));
 }
 
-TokenRange* Parser::parseCodeBlock(int pos)
+TokenRange* Parser::parseCodeBlock(unsigned int pos) const
 {
-    int start = pos;
+    const unsigned int start = pos;
 
-    OpenCurlyBracket* open = getToken<OpenCurlyBracket>(pos++);
+    const OpenCurlyBracket* open = getToken<OpenCurlyBracket>(pos++);
 
     std::vector<Instruction*> instructions;
 
     while (!tokenIs<CloseCurlyBracket>(pos))
     {
-        TokenRange* range = parseInstruction(pos);
+        const TokenRange* range = parseInstruction(pos);
 
         instructions.push_back((Instruction*)range->token);
 
@@ -312,9 +312,9 @@ TokenRange* Parser::parseCodeBlock(int pos)
     return new TokenRange(start, pos + 1, new CodeBlock(open->line, open->character, instructions));
 }
 
-TokenRange* Parser::parseCall(int pos)
+TokenRange* Parser::parseCall(unsigned int pos) const
 {
-    int start = pos;
+    const unsigned int start = pos;
 
     pos += 2;
 
@@ -326,7 +326,7 @@ TokenRange* Parser::parseCall(int pos)
 
         do
         {
-            TokenRange* range = parseArgument(pos + 1);
+            const TokenRange* range = parseArgument(pos + 1);
 
             arguments.push_back((Argument*)range->token);
 
@@ -336,7 +336,7 @@ TokenRange* Parser::parseCall(int pos)
 
     if (tokenIs<CloseParenthesis>(pos))
     {
-        Name* name = getToken<Name>(start);
+        const Name* name = getToken<Name>(start);
 
         return new TokenRange(start, pos + 1, new Call(name, new ArgumentList(arguments, name->name, path)));
     }
@@ -346,7 +346,7 @@ TokenRange* Parser::parseCall(int pos)
     return nullptr;
 }
 
-TokenRange* Parser::parseArgument(int pos)
+TokenRange* Parser::parseArgument(unsigned int pos) const
 {
     if (!tokenIs<Name>(pos))
     {
@@ -358,14 +358,14 @@ TokenRange* Parser::parseArgument(int pos)
         tokenError(getToken(pos + 1), "\":\"");
     }
 
-    TokenRange* range = parseExpression(pos + 2);
+    const TokenRange* range = parseExpression(pos + 2);
 
-    Name* name = getToken<Name>(pos);
+    const Name* name = getToken<Name>(pos);
 
     return new TokenRange(pos, range->end, new Argument(name->line, name->character, name->name, range->token));
 }
 
-TokenRange* Parser::parseExpression(int pos)
+TokenRange* Parser::parseExpression(unsigned int pos) const
 {
     if (tokenIs<OpenCurlyBracket>(pos))
     {
@@ -374,13 +374,13 @@ TokenRange* Parser::parseExpression(int pos)
 
     if (tokenIs<OpenParenthesis>(pos) && tokenIs<Comma>(parseExpression(pos + 1)->end))
     {
-        int start = pos;
+        const unsigned int start = pos;
 
         std::vector<Token*> list;
 
         do
         {
-            TokenRange* range = parseExpression(pos + 1);
+            const TokenRange* range = parseExpression(pos + 1);
 
             list.push_back(range->token);
 
@@ -392,7 +392,7 @@ TokenRange* Parser::parseExpression(int pos)
             tokenError(getToken(pos), "\")\"");
         }
 
-        Token* token = getToken(start);
+        const Token* token = getToken(start);
 
         if (list.size() == 0)
         {
@@ -405,9 +405,9 @@ TokenRange* Parser::parseExpression(int pos)
     return parseTerms(pos);
 }
 
-TokenRange* Parser::parseTerms(int pos)
+TokenRange* Parser::parseTerms(unsigned int pos) const
 {
-    int start = pos;
+    const unsigned int start = pos;
 
     std::vector<TokenRange*> terms;
 
@@ -426,7 +426,7 @@ TokenRange* Parser::parseTerms(int pos)
 
         else if (tokenIs<OpenParenthesis>(pos))
         {
-            int pStart = pos;
+            const unsigned int pStart = pos;
 
             TokenRange* range = parseTerms(pos + 1);
 
@@ -454,7 +454,7 @@ TokenRange* Parser::parseTerms(int pos)
         }
     } while (tokenIs<Operator>(pos));
 
-    for (int i = 1; i < terms.size() - 1; i++)
+    for (unsigned int i = 1; i < terms.size() - 1; i++)
     {
         if (dynamic_cast<const MultiplyToken*>(terms[i]->token))
         {
@@ -475,7 +475,7 @@ TokenRange* Parser::parseTerms(int pos)
         }
     }
 
-    for (int i = 1; i < terms.size() - 1; i++)
+    for (unsigned int i = 1; i < terms.size() - 1; i++)
     {
         if (dynamic_cast<const AddToken*>(terms[i]->token))
         {
@@ -499,7 +499,7 @@ TokenRange* Parser::parseTerms(int pos)
     return new TokenRange(start, pos, terms[0]->token);
 }
 
-TokenRange* Parser::parseTerm(int pos)
+TokenRange* Parser::parseTerm(unsigned int pos) const
 {
     if (tokenIs<Name>(pos))
     {
@@ -518,7 +518,7 @@ TokenRange* Parser::parseTerm(int pos)
 
     else if (tokenIs<SubtractToken>(pos) && tokenIs<Constant>(pos + 1))
     {
-        Token* start = getToken(pos);
+        const Token* start = getToken(pos);
 
         return new TokenRange(pos, pos + 2, new Constant(start->line, start->character, "-" + getToken<Constant>(pos + 1)->string()));
     }

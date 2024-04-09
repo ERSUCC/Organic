@@ -22,7 +22,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
 struct Organic
 {
-    Organic(const std::string program, const std::vector<std::string> flags);
+    Organic(const std::string program, const std::vector<std::string>& flags);
 
     void start();
 

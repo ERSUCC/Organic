@@ -100,7 +100,7 @@ void Machine::execute(unsigned int address)
                 {
                     case 0x00:
                     {
-                        unsigned int size = popStackAs<Value>()->value;
+                        const unsigned int size = popStackAs<Value>()->value;
 
                         std::vector<Object*> values;
 
@@ -370,7 +370,7 @@ void Machine::processAudioSources(double* buffer, const unsigned int bufferLengt
 
 void Machine::performEvents()
 {
-    for (int i = 0; i < events.size(); i++)
+    for (unsigned int i = 0; i < events.size(); i++)
     {
         if (events[i]->ready())
         {
@@ -438,7 +438,7 @@ template <typename T> List<T>* Machine::popStackAsList()
 
     std::vector<T*> objects;
 
-    if (List<Object>* list = dynamic_cast<List<Object>*>(object))
+    if (const List<Object>* list = dynamic_cast<const List<Object>*>(object))
     {
         for (Object* object : list->objects)
         {

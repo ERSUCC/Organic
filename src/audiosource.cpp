@@ -22,7 +22,7 @@ void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength)
             effect->apply(effectBuffer, bufferLength);
         }
 
-        for (int i = 0; i < bufferLength * utils->channels; i++)
+        for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
         {
             buffer[i] += effectBuffer[i] * utils->volume;
         }
@@ -55,25 +55,31 @@ void Oscillator::prepareForEffects(const unsigned int bufferLength)
 {
     phaseDelta = utils->twoPi * frequency->getValue() / utils->sampleRate;
 
+    const double volumeValue = volume->getValue();
+    const double panValue = pan->getValue();
+
     for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
+        const double value = volumeValue * getValue();
+
         if (utils->channels == 1)
         {
-            effectBuffer[i] = volume->getValue() * getValue();
+            effectBuffer[i] = volumeValue * value;
         }
 
         else
         {
-            double value = volume->getValue() * getValue();
-
-            effectBuffer[i] = value * (1 - pan->getValue()) / 2;
-            effectBuffer[i + 1] = value * (pan->getValue() + 1) / 2;
+            effectBuffer[i] = value * (1 - panValue) / 2;
+            effectBuffer[i + 1] = value * (panValue + 1) / 2;
         }
 
         phase += phaseDelta;
     }
 
-    phase = fmod(phase, utils->twoPi);
+    if (phase > utils->twoPi)
+    {
+        phase -= utils->twoPi;
+    }
 }
 
 Sine::Sine(ValueObject* volume, ValueObject* pan, List<Effect>* effects, ValueObject* frequency) :
@@ -123,31 +129,29 @@ Noise::Noise(ValueObject* volume, ValueObject* pan, List<Effect>* effects) :
 
 void Noise::prepareForEffects(const unsigned int bufferLength)
 {
+    const double volumeValue = volume->getValue();
+    const double panValue = pan->getValue();
+
     for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
+        const double value = volumeValue * udist(utils->rng);
+
         if (utils->channels == 1)
         {
-            effectBuffer[i] = volume->getValue() * udist(utils->rng);
+            effectBuffer[i] = value;
         }
 
         else
         {
-            double value = volume->getValue() * udist(utils->rng);
-
-            effectBuffer[i] = value * (1 - pan->getValue()) / 2;
-            effectBuffer[i + 1] = value * (pan->getValue() + 1) / 2;
+            effectBuffer[i] = value * (1 - panValue) / 2;
+            effectBuffer[i + 1] = value * (panValue + 1) / 2;
         }
     }
 }
 
-Sample::Sample(ValueObject* volume, ValueObject* pan, List<Effect>* effects, std::string path, int grains, bool looping) :
-    AudioSource(volume, pan, effects), grains(grains), looping(looping)
+Sample::Sample(ValueObject* volume, ValueObject* pan, List<Effect>* effects, std::string path, unsigned int grains, bool looping) :
+    AudioSource(volume, pan, effects), grains(grains, 0), looping(looping)
 {
-    for (int i = 0; i < grains; i++)
-    {
-        this->grains[i] = 0;
-    }
-
     AudioFile<double> file(path);
 
     length = file.getNumSamplesPerChannel() * utils->channels;
@@ -193,10 +197,7 @@ Sample::~Sample()
 
 void Sample::finishStart()
 {
-    for (int i = 0; i < grains.size(); i++)
-    {
-        grains[i] = 0;
-    }
+    std::fill(grains.begin(), grains.end(), 0);
 
     for (Effect* effect : effects->objects)
     {
@@ -206,14 +207,17 @@ void Sample::finishStart()
 
 void Sample::prepareForEffects(const unsigned int bufferLength)
 {
-    for (int i = 0; i < bufferLength * utils->channels; i++)
+    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
     {
         effectBuffer[i] = 0;
     }
 
-    for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
+    const double volumeValue = volume->getValue();
+    const double panValue = pan->getValue();
+
+    for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
-        for (int j = 0; j < grains.size(); j++)
+        for (unsigned int j = 0; j < grains.size(); j++)
         {
             if (grains[j] >= length && looping)
             {
@@ -229,18 +233,20 @@ void Sample::prepareForEffects(const unsigned int bufferLength)
 
                 else
                 {
-                    double value = volume->getValue() * data[grains[j]++];
-                    double value2 = volume->getValue() * data[grains[j]++];
+                    const double value = volumeValue * data[grains[j]++];
+                    const double value2 = volumeValue * data[grains[j]++];
 
-                    effectBuffer[i] += value * (1 - pan->getValue()) / 2;
-                    effectBuffer[i + 1] += value2 * (pan->getValue() + 1) / 2;
+                    effectBuffer[i] += value * (1 - panValue) / 2;
+                    effectBuffer[i + 1] += value2 * (panValue + 1) / 2;
                 }
             }
         }
-    }
 
-    for (int i = 0; i < bufferLength * utils->channels; i++)
-    {
         effectBuffer[i] /= grains.size();
+
+        if (utils->channels == 2)
+        {
+            effectBuffer[i + 1] /= grains.size();
+        }
     }
 }

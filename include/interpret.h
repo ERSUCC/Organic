@@ -23,7 +23,7 @@ struct InterpreterOptions
 
 struct Interpreter
 {
-    Interpreter(const std::string path, const std::vector<std::string> flags);
+    Interpreter(const std::string path, const std::vector<std::string>& flags);
 
     InterpreterOptions interpret();
 

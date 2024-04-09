@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -15,14 +16,13 @@ struct AudioSource : public ValueObject
 
     void fillBuffer(double* buffer, const unsigned int bufferLength);
 
-    ValueObject* volume;
-    ValueObject* pan;
-
 protected:
     virtual void prepareForEffects(const unsigned int bufferLength) = 0;
 
     double* effectBuffer;
 
+    ValueObject* volume;
+    ValueObject* pan;
     List<Effect>* effects;
 
 };
@@ -30,8 +30,6 @@ protected:
 struct Oscillator : public AudioSource
 {
     Oscillator(ValueObject* volume, ValueObject* pan, List<Effect>* effects, ValueObject* frequency);
-
-    ValueObject* frequency;
 
     double phase = 0;
     double phaseDelta;
@@ -41,6 +39,8 @@ protected:
     void finishStop() override;
 
     void prepareForEffects(const unsigned int bufferLength) override;
+
+    ValueObject* frequency;
 
 };
 
@@ -86,7 +86,7 @@ private:
 
 struct Sample : public AudioSource
 {
-    Sample(ValueObject* volume, ValueObject* pan, List<Effect>* effects, std::string path, int grains, bool looping);
+    Sample(ValueObject* volume, ValueObject* pan, List<Effect>* effects, std::string path, unsigned int grains, bool looping);
     ~Sample();
 
 protected:
@@ -97,9 +97,9 @@ protected:
 private:
     double* data;
 
-    int length;
+    unsigned int length;
 
-    std::vector<int> grains;
+    std::vector<unsigned int> grains;
 
     bool looping;
 

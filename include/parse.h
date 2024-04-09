@@ -18,20 +18,20 @@ private:
 
     void tokenize();
 
-    Token* getToken(const int pos);
-    template <typename T> T* getToken(const int pos);
-    template <typename T> bool tokenIs(const int pos);
+    Token* getToken(const unsigned int pos) const;
+    template <typename T> T* getToken(const unsigned int pos) const;
+    template <typename T> bool tokenIs(const unsigned int pos) const;
 
-    void tokenError(const Token* token, const std::string message);
+    void tokenError(const Token* token, const std::string message) const;
 
-    TokenRange* parseInstruction(int pos);
-    TokenRange* parseAssign(int pos);
-    TokenRange* parseCodeBlock(int pos);
-    TokenRange* parseCall(int pos);
-    TokenRange* parseArgument(int pose);
-    TokenRange* parseExpression(int pos);
-    TokenRange* parseTerms(int pos);
-    TokenRange* parseTerm(int pos);
+    TokenRange* parseInstruction(unsigned int pos) const;
+    TokenRange* parseAssign(unsigned int pos) const;
+    TokenRange* parseCodeBlock(unsigned int pos) const;
+    TokenRange* parseCall(unsigned int pos) const;
+    TokenRange* parseArgument(unsigned int pos) const;
+    TokenRange* parseExpression(unsigned int pos) const;
+    TokenRange* parseTerms(unsigned int pos) const;
+    TokenRange* parseTerm(unsigned int pos) const;
 
     const std::string path;
 
@@ -39,8 +39,8 @@ private:
 
     std::vector<Token*> tokens;
 
-    int current = 0;
-    int line = 1;
-    int character = 1;
+    unsigned int current = 0;
+    unsigned int line = 1;
+    unsigned int character = 1;
 
 };

@@ -1,11 +1,11 @@
 #include "../include/bytecode.h"
 
-BytecodeInstruction::BytecodeInstruction(unsigned int size) :
+BytecodeInstruction::BytecodeInstruction(const unsigned int size) :
     size(size) {}
 
-std::vector<unsigned char> BytecodeInstruction::intToBytes(unsigned int i) const
+std::vector<unsigned char> BytecodeInstruction::intToBytes(const unsigned int i) const
 {
-    unsigned char* bytes_array = reinterpret_cast<unsigned char*>(&i);
+    const unsigned char* bytes_array = reinterpret_cast<const unsigned char*>(&i);
 
     std::vector<unsigned char> bytes;
 
@@ -17,9 +17,9 @@ std::vector<unsigned char> BytecodeInstruction::intToBytes(unsigned int i) const
     return bytes;
 }
 
-std::vector<unsigned char> BytecodeInstruction::doubleToBytes(double d) const
+std::vector<unsigned char> BytecodeInstruction::doubleToBytes(const double d) const
 {
-    unsigned char* bytes_array = reinterpret_cast<unsigned char*>(&d);
+    const unsigned char* bytes_array = reinterpret_cast<const unsigned char*>(&d);
 
     std::vector<unsigned char> bytes;
 
@@ -46,7 +46,7 @@ void StackPushInt::output(std::ofstream& stream, BytecodeResolver* resolver) con
 {
     stream << (unsigned char)0x02;
 
-    for (unsigned char b : intToBytes(value))
+    for (const unsigned char b : intToBytes(value))
     {
         stream << b;
     }
@@ -59,13 +59,13 @@ void StackPushDouble::output(std::ofstream& stream, BytecodeResolver* resolver) 
 {
     stream << (unsigned char)0x03;
 
-    for (unsigned char b : doubleToBytes(value))
+    for (const unsigned char b : doubleToBytes(value))
     {
         stream << b;
     }
 }
 
-SetVariable::SetVariable(std::string variable) :
+SetVariable::SetVariable(const std::string variable) :
     BytecodeInstruction(2), variable(variable) {}
 
 void SetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) const
@@ -87,7 +87,7 @@ void SetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) cons
     stream << (unsigned char)0x04 << id;
 }
 
-GetVariable::GetVariable(std::string variable) :
+GetVariable::GetVariable(const std::string variable) :
     BytecodeInstruction(2), variable(variable) {}
 
 void GetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) const
@@ -95,7 +95,7 @@ void GetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) cons
     stream << (unsigned char)0x05 << resolver->variables[variable];
 }
 
-GetVariableCopy::GetVariableCopy(std::string variable) :
+GetVariableCopy::GetVariableCopy(const std::string variable) :
     BytecodeInstruction(2), variable(variable) {}
 
 void GetVariableCopy::output(std::ofstream& stream, BytecodeResolver* resolver) const

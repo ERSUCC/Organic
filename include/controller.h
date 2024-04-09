@@ -85,7 +85,7 @@ struct Sequence : public ValueController
 
     List<ValueObject>* controllers;
 
-    std::unordered_set<int> chosen;
+    std::unordered_set<unsigned int> chosen;
 
     Order* order;
 
@@ -119,7 +119,7 @@ protected:
     void finishRepeat() override;
 
 private:
-    int times = 0;
+    unsigned int times = 0;
 
 };
 

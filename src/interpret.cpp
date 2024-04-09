@@ -1,8 +1,8 @@
 #include "../include/interpret.h"
 
-Interpreter::Interpreter(const std::string path, const std::vector<std::string> flags) : path(path)
+Interpreter::Interpreter(const std::string path, const std::vector<std::string>& flags) : path(path)
 {
-    for (std::string flag : flags)
+    for (const std::string flag : flags)
     {
         this->flags.push(flag);
     }

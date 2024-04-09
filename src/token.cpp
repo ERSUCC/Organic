@@ -1,6 +1,6 @@
 #include "../include/token.h"
 
-Token::Token(const int line, const int character, const std::string str) :
+Token::Token(const unsigned int line, const unsigned int character, const std::string str) :
     line(line), character(character), str(str) {}
 
 std::string Token::string() const
@@ -10,46 +10,46 @@ std::string Token::string() const
 
 void Token::accept(BytecodeTransformer* visitor) const {}
 
-TokenRange::TokenRange(const int start, const int end, Token* token) :
+TokenRange::TokenRange(const unsigned int start, const unsigned int end, Token* token) :
     start(start), end(end), token(token) {}
 
-OpenParenthesis::OpenParenthesis(const int line, const int character) :
+OpenParenthesis::OpenParenthesis(const unsigned int line, const unsigned int character) :
     Token(line, character, "(") {}
 
-CloseParenthesis::CloseParenthesis(const int line, const int character) :
+CloseParenthesis::CloseParenthesis(const unsigned int line, const unsigned int character) :
     Token(line, character, ")") {}
 
-OpenCurlyBracket::OpenCurlyBracket(const int line, const int character) :
+OpenCurlyBracket::OpenCurlyBracket(const unsigned int line, const unsigned int character) :
     Token(line, character, "{") {}
 
-CloseCurlyBracket::CloseCurlyBracket(const int line, const int character) :
+CloseCurlyBracket::CloseCurlyBracket(const unsigned int line, const unsigned int character) :
     Token(line, character, "}") {}
 
-Colon::Colon(const int line, const int character) :
+Colon::Colon(const unsigned int line, const unsigned int character) :
     Token(line, character, ":") {}
 
-Comma::Comma(const int line, const int character) :
+Comma::Comma(const unsigned int line, const unsigned int character) :
     Token(line, character, ",") {}
 
-Equals::Equals(const int line, const int character) :
+Equals::Equals(const unsigned int line, const unsigned int character) :
     Token(line, character, "=") {}
 
-Operator::Operator(const int line, const int character, const std::string str) :
+Operator::Operator(const unsigned int line, const unsigned int character, const std::string str) :
     Token(line, character, str) {}
 
-AddToken::AddToken(const int line, const int character) :
+AddToken::AddToken(const unsigned int line, const unsigned int character) :
     Operator(line, character, "+") {}
 
-SubtractToken::SubtractToken(const int line, const int character) :
+SubtractToken::SubtractToken(const unsigned int line, const unsigned int character) :
     Operator(line, character, "-") {}
 
-MultiplyToken::MultiplyToken(const int line, const int character) :
+MultiplyToken::MultiplyToken(const unsigned int line, const unsigned int character) :
     Operator(line, character, "*") {}
 
-DivideToken::DivideToken(const int line, const int character) :
+DivideToken::DivideToken(const unsigned int line, const unsigned int character) :
     Operator(line, character, "/") {}
 
-Name::Name(const int line, const int character, const std::string name, const bool value) :
+Name::Name(const unsigned int line, const unsigned int character, const std::string name, const bool value) :
     Token(line, character, name), name(name), value(value) {}
 
 void Name::accept(BytecodeTransformer* visitor) const
@@ -57,7 +57,7 @@ void Name::accept(BytecodeTransformer* visitor) const
     visitor->visit(this);
 }
 
-Constant::Constant(const int line, const int character, const std::string str) :
+Constant::Constant(const unsigned int line, const unsigned int character, const std::string str) :
     Token(line, character, str), value(std::stod(str)) {}
 
 void Constant::accept(BytecodeTransformer* visitor) const
@@ -65,7 +65,7 @@ void Constant::accept(BytecodeTransformer* visitor) const
     visitor->visit(this);
 }
 
-Argument::Argument(const int line, const int character, const std::string name, const Token* value) :
+Argument::Argument(const unsigned int line, const unsigned int character, const std::string name, const Token* value) :
     Token(line, character, name + ": " + value->string()), name(name), value(value) {}
 
 ArgumentList::ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path) :
@@ -131,7 +131,7 @@ std::string ArgumentList::string() const
     return result;
 }
 
-ListToken::ListToken(const int line, const int character, const std::vector<Token*> values) :
+ListToken::ListToken(const unsigned int line, const unsigned int character, const std::vector<Token*> values) :
     Token(line, character), values(values) {}
 
 std::string ListToken::string() const
@@ -191,7 +191,7 @@ void Divide::accept(BytecodeTransformer* visitor) const
     visitor->visit(this);
 }
 
-Instruction::Instruction(const int line, const int character, const std::string str) :
+Instruction::Instruction(const unsigned int line, const unsigned int character, const std::string str) :
     Token(line, character, str) {}
 
 Assign::Assign(const Name* variable, const Token* value) :
@@ -215,7 +215,7 @@ void Call::accept(BytecodeTransformer* visitor) const
     visitor->visit(this);
 }
 
-CodeBlock::CodeBlock(const int line, const int character, const std::vector<Instruction*> instructions) :
+CodeBlock::CodeBlock(const unsigned int line, const unsigned int character, const std::vector<Instruction*> instructions) :
     Token(line, character), instructions(instructions) {}
 
 std::string CodeBlock::string() const

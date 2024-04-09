@@ -14,7 +14,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
     return 0;
 }
 
-Organic::Organic(const std::string program, const std::vector<std::string> flags)
+Organic::Organic(const std::string program, const std::vector<std::string>& flags)
 {
     utils = Utils::get();
 
@@ -45,7 +45,7 @@ void Organic::startPlayback()
 {
     RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
 
-    std::vector<unsigned int> ids = audio.getDeviceIds();
+    const std::vector<unsigned int>& ids = audio.getDeviceIds();
 
     if (ids.size() < 1)
     {
@@ -85,7 +85,7 @@ void Organic::startPlayback()
     {
         utils->time = (clock.now() - start).count() / 1000000.0;
 
-        // perform events
+        machine->performEvents();
     }
 
     if (audio.isStreamRunning())
@@ -101,7 +101,7 @@ void Organic::startPlayback()
 
 void Organic::startExport()
 {
-    int steps = (options.time / 1000) * utils->sampleRate;
+    const unsigned int steps = (options.time / 1000) * utils->sampleRate;
 
     AudioFile<double> file;
 
@@ -110,7 +110,7 @@ void Organic::startExport()
 
     double* buffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
 
-    for (int i = 0; i < steps; i += utils->bufferLength)
+    for (unsigned int i = 0; i < steps; i += utils->bufferLength)
     {
         utils->time = i * 1000.0 / utils->sampleRate;
 

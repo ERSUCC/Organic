@@ -4,13 +4,7 @@
 
 struct Object
 {
-    Object();
-
     virtual ~Object();
-
-protected:
-    Utils* utils; // can this be moved to Sync or ValueObject?
-
 };
 
 template <typename T> struct List : public Object
@@ -22,6 +16,8 @@ template <typename T> struct List : public Object
 
 struct Sync : public Object
 {
+    Sync();
+
     void start(double time);
     void repeat(double time);
     void stop();
@@ -37,6 +33,8 @@ protected:
     virtual void finishStart();
     virtual void finishRepeat();
     virtual void finishStop();
+
+    Utils* utils;
 
 };
 
@@ -54,7 +52,7 @@ struct Variable : public ValueObject
 
     ValueObject* value;
 
-protected:
+private:
     void finishStart() override;
     void finishStop() override;
 

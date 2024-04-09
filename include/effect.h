@@ -8,7 +8,7 @@ struct Effect : public Sync
 {
     Effect(ValueObject* mix);
 
-    virtual void apply(double* buffer, unsigned int bufferLength) = 0;
+    virtual void apply(double* buffer, const unsigned int bufferLength) = 0;
 
     ValueObject* mix;
 };
@@ -17,7 +17,7 @@ struct Delay : public Effect
 {
     Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
 
-    void apply(double* buffer, unsigned int bufferLength) override;
+    void apply(double* buffer, const unsigned int bufferLength) override;
 
     ValueObject* delay;
     ValueObject* feedback;
@@ -37,7 +37,7 @@ struct LowPassFilter : public Effect
 {
     LowPassFilter(ValueObject* mix, ValueObject* cutoff);
     
-    void apply(double* buffer, unsigned int bufferLength) override;
+    void apply(double* buffer, const unsigned int bufferLength) override;
 
     ValueObject* cutoff;
 
