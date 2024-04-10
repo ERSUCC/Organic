@@ -129,9 +129,19 @@ void Parser::tokenize()
 
         else if (code[current] == '=')
         {
-            tokens.push_back(new Equals(startLine, startCharacter));
-
             nextCharacter();
+
+            if (code[current] == '=')
+            {
+                tokens.push_back(new DoubleEquals(startLine, startCharacter));
+
+                nextCharacter();
+            }
+
+            else
+            {
+                tokens.push_back(new Equals(startLine, startCharacter));
+            }
         }
 
         else if (code[current] == '+')
@@ -453,6 +463,18 @@ TokenRange* Parser::parseTerms(unsigned int pos) const
             pos = range->end;
         }
     } while (tokenIs<Operator>(pos));
+
+    for (unsigned int i = 1; i < terms.size() - 1; i++)
+    {
+        if (dynamic_cast<const DoubleEquals*>(terms[i]->token))
+        {
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new EqualTo(terms[i - 1]->token, terms[i + 1]->token));
+
+            terms.erase(terms.begin() + 1, terms.begin() + i + 2);
+
+            i--;
+        }
+    }
 
     for (unsigned int i = 1; i < terms.size() - 1; i++)
     {

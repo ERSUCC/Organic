@@ -49,6 +49,9 @@ MultiplyToken::MultiplyToken(const unsigned int line, const unsigned int charact
 DivideToken::DivideToken(const unsigned int line, const unsigned int character) :
     Operator(line, character, "/") {}
 
+DoubleEquals::DoubleEquals(const unsigned int line, const unsigned int character) :
+    Operator(line, character, "==") {}
+
 Name::Name(const unsigned int line, const unsigned int character, const std::string name, const bool value) :
     Token(line, character, name), name(name), value(value) {}
 
@@ -187,6 +190,14 @@ Divide::Divide(const Token* value1, const Token* value2) :
     Combine(value1, value2, "/") {}
 
 void Divide::accept(BytecodeTransformer* visitor) const
+{
+    visitor->visit(this);
+}
+
+EqualTo::EqualTo(const Token* value1, const Token* value2) :
+    Combine(value1, value2, "==") {}
+
+void EqualTo::accept(BytecodeTransformer* visitor) const
 {
     visitor->visit(this);
 }
@@ -504,6 +515,14 @@ void BytecodeTransformer::visit(const Divide* token)
     currentScope->block->instructions.push_back(new CallNative("divide"));
 }
 
+void BytecodeTransformer::visit(const EqualTo* token)
+{
+    token->value2->accept(this);
+    token->value1->accept(this);
+
+    currentScope->block->instructions.push_back(new CallNative("equals"));
+}
+
 void BytecodeTransformer::visit(const Assign* token)
 {
     currentVariable = token->variable->name;
@@ -610,6 +629,12 @@ void BytecodeTransformer::visit(const Call* token)
         token->arguments->get("max", new Constant(0, 0, "0"), this);
         token->arguments->get("min", new Constant(0, 0, "0"), this);
         token->arguments->get("value", new Constant(0, 0, "0"), this);
+    }
+
+    else if (name == "trigger")
+    {
+        token->arguments->get("value", new Constant(0, 0, "0"), this);
+        token->arguments->get("condition", new Constant(0, 0, "0"), this);
     }
 
     else if (name == "delay")

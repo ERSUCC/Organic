@@ -62,6 +62,19 @@ double ValueDivide::getValueInternal()
     return value1->getValue() / value2->getValue();
 }
 
+ValueEquals::ValueEquals(ValueObject* value1, ValueObject* value2) :
+    ValueCombination(value1, value2) {}
+
+double ValueEquals::getValueInternal()
+{
+    if (value1->getValue() == value2->getValue())
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 Sequence::Order::Order(OrderEnum order) :
     order(order) {}
 
@@ -410,4 +423,39 @@ void Limit::finishStart()
     value->start(startTime);
     min->start(startTime);
     max->start(startTime);
+}
+
+Trigger::Trigger(ValueObject* condition, ValueObject* value) :
+    condition(condition), value(value) {}
+
+double Trigger::syncLength()
+{
+    return value->syncLength();
+}
+
+double Trigger::getValue()
+{
+    if (triggered && !value->enabled && condition->getValue() == 0)
+    {
+        triggered = false;
+    }
+
+    if (!triggered && condition->getValue() != 0)
+    {
+        triggered = true;
+
+        value->start(utils->time);
+    }
+
+    if (value->enabled)
+    {
+        return value->getValue();
+    }
+
+    return 0;
+}
+
+void Trigger::finishStart()
+{
+    condition->start(startTime);
 }

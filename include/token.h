@@ -96,6 +96,11 @@ struct DivideToken : public Operator
     DivideToken(const unsigned int line, const unsigned int character);
 };
 
+struct DoubleEquals : public Operator
+{
+    DoubleEquals(const unsigned int line, const unsigned int character);
+};
+
 struct Name : public Token
 {
     Name(const unsigned int line, const unsigned int character, const std::string name, const bool value = false);
@@ -189,6 +194,13 @@ struct Divide : public Combine
     void accept(BytecodeTransformer* visitor) const override;
 };
 
+struct EqualTo : public Combine
+{
+    EqualTo(const Token* value1, const Token* value2);
+
+    void accept(BytecodeTransformer* visitor) const override;
+};
+
 struct Instruction : public Token
 {
     Instruction(const unsigned int line, const unsigned int character, const std::string str = "");
@@ -272,6 +284,7 @@ struct BytecodeTransformer
     void visit(const Subtract* token);
     void visit(const Multiply* token);
     void visit(const Divide* token);
+    void visit(const EqualTo* token);
     void visit(const Assign* token);
     void visit(const Call* token);
     void visit(const CodeBlock* token);

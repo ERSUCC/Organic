@@ -61,6 +61,15 @@ protected:
     
 };
 
+struct ValueEquals : public ValueCombination
+{
+    ValueEquals(ValueObject* value1, ValueObject* value2);
+
+protected:
+    double getValueInternal() override;
+
+};
+
 struct Sequence : public ValueController
 {
     enum OrderEnum
@@ -229,5 +238,23 @@ struct Limit : public ValueController
 
 protected:
     void finishStart() override;
+
+};
+
+struct Trigger : public ValueController
+{
+    Trigger(ValueObject* condition, ValueObject* value);
+
+    double syncLength() override;
+    double getValue() override;
+
+protected:
+    void finishStart() override;
+
+private:
+    ValueObject* condition;
+    ValueObject* value;
+
+    bool triggered = false;
 
 };

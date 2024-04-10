@@ -111,40 +111,35 @@ void Machine::execute(unsigned int address)
 
                         stack.push(new List<Object>(values));
 
-                        address += 2;
-
                         break;
                     }
 
                     case 0x01:
                         stack.push(new ValueAdd(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
-                        address += 2;
-
                         break;
 
                     case 0x02:
                         stack.push(new ValueSubtract(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
-
-                        address += 2;
 
                         break;
 
                     case 0x03:
                         stack.push(new ValueMultiply(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
-                        address += 2;
-
                         break;
 
                     case 0x04:
                         stack.push(new ValueDivide(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
-                        address += 2;
-
                         break;
 
                     case 0x05:
+                        stack.push(new ValueEquals(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+
+                        break;
+
+                    case 0x06:
                     {
                         Sine* sine = new Sine(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
 
@@ -154,12 +149,10 @@ void Machine::execute(unsigned int address)
 
                         stack.push(sine);
 
-                        address += 2;
-
                         break;
                     }
 
-                    case 0x06:
+                    case 0x07:
                     {
                         Square* square = new Square(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
 
@@ -169,12 +162,10 @@ void Machine::execute(unsigned int address)
 
                         stack.push(square);
 
-                        address += 2;
-
                         break;
                     }
 
-                    case 0x07:
+                    case 0x08:
                     {
                         Triangle* triangle = new Triangle(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
 
@@ -184,12 +175,10 @@ void Machine::execute(unsigned int address)
 
                         stack.push(triangle);
 
-                        address += 2;
-
                         break;
                     }
 
-                    case 0x08:
+                    case 0x09:
                     {
                         Saw* saw = new Saw(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
 
@@ -199,12 +188,10 @@ void Machine::execute(unsigned int address)
 
                         stack.push(saw);
 
-                        address += 2;
-
                         break;
                     }
 
-                    case 0x09:
+                    case 0x0a:
                     {
                         Noise* noise = new Noise(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>());
 
@@ -214,33 +201,25 @@ void Machine::execute(unsigned int address)
 
                         stack.push(noise);
 
-                        address += 2;
-
                         break;
                     }
 
-                    case 0x0a:
-                        stack.push(new Hold(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
-
-                        address += 2;
-
-                        break;
-
                     case 0x0b:
-                        stack.push(new LFO(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
-
-                        address += 2;
+                        stack.push(new Hold(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
                         break;
 
                     case 0x0c:
-                        stack.push(new Sweep(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
-
-                        address += 2;
+                        stack.push(new LFO(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
                         break;
 
                     case 0x0d:
+                        stack.push(new Sweep(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+
+                        break;
+
+                    case 0x0e:
                     {
                         List<ValueObject>* list = popStackAsList<ValueObject>();
 
@@ -274,19 +253,15 @@ void Machine::execute(unsigned int address)
 
                         stack.push(new Sequence(list, order));
 
-                        address += 2;
-
                         break;
                     }
 
-                    case 0x0e:
+                    case 0x0f:
                         stack.push(new Repeat(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
-
-                        address += 2;
 
                         break;
 
-                    case 0x0f:
+                    case 0x10:
                     {
                         ValueObject* from = popStackAs<ValueObject>();
                         ValueObject* to = popStackAs<ValueObject>();
@@ -312,29 +287,26 @@ void Machine::execute(unsigned int address)
 
                         stack.push(new Random(from, to, length, type));
 
-                        address += 2;
-
                         break;
                     }
 
-                    case 0x10:
-                        stack.push(new Limit(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
-
-                        address += 2;
-
-                        break;
-
                     case 0x11:
-                        stack.push(new Delay(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
-
-                        address += 2;
+                        stack.push(new Limit(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
                         break;
 
                     case 0x12:
-                        // perform (get address, then call execute again at some point)
+                        stack.push(new Trigger(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
-                        address += 2;
+                        break;
+
+                    case 0x13:
+                        stack.push(new Delay(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+
+                        break;
+
+                    case 0x14:
+                        // perform (get address, then call execute again at some point)
 
                         break;
 
@@ -345,6 +317,8 @@ void Machine::execute(unsigned int address)
 
                         return Utils::machineError("Unrecognized function code \"" + code.str() + "\"", path);
                 }
+
+                address += 2;
 
                 break;
 
