@@ -70,6 +70,42 @@ protected:
 
 };
 
+struct ValueLess : public ValueCombination
+{
+    ValueLess(ValueObject* value1, ValueObject* value2);
+
+protected:
+    double getValueInternal() override;
+
+};
+
+struct ValueGreater : public ValueCombination
+{
+    ValueGreater(ValueObject* value1, ValueObject* value2);
+
+protected:
+    double getValueInternal() override;
+
+};
+
+struct ValueLessEqual : public ValueCombination
+{
+    ValueLessEqual(ValueObject* value1, ValueObject* value2);
+
+protected:
+    double getValueInternal() override;
+
+};
+
+struct ValueGreaterEqual : public ValueCombination
+{
+    ValueGreaterEqual(ValueObject* value1, ValueObject* value2);
+
+protected:
+    double getValueInternal() override;
+
+};
+
 struct Sequence : public ValueController
 {
     enum OrderEnum

@@ -66,9 +66,9 @@ struct Comma : public Token
     Comma(const unsigned int line, const unsigned int character);
 };
 
-struct Equals : public Token
+struct EqualToken : public Token
 {
-    Equals(const unsigned int line, const unsigned int character);
+    EqualToken(const unsigned int line, const unsigned int character);
 };
 
 struct Operator : public Token
@@ -96,9 +96,29 @@ struct DivideToken : public Operator
     DivideToken(const unsigned int line, const unsigned int character);
 };
 
-struct DoubleEquals : public Operator
+struct DoubleEqualToken : public Operator
 {
-    DoubleEquals(const unsigned int line, const unsigned int character);
+    DoubleEqualToken(const unsigned int line, const unsigned int character);
+};
+
+struct LessToken : public Operator
+{
+    LessToken(const unsigned int line, const unsigned int character);
+};
+
+struct GreaterToken : public Operator
+{
+    GreaterToken(const unsigned int line, const unsigned int character);
+};
+
+struct LessEqualToken : public Operator
+{
+    LessEqualToken(const unsigned int line, const unsigned int character);
+};
+
+struct GreaterEqualToken : public Operator
+{
+    GreaterEqualToken(const unsigned int line, const unsigned int character);
 };
 
 struct Name : public Token
@@ -194,9 +214,42 @@ struct Divide : public Combine
     void accept(BytecodeTransformer* visitor) const override;
 };
 
-struct EqualTo : public Combine
+struct Comparison : public Combine
 {
-    EqualTo(const Token* value1, const Token* value2);
+    Comparison(const Token* value1, const Token* value2, const std::string op);
+};
+
+struct Equal : public Comparison
+{
+    Equal(const Token* value1, const Token* value2);
+
+    void accept(BytecodeTransformer* visitor) const override;
+};
+
+struct Less : public Comparison
+{
+    Less(const Token* value1, const Token* value2);
+
+    void accept(BytecodeTransformer* visitor) const override;
+};
+
+struct Greater : public Comparison
+{
+    Greater(const Token* value1, const Token* value2);
+
+    void accept(BytecodeTransformer* visitor) const override;
+};
+
+struct LessEqual : public Comparison
+{
+    LessEqual(const Token* value1, const Token* value2);
+
+    void accept(BytecodeTransformer* visitor) const override;
+};
+
+struct GreaterEqual : public Comparison
+{
+    GreaterEqual(const Token* value1, const Token* value2);
 
     void accept(BytecodeTransformer* visitor) const override;
 };
@@ -284,7 +337,11 @@ struct BytecodeTransformer
     void visit(const Subtract* token);
     void visit(const Multiply* token);
     void visit(const Divide* token);
-    void visit(const EqualTo* token);
+    void visit(const Equal* token);
+    void visit(const Less* token);
+    void visit(const Greater* token);
+    void visit(const LessEqual* token);
+    void visit(const GreaterEqual* token);
     void visit(const Assign* token);
     void visit(const Call* token);
     void visit(const CodeBlock* token);

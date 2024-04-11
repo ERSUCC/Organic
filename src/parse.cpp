@@ -133,14 +133,14 @@ void Parser::tokenize()
 
             if (code[current] == '=')
             {
-                tokens.push_back(new DoubleEquals(startLine, startCharacter));
+                tokens.push_back(new DoubleEqualToken(startLine, startCharacter));
 
                 nextCharacter();
             }
 
             else
             {
-                tokens.push_back(new Equals(startLine, startCharacter));
+                tokens.push_back(new EqualToken(startLine, startCharacter));
             }
         }
 
@@ -170,6 +170,40 @@ void Parser::tokenize()
             tokens.push_back(new DivideToken(startLine, startCharacter));
 
             nextCharacter();
+        }
+
+        else if (code[current] == '<')
+        {
+            nextCharacter();
+
+            if (code[current] == '=')
+            {
+                tokens.push_back(new LessEqualToken(startLine, startCharacter));
+
+                nextCharacter();
+            }
+
+            else
+            {
+                tokens.push_back(new LessToken(startLine, startCharacter));
+            }
+        }
+
+        else if (code[current] == '>')
+        {
+            nextCharacter();
+
+            if (code[current] == '=')
+            {
+                tokens.push_back(new GreaterEqualToken(startLine, startCharacter));
+
+                nextCharacter();
+            }
+
+            else
+            {
+                tokens.push_back(new GreaterToken(startLine, startCharacter));
+            }
         }
 
         else if (isdigit(code[current]))
@@ -280,7 +314,7 @@ TokenRange* Parser::parseInstruction(unsigned int pos) const
         tokenError(getToken(pos), "name");
     }
 
-    if (tokenIs<Equals>(pos + 1))
+    if (tokenIs<EqualToken>(pos + 1))
     {
         return parseAssign(pos);
     }
@@ -464,11 +498,84 @@ TokenRange* Parser::parseTerms(unsigned int pos) const
         }
     } while (tokenIs<Operator>(pos));
 
+    bool comparison = false;
+
     for (unsigned int i = 1; i < terms.size() - 1; i++)
     {
-        if (dynamic_cast<const DoubleEquals*>(terms[i]->token))
+        if (dynamic_cast<const DoubleEqualToken*>(terms[i]->token))
         {
-            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new EqualTo(terms[i - 1]->token, terms[i + 1]->token));
+            if (comparison)
+            {
+                Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->token->line, terms[i]->token->character);
+            }
+
+            comparison = true;
+
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new Equal(terms[i - 1]->token, terms[i + 1]->token));
+
+            terms.erase(terms.begin() + 1, terms.begin() + i + 2);
+
+            i--;
+        }
+
+        else if (dynamic_cast<const LessToken*>(terms[i]->token))
+        {
+            if (comparison)
+            {
+                Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->token->line, terms[i]->token->character);
+            }
+
+            comparison = true;
+
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new Less(terms[i - 1]->token, terms[i + 1]->token));
+
+            terms.erase(terms.begin() + 1, terms.begin() + i + 2);
+
+            i--;
+        }
+
+        else if (dynamic_cast<const GreaterToken*>(terms[i]->token))
+        {
+            if (comparison)
+            {
+                Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->token->line, terms[i]->token->character);
+            }
+
+            comparison = true;
+            
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new Greater(terms[i - 1]->token, terms[i + 1]->token));
+
+            terms.erase(terms.begin() + 1, terms.begin() + i + 2);
+
+            i--;
+        }
+
+        else if (dynamic_cast<const LessEqualToken*>(terms[i]->token))
+        {
+            if (comparison)
+            {
+                Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->token->line, terms[i]->token->character);
+            }
+
+            comparison = true;
+
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new LessEqual(terms[i - 1]->token, terms[i + 1]->token));
+
+            terms.erase(terms.begin() + 1, terms.begin() + i + 2);
+
+            i--;
+        }
+
+        else if (dynamic_cast<const GreaterEqualToken*>(terms[i]->token))
+        {
+            if (comparison)
+            {
+                Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->token->line, terms[i]->token->character);
+            }
+
+            comparison = true;
+            
+            terms[i - 1] = new TokenRange(terms[i - 1]->start, terms[i + 1]->end, new GreaterEqual(terms[i - 1]->token, terms[i + 1]->token));
 
             terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 

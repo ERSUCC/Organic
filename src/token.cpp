@@ -31,7 +31,7 @@ Colon::Colon(const unsigned int line, const unsigned int character) :
 Comma::Comma(const unsigned int line, const unsigned int character) :
     Token(line, character, ",") {}
 
-Equals::Equals(const unsigned int line, const unsigned int character) :
+EqualToken::EqualToken(const unsigned int line, const unsigned int character) :
     Token(line, character, "=") {}
 
 Operator::Operator(const unsigned int line, const unsigned int character, const std::string str) :
@@ -49,8 +49,20 @@ MultiplyToken::MultiplyToken(const unsigned int line, const unsigned int charact
 DivideToken::DivideToken(const unsigned int line, const unsigned int character) :
     Operator(line, character, "/") {}
 
-DoubleEquals::DoubleEquals(const unsigned int line, const unsigned int character) :
+DoubleEqualToken::DoubleEqualToken(const unsigned int line, const unsigned int character) :
     Operator(line, character, "==") {}
+
+LessToken::LessToken(const unsigned int line, const unsigned int character) :
+    Operator(line, character, "<") {}
+
+GreaterToken::GreaterToken(const unsigned int line, const unsigned int character) :
+    Operator(line, character, ">") {}
+
+LessEqualToken::LessEqualToken(const unsigned int line, const unsigned int character) :
+    Operator(line, character, "<=") {}
+
+GreaterEqualToken::GreaterEqualToken(const unsigned int line, const unsigned int character) :
+    Operator(line, character, ">=") {}
 
 Name::Name(const unsigned int line, const unsigned int character, const std::string name, const bool value) :
     Token(line, character, name), name(name), value(value) {}
@@ -194,10 +206,45 @@ void Divide::accept(BytecodeTransformer* visitor) const
     visitor->visit(this);
 }
 
-EqualTo::EqualTo(const Token* value1, const Token* value2) :
-    Combine(value1, value2, "==") {}
+Comparison::Comparison(const Token* value1, const Token* value2, const std::string op) :
+    Combine(value1, value2, op) {}
 
-void EqualTo::accept(BytecodeTransformer* visitor) const
+Equal::Equal(const Token* value1, const Token* value2) :
+    Comparison(value1, value2, "==") {}
+
+void Equal::accept(BytecodeTransformer* visitor) const
+{
+    visitor->visit(this);
+}
+
+Less::Less(const Token* value1, const Token* value2) :
+    Comparison(value1, value2, "<") {}
+
+void Less::accept(BytecodeTransformer* visitor) const
+{
+    visitor->visit(this);
+}
+
+Greater::Greater(const Token* value1, const Token* value2) :
+    Comparison(value1, value2, ">") {}
+
+void Greater::accept(BytecodeTransformer* visitor) const
+{
+    visitor->visit(this);
+}
+
+LessEqual::LessEqual(const Token* value1, const Token* value2) :
+    Comparison(value1, value2, "<=") {}
+
+void LessEqual::accept(BytecodeTransformer* visitor) const
+{
+    visitor->visit(this);
+}
+
+GreaterEqual::GreaterEqual(const Token* value1, const Token* value2) :
+    Comparison(value1, value2, ">=") {}
+
+void GreaterEqual::accept(BytecodeTransformer* visitor) const
 {
     visitor->visit(this);
 }
@@ -515,12 +562,44 @@ void BytecodeTransformer::visit(const Divide* token)
     currentScope->block->instructions.push_back(new CallNative("divide"));
 }
 
-void BytecodeTransformer::visit(const EqualTo* token)
+void BytecodeTransformer::visit(const Equal* token)
 {
     token->value2->accept(this);
     token->value1->accept(this);
 
-    currentScope->block->instructions.push_back(new CallNative("equals"));
+    currentScope->block->instructions.push_back(new CallNative("equal"));
+}
+
+void BytecodeTransformer::visit(const Less* token)
+{
+    token->value2->accept(this);
+    token->value1->accept(this);
+
+    currentScope->block->instructions.push_back(new CallNative("less"));
+}
+
+void BytecodeTransformer::visit(const Greater* token)
+{
+    token->value2->accept(this);
+    token->value1->accept(this);
+
+    currentScope->block->instructions.push_back(new CallNative("greater"));
+}
+
+void BytecodeTransformer::visit(const LessEqual* token)
+{
+    token->value2->accept(this);
+    token->value1->accept(this);
+
+    currentScope->block->instructions.push_back(new CallNative("lessequal"));
+}
+
+void BytecodeTransformer::visit(const GreaterEqual* token)
+{
+    token->value2->accept(this);
+    token->value1->accept(this);
+
+    currentScope->block->instructions.push_back(new CallNative("greaterequal"));
 }
 
 void BytecodeTransformer::visit(const Assign* token)

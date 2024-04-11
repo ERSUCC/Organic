@@ -75,6 +75,58 @@ double ValueEquals::getValueInternal()
     return 0;
 }
 
+ValueLess::ValueLess(ValueObject* value1, ValueObject* value2) :
+    ValueCombination(value1, value2) {}
+
+double ValueLess::getValueInternal()
+{
+    if (value1->getValue() < value2->getValue())
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+ValueGreater::ValueGreater(ValueObject* value1, ValueObject* value2) :
+    ValueCombination(value1, value2) {}
+
+double ValueGreater::getValueInternal()
+{
+    if (value1->getValue() > value2->getValue())
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+ValueLessEqual::ValueLessEqual(ValueObject* value1, ValueObject* value2) :
+    ValueCombination(value1, value2) {}
+
+double ValueLessEqual::getValueInternal()
+{
+    if (value1->getValue() <= value2->getValue())
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+ValueGreaterEqual::ValueGreaterEqual(ValueObject* value1, ValueObject* value2) :
+    ValueCombination(value1, value2) {}
+
+double ValueGreaterEqual::getValueInternal()
+{
+    if (value1->getValue() >= value2->getValue())
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 Sequence::Order::Order(OrderEnum order) :
     order(order) {}
 
