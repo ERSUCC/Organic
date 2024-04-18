@@ -6,41 +6,46 @@
 
 #include "token.h"
 
-struct Parser
+namespace Parser
 {
-    Parser(const std::string path);
+    struct Parser
+    {
+        Parser(const std::string path);
 
-    Program* parse();
+        Program* parse();
 
-private:
-    void skipWhitespace();
-    void nextCharacter();
+    private:
+        void skipWhitespace();
+        void nextCharacter();
 
-    void tokenize();
+        void tokenize();
 
-    Token* getToken(const unsigned int pos) const;
-    template <typename T> T* getToken(const unsigned int pos) const;
-    template <typename T> bool tokenIs(const unsigned int pos) const;
+        Token* getToken(const unsigned int pos) const;
+        template <typename T> T* getToken(const unsigned int pos) const;
+        template <typename T> bool tokenIs(const unsigned int pos) const;
 
-    void tokenError(const Token* token, const std::string message) const;
+        void tokenError(const Token* token, const std::string message) const;
 
-    TokenRange* parseInstruction(unsigned int pos) const;
-    TokenRange* parseAssign(unsigned int pos) const;
-    TokenRange* parseCodeBlock(unsigned int pos) const;
-    TokenRange* parseCall(unsigned int pos) const;
-    TokenRange* parseArgument(unsigned int pos) const;
-    TokenRange* parseExpression(unsigned int pos) const;
-    TokenRange* parseTerms(unsigned int pos) const;
-    TokenRange* parseTerm(unsigned int pos) const;
+        Token* parseInstruction(unsigned int pos) const;
+        Token* parseAssign(unsigned int pos) const;
+        Token* parseCodeBlock(unsigned int pos) const;
+        Token* parseCall(unsigned int pos) const;
+        Token* parseArgument(unsigned int pos) const;
+        Token* parseExpression(unsigned int pos) const;
+        Token* parseTerms(unsigned int pos) const;
+        Token* parseTerm(unsigned int pos) const;
 
-    const std::string path;
+        double getFrequency(const double note) const;
 
-    std::string code;
+        const std::string path;
 
-    std::vector<Token*> tokens;
+        std::string code;
 
-    unsigned int current = 0;
-    unsigned int line = 1;
-    unsigned int character = 1;
+        std::vector<Token*> tokens;
 
-};
+        unsigned int current = 0;
+        unsigned int line = 1;
+        unsigned int character = 1;
+
+    };
+}

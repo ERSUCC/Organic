@@ -8,356 +8,368 @@
 
 #include "bytecode.h"
 
-struct BytecodeTransformer;
-
-struct Token
+namespace Parser
 {
-    Token(const unsigned int line, const unsigned int character, const std::string str = "");
-
-    virtual std::string string() const;
-
-    virtual void accept(BytecodeTransformer* visitor) const;
-
-    const unsigned int line;
-    const unsigned int character;
-
-protected:
-    const std::string str;
-
-};
-
-struct TokenRange
-{
-    TokenRange(const unsigned int start, const unsigned int end, Token* token);
-
-    const unsigned int start;
-    const unsigned int end;
-    
-    Token* token;
-};
-
-struct OpenParenthesis : public Token
-{
-    OpenParenthesis(const unsigned int line, const unsigned int character);
-};
-
-struct CloseParenthesis : public Token
-{
-    CloseParenthesis(const unsigned int line, const unsigned int character);
-};
-
-struct OpenCurlyBracket : public Token
-{
-    OpenCurlyBracket(const unsigned int line, const unsigned int character);
-};
-
-struct CloseCurlyBracket : public Token
-{
-    CloseCurlyBracket(const unsigned int line, const unsigned int character);
-};
+    struct BytecodeTransformer;
+
+    struct ParserLocation
+    {
+        ParserLocation(const unsigned int line, const unsigned int character, const unsigned int start, const unsigned int end);
+
+        const unsigned int line;
+        const unsigned int character;
+        const unsigned int start;
+        const unsigned int end;
+    };
+
+    struct Token
+    {
+        Token(const ParserLocation location, const std::string str);
+
+        virtual void accept(BytecodeTransformer* visitor) const;
+
+        const ParserLocation location;
+
+        const std::string str;
+    };
+
+    struct OpenParenthesis : public Token
+    {
+        OpenParenthesis(const ParserLocation location);
+    };
+
+    struct CloseParenthesis : public Token
+    {
+        CloseParenthesis(const ParserLocation location);
+    };
+
+    struct OpenCurlyBracket : public Token
+    {
+        OpenCurlyBracket(const ParserLocation location);
+    };
+
+    struct CloseCurlyBracket : public Token
+    {
+        CloseCurlyBracket(const ParserLocation location);
+    };
+
+    struct Colon : public Token
+    {
+        Colon(const ParserLocation location);
+    };
+
+    struct Comma : public Token
+    {
+        Comma(const ParserLocation location);
+    };
+
+    struct Equals : public Token
+    {
+        Equals(const ParserLocation location);
+    };
+
+    struct Operator : public Token
+    {
+        Operator(const ParserLocation location, const std::string str);
+    };
 
-struct Colon : public Token
-{
-    Colon(const unsigned int line, const unsigned int character);
-};
+    struct Add : public Operator
+    {
+        Add(const ParserLocation location);
+    };
 
-struct Comma : public Token
-{
-    Comma(const unsigned int line, const unsigned int character);
-};
+    struct Subtract : public Operator
+    {
+        Subtract(const ParserLocation location);
+    };
 
-struct EqualToken : public Token
-{
-    EqualToken(const unsigned int line, const unsigned int character);
-};
+    struct Multiply : public Operator
+    {
+        Multiply(const ParserLocation location);
+    };
 
-struct Operator : public Token
-{
-    Operator(const unsigned int line, const unsigned int character, std::string str);
-};
+    struct Divide : public Operator
+    {
+        Divide(const ParserLocation location);
+    };
 
-struct AddToken : public Operator
-{
-    AddToken(const unsigned int line, const unsigned int character);
-};
+    struct DoubleEquals : public Operator
+    {
+        DoubleEquals(const ParserLocation location);
+    };
 
-struct SubtractToken : public Operator
-{
-    SubtractToken(const unsigned int line, const unsigned int character);
-};
+    struct Less : public Operator
+    {
+        Less(const ParserLocation location);
+    };
 
-struct MultiplyToken : public Operator
-{
-    MultiplyToken(const unsigned int line, const unsigned int character);
-};
+    struct Greater : public Operator
+    {
+        Greater(const ParserLocation location);
+    };
 
-struct DivideToken : public Operator
-{
-    DivideToken(const unsigned int line, const unsigned int character);
-};
+    struct LessEqual : public Operator
+    {
+        LessEqual(const ParserLocation location);
+    };
 
-struct DoubleEqualToken : public Operator
-{
-    DoubleEqualToken(const unsigned int line, const unsigned int character);
-};
+    struct GreaterEqual : public Operator
+    {
+        GreaterEqual(const ParserLocation location);
+    };
 
-struct LessToken : public Operator
-{
-    LessToken(const unsigned int line, const unsigned int character);
-};
+    struct String : public Token
+    {
+        String(const ParserLocation location, const std::string str);
+    };
 
-struct GreaterToken : public Operator
-{
-    GreaterToken(const unsigned int line, const unsigned int character);
-};
+    struct Value : public Token
+    {
+        Value(const ParserLocation location, const std::string str, const double value);
 
-struct LessEqualToken : public Operator
-{
-    LessEqualToken(const unsigned int line, const unsigned int character);
-};
+        void accept(BytecodeTransformer* visitor) const override;
 
-struct GreaterEqualToken : public Operator
-{
-    GreaterEqualToken(const unsigned int line, const unsigned int character);
-};
+        const double value;
+    };
 
-struct Name : public Token
-{
-    Name(const unsigned int line, const unsigned int character, const std::string name, const bool value = false);
+    struct NamedConstant : public Token
+    {
+        NamedConstant(const ParserLocation location, const std::string constant);
 
-    void accept(BytecodeTransformer* visitor) const override;
+        void accept(BytecodeTransformer* visitor) const override;
+    };
 
-    const std::string name;
+    struct Variable : public Token
+    {
+        Variable(const ParserLocation location, const std::string variable);
 
-    const bool value;
-};
+        void accept(BytecodeTransformer* visitor) const override;
+    };
 
-struct Constant : public Token
-{
-    Constant(const unsigned int line, const unsigned int character, const std::string str);
+    struct Argument : public Token
+    {
+        Argument(const ParserLocation location, const std::string name, const Token* value);
 
-    void accept(BytecodeTransformer* visitor) const override;
+        const std::string name;
 
-    const double value;
-};
+        const Token* value;
+    };
 
-struct Argument : public Token
-{
-    Argument(const unsigned int line, const unsigned int character, const std::string name, const Token* value);
+    struct ArgumentList
+    {
+        ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path);
 
-    const std::string name;
-    const Token* value;
-};
+        void get(const std::string name, Token* defaultValue, BytecodeTransformer* visitor);
 
-struct ArgumentList
-{
-    ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path);
+        void confirmEmpty() const;
 
-    void get(const std::string name, Token* defaultValue, BytecodeTransformer* visitor);
+    private:
+        std::vector<Argument*> arguments;
 
-    void confirmEmpty() const;
+        const std::string name;
+        const std::string path;
 
-    std::string string() const;
+    };
 
-private:
-    std::vector<Argument*> arguments;
+    struct List : public Token
+    {
+        List(const ParserLocation location, const std::vector<Token*> values);
 
-    const std::string name;
-    const std::string path;
+        void accept(BytecodeTransformer* visitor) const override;
 
-};
+        const std::vector<Token*> values;
+    };
 
-struct ListToken : public Token
-{
-    ListToken(const unsigned int line, const unsigned int character, const std::vector<Token*> values);
+    struct AddObject : public Token
+    {
+        AddObject(const ParserLocation location, const Token* value1, const Token* value2);
 
-    std::string string() const override;
+        void accept(BytecodeTransformer* visitor) const override;
 
-    void accept(BytecodeTransformer* visitor) const override;
+        const Token* value1;
+        const Token* value2;
+    };
 
-    const std::vector<Token*> values;
-};
+    struct SubtractObject : public Token
+    {
+        SubtractObject(const ParserLocation location, const Token* value1, const Token* value2);
 
-struct Combine : public Token
-{
-    Combine(const Token* value1, const Token* value2, const std::string op);
+        void accept(BytecodeTransformer* visitor) const override;
 
-    const Token* value1;
-    const Token* value2;
-};
+        const Token* value1;
+        const Token* value2;
+    };
 
-struct Add : public Combine
-{
-    Add(const Token* value1, const Token* value2);
+    struct MultiplyObject : public Token
+    {
+        MultiplyObject(const ParserLocation location, const Token* value1, const Token* value2);
 
-    void accept(BytecodeTransformer* visitor) const override;
-};
+        void accept(BytecodeTransformer* visitor) const override;
 
-struct Subtract : public Combine
-{
-    Subtract(const Token* value1, const Token* value2);
+        const Token* value1;
+        const Token* value2;
+    };
 
-    void accept(BytecodeTransformer* visitor) const override;
-};
+    struct DivideObject : public Token
+    {
+        DivideObject(const ParserLocation location, const Token* value1, const Token* value2);
 
-struct Multiply : public Combine
-{
-    Multiply(const Token* value1, const Token* value2);
+        void accept(BytecodeTransformer* visitor) const override;
 
-    void accept(BytecodeTransformer* visitor) const override;
-};
+        const Token* value1;
+        const Token* value2;
+    };
 
-struct Divide : public Combine
-{
-    Divide(const Token* value1, const Token* value2);
+    struct EqualsObject : public Token
+    {
+        EqualsObject(const ParserLocation location, const Token* value1, const Token* value2);
 
-    void accept(BytecodeTransformer* visitor) const override;
-};
+        void accept(BytecodeTransformer* visitor) const override;
 
-struct Comparison : public Combine
-{
-    Comparison(const Token* value1, const Token* value2, const std::string op);
-};
+        const Token* value1;
+        const Token* value2;
+    };
 
-struct Equal : public Comparison
-{
-    Equal(const Token* value1, const Token* value2);
+    struct LessObject : public Token
+    {
+        LessObject(const ParserLocation location, const Token* value1, const Token* value2);
 
-    void accept(BytecodeTransformer* visitor) const override;
-};
+        void accept(BytecodeTransformer* visitor) const override;
 
-struct Less : public Comparison
-{
-    Less(const Token* value1, const Token* value2);
+        const Token* value1;
+        const Token* value2;
+    };
 
-    void accept(BytecodeTransformer* visitor) const override;
-};
+    struct GreaterObject : public Token
+    {
+        GreaterObject(const ParserLocation location, const Token* value1, const Token* value2);
 
-struct Greater : public Comparison
-{
-    Greater(const Token* value1, const Token* value2);
+        void accept(BytecodeTransformer* visitor) const override;
 
-    void accept(BytecodeTransformer* visitor) const override;
-};
+        const Token* value1;
+        const Token* value2;
+    };
 
-struct LessEqual : public Comparison
-{
-    LessEqual(const Token* value1, const Token* value2);
+    struct LessEqualObject : public Token
+    {
+        LessEqualObject(const ParserLocation location, const Token* value1, const Token* value2);
 
-    void accept(BytecodeTransformer* visitor) const override;
-};
+        void accept(BytecodeTransformer* visitor) const override;
 
-struct GreaterEqual : public Comparison
-{
-    GreaterEqual(const Token* value1, const Token* value2);
+        const Token* value1;
+        const Token* value2;
+    };
 
-    void accept(BytecodeTransformer* visitor) const override;
-};
+    struct GreaterEqualObject : public Token
+    {
+        GreaterEqualObject(const ParserLocation location, const Token* value1, const Token* value2);
 
-struct Instruction : public Token
-{
-    Instruction(const unsigned int line, const unsigned int character, const std::string str = "");
-};
+        void accept(BytecodeTransformer* visitor) const override;
 
-struct Assign : public Instruction
-{
-    Assign(const Name* variable, const Token* value);
+        const Token* value1;
+        const Token* value2;
+    };
 
-    void accept(BytecodeTransformer* visitor) const override;
+    struct Instruction : public Token
+    {
+        Instruction(const ParserLocation location, const std::string str);
+    };
 
-    const Name* variable;
-    const Token* value;
-};
+    struct Assign : public Instruction
+    {
+        Assign(const ParserLocation location, const std::string variable, const Token* value);
 
-struct Call : public Instruction
-{
-    Call(const Name* name, ArgumentList* arguments);
+        void accept(BytecodeTransformer* visitor) const override;
 
-    std::string string() const override;
+        const std::string variable;
 
-    void accept(BytecodeTransformer* visitor) const override;
+        const Token* value;
+    };
 
-    const Name* name;
-    ArgumentList* arguments;
-};
+    struct Call : public Instruction
+    {
+        Call(const ParserLocation location, const std::string name, ArgumentList* arguments);
 
-struct CodeBlock : public Token
-{
-    CodeBlock(const unsigned int line, const unsigned int character, const std::vector<Instruction*> instructions);
+        void accept(BytecodeTransformer* visitor) const override;
 
-    std::string string() const override;
+        const std::string name;
 
-    void accept(BytecodeTransformer* visitor) const override;
+        ArgumentList* arguments;
+    };
 
-    const std::vector<Instruction*> instructions;
-};
+    struct CodeBlock : public Token
+    {
+        CodeBlock(const ParserLocation location, const std::vector<Instruction*> instructions);
 
-struct Scope
-{
-    Scope(Scope* parent = nullptr);
+        void accept(BytecodeTransformer* visitor) const override;
 
-    bool getVariable(const std::string name);
-    void addVariable(const std::string name);
+        const std::vector<Instruction*> instructions;
+    };
 
-    void checkVariableUses() const;
+    struct Scope
+    {
+        Scope(Scope* parent = nullptr);
 
-    BytecodeTransformer* visitor;
+        bool getVariable(const std::string name);
+        void addVariable(const std::string name);
 
-    Scope* parent;
+        void checkVariableUses() const;
 
-    BytecodeBlock* block = new BytecodeBlock();
+        BytecodeTransformer* visitor;
 
-private:
-    std::unordered_set<std::string> variables;
-    std::unordered_set<std::string> variablesUsed;
+        Scope* parent;
 
-};
+        BytecodeBlock* block = new BytecodeBlock();
 
-struct Program : public Token
-{
-    Program(const std::vector<Instruction*> instructions);
+    private:
+        std::unordered_set<std::string> variables;
+        std::unordered_set<std::string> variablesUsed;
 
-    std::string string() const override;
-    
-    void accept(BytecodeTransformer* visitor) const override;
+    };
 
-    const std::vector<Instruction*> instructions;
-};
+    struct Program : public Token
+    {
+        Program(const std::vector<Instruction*> instructions);
 
-struct BytecodeTransformer
-{
-    BytecodeTransformer(const std::string sourcePath);
+        void accept(BytecodeTransformer* visitor) const override;
 
-    std::string transform(const Program* program);
+        const std::vector<Instruction*> instructions;
+    };
 
-    void visit(const Name* token);
-    void visit(const Constant* token);
-    void visit(const ListToken* token);
-    void visit(const Add* token);
-    void visit(const Subtract* token);
-    void visit(const Multiply* token);
-    void visit(const Divide* token);
-    void visit(const Equal* token);
-    void visit(const Less* token);
-    void visit(const Greater* token);
-    void visit(const LessEqual* token);
-    void visit(const GreaterEqual* token);
-    void visit(const Assign* token);
-    void visit(const Call* token);
-    void visit(const CodeBlock* token);
-    void visit(const Program* token);
+    struct BytecodeTransformer
+    {
+        BytecodeTransformer(const std::string sourcePath);
 
-    Scope* currentScope;
+        std::string transform(const Program* program);
 
-private:
-    double getFrequency(const double note) const;
+        void visit(const Value* token);
+        void visit(const NamedConstant* token);
+        void visit(const Variable* token);
+        void visit(const List* token);
+        void visit(const AddObject* token);
+        void visit(const SubtractObject* token);
+        void visit(const MultiplyObject* token);
+        void visit(const DivideObject* token);
+        void visit(const EqualsObject* token);
+        void visit(const LessObject* token);
+        void visit(const GreaterObject* token);
+        void visit(const LessEqualObject* token);
+        void visit(const GreaterEqualObject* token);
+        void visit(const Assign* token);
+        void visit(const Call* token);
+        void visit(const CodeBlock* token);
+        void visit(const Program* token);
 
-    const std::string sourcePath;
+        Scope* currentScope;
 
-    std::string outputPath;
+    private:
+        const std::string sourcePath;
 
-    std::string currentVariable;
+        std::string outputPath;
 
-    BytecodeResolver* resolver = new BytecodeResolver();
+        std::string currentVariable;
 
-};
+        BytecodeResolver* resolver = new BytecodeResolver();
+
+    };
+}
