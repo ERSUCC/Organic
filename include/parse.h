@@ -35,8 +35,6 @@ namespace Parser
         const Token* parseTerms(unsigned int pos) const;
         const Token* parseTerm(unsigned int pos) const;
 
-        const Token* foldConstants(const Token* token) const;
-
         double getFrequency(const double note) const;
 
         const std::string path;
