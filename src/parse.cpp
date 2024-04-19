@@ -537,17 +537,13 @@ namespace Parser
 
         std::vector<const Token*> terms;
 
-        do
+        while (tokenIs<Value>(pos) || tokenIs<Operator>(pos) || tokenIs<OpenParenthesis>(pos))
         {
             if (tokenIs<Operator>(pos) && terms.size() > 0 && !tokenIs<Operator>(pos - 1))
             {
                 terms.push_back(getToken(pos));
 
-                const Token* token = parseTerms(pos + 1);
-
-                terms.push_back(token);
-
-                pos = token->location.end;
+                pos++;
             }
 
             else if (tokenIs<OpenParenthesis>(pos))
@@ -555,8 +551,6 @@ namespace Parser
                 const unsigned int pStart = pos;
 
                 const Token* token = parseTerms(pos + 1);
-
-                terms.push_back(token);
 
                 pos = token->location.end;
 
@@ -568,6 +562,10 @@ namespace Parser
                 }
 
                 pos++;
+
+                const Token* startToken = getToken(pStart);
+
+                terms.push_back(new ParenthesizedExpression(ParserLocation(startToken->location.line, startToken->location.character, pStart, pos), token));
             }
 
             else
@@ -578,7 +576,7 @@ namespace Parser
 
                 pos = token->location.end;
             }
-        } while (tokenIs<Operator>(pos));
+        }
 
         bool comparison = false;
 
@@ -714,7 +712,7 @@ namespace Parser
             Utils::parseError("Invalid expression.", path, startToken->location.line, startToken->location.character);
         }
 
-        return foldConstants(terms[0]);
+        return terms[0];
     }
 
     const Token* Parser::parseTerm(unsigned int pos) const

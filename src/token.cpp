@@ -212,6 +212,14 @@ namespace Parser
         visitor->visit(this);
     }
 
+    ParenthesizedExpression::ParenthesizedExpression(const ParserLocation location, const Token* value) :
+        Token(location, "(" + value->str + ")"), value(value) {}
+    
+    void ParenthesizedExpression::accept(BytecodeTransformer* visitor) const
+    {
+        visitor->visit(this);
+    }
+
     Instruction::Instruction(const ParserLocation location, const std::string str) :
         Token(location, str) {}
 
@@ -457,6 +465,11 @@ namespace Parser
         token->value1->accept(this);
 
         currentScope->block->instructions.push_back(new CallNative("greaterequal"));
+    }
+
+    void BytecodeTransformer::visit(const ParenthesizedExpression* token)
+    {
+        token->value->accept(this);
     }
 
     void BytecodeTransformer::visit(const Assign* token)

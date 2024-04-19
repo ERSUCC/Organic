@@ -270,6 +270,15 @@ namespace Parser
         const Token* value2;
     };
 
+    struct ParenthesizedExpression : public Token
+    {
+        ParenthesizedExpression(const ParserLocation, const Token* value);
+
+        void accept(BytecodeTransformer* visitor) const override;
+
+        const Token* value;
+    };
+
     struct Instruction : public Token
     {
         Instruction(const ParserLocation location, const std::string str);
@@ -355,6 +364,7 @@ namespace Parser
         void visit(const GreaterObject* token);
         void visit(const LessEqualObject* token);
         void visit(const GreaterEqualObject* token);
+        void visit(const ParenthesizedExpression* token);
         void visit(const Assign* token);
         void visit(const Call* token);
         void visit(const CodeBlock* token);
