@@ -157,14 +157,14 @@ namespace Parser
 
     struct ArgumentList
     {
-        ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path);
+        ArgumentList(const std::vector<const Argument*> arguments, const std::string name, const std::string path);
 
         void get(const std::string name, Token* defaultValue, BytecodeTransformer* visitor);
 
         void confirmEmpty() const;
 
     private:
-        std::vector<Argument*> arguments;
+        std::vector<const Argument*> arguments;
 
         const std::string name;
         const std::string path;
@@ -173,11 +173,11 @@ namespace Parser
 
     struct List : public Token
     {
-        List(const ParserLocation location, const std::vector<Token*> values);
+        List(const ParserLocation location, const std::vector<const Token*> values);
 
         void accept(BytecodeTransformer* visitor) const override;
 
-        const std::vector<Token*> values;
+        const std::vector<const Token*> values;
     };
 
     struct AddObject : public Token
@@ -299,11 +299,11 @@ namespace Parser
 
     struct CodeBlock : public Token
     {
-        CodeBlock(const ParserLocation location, const std::vector<Instruction*> instructions);
+        CodeBlock(const ParserLocation location, const std::vector<const Instruction*> instructions);
 
         void accept(BytecodeTransformer* visitor) const override;
 
-        const std::vector<Instruction*> instructions;
+        const std::vector<const Instruction*> instructions;
     };
 
     struct Scope
@@ -329,11 +329,11 @@ namespace Parser
 
     struct Program : public Token
     {
-        Program(const std::vector<Instruction*> instructions);
+        Program(const std::vector<const Instruction*> instructions);
 
         void accept(BytecodeTransformer* visitor) const override;
 
-        const std::vector<Instruction*> instructions;
+        const std::vector<const Instruction*> instructions;
     };
 
     struct BytecodeTransformer

@@ -20,20 +20,22 @@ namespace Parser
 
         void tokenize();
 
-        Token* getToken(const unsigned int pos) const;
-        template <typename T> T* getToken(const unsigned int pos) const;
+        const Token* getToken(const unsigned int pos) const;
+        template <typename T> const T* getToken(const unsigned int pos) const;
         template <typename T> bool tokenIs(const unsigned int pos) const;
 
         void tokenError(const Token* token, const std::string message) const;
 
-        Token* parseInstruction(unsigned int pos) const;
-        Token* parseAssign(unsigned int pos) const;
-        Token* parseCodeBlock(unsigned int pos) const;
-        Token* parseCall(unsigned int pos) const;
-        Token* parseArgument(unsigned int pos) const;
-        Token* parseExpression(unsigned int pos) const;
-        Token* parseTerms(unsigned int pos) const;
-        Token* parseTerm(unsigned int pos) const;
+        const Token* parseInstruction(unsigned int pos) const;
+        const Token* parseAssign(unsigned int pos) const;
+        const Token* parseCodeBlock(unsigned int pos) const;
+        const Token* parseCall(unsigned int pos) const;
+        const Token* parseArgument(unsigned int pos) const;
+        const Token* parseExpression(unsigned int pos) const;
+        const Token* parseTerms(unsigned int pos) const;
+        const Token* parseTerm(unsigned int pos) const;
+
+        const Token* foldConstants(const Token* token) const;
 
         double getFrequency(const double note) const;
 

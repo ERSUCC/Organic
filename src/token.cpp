@@ -91,12 +91,12 @@ namespace Parser
     Argument::Argument(const ParserLocation location, const std::string name, const Token* value) :
         Token(location, name + ": " + value->str), name(name), value(value) {}
 
-    ArgumentList::ArgumentList(const std::vector<Argument*> arguments, const std::string name, const std::string path) :
+    ArgumentList::ArgumentList(const std::vector<const Argument*> arguments, const std::string name, const std::string path) :
         arguments(arguments), name(name), path(path)
     {
         std::unordered_set<std::string> defined;
 
-        for (Argument* argument : arguments)
+        for (const Argument* argument : arguments)
         {
             if (defined.count(argument->name))
             {
@@ -132,7 +132,7 @@ namespace Parser
         }
     }
 
-    List::List(const ParserLocation location, const std::vector<Token*> values) :
+    List::List(const ParserLocation location, const std::vector<const Token*> values) :
         Token(location, "()"), values(values) {} // fix str, idk if necessary but should match other structs
 
     void List::accept(BytecodeTransformer* visitor) const
@@ -231,7 +231,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    CodeBlock::CodeBlock(const ParserLocation location, const std::vector<Instruction*> instructions) :
+    CodeBlock::CodeBlock(const ParserLocation location, const std::vector<const Instruction*> instructions) :
         Token(location, ""), instructions(instructions) {} // fix str, same as list
 
     void CodeBlock::accept(BytecodeTransformer* visitor) const
@@ -278,7 +278,7 @@ namespace Parser
         }
     }
 
-    Program::Program(const std::vector<Instruction*> instructions) :
+    Program::Program(const std::vector<const Instruction*> instructions) :
         Token(ParserLocation(0, 0, 0, 0), ""), instructions(instructions) {} // fix later, same as list
 
     void Program::accept(BytecodeTransformer* visitor) const
@@ -392,9 +392,6 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        // used to constant fold here but it is now impossible
-        // maybe do earlier in parsing or have separate visitor(s) for optimizations
-
         currentScope->block->instructions.push_back(new CallNative("add"));
     }
 
@@ -402,9 +399,6 @@ namespace Parser
     {
         token->value2->accept(this);
         token->value1->accept(this);
-
-        // used to constant fold here but it is now impossible
-        // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
         currentScope->block->instructions.push_back(new CallNative("subtract"));
     }
@@ -414,9 +408,6 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        // used to constant fold here but it is now impossible
-        // maybe do earlier in parsing or have separate visitor(s) for optimizations
-
         currentScope->block->instructions.push_back(new CallNative("multiply"));
     }
 
@@ -424,9 +415,6 @@ namespace Parser
     {
         token->value2->accept(this);
         token->value1->accept(this);
-
-        // used to constant fold here but it is now impossible
-        // maybe do earlier in parsing or have separate visitor(s) for optimizations
 
         currentScope->block->instructions.push_back(new CallNative("divide"));
     }
@@ -491,7 +479,7 @@ namespace Parser
         if (name == "sine")
         {
             token->arguments->get("frequency", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<Token*>()), this);
+            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
             token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
             token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
         }
@@ -499,7 +487,7 @@ namespace Parser
         else if (name == "square")
         {
             token->arguments->get("frequency", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<Token*>()), this);
+            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
             token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
             token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
         }
@@ -507,7 +495,7 @@ namespace Parser
         else if (name == "saw")
         {
             token->arguments->get("frequency", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<Token*>()), this);
+            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
             token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
             token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
         }
@@ -515,14 +503,14 @@ namespace Parser
         else if (name == "triangle")
         {
             token->arguments->get("frequency", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<Token*>()), this);
+            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
             token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
             token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
         }
 
         else if (name == "noise")
         {
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<Token*>()), this);
+            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
             token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
             token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
         }
@@ -550,7 +538,7 @@ namespace Parser
         else if (name == "sequence")
         {
             token->arguments->get("order", new NamedConstant(ParserLocation(0, 0, 0, 0), "sequence-forwards"), this);
-            token->arguments->get("values", new List(ParserLocation(0, 0, 0, 0), std::vector<Token*>()), this);
+            token->arguments->get("values", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
         }
 
         else if (name == "repeat")
