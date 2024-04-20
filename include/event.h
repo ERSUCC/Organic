@@ -1,18 +1,21 @@
 #pragma once
 
+#include <functional>
+
 #include "object.h"
 
 struct Event : public Sync
 {
-    Event();
+    Event(const std::function<void(void)> action);
 
     bool ready() const;
+    bool hasNext() const;
 
-    virtual bool hasNext() const;
-
-    virtual void perform();
+    void perform();
 
 protected:
+    const std::function<void(void)> action;
+
     double next;
 
 };

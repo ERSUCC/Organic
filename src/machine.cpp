@@ -63,6 +63,13 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x04:
+                stack.push(new Value(readInt(address + 1))); // probably shouldn't coerce these to double
+
+                address += 5;
+
+                break;
+
+            case 0x05:
             {
                 const unsigned char id = program[address + 1];
 
@@ -81,21 +88,21 @@ void Machine::execute(unsigned int address)
                 break;
             }
 
-            case 0x05:
+            case 0x06:
                 stack.push(variables[program[address + 1]]);
 
                 address += 2;
 
                 break;
 
-            case 0x06:
+            case 0x07:
                 stack.push(new Variable(variables[program[address + 1]]->value));
 
                 address += 2;
 
                 break;
 
-            case 0x07:
+            case 0x08:
                 switch (program[address + 1])
                 {
                     case 0x00:
@@ -326,16 +333,25 @@ void Machine::execute(unsigned int address)
                         break;
 
                     case 0x70:
-                        // perform (get address, then call execute again at some point)
+                    {
+                        const unsigned int exec = popStackAs<Value>()->value;
+
+                        events.push_back(new Event([&]()
+                        {
+                            execute(exec);
+                        }));
 
                         break;
+                    }
 
                     default:
+                    {
                         std::ostringstream code;
 
                         code << std::hex << program[address + 1];
 
                         return Utils::machineError("Unrecognized function code \"" + code.str() + "\"", path);
+                    }
                 }
 
                 address += 2;
@@ -343,11 +359,8 @@ void Machine::execute(unsigned int address)
                 break;
 
             default:
-                std::ostringstream code;
+                return Utils::machineError("Unrecognized instruction code.", path);
 
-                code << std::hex << program[address];
-
-                return Utils::machineError("Unrecognized instruction code \"" + code.str() + "\".", path);
         }
     }
 }

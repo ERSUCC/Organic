@@ -442,25 +442,25 @@ namespace Parser
 
     const Token* Parser::parseCall(unsigned int pos) const
     {
+        if (!tokenIs<String>(pos))
+        {
+            tokenError(getToken(pos), "function name");
+        }
+
         const unsigned int start = pos;
 
-        pos += 2;
+        pos++;
 
         std::vector<const Argument*> arguments;
 
-        if (tokenIs<String>(pos))
+        do
         {
-            pos -= 1;
+            const Argument* argument = (const Argument*)parseArgument(pos + 1);
 
-            do
-            {
-                const Argument* argument = (const Argument*)parseArgument(pos + 1);
+            arguments.push_back(argument);
 
-                arguments.push_back(argument);
-
-                pos = argument->location.end;
-            } while (tokenIs<Comma>(pos));
-        }
+            pos = argument->location.end;
+        } while (tokenIs<Comma>(pos));
 
         if (tokenIs<CloseParenthesis>(pos))
         {
@@ -537,7 +537,7 @@ namespace Parser
 
         std::vector<const Token*> terms;
 
-        while (tokenIs<Value>(pos) || tokenIs<Operator>(pos) || tokenIs<OpenParenthesis>(pos))
+        while (tokenIs<Value>(pos) || tokenIs<String>(pos) || tokenIs<Operator>(pos) || tokenIs<OpenParenthesis>(pos))
         {
             if (tokenIs<Operator>(pos) && terms.size() > 0 && !tokenIs<Operator>(pos - 1))
             {

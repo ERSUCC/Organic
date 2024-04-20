@@ -596,6 +596,8 @@ namespace Parser
         else if (name == "perform")
         {
             token->arguments->get("function", nullptr, this);
+
+            currentScope->block->instructions.push_back(new StackPushAddress(resolver->blocks.back()));
         }
 
         else

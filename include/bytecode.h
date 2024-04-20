@@ -8,6 +8,7 @@
 #include "utils.h"
 
 struct BytecodeResolver;
+struct BytecodeBlock;
 
 struct BytecodeInstruction
 {
@@ -48,6 +49,15 @@ struct StackPushDouble : public BytecodeInstruction
     void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
 
     const double value;
+};
+
+struct StackPushAddress : public BytecodeInstruction
+{
+    StackPushAddress(const BytecodeBlock* block);
+
+    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+
+    const BytecodeBlock* block;
 };
 
 struct SetVariable : public BytecodeInstruction

@@ -1,6 +1,7 @@
 #include "../include/event.h"
 
-Event::Event()
+Event::Event(const std::function<void(void)> action) :
+    action(action)
 {
     next = startTime;
 }
@@ -15,4 +16,7 @@ bool Event::hasNext() const
     return false;
 }
 
-void Event::perform() {}
+void Event::perform()
+{
+    action();
+}

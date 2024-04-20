@@ -65,6 +65,19 @@ void StackPushDouble::output(std::ofstream& stream, BytecodeResolver* resolver) 
     }
 }
 
+StackPushAddress::StackPushAddress(const BytecodeBlock* block) :
+    BytecodeInstruction(5), block(block) {}
+
+void StackPushAddress::output(std::ofstream& stream, BytecodeResolver* resolver) const
+{
+    stream << (unsigned char)0x04;
+
+    for (const unsigned char b : intToBytes(block->offset))
+    {
+        stream << b;
+    }
+}
+
 SetVariable::SetVariable(const std::string variable) :
     BytecodeInstruction(2), variable(variable) {}
 
@@ -84,7 +97,7 @@ void SetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) cons
         resolver->variables[variable] = id;
     }
 
-    stream << (unsigned char)0x04 << id;
+    stream << (unsigned char)0x05 << id;
 }
 
 GetVariable::GetVariable(const std::string variable) :
@@ -92,7 +105,7 @@ GetVariable::GetVariable(const std::string variable) :
 
 void GetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
-    stream << (unsigned char)0x05 << resolver->variables[variable];
+    stream << (unsigned char)0x06 << resolver->variables[variable];
 }
 
 GetVariableCopy::GetVariableCopy(const std::string variable) :
@@ -100,7 +113,7 @@ GetVariableCopy::GetVariableCopy(const std::string variable) :
 
 void GetVariableCopy::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
-    stream << (unsigned char)0x06 << resolver->variables[variable];
+    stream << (unsigned char)0x07 << resolver->variables[variable];
 }
 
 CallNative::CallNative(std::string function) :
@@ -140,7 +153,7 @@ void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
 
     else if (function == "perform") id = 0x70;
 
-    stream << (unsigned char)0x07 << id;
+    stream << (unsigned char)0x08 << id;
 }
 
 void BytecodeResolver::output(const std::string path)
@@ -164,6 +177,8 @@ void BytecodeResolver::output(const std::string path)
         {
             offset += instruction->size;
         }
+
+        offset++;
     }
 
     for (BytecodeBlock* block : blocks)
