@@ -14,14 +14,14 @@ struct ValueCombination : public ValueController
     double syncLength() override;
     double getValue() override;
 
-    ValueObject* value1;
-    ValueObject* value2;
-
 protected:
     void finishStart() override;
     void finishStop() override;
 
     virtual double getValueInternal() = 0;
+
+    ValueObject* value1;
+    ValueObject* value2;
 
 };
 
@@ -128,24 +128,24 @@ struct Sequence : public ValueController
     double syncLength() override;
     double getValue() override;
 
-    List<ValueObject>* controllers;
-
-    std::unordered_set<unsigned int> chosen;
-
-    Order* order;
-
 protected:
     void finishStart() override;
     void finishRepeat() override;
 
 private:
+    List<ValueObject>* controllers;
+
+    Order* order;
+
+    std::uniform_int_distribution<> udist;
+
+    std::unordered_set<unsigned int> chosen;
+
     int current = 0;
     int direction = 1;
     int last = -1;
     int switches = 0;
     int max_switches;
-
-    std::uniform_int_distribution<> udist;
 
 };
 
@@ -156,14 +156,14 @@ struct Repeat : public ValueController
     double syncLength() override;
     double getValue() override;
 
-    ValueObject* value;
-    ValueObject* repeats;
-
 protected:
     void finishStart() override;
     void finishRepeat() override;
 
 private:
+    ValueObject* value;
+    ValueObject* repeats;
+
     unsigned int times = 0;
 
 };
@@ -184,11 +184,12 @@ struct Hold : public ValueController
     double syncLength() override;
     double getValue() override;
 
-    ValueObject* value;
-    ValueObject* length;
-
 protected:
     void finishStart() override;
+
+private:
+    ValueObject* value;
+    ValueObject* length;
 
 };
 
@@ -199,12 +200,13 @@ struct Sweep : public ValueController
     double syncLength() override;
     double getValue() override;
 
+protected:
+    void finishStart() override;
+
+private:
     ValueObject* from;
     ValueObject* to;
     ValueObject* length;
-
-protected:
-    void finishStart() override;
 
 };
 
@@ -215,12 +217,13 @@ struct LFO : public ValueController
     double syncLength() override;
     double getValue() override;
 
+protected:
+    void finishStart() override;
+
+private:
     ValueObject* from;
     ValueObject* to;
     ValueObject* length;
-
-protected:
-    void finishStart() override;
 
 };
 
@@ -244,16 +247,16 @@ struct Random : public ValueController
     double syncLength() override;
     double getValue() override;
 
+protected:
+    void finishStart() override;
+
+private:
     ValueObject* from;
     ValueObject* to;
     ValueObject* length;
 
     Type* type;
 
-protected:
-    void finishStart() override;
-
-private:
     double current;
     double next = 0;
 
@@ -268,12 +271,13 @@ struct Limit : public ValueController
     double syncLength() override;
     double getValue() override;
 
+protected:
+    void finishStart() override;
+
+private:
     ValueObject* value;
     ValueObject* min;
     ValueObject* max;
-
-protected:
-    void finishStart() override;
 
 };
 
