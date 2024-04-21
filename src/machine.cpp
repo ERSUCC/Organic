@@ -397,10 +397,21 @@ unsigned int Machine::readInt(const unsigned int address) const
 {
     unsigned char bytes[4];
 
-    bytes[0] = program[address];
-    bytes[1] = program[address + 1];
-    bytes[2] = program[address + 2];
-    bytes[3] = program[address + 3];
+    if (utils->littleEndian)
+    {
+        bytes[0] = program[address];
+        bytes[1] = program[address + 1];
+        bytes[2] = program[address + 2];
+        bytes[3] = program[address + 3];
+    }
+
+    else
+    {
+        bytes[0] = program[address + 3];
+        bytes[0] = program[address + 2];
+        bytes[0] = program[address + 1];
+        bytes[0] = program[address];
+    }
 
     return *reinterpret_cast<unsigned int*>(bytes);
 }
@@ -409,14 +420,29 @@ double Machine::readDouble(const unsigned int address) const
 {
     unsigned char bytes[8];
 
-    bytes[0] = program[address];
-    bytes[1] = program[address + 1];
-    bytes[2] = program[address + 2];
-    bytes[3] = program[address + 3];
-    bytes[4] = program[address + 4];
-    bytes[5] = program[address + 5];
-    bytes[6] = program[address + 6];
-    bytes[7] = program[address + 7];
+    if (utils->littleEndian)
+    {
+        bytes[0] = program[address];
+        bytes[1] = program[address + 1];
+        bytes[2] = program[address + 2];
+        bytes[3] = program[address + 3];
+        bytes[4] = program[address + 4];
+        bytes[5] = program[address + 5];
+        bytes[6] = program[address + 6];
+        bytes[7] = program[address + 7];
+    }
+
+    else
+    {
+        bytes[1] = program[address + 7];
+        bytes[2] = program[address + 6];
+        bytes[3] = program[address + 5];
+        bytes[4] = program[address + 4];
+        bytes[5] = program[address + 3];
+        bytes[6] = program[address + 2];
+        bytes[7] = program[address + 1];
+        bytes[0] = program[address];
+    }
 
     return *reinterpret_cast<double*>(bytes);
 }

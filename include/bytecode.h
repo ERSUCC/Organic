@@ -10,6 +10,9 @@
 struct BytecodeResolver;
 struct BytecodeBlock;
 
+std::vector<unsigned char> intToBytes(const unsigned int i);
+std::vector<unsigned char> doubleToBytes(const double d);
+
 struct BytecodeInstruction
 {
     BytecodeInstruction(const unsigned int size);
@@ -17,11 +20,6 @@ struct BytecodeInstruction
     virtual void output(std::ofstream& stream, BytecodeResolver* resolver) const = 0;
 
     const unsigned int size;
-
-protected:
-    std::vector<unsigned char> intToBytes(const unsigned int i) const;
-    std::vector<unsigned char> doubleToBytes(const double d) const;
-
 };
 
 struct StackPushByte : public BytecodeInstruction

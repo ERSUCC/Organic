@@ -2,6 +2,13 @@
 
 Utils::Utils()
 {
+    const unsigned int i = 1;
+
+    if (*reinterpret_cast<const unsigned char*>(&i) == 1)
+    {
+        littleEndian = true;
+    }
+
     rng = std::mt19937(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 }
 

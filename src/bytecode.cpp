@@ -1,35 +1,63 @@
 #include "../include/bytecode.h"
 
+std::vector<unsigned char> intToBytes(const unsigned int i)
+{
+    const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&i);
+
+    if (Utils::get()->littleEndian)
+    {
+        return std::vector<unsigned char>
+        {
+            bytes[0],
+            bytes[1],
+            bytes[2],
+            bytes[3]
+        };
+    }
+    
+    return std::vector<unsigned char>
+    {
+        bytes[3],
+        bytes[2],
+        bytes[1],
+        bytes[0]
+    };
+}
+
+std::vector<unsigned char> doubleToBytes(const double d)
+{
+    const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&d);
+
+    if (Utils::get()->littleEndian)
+    {
+        return std::vector<unsigned char>
+        {
+            bytes[0],
+            bytes[1],
+            bytes[2],
+            bytes[3],
+            bytes[4],
+            bytes[5],
+            bytes[6],
+            bytes[7]
+        };
+    }
+
+    return std::vector<unsigned char>
+    {
+        bytes[7],
+        bytes[6],
+        bytes[5],
+        bytes[4],
+        bytes[3],
+        bytes[2],
+        bytes[1],
+        bytes[0]
+    };
+}
+
 BytecodeInstruction::BytecodeInstruction(const unsigned int size) :
     size(size) {}
-
-std::vector<unsigned char> BytecodeInstruction::intToBytes(const unsigned int i) const
-{
-    const unsigned char* bytes_array = reinterpret_cast<const unsigned char*>(&i);
-
-    std::vector<unsigned char> bytes;
-
-    for (unsigned int j = 0; j < 4; j++)
-    {
-        bytes.push_back(bytes_array[j]);
-    }
-
-    return bytes;
-}
-
-std::vector<unsigned char> BytecodeInstruction::doubleToBytes(const double d) const
-{
-    const unsigned char* bytes_array = reinterpret_cast<const unsigned char*>(&d);
-
-    std::vector<unsigned char> bytes;
-
-    for (unsigned int i = 0; i < 8; i++)
-    {
-        bytes.push_back(bytes_array[i]);
-    }
-
-    return bytes;
-}
 
 StackPushByte::StackPushByte(const unsigned char value) :
     BytecodeInstruction(2), value(value) {}

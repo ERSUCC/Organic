@@ -24,6 +24,8 @@ struct Utils
     static void argumentError(const std::string message);
     static void machineError(const std::string message, const std::string file);
 
+    bool littleEndian = false;
+
     unsigned int sampleRate = 44100;
     unsigned int channels = 2;
     unsigned int bufferLength = 128;
