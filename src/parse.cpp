@@ -231,7 +231,15 @@ namespace Parser
                     nextCharacter();
                 }
 
-                tokens.push_back(new Value(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1), constant, std::stod(constant)));
+                if (dynamic_cast<Subtract*>(tokens.back()) && (dynamic_cast<Equals*>(tokens[tokens.size() - 2]) || dynamic_cast<Colon*>(tokens[tokens.size() - 2]) || dynamic_cast<OpenParenthesis*>(tokens[tokens.size() - 2]) || dynamic_cast<Operator*>(tokens[tokens.size() - 2])))
+                {
+                    tokens[tokens.size() - 1] = new Value(ParserLocation(tokens.back()->location.line, tokens.back()->location.character, tokens.size() - 1, tokens.size()), "-" + constant, std::stod("-" + constant));
+                }
+
+                else
+                {
+                    tokens.push_back(new Value(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1), constant, std::stod(constant)));
+                }
             }
 
             else
@@ -537,16 +545,9 @@ namespace Parser
 
         std::vector<const Token*> terms;
 
-        while (tokenIs<Value>(pos) || tokenIs<String>(pos) || tokenIs<Operator>(pos) || tokenIs<OpenParenthesis>(pos))
+        while (true)
         {
-            if (tokenIs<Operator>(pos) && terms.size() > 0 && !tokenIs<Operator>(pos - 1))
-            {
-                terms.push_back(getToken(pos));
-
-                pos++;
-            }
-
-            else if (tokenIs<OpenParenthesis>(pos))
+            if (tokenIs<OpenParenthesis>(pos))
             {
                 const unsigned int pStart = pos;
 
@@ -575,6 +576,18 @@ namespace Parser
                 terms.push_back(token);
 
                 pos = token->location.end;
+            }
+
+            if (tokenIs<Operator>(pos))
+            {
+                terms.push_back(getToken(pos));
+
+                pos++;
+            }
+
+            else
+            {
+                break;
             }
         }
 
@@ -786,14 +799,6 @@ namespace Parser
             }
 
             return new Variable(ParserLocation(str->location.line, str->location.character, pos, pos + 1), str->str);
-        }
-
-        if (tokenIs<Subtract>(pos) && tokenIs<Value>(pos + 1))
-        {
-            const Token* sub = getToken(pos);
-            const Value* value = getToken<Value>(pos + 1);
-
-            return new Value(ParserLocation(sub->location.line, sub->location.character, pos, pos + 2), "-" + value->str, -value->value);
         }
 
         tokenError(getToken(pos), "expression term");
