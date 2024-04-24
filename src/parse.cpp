@@ -400,6 +400,11 @@ namespace Parser
 
     const Token* Parser::parseInstruction(unsigned int pos) const
     {
+        if (!tokenIs<String>(pos))
+        {
+            tokenError(getToken(pos), "variable or function name");
+        }
+
         if (tokenIs<Equals>(pos + 1))
         {
             return parseAssign(pos);
@@ -417,11 +422,6 @@ namespace Parser
 
     const Token* Parser::parseAssign(unsigned int pos) const
     {
-        if (!tokenIs<String>(pos))
-        {
-            tokenError(getToken<String>(pos), "variable name");
-        }
-
         const Token* name = getToken(pos);
         const Token* value = parseExpression(pos + 2);
 
@@ -450,11 +450,6 @@ namespace Parser
 
     const Token* Parser::parseCall(unsigned int pos) const
     {
-        if (!tokenIs<String>(pos))
-        {
-            tokenError(getToken(pos), "function name");
-        }
-
         const unsigned int start = pos;
 
         pos++;
