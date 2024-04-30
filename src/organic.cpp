@@ -110,10 +110,13 @@ void Organic::startExport()
 
     double* buffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
 
+    machine->execute(4);
+
     for (unsigned int i = 0; i < steps; i += utils->bufferLength)
     {
         utils->time = i * 1000.0 / utils->sampleRate;
 
+        machine->performEvents();
         machine->processAudioSources(buffer, utils->bufferLength);
 
         for (int j = 0; j < utils->bufferLength; j++)
