@@ -62,6 +62,14 @@ double ValueDivide::getValueInternal()
     return value1->getValue() / value2->getValue();
 }
 
+ValuePower::ValuePower(ValueObject* value1, ValueObject* value2) :
+    ValueCombination(value1, value2) {}
+
+double ValuePower::getValueInternal()
+{
+    return pow(value1->getValue(), value2->getValue());
+}
+
 ValueEquals::ValueEquals(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 

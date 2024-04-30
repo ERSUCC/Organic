@@ -61,6 +61,15 @@ protected:
     
 };
 
+struct ValuePower : public ValueCombination
+{
+    ValuePower(ValueObject* value1, ValueObject* value2);
+
+protected:
+    double getValueInternal() override;
+    
+};
+
 struct ValueEquals : public ValueCombination
 {
     ValueEquals(ValueObject* value1, ValueObject* value2);

@@ -46,6 +46,9 @@ namespace Parser
     Divide::Divide(const ParserLocation location) :
         Operator(location, "/") {}
 
+    Power::Power(const ParserLocation location) :
+        Operator(location, "^") {}
+
     DoubleEquals::DoubleEquals(const ParserLocation location) :
         Operator(location, "==") {}
 
@@ -168,6 +171,14 @@ namespace Parser
         Token(location, value1->str + " / " + value2->str), value1(value1), value2(value2) {}
 
     void DivideObject::accept(BytecodeTransformer* visitor) const
+    {
+        visitor->visit(this);
+    }
+
+    PowerObject::PowerObject(const ParserLocation location, const Token* value1, const Token* value2) :
+        Token(location, value1->str + " ^ " + value2->str), value1(value1), value2(value2) {}
+
+    void PowerObject::accept(BytecodeTransformer* visitor) const
     {
         visitor->visit(this);
     }
@@ -420,6 +431,14 @@ namespace Parser
         token->value1->accept(this);
 
         currentScope->block->instructions.push_back(new CallNative("divide"));
+    }
+
+    void BytecodeTransformer::visit(const PowerObject* token)
+    {
+        token->value2->accept(this);
+        token->value1->accept(this);
+
+        currentScope->block->instructions.push_back(new CallNative("power"));
     }
 
     void BytecodeTransformer::visit(const EqualsObject* token)

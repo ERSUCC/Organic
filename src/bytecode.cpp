@@ -157,11 +157,12 @@ void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
     else if (function == "subtract") id = 0x11;
     else if (function == "multiply") id = 0x12;
     else if (function == "divide") id = 0x13;
-    else if (function == "equal") id = 0x14;
-    else if (function == "less") id = 0x15;
-    else if (function == "greater") id = 0x16;
-    else if (function == "lessequal") id = 0x17;
-    else if (function == "greaterequal") id = 0x18;
+    else if (function == "power") id = 0x14;
+    else if (function == "equal") id = 0x15;
+    else if (function == "less") id = 0x16;
+    else if (function == "greater") id = 0x17;
+    else if (function == "lessequal") id = 0x18;
+    else if (function == "greaterequal") id = 0x19;
 
     else if (function == "sine") id = 0x30;
     else if (function == "square") id = 0x31;

@@ -174,6 +174,13 @@ namespace Parser
                 nextCharacter();
             }
 
+            else if (code[current] == '^')
+            {
+                tokens.push_back(new Power(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+
+                nextCharacter();
+            }
+
             else if (code[current] == '<')
             {
                 nextCharacter();
@@ -666,6 +673,29 @@ namespace Parser
                 terms[i - 1] = new GreaterEqualObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
+
+                i--;
+            }
+        }
+
+        for (unsigned int i = 1; i < terms.size() - 1; i++)
+        {
+            if (dynamic_cast<const Power*>(terms[i]))
+            {
+                const Value* left = dynamic_cast<const Value*>(terms[i - 1]);
+                const Value* right = dynamic_cast<const Value*>(terms[i + 1]);
+
+                if (left && right)
+                {
+                    terms[i - 1] = new Value(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), terms[i]->str, pow(left->value, right->value));
+                }
+
+                else
+                {
+                    terms[i - 1] = new PowerObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                }
+
+                terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
                 i--;
             }

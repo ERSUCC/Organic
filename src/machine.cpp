@@ -145,26 +145,31 @@ void Machine::execute(unsigned int address)
                         break;
 
                     case 0x14:
-                        stack.push(new ValueEquals(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValuePower(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
                         break;
 
                     case 0x15:
-                        stack.push(new ValueLess(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueEquals(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
                         break;
 
                     case 0x16:
-                        stack.push(new ValueGreater(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueLess(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
                         break;
 
                     case 0x17:
-                        stack.push(new ValueLessEqual(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueGreater(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
                         break;
 
                     case 0x18:
+                        stack.push(new ValueLessEqual(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+
+                        break;
+
+                    case 0x19:
                         stack.push(new ValueGreaterEqual(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
 
                         break;

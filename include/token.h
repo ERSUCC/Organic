@@ -94,6 +94,11 @@ namespace Parser
         Divide(const ParserLocation location);
     };
 
+    struct Power : public Operator
+    {
+        Power(const ParserLocation location);
+    };
+
     struct DoubleEquals : public Operator
     {
         DoubleEquals(const ParserLocation location);
@@ -214,6 +219,16 @@ namespace Parser
     struct DivideObject : public Token
     {
         DivideObject(const ParserLocation location, const Token* value1, const Token* value2);
+
+        void accept(BytecodeTransformer* visitor) const override;
+
+        const Token* value1;
+        const Token* value2;
+    };
+
+    struct PowerObject : public Token
+    {
+        PowerObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -360,6 +375,7 @@ namespace Parser
         void visit(const SubtractObject* token);
         void visit(const MultiplyObject* token);
         void visit(const DivideObject* token);
+        void visit(const PowerObject* token);
         void visit(const EqualsObject* token);
         void visit(const LessObject* token);
         void visit(const GreaterObject* token);
