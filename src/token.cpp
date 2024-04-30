@@ -362,11 +362,6 @@ namespace Parser
 
         if (currentScope->getVariable(name))
         {
-            if (currentVariable == name)
-            {
-                return Utils::parseError("Variable \"" + name + "\" referenced in its own definition.", sourcePath, token->location.line, token->location.character);
-            }
-
             if (copy)
             {
                 currentScope->block->instructions.push_back(new GetVariableCopy(name));
@@ -474,15 +469,11 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Assign* token)
     {
-        currentVariable = token->variable;
-
-        currentScope->addVariable(currentVariable);
-
         token->value->accept(this);
 
-        currentScope->block->instructions.push_back(new SetVariable(currentVariable));
+        currentScope->block->instructions.push_back(new SetVariable(token->variable));
 
-        currentVariable = ""; // this breaks for multi-nested scopes, fix with stack
+        currentScope->addVariable(token->variable);
     }
 
     void BytecodeTransformer::visit(const Call* token)
@@ -595,7 +586,8 @@ namespace Parser
 
         else if (name == "perform")
         {
-            token->arguments->get("function", nullptr, this);
+            token->arguments->get("delay", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("function", new CodeBlock(ParserLocation(0, 0, 0, 0), std::vector<const Instruction*>()), this);
 
             currentScope->block->instructions.push_back(new StackPushAddress(resolver->blocks.back()));
         }

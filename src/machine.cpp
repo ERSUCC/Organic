@@ -83,6 +83,9 @@ void Machine::execute(unsigned int address)
                     variables[id] = new Variable(popStackAs<ValueObject>());
                 }
 
+                variables[id]->stop();
+                variables[id]->start(utils->time);
+
                 address += 2;
 
                 break;
@@ -96,7 +99,7 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x07:
-                stack.push(new Variable(variables[program[address + 1]]->value));
+                stack.push(variables[program[address + 1]]->value);
 
                 address += 2;
 
@@ -336,10 +339,10 @@ void Machine::execute(unsigned int address)
                     {
                         const unsigned int exec = popStackAs<Value>()->value;
 
-                        events.push_back(new Event([&]()
+                        events.push_back(new Event([=]()
                         {
                             execute(exec);
-                        }));
+                        }, popStackAs<ValueObject>()));
 
                         break;
                     }
@@ -365,13 +368,13 @@ void Machine::execute(unsigned int address)
     }
 }
 
-void Machine::processAudioSources(double* buffer, const unsigned int bufferLength) const
+void Machine::processAudioSources(double* buffer, const unsigned int bufferLength)
 {
     std::fill(buffer, buffer + bufferLength * utils->channels, 0);
 
-    for (AudioSource* audioSource : audioSources)
+    for (unsigned int i = 0; i < audioSources.size(); i++)
     {
-        audioSource->fillBuffer(buffer, bufferLength);
+        audioSources[i]->fillBuffer(buffer, bufferLength);
     }
 }
 

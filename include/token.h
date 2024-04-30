@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <stack>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -376,8 +377,6 @@ namespace Parser
         const std::string sourcePath;
 
         std::string outputPath;
-
-        std::string currentVariable;
 
         BytecodeResolver* resolver = new BytecodeResolver();
 

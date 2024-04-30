@@ -1,0 +1,80 @@
+time = 50
+
+base = 110
+freq = base
+
+doom = 1
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+})
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time * 2)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time * 3)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time * 4)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time * 5)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time * 6)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time * 7)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time * 8)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time * 9)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+
+    freq = #freq + base
+}, delay: time * 10)
+
+perform(function: {
+    triangle(volume: 1, frequency: #freq * doom)
+}, delay: time * 11)
+
+perform(function: {
+    doom = sweep(from: 1, to: 0, length: 10000)
+}, delay: time * 11 + 2000)

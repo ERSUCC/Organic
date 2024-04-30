@@ -20,7 +20,7 @@ struct Machine
 
     void execute(unsigned int address);
 
-    void processAudioSources(double* buffer, const unsigned int bufferLength) const;
+    void processAudioSources(double* buffer, const unsigned int bufferLength);
     void performEvents();
 
 private:

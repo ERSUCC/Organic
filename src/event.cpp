@@ -1,14 +1,11 @@
 #include "../include/event.h"
 
-Event::Event(const std::function<void(void)> action) :
-    action(action)
-{
-    next = startTime;
-}
+Event::Event(const std::function<void(void)> action, ValueObject* delay) :
+    action(action), delay(delay) {}
 
 bool Event::ready() const
 {
-    return utils->time >= next;
+    return utils->time >= startTime + delay->getValue();
 }
 
 bool Event::hasNext() const
@@ -19,4 +16,14 @@ bool Event::hasNext() const
 void Event::perform()
 {
     action();
+}
+
+void Event::finishStart()
+{
+    delay->start(startTime);
+}
+
+void Event::finishStop()
+{
+    delay->stop();
 }
