@@ -75,12 +75,12 @@ void Machine::execute(unsigned int address)
 
                 if (variables.count(id))
                 {
-                    variables[id]->value = popStackAs<ValueObject>();
+                    variables[id]->object = popStack(); // reassign valueObject or call setter
                 }
 
                 else
                 {
-                    variables[id] = new Variable(popStackAs<ValueObject>());
+                    variables[id] = new Variable(popStack());
                 }
 
                 variables[id]->stop();
@@ -99,7 +99,7 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x07:
-                stack.push(variables[program[address + 1]]->value);
+                stack.push(variables[program[address + 1]]->object);
 
                 address += 2;
 
@@ -176,7 +176,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x30:
                     {
-                        Sine* sine = new Sine(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
+                        Sine* sine = new Sine(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack(), popStackAs<ValueObject>());
 
                         audioSources.push_back(sine);
 
@@ -189,7 +189,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x31:
                     {
-                        Square* square = new Square(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
+                        Square* square = new Square(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack(), popStackAs<ValueObject>());
 
                         audioSources.push_back(square);
 
@@ -202,7 +202,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x32:
                     {
-                        Triangle* triangle = new Triangle(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
+                        Triangle* triangle = new Triangle(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack(), popStackAs<ValueObject>());
 
                         audioSources.push_back(triangle);
 
@@ -215,7 +215,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x33:
                     {
-                        Saw* saw = new Saw(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>(), popStackAs<ValueObject>());
+                        Saw* saw = new Saw(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack(), popStackAs<ValueObject>());
 
                         audioSources.push_back(saw);
 
@@ -228,7 +228,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x34:
                     {
-                        Noise* noise = new Noise(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAsList<Effect>());
+                        Noise* noise = new Noise(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack());
 
                         audioSources.push_back(noise);
 
@@ -361,6 +361,36 @@ void Machine::execute(unsigned int address)
                         return Utils::machineError("Unrecognized function code \"" + code.str() + "\"", path);
                     }
                 }
+
+                address += 2;
+
+                break;
+
+            case 0x09:
+                execute(popStackAs<Value>()->value);
+
+                inputs.pop();
+
+                address++;
+
+                break;
+
+            case 0x0a:
+                inputs.push(std::unordered_map<unsigned char, Object*>());
+
+                address++;
+
+                break;
+
+            case 0x0b:
+                inputs.top()[program[address + 1]] = popStack();
+
+                address += 2;
+
+                break;
+
+            case 0x0c:
+                stack.push(inputs.top()[program[address + 1]]);
 
                 address += 2;
 

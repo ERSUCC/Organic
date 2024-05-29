@@ -10,6 +10,23 @@ namespace Parser
 
     void Token::accept(BytecodeTransformer* visitor) const {}
 
+    std::string listToString(const std::vector<const Token*> list)
+    {
+        std::string result = "(";
+
+        if (list.size() > 0)
+        {
+            result += list[0]->str;
+
+            for (unsigned int i = 1; i < list.size(); i++)
+            {
+                result += ", " + list[i]->str;
+            }
+        }
+
+        return result + ")";
+    }
+
     OpenParenthesis::OpenParenthesis(const ParserLocation location) :
         Token(location, "(") {}
 
@@ -93,9 +110,26 @@ namespace Parser
 
     Argument::Argument(const ParserLocation location, const std::string name, const Token* value) :
         Token(location, name + ": " + value->str), name(name), value(value) {}
+    
+    std::string argumentsToString(const std::vector<const Argument*> arguments)
+    {
+        std::string result = "(";
+
+        if (arguments.size() > 0)
+        {
+            result += arguments[0]->str;
+
+            for (unsigned int i = 1; i < arguments.size(); i++)
+            {
+                result += ", " + arguments[i]->str;
+            }
+        }
+
+        return result + ")";
+    }
 
     ArgumentList::ArgumentList(const std::vector<const Argument*> arguments, const std::string name, const std::string path) :
-        arguments(arguments), name(name), path(path)
+        arguments(arguments), name(name), path(path), str(argumentsToString(arguments))
     {
         std::unordered_set<std::string> defined;
 
@@ -136,7 +170,7 @@ namespace Parser
     }
 
     List::List(const ParserLocation location, const std::vector<const Token*> values) :
-        Token(location, "()"), values(values) {} // fix str, idk if necessary but should match other structs
+        Token(location, listToString(values)), values(values) {}
 
     void List::accept(BytecodeTransformer* visitor) const
     {
@@ -243,7 +277,7 @@ namespace Parser
     }
 
     Call::Call(const ParserLocation location, const std::string name, ArgumentList* arguments) :
-        Instruction(location, name + "()"), name(name), arguments(arguments) {} // fix str, same as list
+        Instruction(location, name + arguments->str), name(name), arguments(arguments) {}
 
     void Call::accept(BytecodeTransformer* visitor) const
     {
@@ -254,6 +288,14 @@ namespace Parser
         Token(location, ""), instructions(instructions) {} // fix str, same as list
 
     void CodeBlock::accept(BytecodeTransformer* visitor) const
+    {
+        visitor->visit(this);
+    }
+
+    Define::Define(const ParserLocation location, const std::string name, const std::vector<std::string> inputs, const CodeBlock* body) :
+        Token(location, ""), name(name), inputs(inputs), body(body) {} // fix str, same as list
+
+    void Define::accept(BytecodeTransformer* visitor) const
     {
         visitor->visit(this);
     }
@@ -286,13 +328,86 @@ namespace Parser
         }
     }
 
-    void Scope::checkVariableUses() const
+    BytecodeBlock* Scope::getFunction(const std::string name)
     {
+        if (functions.count(name))
+        {
+            functionsUsed.insert(name);
+
+            return functions[name];
+        }
+
+        if (parent)
+        {
+            if (BytecodeBlock* function = parent->getFunction(name))
+            {
+                return function;
+            }
+        }
+
+        return nullptr;
+    }
+
+    void Scope::addFunction(const std::string name, BytecodeBlock* body)
+    {
+        functions[name] = body;
+    }
+
+    void Scope::addInput(const std::string input)
+    {
+        inputs[input] = inputs.size();
+    }
+
+    std::optional<unsigned char> Scope::getInput(const std::string input)
+    {
+        if (inputs.count(input))
+        {
+            inputsUsed.insert(input);
+
+            return inputs[input];
+        }
+
+        if (parent)
+        {
+            if (std::optional<unsigned char> result = parent->getInput(input))
+            {
+                return result;
+            }
+        }
+
+        return std::nullopt;
+    }
+
+    void Scope::removeInput(const std::string input)
+    {
+        inputs.erase(input);
+    }
+
+    void Scope::checkUses() const
+    {
+        // add parse locations to all of these if possible?
+
         for (const std::string variable : variables)
         {
             if (!variablesUsed.count(variable))
             {
                 Utils::warning("Warning: Unused variable \"" + variable + "\".");
+            }
+        }
+
+        for (const std::pair<std::string, BytecodeBlock*> pair : functions)
+        {
+            if (!functionsUsed.count(pair.first))
+            {
+                Utils::warning("Warning: Unused function \"" + pair.first + "\".");
+            }
+        }
+
+        for (const std::pair<std::string, unsigned char> pair : inputs)
+        {
+            if (!inputsUsed.count(pair.first))
+            {
+                Utils::warning("Warning: unused input \"" + pair.first + "\"."); // add function name to be more clear
             }
         }
     }
@@ -371,7 +486,20 @@ namespace Parser
             copy = true;
         }
 
-        if (currentScope->getVariable(name))
+        if (const std::optional<unsigned char> input = currentScope->getInput(name))
+        {
+            if (copy)
+            {
+                // is this an error or not
+            }
+
+            else
+            {
+                currentScope->block->instructions.push_back(new GetInput(input.value()));
+            }
+        }
+
+        else if (currentScope->getVariable(name))
         {
             if (copy)
             {
@@ -490,7 +618,7 @@ namespace Parser
     {
         token->value->accept(this);
 
-        currentScope->block->instructions.push_back(new SetVariable(token->variable));
+        currentScope->block->instructions.push_back(new SetVariable(token->variable)); // this will break for assigning inputs
 
         currentScope->addVariable(token->variable);
     }
@@ -498,6 +626,25 @@ namespace Parser
     void BytecodeTransformer::visit(const Call* token)
     {
         const std::string name = token->name;
+
+        if (const BytecodeBlock* function = currentScope->getFunction(name))
+        {
+            currentScope->block->instructions.push_back(new PrepareInputs());
+
+            for (unsigned int i = 0; i < function->inputs.size(); i++)
+            {
+                token->arguments->get(function->inputs[i], new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+
+                currentScope->block->instructions.push_back(new SetInput(i));
+            }
+
+            token->arguments->confirmEmpty();
+
+            currentScope->block->instructions.push_back(new StackPushAddress(resolver->blocks.back()));
+            currentScope->block->instructions.push_back(new CallUser());
+
+            return;
+        }
 
         if (name == "sine")
         {
@@ -632,11 +779,51 @@ namespace Parser
             instruction->accept(this);
         }
 
-        currentScope->checkVariableUses();
+        currentScope->checkUses();
 
         resolver->blocks.push_back(currentScope->block);
 
         currentScope = currentScope->parent;
+    }
+
+    void BytecodeTransformer::visit(const Define* token)
+    {
+        if (token->name == "sine" ||
+            token->name == "square" ||
+            token->name == "saw" ||
+            token->name == "triangle" ||
+            token->name == "noise" ||
+            token->name == "hold" ||
+            token->name == "lfo" ||
+            token->name == "sweep" ||
+            token->name == "sequence" ||
+            token->name == "repeat" ||
+            token->name == "random" ||
+            token->name == "limit" ||
+            token->name == "trigger" ||
+            token->name == "delay" ||
+            token->name == "lowpass" ||
+            token->name == "perform" ||
+            currentScope->getFunction(token->name))
+        {
+            return Utils::parseError("A function already exists with the name \"" + token->name + "\".", sourcePath, token->location.line, token->location.character);
+        }
+
+        for (const std::string input : token->inputs)
+        {
+            currentScope->addInput(input);
+        }
+
+        token->body->accept(this);
+
+        for (const std::string input : token->inputs)
+        {
+            currentScope->removeInput(input);
+        }
+
+        resolver->blocks.back()->inputs = token->inputs;
+
+        currentScope->addFunction(token->name, resolver->blocks.back());
     }
 
     void BytecodeTransformer::visit(const Program* token)
@@ -648,7 +835,7 @@ namespace Parser
             instruction->accept(this);
         }
 
-        currentScope->checkVariableUses();
+        currentScope->checkUses();
 
         resolver->output(outputPath);
     }

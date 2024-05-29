@@ -41,6 +41,8 @@ private:
 
     std::unordered_map<unsigned char, Variable*> variables;
 
+    std::stack<std::unordered_map<unsigned char, Object*>> inputs;
+
     std::vector<AudioSource*> audioSources;
     std::vector<Event*> events;
 

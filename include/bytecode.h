@@ -94,8 +94,42 @@ struct CallNative : public BytecodeInstruction
     const std::string function;
 };
 
+struct CallUser : public BytecodeInstruction
+{
+    CallUser();
+
+    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+};
+
+struct PrepareInputs : public BytecodeInstruction
+{
+    PrepareInputs();
+
+    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+};
+
+struct SetInput : public BytecodeInstruction
+{
+    SetInput(const unsigned char input);
+
+    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+
+    const unsigned char input;
+};
+
+struct GetInput : public BytecodeInstruction
+{
+    GetInput(const unsigned char input);
+
+    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+
+    const unsigned char input;
+};
+
 struct BytecodeBlock
 {
+    std::vector<std::string> inputs;
+
     std::vector<BytecodeInstruction*> instructions;
 
     unsigned int offset;

@@ -419,12 +419,75 @@ namespace Parser
 
         if (tokenIs<OpenParenthesis>(pos + 1))
         {
-            return parseCall(pos);
+            unsigned int start = pos;
+
+            unsigned int depth = 0;
+
+            do
+            {
+                pos++;
+
+                if (tokenIs<OpenParenthesis>(pos))
+                {
+                    depth++;
+                }
+
+                else if (tokenIs<CloseParenthesis>(pos))
+                {
+                    depth--;
+                }
+            } while (depth > 0);
+
+            if (tokenIs<Equals>(++pos))
+            {
+                return parseDefine(start);
+            }
+
+            return parseCall(start);
         }
 
         tokenError(getToken(pos + 1), "\"=\" or \"(\"");
 
         return nullptr;
+    }
+
+    const Token* Parser::parseDefine(unsigned int pos) const
+    {
+        const Token* name = getToken(pos);
+        
+        pos += 2;
+
+        std::vector<std::string> inputs;
+
+        if (!tokenIs<CloseParenthesis>(pos))
+        {
+            pos--;
+
+            do
+            {
+                const String* input = getToken<String>(++pos);
+
+                if (!input)
+                {
+                    tokenError(getToken(pos), "input name");
+                }
+
+                inputs.push_back(input->str);
+
+                pos++;
+            } while (tokenIs<Comma>(pos));
+
+            if (!tokenIs<CloseParenthesis>(pos))
+            {
+                tokenError(getToken(pos), "\")\"");
+            }
+        }
+
+        pos += 2;
+
+        const CodeBlock* body = dynamic_cast<const CodeBlock*>(parseCodeBlock(pos));
+
+        return new Define(ParserLocation(name->location.line, name->location.character, name->location.start, body->location.end), name->str, inputs, body);
     }
 
     const Token* Parser::parseAssign(unsigned int pos) const

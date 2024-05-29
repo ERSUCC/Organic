@@ -45,12 +45,13 @@ struct ValueObject : public Sync
 
 struct Variable : public ValueObject
 {
-    Variable(ValueObject* value);
+    Variable(Object* object);
 
     double syncLength() override;
     double getValue() override;
 
-    ValueObject* value;
+    Object* object;
+    ValueObject* valueObject; // doesn't change when only object is set, fix with setter function
 
 private:
     void finishStart() override;

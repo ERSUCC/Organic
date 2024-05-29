@@ -2,9 +2,11 @@
 
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <stack>
 #include <string>
 #include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include "bytecode.h"
@@ -33,6 +35,8 @@ namespace Parser
 
         const std::string str;
     };
+
+    std::string listToString(const std::vector<const Token*> list);
 
     struct OpenParenthesis : public Token
     {
@@ -161,6 +165,8 @@ namespace Parser
         const Token* value;
     };
 
+    std::string argumentsToString(const std::vector<const Argument*> arguments);
+
     struct ArgumentList
     {
         ArgumentList(const std::vector<const Argument*> arguments, const std::string name, const std::string path);
@@ -168,6 +174,8 @@ namespace Parser
         void get(const std::string name, Token* defaultValue, BytecodeTransformer* visitor);
 
         void confirmEmpty() const;
+
+        const std::string str;
 
     private:
         std::vector<const Argument*> arguments;
@@ -331,6 +339,19 @@ namespace Parser
         const std::vector<const Instruction*> instructions;
     };
 
+    struct Define : public Token
+    {
+        Define(const ParserLocation location, const std::string name, const std::vector<std::string> inputs, const CodeBlock* body);
+
+        void accept(BytecodeTransformer* visitor) const override;
+
+        const std::string name;
+
+        const std::vector<std::string> inputs;
+
+        const CodeBlock* body;
+    };
+
     struct Scope
     {
         Scope(Scope* parent = nullptr);
@@ -338,7 +359,14 @@ namespace Parser
         bool getVariable(const std::string name);
         void addVariable(const std::string name);
 
-        void checkVariableUses() const;
+        BytecodeBlock* getFunction(const std::string name);
+        void addFunction(const std::string name, BytecodeBlock* body);
+
+        void addInput(const std::string input);
+        std::optional<unsigned char> getInput(const std::string input);
+        void removeInput(const std::string input);
+
+        void checkUses() const;
 
         BytecodeTransformer* visitor;
 
@@ -349,6 +377,12 @@ namespace Parser
     private:
         std::unordered_set<std::string> variables;
         std::unordered_set<std::string> variablesUsed;
+
+        std::unordered_map<std::string, BytecodeBlock*> functions;
+        std::unordered_set<std::string> functionsUsed;
+
+        std::unordered_map<std::string, unsigned char> inputs;
+        std::unordered_set<std::string> inputsUsed;
 
     };
 
@@ -385,6 +419,7 @@ namespace Parser
         void visit(const Assign* token);
         void visit(const Call* token);
         void visit(const CodeBlock* token);
+        void visit(const Define* token);
         void visit(const Program* token);
 
         Scope* currentScope;

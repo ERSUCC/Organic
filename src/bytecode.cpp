@@ -111,7 +111,7 @@ SetVariable::SetVariable(const std::string variable) :
 
 void SetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
-    unsigned char id = 0;
+    unsigned char id;
 
     if (resolver->variables.count(variable))
     {
@@ -183,6 +183,38 @@ void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
     else if (function == "perform") id = 0x70;
 
     stream << (unsigned char)0x08 << id;
+}
+
+CallUser::CallUser() :
+    BytecodeInstruction(1) {}
+
+void CallUser::output(std::ofstream& stream, BytecodeResolver* resolver) const
+{
+    stream << (unsigned char)0x09;
+}
+
+PrepareInputs::PrepareInputs() :
+    BytecodeInstruction(1) {}
+
+void PrepareInputs::output(std::ofstream& stream, BytecodeResolver* resolver) const
+{
+    stream << (unsigned char)0x0a;
+}
+
+SetInput::SetInput(const unsigned char input) :
+    BytecodeInstruction(2), input(input) {}
+
+void SetInput::output(std::ofstream& stream, BytecodeResolver* resolver) const
+{
+    stream << (unsigned char)0x0b << input;
+}
+
+GetInput::GetInput(const unsigned char input) :
+    BytecodeInstruction(2), input(input) {}
+
+void GetInput::output(std::ofstream& stream, BytecodeResolver* resolver) const
+{
+    stream << (unsigned char)0x0c << input;
 }
 
 void BytecodeResolver::output(const std::string path)

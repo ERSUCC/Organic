@@ -27,6 +27,7 @@ namespace Parser
         void tokenError(const Token* token, const std::string message) const;
 
         const Token* parseInstruction(unsigned int pos) const;
+        const Token* parseDefine(unsigned int pos) const;
         const Token* parseAssign(unsigned int pos) const;
         const Token* parseCodeBlock(unsigned int pos) const;
         const Token* parseCall(unsigned int pos) const;

@@ -49,30 +49,41 @@ double ValueObject::getValue()
     return 0;
 }
 
-Variable::Variable(ValueObject* value) :
-    value(value) {}
+Variable::Variable(Object* object) :
+    object(object), valueObject(dynamic_cast<ValueObject*>(object)) {}
 
 double Variable::syncLength()
 {
-    return value->syncLength();
+    return valueObject ? valueObject->syncLength() : 0;
 }
 
 double Variable::getValue()
 {
-    if (!value->enabled)
+    if (valueObject)
     {
-        stop();
+        if (!valueObject->enabled)
+        {
+            stop();
+        }
+
+        return valueObject->getValue();
     }
 
-    return value->getValue();
+    return 0;
 }
 
 void Variable::finishStart()
 {
-    value->start(startTime);
+    if (valueObject)
+    {
+        valueObject->start(startTime);
+    }
 }
 
 void Variable::finishStop()
 {
-    value->stop();
+    if (valueObject)
+    {
+        valueObject->stop();
+    }
 }
