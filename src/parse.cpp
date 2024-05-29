@@ -522,29 +522,32 @@ namespace Parser
     {
         const unsigned int start = pos;
 
-        pos++;
+        pos += 2;
 
         std::vector<const Argument*> arguments;
 
-        do
+        if (!tokenIs<CloseParenthesis>(pos))
         {
-            const Argument* argument = (const Argument*)parseArgument(pos + 1);
+            pos--;
 
-            arguments.push_back(argument);
+            do
+            {
+                const Argument* argument = (const Argument*)parseArgument(pos + 1);
 
-            pos = argument->location.end;
-        } while (tokenIs<Comma>(pos));
+                arguments.push_back(argument);
 
-        if (tokenIs<CloseParenthesis>(pos))
-        {
-            const Token* str = getToken(start);
+                pos = argument->location.end;
+            } while (tokenIs<Comma>(pos));
 
-            return new Call(ParserLocation(str->location.line, str->location.character, start, pos + 1), str->str, new ArgumentList(arguments, str->str, path));
+            if (!tokenIs<CloseParenthesis>(pos))
+            {
+                tokenError(getToken(pos), "\")\"");
+            }
         }
 
-        tokenError(getToken(pos), "\")\"");
+        const Token* str = getToken(start);
 
-        return nullptr;
+        return new Call(ParserLocation(str->location.line, str->location.character, start, pos + 1), str->str, new ArgumentList(arguments, str->str, path));
     }
 
     const Token* Parser::parseArgument(unsigned int pos) const
