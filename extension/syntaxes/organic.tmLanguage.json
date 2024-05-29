@@ -56,15 +56,19 @@
 			"patterns": [
 				{
 					"name": "constant.language.sequence.organic",
-					"match": "(sequence-forwards|sequence-backwards|sequence-ping-pong|sequence-random)"
+					"match": "sequence-forwards|sequence-backwards|sequence-ping-pong|sequence-random"
 				},
 				{
 					"name": "constant.language.random.organic",
-					"match": "(random-step|random-linear)"
+					"match": "random-step|random-linear"
 				},
 				{
 					"name": "constant.language.note.organic",
 					"match": "[a-g][sf]?[0-9]"
+				},
+				{
+					"name": "constant.language.value.organic",
+					"match": "pi|e"
 				}
 			]
 		},

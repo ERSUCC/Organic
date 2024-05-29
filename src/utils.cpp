@@ -9,6 +9,8 @@ Utils::Utils()
         littleEndian = true;
     }
 
+    e = exp(1);
+
     rng = std::mt19937(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 }
 

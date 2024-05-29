@@ -69,13 +69,13 @@ LowPassFilter::LowPassFilter(ValueObject* mix, ValueObject* cutoff) :
 
 void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
 {
-    const double omega = tan(M_PI * cutoff->getValue() / utils->sampleRate);
+    const double omega = tan(utils->pi * cutoff->getValue() / utils->sampleRate);
     const double omega2 = omega * omega;
-    const double c = 1 + 2 * cos(M_PI / 4) * omega + omega2;
+    const double c = 1 + 2 * cos(utils->pi / 4) * omega + omega2;
     const double a0 = omega2 / c;
     const double a1 = 2 * a0;
     const double b1 = 2 * (omega2 - 1) / c;
-    const double b2 = (1 - 2 * cos(M_PI / 4) * omega + omega2) / c;
+    const double b2 = (1 - 2 * cos(utils->pi / 4) * omega + omega2) / c;
 
     for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {

@@ -884,7 +884,9 @@ namespace Parser
                 str->str == "sequence-ping-pong" ||
                 str->str == "sequence-random" ||
                 str->str == "random-step" ||
-                str->str == "random-linear")
+                str->str == "random-linear" ||
+                str->str == "pi" ||
+                str->str == "e")
             {
                 return new NamedConstant(ParserLocation(str->location.line, str->location.character, pos, pos + 1), str->str);
             }

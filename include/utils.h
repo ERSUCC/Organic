@@ -30,7 +30,10 @@ struct Utils
     unsigned int channels = 2;
     unsigned int bufferLength = 128;
 
+    const double pi = M_PI;
     const double twoPi = M_PI * 2;
+
+    double e;
 
     double volume = 0.25;
     double time = 0;

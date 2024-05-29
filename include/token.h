@@ -431,5 +431,7 @@ namespace Parser
 
         BytecodeResolver* resolver = new BytecodeResolver();
 
+        Utils* utils;
+
     };
 }

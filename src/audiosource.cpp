@@ -139,7 +139,7 @@ Saw::Saw(ValueObject* volume, ValueObject* pan, Object* effects, ValueObject* fr
 
 double Saw::getValue()
 {
-    return fmod(phase, utils->twoPi) / M_PI - 1;
+    return fmod(phase, utils->twoPi) / utils->pi - 1;
 }
 
 Triangle::Triangle(ValueObject* volume, ValueObject* pan, Object* effects, ValueObject* frequency) :
@@ -149,10 +149,10 @@ double Triangle::getValue()
 {
     if (sin(phase) < 0)
     {
-        return -fmod(phase - M_PI, M_PI) * 2 / M_PI + 1;
+        return -fmod(phase - utils->pi, utils->pi) * 2 / utils->pi + 1;
     }
 
-    return fmod(phase, M_PI) * 2 / M_PI - 1;
+    return fmod(phase, utils->pi) * 2 / utils->pi - 1;
 }
 
 Noise::Noise(ValueObject* volume, ValueObject* pan, Object* effects) :

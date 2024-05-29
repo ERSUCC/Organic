@@ -425,6 +425,8 @@ namespace Parser
     {
         outputPath = std::filesystem::path(path).replace_extension("obc").string();
 
+        utils = Utils::get();
+
         currentScope = new Scope();
     }
 
@@ -470,6 +472,16 @@ namespace Parser
         else if (token->str == "random-linear")
         {
             currentScope->block->instructions.push_back(new StackPushByte(0x01));
+        }
+
+        else if (token->str == "pi")
+        {
+            currentScope->block->instructions.push_back(new StackPushDouble(utils->pi));
+        }
+
+        else if (token->str == "e")
+        {
+            currentScope->block->instructions.push_back(new StackPushDouble(utils->e));
         }
     }
 
