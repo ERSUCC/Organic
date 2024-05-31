@@ -1,6 +1,6 @@
 #include "../include/audiosource.h"
 
-AudioSource::AudioSource(ValueObject* volume, ValueObject* pan, Object* effects) :
+AudioSource::AudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     volume(volume), pan(pan), effects(effects)
 {
     effectBuffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
@@ -31,23 +31,16 @@ void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength)
 
 std::vector<Effect*> AudioSource::getEffectsList() const
 {
-    Object* current = effects;
+    ValueObject* current = effects;
 
     while (Variable* variable = dynamic_cast<Variable*>(current))
     {
-        current = variable->object;
+        current = variable->value;
     }
 
     if (List<Effect>* list = dynamic_cast<List<Effect>*>(current))
     {
-        std::vector<Effect*> objects;
-
-        for (Object* object : list->objects)
-        {
-            objects.push_back(dynamic_cast<Effect*>(object));
-        }
-
-        return objects;
+        return list->objects;
     }
 
     // potentially error if can't cast to effect
@@ -60,7 +53,7 @@ std::vector<Effect*> AudioSource::getEffectsList() const
     return std::vector<Effect*>();
 }
 
-Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, Object* effects, ValueObject* frequency) :
+Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     AudioSource(volume, pan, effects), frequency(frequency) {}
 
 void Oscillator::finishStart()
@@ -113,7 +106,7 @@ void Oscillator::prepareForEffects(const unsigned int bufferLength)
     }
 }
 
-Sine::Sine(ValueObject* volume, ValueObject* pan, Object* effects, ValueObject* frequency) :
+Sine::Sine(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
 
 double Sine::getValue()
@@ -121,7 +114,7 @@ double Sine::getValue()
     return sin(phase);
 }
 
-Square::Square(ValueObject* volume, ValueObject* pan, Object* effects, ValueObject* frequency) :
+Square::Square(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
 
 double Square::getValue()
@@ -134,7 +127,7 @@ double Square::getValue()
     return 1;
 }
 
-Saw::Saw(ValueObject* volume, ValueObject* pan, Object* effects, ValueObject* frequency) :
+Saw::Saw(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
 
 double Saw::getValue()
@@ -142,7 +135,7 @@ double Saw::getValue()
     return fmod(phase, utils->twoPi) / utils->pi - 1;
 }
 
-Triangle::Triangle(ValueObject* volume, ValueObject* pan, Object* effects, ValueObject* frequency) :
+Triangle::Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
 
 double Triangle::getValue()
@@ -155,7 +148,7 @@ double Triangle::getValue()
     return fmod(phase, utils->pi) * 2 / utils->pi - 1;
 }
 
-Noise::Noise(ValueObject* volume, ValueObject* pan, Object* effects) :
+Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     AudioSource(volume, pan, effects) {}
 
 void Noise::prepareForEffects(const unsigned int bufferLength)
@@ -180,7 +173,7 @@ void Noise::prepareForEffects(const unsigned int bufferLength)
     }
 }
 
-Sample::Sample(ValueObject* volume, ValueObject* pan, Object* effects, std::string path, unsigned int grains, bool looping) :
+Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, std::string path, unsigned int grains, bool looping) :
     AudioSource(volume, pan, effects), grains(grains, 0), looping(looping)
 {
     AudioFile<double> file(path);

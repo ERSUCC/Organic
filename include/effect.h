@@ -4,7 +4,7 @@
 
 #include "object.h"
 
-struct Effect : public Sync
+struct Effect : public ValueObject
 {
     Effect(ValueObject* mix);
 

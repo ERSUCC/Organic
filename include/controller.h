@@ -125,14 +125,7 @@ struct Sequence : public ValueController
         Random
     };
 
-    struct Order : public Object
-    {
-        Order(OrderEnum order);
-        
-        OrderEnum order;
-    };
-
-    Sequence(List<ValueObject>* controllers, Order* order);
+    Sequence(List<ValueObject>* controllers, ValueObject* order);
 
     double syncLength() override;
     double getValue() override;
@@ -144,7 +137,7 @@ protected:
 private:
     List<ValueObject>* controllers;
 
-    Order* order;
+    ValueObject* order;
 
     std::uniform_int_distribution<> udist;
 
@@ -244,14 +237,7 @@ struct Random : public ValueController
         Linear
     };
 
-    struct Type : public Object
-    {
-        Type(TypeEnum type);
-        
-        TypeEnum type;
-    };
-
-    Random(ValueObject* from, ValueObject* to, ValueObject* length, Type* type);
+    Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type);
 
     double syncLength() override;
     double getValue() override;
@@ -264,7 +250,7 @@ private:
     ValueObject* to;
     ValueObject* length;
 
-    Type* type;
+    ValueObject* type;
 
     double current;
     double next = 0;

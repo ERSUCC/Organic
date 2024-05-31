@@ -446,32 +446,32 @@ namespace Parser
     {
         if (token->str == "sequence-forwards")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(0x00));
+            currentScope->block->instructions.push_back(new StackPushByte(Sequence::OrderEnum::Forwards));
         }
 
         else if (token->str == "sequence-backwards")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(0x01));
+            currentScope->block->instructions.push_back(new StackPushByte(Sequence::OrderEnum::Backwards));
         }
 
         else if (token->str == "sequence-ping-pong")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(0x02));
+            currentScope->block->instructions.push_back(new StackPushByte(Sequence::OrderEnum::PingPong));
         }
 
         else if (token->str == "sequence-random")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(0x03));
+            currentScope->block->instructions.push_back(new StackPushByte(Sequence::OrderEnum::Random));
         }
 
         else if (token->str == "random-step")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(0x00));
+            currentScope->block->instructions.push_back(new StackPushByte(Random::TypeEnum::Step));
         }
 
         else if (token->str == "random-linear")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(0x01));
+            currentScope->block->instructions.push_back(new StackPushByte(Random::TypeEnum::Linear));
         }
 
         else if (token->str == "pi")

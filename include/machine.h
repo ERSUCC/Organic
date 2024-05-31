@@ -27,7 +27,7 @@ private:
     unsigned int readInt(const unsigned int address) const;
     double readDouble(const unsigned int address) const;
 
-    Object* popStack();
+    ValueObject* popStack();
     template <typename T> T* popStackAs();
     template <typename T> List<T>* popStackAsList();
 
@@ -37,11 +37,11 @@ private:
 
     std::vector<unsigned char> program;
 
-    std::stack<Object*> stack;
+    std::stack<ValueObject*> stack;
 
     std::unordered_map<unsigned char, Variable*> variables;
 
-    std::stack<std::unordered_map<unsigned char, Object*>> inputs;
+    std::stack<std::unordered_map<unsigned char, ValueObject*>> inputs;
 
     std::vector<AudioSource*> audioSources;
     std::vector<Event*> events;

@@ -1,7 +1,5 @@
 #include "../include/object.h"
 
-Object::~Object() {}
-
 Sync::Sync() :
     utils(Utils::get()) {}
 
@@ -49,41 +47,30 @@ double ValueObject::getValue()
     return 0;
 }
 
-Variable::Variable(Object* object) :
-    object(object), valueObject(dynamic_cast<ValueObject*>(object)) {}
+Variable::Variable(ValueObject* value) :
+    value(value) {}
 
 double Variable::syncLength()
 {
-    return valueObject ? valueObject->syncLength() : 0;
+    return value->syncLength();
 }
 
 double Variable::getValue()
 {
-    if (valueObject)
+    if (!value->enabled)
     {
-        if (!valueObject->enabled)
-        {
-            stop();
-        }
-
-        return valueObject->getValue();
+        stop();
     }
 
-    return 0;
+    return value->getValue();
 }
 
 void Variable::finishStart()
 {
-    if (valueObject)
-    {
-        valueObject->start(startTime);
-    }
+    value->start(startTime);
 }
 
 void Variable::finishStop()
 {
-    if (valueObject)
-    {
-        valueObject->stop();
-    }
+    value->stop();
 }

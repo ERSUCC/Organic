@@ -75,7 +75,7 @@ void Machine::execute(unsigned int address)
 
                 if (variables.count(id))
                 {
-                    variables[id]->object = popStack(); // reassign valueObject or call setter
+                    variables[id]->value = popStack();
                 }
 
                 else
@@ -99,7 +99,7 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x07:
-                stack.push(variables[program[address + 1]]->object);
+                stack.push(variables[program[address + 1]]->value);
 
                 address += 2;
 
@@ -110,73 +110,73 @@ void Machine::execute(unsigned int address)
                 {
                     case 0x00:
                     {
-                        const unsigned int size = popStackAs<Value>()->value;
+                        const unsigned int size = popStack()->getValue();
 
-                        std::vector<Object*> values;
+                        std::vector<ValueObject*> values;
 
                         for (unsigned int i = 0; i < size; i++)
                         {
                             values.push_back(popStack());
                         }
 
-                        stack.push(new List<Object>(values));
+                        stack.push(new List<ValueObject>(values));
 
                         break;
                     }
 
                     case 0x10:
-                        stack.push(new ValueAdd(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueAdd(popStack(), popStack()));
 
                         break;
 
                     case 0x11:
-                        stack.push(new ValueSubtract(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueSubtract(popStack(), popStack()));
 
                         break;
 
                     case 0x12:
-                        stack.push(new ValueMultiply(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueMultiply(popStack(), popStack()));
 
                         break;
 
                     case 0x13:
-                        stack.push(new ValueDivide(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueDivide(popStack(), popStack()));
 
                         break;
 
                     case 0x14:
-                        stack.push(new ValuePower(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValuePower(popStack(), popStack()));
 
                         break;
 
                     case 0x15:
-                        stack.push(new ValueEquals(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueEquals(popStack(), popStack()));
 
                         break;
 
                     case 0x16:
-                        stack.push(new ValueLess(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueLess(popStack(), popStack()));
 
                         break;
 
                     case 0x17:
-                        stack.push(new ValueGreater(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueGreater(popStack(), popStack()));
 
                         break;
 
                     case 0x18:
-                        stack.push(new ValueLessEqual(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueLessEqual(popStack(), popStack()));
 
                         break;
 
                     case 0x19:
-                        stack.push(new ValueGreaterEqual(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new ValueGreaterEqual(popStack(), popStack()));
 
                         break;
 
                     case 0x30:
                     {
-                        Sine* sine = new Sine(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack(), popStackAs<ValueObject>());
+                        Sine* sine = new Sine(popStack(), popStack(), popStack(), popStack());
 
                         audioSources.push_back(sine);
 
@@ -189,7 +189,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x31:
                     {
-                        Square* square = new Square(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack(), popStackAs<ValueObject>());
+                        Square* square = new Square(popStack(), popStack(), popStack(), popStack());
 
                         audioSources.push_back(square);
 
@@ -202,7 +202,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x32:
                     {
-                        Triangle* triangle = new Triangle(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack(), popStackAs<ValueObject>());
+                        Triangle* triangle = new Triangle(popStack(), popStack(), popStack(), popStack());
 
                         audioSources.push_back(triangle);
 
@@ -215,7 +215,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x33:
                     {
-                        Saw* saw = new Saw(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack(), popStackAs<ValueObject>());
+                        Saw* saw = new Saw(popStack(), popStack(), popStack(), popStack());
 
                         audioSources.push_back(saw);
 
@@ -228,7 +228,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x34:
                     {
-                        Noise* noise = new Noise(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStack());
+                        Noise* noise = new Noise(popStack(), popStack(), popStack());
 
                         audioSources.push_back(noise);
 
@@ -240,114 +240,60 @@ void Machine::execute(unsigned int address)
                     }
 
                     case 0x50:
-                        stack.push(new Hold(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new Hold(popStack(), popStack()));
 
                         break;
 
                     case 0x51:
-                        stack.push(new LFO(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new LFO(popStack(), popStack(), popStack()));
 
                         break;
 
                     case 0x52:
-                        stack.push(new Sweep(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new Sweep(popStack(), popStack(), popStack()));
 
                         break;
 
                     case 0x53:
-                    {
-                        List<ValueObject>* list = popStackAsList<ValueObject>();
-
-                        Sequence::Order* order;
-
-                        switch ((unsigned char)popStackAs<Value>()->value)
-                        {
-                            case 0x00:
-                                order = new Sequence::Order(Sequence::OrderEnum::Forwards);
-
-                                break;
-
-                            case 0x01:
-                                order = new Sequence::Order(Sequence::OrderEnum::Backwards);
-
-                                break;
-
-                            case 0x02:
-                                order = new Sequence::Order(Sequence::OrderEnum::PingPong);
-
-                                break;
-
-                            case 0x03:
-                                order = new Sequence::Order(Sequence::OrderEnum::Random);
-
-                                break;
-
-                            default:
-                                return Utils::machineError("Unrecognized constant code.", path);
-                        }
-
-                        stack.push(new Sequence(list, order));
+                        stack.push(new Sequence(popStackAsList<ValueObject>(), popStack()));
 
                         break;
-                    }
 
                     case 0x54:
-                        stack.push(new Repeat(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new Repeat(popStack(), popStack()));
 
                         break;
 
                     case 0x55:
                     {
-                        ValueObject* from = popStackAs<ValueObject>();
-                        ValueObject* to = popStackAs<ValueObject>();
-                        ValueObject* length = popStackAs<ValueObject>();
-
-                        Random::Type* type;
-
-                        switch ((unsigned char)popStackAs<Value>()->value)
-                        {
-                            case 0x00:
-                                type = new Random::Type(Random::TypeEnum::Step);
-
-                                break;
-
-                            case 0x01:
-                                type = new Random::Type(Random::TypeEnum::Linear);
-
-                                break;
-
-                            default:
-                                return Utils::machineError("Unrecognized constant code.", path);
-                        }
-
-                        stack.push(new Random(from, to, length, type));
+                        stack.push(new Random(popStack(), popStack(), popStack(), popStack()));
 
                         break;
                     }
 
                     case 0x56:
-                        stack.push(new Limit(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new Limit(popStack(), popStack(), popStack()));
 
                         break;
 
                     case 0x57:
-                        stack.push(new Trigger(popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new Trigger(popStack(), popStack()));
 
                         break;
 
                     case 0x58:
-                        stack.push(new Delay(popStackAs<ValueObject>(), popStackAs<ValueObject>(), popStackAs<ValueObject>()));
+                        stack.push(new Delay(popStack(), popStack(), popStack()));
 
                         break;
 
                     case 0x70:
                     {
-                        const unsigned int exec = popStackAs<Value>()->value;
+                        const unsigned int exec = popStack()->getValue();
 
                         events.push_back(new Event([=]()
                         {
                             execute(exec);
-                        }, popStackAs<ValueObject>()));
+                        }, popStack()));
 
                         break;
                     }
@@ -367,7 +313,7 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x09:
-                execute(popStackAs<Value>()->value);
+                execute(popStack()->getValue());
 
                 inputs.pop();
 
@@ -376,7 +322,7 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x0a:
-                inputs.push(std::unordered_map<unsigned char, Object*>());
+                inputs.push(std::unordered_map<unsigned char, ValueObject*>());
 
                 address++;
 
@@ -485,9 +431,9 @@ double Machine::readDouble(const unsigned int address) const
     return *reinterpret_cast<double*>(bytes);
 }
 
-Object* Machine::popStack()
+ValueObject* Machine::popStack()
 {
-    Object* value = stack.top();
+    ValueObject* value = stack.top();
 
     stack.pop();
 
@@ -505,13 +451,13 @@ template <typename T> T* Machine::popStackAs()
 
 template <typename T> List<T>* Machine::popStackAsList()
 {
-    Object* object = popStack();
+    ValueObject* object = popStack();
 
     std::vector<T*> objects;
 
-    if (const List<Object>* list = dynamic_cast<const List<Object>*>(object))
+    if (const List<ValueObject>* list = dynamic_cast<const List<ValueObject>*>(object))
     {
-        for (Object* object : list->objects)
+        for (ValueObject* object : list->objects)
         {
             objects.push_back(dynamic_cast<T*>(object));
         }

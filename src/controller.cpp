@@ -135,10 +135,7 @@ double ValueGreaterEqual::getValueInternal()
     return 0;
 }
 
-Sequence::Order::Order(OrderEnum order) :
-    order(order) {}
-
-Sequence::Sequence(List<ValueObject>* controllers, Order* order) :
+Sequence::Sequence(List<ValueObject>* controllers, ValueObject* order) :
     controllers(controllers), order(order) {}
 
 double Sequence::syncLength()
@@ -181,7 +178,9 @@ void Sequence::finishStart()
 
     udist = std::uniform_int_distribution<>(0, controllers->objects.size() - 1);
 
-    if (order->order == OrderEnum::PingPong)
+    const unsigned int orderNum = (unsigned int)order->getValue();
+
+    if (orderNum == OrderEnum::PingPong)
     {
         max_switches = controllers->objects.size() * 2 - 2;
     }
@@ -191,12 +190,12 @@ void Sequence::finishStart()
         max_switches = controllers->objects.size() - 1;
     }
 
-    if (order->order == OrderEnum::Backwards)
+    if (orderNum == OrderEnum::Backwards)
     {
         current = controllers->objects.size() - 1;
     }
 
-    else if (order->order == OrderEnum::Random)
+    else if (orderNum == OrderEnum::Random)
     {
         current = udist(utils->rng);
 
@@ -218,7 +217,7 @@ void Sequence::finishStart()
 
 void Sequence::finishRepeat()
 {
-    switch (order->order)
+    switch ((unsigned int)order->getValue())
     {
         case OrderEnum::Forwards:
             current = (current + 1) % controllers->objects.size();
@@ -265,6 +264,11 @@ void Sequence::finishRepeat()
 
             break;
         }
+
+        default:
+            // should this be an error?
+
+            break;
     }
 
     controllers->objects[current]->start(repeatTime);
@@ -395,10 +399,7 @@ void LFO::finishStart()
     length->start(startTime);
 }
 
-Random::Type::Type(TypeEnum type) :
-    type(type) {}
-
-Random::Random(ValueObject* from, ValueObject* to, ValueObject* length, Type* type) :
+Random::Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type) :
     from(from), to(to), length(length), type(type) {}
 
 double Random::syncLength()
@@ -413,13 +414,16 @@ double Random::getValue()
         stop();
     }
 
-    switch (type->type)
+    switch ((unsigned int)type->getValue())
     {
         case TypeEnum::Step:
             return current;
 
         case TypeEnum::Linear:
             return current + (next - current) * (utils->time - startTime) / syncLength();
+
+        default:
+            return 0; // should this be an error?
     }
 }
 

@@ -2,19 +2,7 @@
 
 #include "utils.h"
 
-struct Object
-{
-    virtual ~Object();
-};
-
-template <typename T> struct List : public Object
-{
-    List(const std::vector<T*> objects) : objects(objects) {}
-
-    const std::vector<T*> objects;
-};
-
-struct Sync : public Object
+struct Sync
 {
     Sync();
 
@@ -43,15 +31,21 @@ struct ValueObject : public Sync
     virtual double getValue();
 };
 
+template <typename T> struct List : public ValueObject
+{
+    List(const std::vector<T*> objects) : objects(objects) {}
+
+    const std::vector<T*> objects;
+};
+
 struct Variable : public ValueObject
 {
-    Variable(Object* object);
+    Variable(ValueObject* value);
 
     double syncLength() override;
     double getValue() override;
 
-    Object* object;
-    ValueObject* valueObject; // doesn't change when only object is set, fix with setter function
+    ValueObject* value;
 
 private:
     void finishStart() override;
