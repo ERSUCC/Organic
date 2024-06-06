@@ -353,7 +353,7 @@ namespace Parser
 
     struct Scope
     {
-        Scope(Scope* parent = nullptr);
+        Scope(Scope* parent = nullptr, const std::vector<std::string> inputs = std::vector<std::string>());
 
         bool getVariable(const std::string name);
         void addVariable(const std::string name);
@@ -361,13 +361,9 @@ namespace Parser
         BytecodeBlock* getFunction(const std::string name);
         void addFunction(const std::string name, BytecodeBlock* body);
 
-        void addInput(const std::string input);
         std::optional<unsigned char> getInput(const std::string input);
-        void removeInput(const std::string input);
 
         void checkUses() const;
-
-        BytecodeTransformer* visitor;
 
         Scope* parent;
 

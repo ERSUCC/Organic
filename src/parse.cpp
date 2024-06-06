@@ -569,11 +569,6 @@ namespace Parser
 
     const Token* Parser::parseExpression(unsigned int pos) const
     {
-        if (tokenIs<OpenCurlyBracket>(pos))
-        {
-            return parseCodeBlock(pos);
-        }
-
         if (tokenIs<OpenParenthesis>(pos) && tokenIs<Comma>(parseExpression(pos + 1)->location.end))
         {
             const unsigned int start = pos;

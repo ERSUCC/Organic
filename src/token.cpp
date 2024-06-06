@@ -300,8 +300,16 @@ namespace Parser
         visitor->visit(this);
     }
 
-    Scope::Scope(Scope* parent) :
-        parent(parent) {}
+    Scope::Scope(Scope* parent, const std::vector<std::string> inputs) :
+        parent(parent)
+    {
+        block->inputs = inputs;
+
+        for (unsigned int i = 0; i < inputs.size(); i++)
+        {
+            this->inputs[inputs[i]] = i;
+        }
+    }
 
     bool Scope::getVariable(const std::string name)
     {
@@ -353,11 +361,6 @@ namespace Parser
         functions[name] = body;
     }
 
-    void Scope::addInput(const std::string input)
-    {
-        inputs[input] = inputs.size();
-    }
-
     std::optional<unsigned char> Scope::getInput(const std::string input)
     {
         if (inputs.count(input))
@@ -376,11 +379,6 @@ namespace Parser
         }
 
         return std::nullopt;
-    }
-
-    void Scope::removeInput(const std::string input)
-    {
-        inputs.erase(input);
     }
 
     void Scope::checkUses() const
@@ -407,7 +405,7 @@ namespace Parser
         {
             if (!inputsUsed.count(pair.first))
             {
-                Utils::warning("Warning: unused input \"" + pair.first + "\"."); // add function name to be more clear
+                Utils::warning("Warning: Unused input \"" + pair.first + "\"."); // add function name to be more clear
             }
         }
     }
@@ -765,7 +763,14 @@ namespace Parser
         else if (name == "perform")
         {
             token->arguments->get("delay", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+
+            currentScope = new Scope(currentScope);
+
             token->arguments->get("function", new CodeBlock(ParserLocation(0, 0, 0, 0), std::vector<const Instruction*>()), this);
+
+            resolver->blocks.push_back(currentScope->block);
+
+            currentScope = currentScope->parent;
 
             currentScope->block->instructions.push_back(new StackPushAddress(resolver->blocks.back()));
         }
@@ -782,20 +787,10 @@ namespace Parser
 
     void BytecodeTransformer::visit(const CodeBlock* token)
     {
-        Scope* scope = new Scope(currentScope);
-
-        currentScope = scope;
-
         for (const Instruction* instruction : token->instructions)
         {
             instruction->accept(this);
         }
-
-        currentScope->checkUses();
-
-        resolver->blocks.push_back(currentScope->block);
-
-        currentScope = currentScope->parent;
     }
 
     void BytecodeTransformer::visit(const Define* token)
@@ -821,19 +816,15 @@ namespace Parser
             return Utils::parseError("A function already exists with the name \"" + token->name + "\".", sourcePath, token->location.line, token->location.character);
         }
 
-        for (const std::string input : token->inputs)
-        {
-            currentScope->addInput(input);
-        }
+        currentScope = new Scope(currentScope, token->inputs);
 
         token->body->accept(this);
 
-        for (const std::string input : token->inputs)
-        {
-            currentScope->removeInput(input);
-        }
+        currentScope->checkUses();
 
-        resolver->blocks.back()->inputs = token->inputs;
+        resolver->blocks.push_back(currentScope->block);
+
+        currentScope = currentScope->parent;
 
         currentScope->addFunction(token->name, resolver->blocks.back());
     }
