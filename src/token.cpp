@@ -628,9 +628,17 @@ namespace Parser
     {
         token->value->accept(this);
 
-        currentScope->block->instructions.push_back(new SetVariable(token->variable)); // this will break for assigning inputs
+        if (std::optional<unsigned char> input = currentScope->getInput(token->variable))
+        {
+            currentScope->block->instructions.push_back(new SetInput(input.value()));
+        }
 
-        currentScope->addVariable(token->variable);
+        else
+        {
+            currentScope->block->instructions.push_back(new SetVariable(token->variable));
+
+            currentScope->addVariable(token->variable);
+        }
     }
 
     void BytecodeTransformer::visit(const Call* token)
