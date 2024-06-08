@@ -367,7 +367,7 @@ namespace Parser
 
         Scope* parent;
 
-        BytecodeBlock* block = new BytecodeBlock();
+        BytecodeBlock* block;
 
     private:
         std::unordered_set<std::string> variables;

@@ -217,13 +217,33 @@ void GetInput::output(std::ofstream& stream, BytecodeResolver* resolver) const
     stream << (unsigned char)0x0c << input;
 }
 
+BytecodeBlock::BytecodeBlock(const std::vector<std::string> inputs) :
+    inputs(inputs) {}
+
+void BytecodeBlock::addInstruction(const BytecodeInstruction* instruction)
+{
+    instructions.push_back(instruction);
+
+    size += instruction->size;
+}
+
+void BytecodeBlock::output(std::ofstream& stream, BytecodeResolver* resolver) const
+{
+    for (const BytecodeInstruction* instruction : instructions)
+    {
+        instruction->output(stream, resolver);
+    }
+
+    stream << (unsigned char)0x00;
+}
+
 void BytecodeResolver::output(const std::string path)
 {
     std::ofstream stream(path, std::ios::binary);
 
     if (!stream.is_open())
     {
-        return Utils::error("Could not create intermediate file \"" + path + "\".");
+        return Utils::error("Error creating intermediate file \"" + path + "\".");
     }
 
     stream << "BACH";
@@ -234,23 +254,18 @@ void BytecodeResolver::output(const std::string path)
     {
         block->offset = offset;
 
-        for (BytecodeInstruction* instruction : block->instructions)
-        {
-            offset += instruction->size;
-        }
-
-        offset++;
+        offset += block->size;
     }
 
     for (BytecodeBlock* block : blocks)
     {
-        for (BytecodeInstruction* instruction : block->instructions)
-        {
-            instruction->output(stream, this);
-        }
-
-        stream << (unsigned char)0x00;
+        block->output(stream, this);
     }
 
     stream.close();
+}
+
+void BytecodeResolver::addBlock(BytecodeBlock* block)
+{
+    blocks.push_back(block);
 }

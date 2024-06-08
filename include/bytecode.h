@@ -128,18 +128,31 @@ struct GetInput : public BytecodeInstruction
 
 struct BytecodeBlock
 {
-    std::vector<std::string> inputs;
+    BytecodeBlock(const std::vector<std::string> inputs);
 
-    std::vector<BytecodeInstruction*> instructions;
+    void addInstruction(const BytecodeInstruction* instruction);
+
+    void output(std::ofstream& stream, BytecodeResolver* resolver) const;
+
+    const std::vector<std::string> inputs;
 
     unsigned int offset;
+    unsigned int size = 1;
+
+private:
+    std::vector<const BytecodeInstruction*> instructions;
+
 };
 
 struct BytecodeResolver
 {
     void output(const std::string path);
 
-    std::vector<BytecodeBlock*> blocks;
+    void addBlock(BytecodeBlock* block);
 
     std::unordered_map<std::string, unsigned char> variables;
+
+private:
+    std::vector<BytecodeBlock*> blocks;
+
 };

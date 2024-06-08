@@ -303,7 +303,7 @@ namespace Parser
     Scope::Scope(Scope* parent, const std::vector<std::string> inputs) :
         parent(parent)
     {
-        block->inputs = inputs;
+        block = new BytecodeBlock(inputs);
 
         for (unsigned int i = 0; i < inputs.size(); i++)
         {
@@ -437,49 +437,49 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Value* token)
     {
-        currentScope->block->instructions.push_back(new StackPushDouble(token->value));
+        currentScope->block->addInstruction(new StackPushDouble(token->value));
     }
 
     void BytecodeTransformer::visit(const NamedConstant* token)
     {
         if (token->str == "sequence-forwards")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(Sequence::OrderEnum::Forwards));
+            currentScope->block->addInstruction(new StackPushByte(Sequence::OrderEnum::Forwards));
         }
 
         else if (token->str == "sequence-backwards")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(Sequence::OrderEnum::Backwards));
+            currentScope->block->addInstruction(new StackPushByte(Sequence::OrderEnum::Backwards));
         }
 
         else if (token->str == "sequence-ping-pong")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(Sequence::OrderEnum::PingPong));
+            currentScope->block->addInstruction(new StackPushByte(Sequence::OrderEnum::PingPong));
         }
 
         else if (token->str == "sequence-random")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(Sequence::OrderEnum::Random));
+            currentScope->block->addInstruction(new StackPushByte(Sequence::OrderEnum::Random));
         }
 
         else if (token->str == "random-step")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(Random::TypeEnum::Step));
+            currentScope->block->addInstruction(new StackPushByte(Random::TypeEnum::Step));
         }
 
         else if (token->str == "random-linear")
         {
-            currentScope->block->instructions.push_back(new StackPushByte(Random::TypeEnum::Linear));
+            currentScope->block->addInstruction(new StackPushByte(Random::TypeEnum::Linear));
         }
 
         else if (token->str == "pi")
         {
-            currentScope->block->instructions.push_back(new StackPushDouble(utils->pi));
+            currentScope->block->addInstruction(new StackPushDouble(utils->pi));
         }
 
         else if (token->str == "e")
         {
-            currentScope->block->instructions.push_back(new StackPushDouble(utils->e));
+            currentScope->block->addInstruction(new StackPushDouble(utils->e));
         }
     }
 
@@ -505,7 +505,7 @@ namespace Parser
 
             else
             {
-                currentScope->block->instructions.push_back(new GetInput(input.value()));
+                currentScope->block->addInstruction(new GetInput(input.value()));
             }
         }
 
@@ -513,12 +513,12 @@ namespace Parser
         {
             if (copy)
             {
-                currentScope->block->instructions.push_back(new GetVariableCopy(name));
+                currentScope->block->addInstruction(new GetVariableCopy(name));
             }
 
             else
             {
-                currentScope->block->instructions.push_back(new GetVariable(name));
+                currentScope->block->addInstruction(new GetVariable(name));
             }
         }
 
@@ -535,8 +535,8 @@ namespace Parser
             token->values[i]->accept(this);
         }
 
-        currentScope->block->instructions.push_back(new StackPushInt(token->values.size()));
-        currentScope->block->instructions.push_back(new CallNative("list"));
+        currentScope->block->addInstruction(new StackPushInt(token->values.size()));
+        currentScope->block->addInstruction(new CallNative("list"));
     }
 
     void BytecodeTransformer::visit(const AddObject* token)
@@ -544,7 +544,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("add"));
+        currentScope->block->addInstruction(new CallNative("add"));
     }
 
     void BytecodeTransformer::visit(const SubtractObject* token)
@@ -552,7 +552,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("subtract"));
+        currentScope->block->addInstruction(new CallNative("subtract"));
     }
 
     void BytecodeTransformer::visit(const MultiplyObject* token)
@@ -560,7 +560,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("multiply"));
+        currentScope->block->addInstruction(new CallNative("multiply"));
     }
 
     void BytecodeTransformer::visit(const DivideObject* token)
@@ -568,7 +568,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("divide"));
+        currentScope->block->addInstruction(new CallNative("divide"));
     }
 
     void BytecodeTransformer::visit(const PowerObject* token)
@@ -576,7 +576,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("power"));
+        currentScope->block->addInstruction(new CallNative("power"));
     }
 
     void BytecodeTransformer::visit(const EqualsObject* token)
@@ -584,7 +584,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("equal"));
+        currentScope->block->addInstruction(new CallNative("equal"));
     }
 
     void BytecodeTransformer::visit(const LessObject* token)
@@ -592,7 +592,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("less"));
+        currentScope->block->addInstruction(new CallNative("less"));
     }
 
     void BytecodeTransformer::visit(const GreaterObject* token)
@@ -600,7 +600,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("greater"));
+        currentScope->block->addInstruction(new CallNative("greater"));
     }
 
     void BytecodeTransformer::visit(const LessEqualObject* token)
@@ -608,7 +608,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("lessequal"));
+        currentScope->block->addInstruction(new CallNative("lessequal"));
     }
 
     void BytecodeTransformer::visit(const GreaterEqualObject* token)
@@ -616,7 +616,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->instructions.push_back(new CallNative("greaterequal"));
+        currentScope->block->addInstruction(new CallNative("greaterequal"));
     }
 
     void BytecodeTransformer::visit(const ParenthesizedExpression* token)
@@ -630,12 +630,12 @@ namespace Parser
 
         if (std::optional<unsigned char> input = currentScope->getInput(token->variable))
         {
-            currentScope->block->instructions.push_back(new SetInput(input.value()));
+            currentScope->block->addInstruction(new SetInput(input.value()));
         }
 
         else
         {
-            currentScope->block->instructions.push_back(new SetVariable(token->variable));
+            currentScope->block->addInstruction(new SetVariable(token->variable));
 
             currentScope->addVariable(token->variable);
         }
@@ -647,19 +647,19 @@ namespace Parser
 
         if (const BytecodeBlock* function = currentScope->getFunction(name))
         {
-            currentScope->block->instructions.push_back(new PrepareInputs());
+            currentScope->block->addInstruction(new PrepareInputs());
 
             for (unsigned int i = 0; i < function->inputs.size(); i++)
             {
                 token->arguments->get(function->inputs[i], new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
 
-                currentScope->block->instructions.push_back(new SetInput(i));
+                currentScope->block->addInstruction(new SetInput(i));
             }
 
             token->arguments->confirmEmpty();
 
-            currentScope->block->instructions.push_back(new StackPushAddress(resolver->blocks.back()));
-            currentScope->block->instructions.push_back(new CallUser());
+            currentScope->block->addInstruction(new StackPushAddress(function));
+            currentScope->block->addInstruction(new CallUser());
 
             return;
         }
@@ -776,11 +776,13 @@ namespace Parser
 
             token->arguments->get("function", new CodeBlock(ParserLocation(0, 0, 0, 0), std::vector<const Instruction*>()), this);
 
-            resolver->blocks.push_back(currentScope->block);
+            BytecodeBlock* block = currentScope->block;
+
+            resolver->addBlock(block);
 
             currentScope = currentScope->parent;
 
-            currentScope->block->instructions.push_back(new StackPushAddress(resolver->blocks.back()));
+            currentScope->block->addInstruction(new StackPushAddress(block));
         }
 
         else
@@ -790,7 +792,7 @@ namespace Parser
 
         token->arguments->confirmEmpty();
 
-        currentScope->block->instructions.push_back(new CallNative(name));
+        currentScope->block->addInstruction(new CallNative(name));
     }
 
     void BytecodeTransformer::visit(const CodeBlock* token)
@@ -830,16 +832,18 @@ namespace Parser
 
         currentScope->checkUses();
 
-        resolver->blocks.push_back(currentScope->block);
+        BytecodeBlock* block = currentScope->block;
+
+        resolver->addBlock(block);
 
         currentScope = currentScope->parent;
 
-        currentScope->addFunction(token->name, resolver->blocks.back());
+        currentScope->addFunction(token->name, block);
     }
 
     void BytecodeTransformer::visit(const Program* token)
     {
-        resolver->blocks.push_back(currentScope->block);
+        resolver->addBlock(currentScope->block);
 
         for (const Instruction* instruction : token->instructions)
         {
