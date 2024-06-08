@@ -438,9 +438,14 @@ namespace Parser
                 }
             } while (depth > 0);
 
-            if (tokenIs<Equals>(++pos))
+            if (tokenIs<Equals>(pos + 1))
             {
-                return parseDefine(start);
+                if (tokenIs<OpenCurlyBracket>(pos + 2))
+                {
+                    return parseDefine(start);
+                }
+
+                tokenError(getToken(pos + 2), "\"{\"");
             }
 
             return parseCall(start);
