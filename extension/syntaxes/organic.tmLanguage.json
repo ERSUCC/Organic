@@ -37,38 +37,10 @@
 				{
 					"match": "([a-zA-Z_][a-zA-Z0-9\\-_]*)\\s*\\(",
 					"captures": {
-						"0": {
+						"1": {
 							"name": "support.function.organic"
 						}
 					}
-				}
-			]
-		},
-		"variable": {
-			"patterns": [
-				{
-					"name": "variable.name.organic",
-					"match": "#?[a-zA-Z_][a-zA-Z0-9\\-_]*"
-				}
-			]
-		},
-		"language-constant": {
-			"patterns": [
-				{
-					"name": "constant.language.sequence.organic",
-					"match": "sequence-forwards|sequence-backwards|sequence-ping-pong|sequence-random"
-				},
-				{
-					"name": "constant.language.random.organic",
-					"match": "random-step|random-linear"
-				},
-				{
-					"name": "constant.language.note.organic",
-					"match": "[a-g][sf]?[0-9]"
-				},
-				{
-					"name": "constant.language.value.organic",
-					"match": "pi|e"
 				}
 			]
 		},
@@ -77,6 +49,34 @@
 				{
 					"name": "constant.numeric.organic",
 					"match": "-?([0-9]*[.])?[0-9]+"
+				}
+			]
+		},
+		"language-constant": {
+			"patterns": [
+				{
+					"name": "constant.language.sequence.organic",
+					"match": "\\b(sequence-forwards|sequence-backwards|sequence-ping-pong|sequence-random)\\b"
+				},
+				{
+					"name": "constant.language.random.organic",
+					"match": "\\b(random-step|random-linear)\\b"
+				},
+				{
+					"name": "constant.language.note.organic",
+					"match": "\\b([a-g][sf]?[0-9])\\b"
+				},
+				{
+					"name": "constant.language.value.organic",
+					"match": "\b(pi|e)\\b"
+				}
+			]
+		},
+		"variable": {
+			"patterns": [
+				{
+					"name": "variable.name.organic",
+					"match": "#?[a-zA-Z_][a-zA-Z0-9\\-_]*"
 				}
 			]
 		}
