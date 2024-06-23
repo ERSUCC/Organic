@@ -119,7 +119,7 @@ void Organic::startExport()
         machine->performEvents();
         machine->processAudioSources(buffer, utils->bufferLength);
 
-        for (int j = 0; j < utils->bufferLength; j++)
+        for (int j = 0; j < utils->bufferLength && i + j < steps; j++)
         {
             file.samples[0][i + j] = buffer[j * utils->channels];
 
