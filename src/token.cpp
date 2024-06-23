@@ -144,7 +144,7 @@ namespace Parser
         }
     }
 
-    void ArgumentList::get(const std::string name, Token* defaultValue, BytecodeTransformer* visitor)
+    void ArgumentList::get(const std::string name, BytecodeTransformer* visitor)
     {
         for (unsigned int i = 0; i < arguments.size(); i++)
         {
@@ -158,7 +158,7 @@ namespace Parser
             }
         }
 
-        defaultValue->accept(visitor);
+        (new Value(ParserLocation(0, 0, 0, 0), "0", 0))->accept(visitor);
     }
 
     void ArgumentList::confirmEmpty() const
@@ -626,7 +626,7 @@ namespace Parser
 
             for (unsigned int i = 0; i < function->inputs.size(); i++)
             {
-                token->arguments->get(function->inputs[i], new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+                token->arguments->get(function->inputs[i], this);
 
                 currentScope->block->addInstruction(new SetInput(i));
             }
@@ -641,106 +641,106 @@ namespace Parser
 
         if (name == "copy")
         {
-            token->arguments->get("value", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("value", this);
         }
 
         else if (name == "sine")
         {
-            token->arguments->get("frequency", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
-            token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("frequency", this);
+            token->arguments->get("effects", this);
+            token->arguments->get("pan", this);
+            token->arguments->get("volume", this);
         }
 
         else if (name == "square")
         {
-            token->arguments->get("frequency", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
-            token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("frequency", this);
+            token->arguments->get("effects", this);
+            token->arguments->get("pan", this);
+            token->arguments->get("volume", this);
         }
 
         else if (name == "saw")
         {
-            token->arguments->get("frequency", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
-            token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("frequency", this);
+            token->arguments->get("effects", this);
+            token->arguments->get("pan", this);
+            token->arguments->get("volume", this);
         }
 
         else if (name == "triangle")
         {
-            token->arguments->get("frequency", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
-            token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("frequency", this);
+            token->arguments->get("effects", this);
+            token->arguments->get("pan", this);
+            token->arguments->get("volume", this);
         }
 
         else if (name == "noise")
         {
-            token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
-            token->arguments->get("pan", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("volume", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("effects", this);
+            token->arguments->get("pan", this);
+            token->arguments->get("volume", this);
         }
 
         else if (name == "hold")
         {
-            token->arguments->get("length", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("value", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("length", this);
+            token->arguments->get("value", this);
         }
 
         else if (name == "lfo")
         {
-            token->arguments->get("length", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("to", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("from", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("length", this);
+            token->arguments->get("to", this);
+            token->arguments->get("from", this);
         }
 
         else if (name == "sweep")
         {
-            token->arguments->get("length", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("to", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("from", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("length", this);
+            token->arguments->get("to", this);
+            token->arguments->get("from", this);
         }
 
         else if (name == "sequence")
         {
-            token->arguments->get("order", new NamedConstant(ParserLocation(0, 0, 0, 0), "sequence-forwards"), this);
-            token->arguments->get("values", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
+            token->arguments->get("order", this);
+            token->arguments->get("values", this);
         }
 
         else if (name == "repeat")
         {
-            token->arguments->get("repeats", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("value", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("repeats", this);
+            token->arguments->get("value", this);
         }
 
         else if (name == "random")
         {
-            token->arguments->get("type", new NamedConstant(ParserLocation(0, 0, 0, 0), "random-step"), this);
-            token->arguments->get("length", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("to", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("from", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("type", this);
+            token->arguments->get("length", this);
+            token->arguments->get("to", this);
+            token->arguments->get("from", this);
         }
 
         else if (name == "limit")
         {
-            token->arguments->get("max", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("min", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("value", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("max", this);
+            token->arguments->get("min", this);
+            token->arguments->get("value", this);
         }
 
         else if (name == "trigger")
         {
-            token->arguments->get("value", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("condition", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("value", this);
+            token->arguments->get("condition", this);
         }
 
         else if (name == "delay")
         {
-            token->arguments->get("feedback", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("delay", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
-            token->arguments->get("mix", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("feedback", this);
+            token->arguments->get("delay", this);
+            token->arguments->get("mix", this);
         }
 
         else if (name == "lowpass")
@@ -750,11 +750,11 @@ namespace Parser
 
         else if (name == "perform")
         {
-            token->arguments->get("delay", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+            token->arguments->get("delay", this);
 
             currentScope = new Scope(currentScope);
 
-            token->arguments->get("function", new CodeBlock(ParserLocation(0, 0, 0, 0), std::vector<const Instruction*>()), this);
+            token->arguments->get("function", this);
 
             BytecodeBlock* block = currentScope->block;
 

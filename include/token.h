@@ -170,7 +170,7 @@ namespace Parser
     {
         ArgumentList(const std::vector<const Argument*> arguments, const std::string name, const std::string path);
 
-        void get(const std::string name, Token* defaultValue, BytecodeTransformer* visitor);
+        void get(const std::string name, BytecodeTransformer* visitor);
 
         void confirmEmpty() const;
 
