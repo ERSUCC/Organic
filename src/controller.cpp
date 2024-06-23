@@ -529,7 +529,7 @@ If::If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue) 
 
 double If::syncLength()
 {
-    return 0;
+    return utils->infinity;
 }
 
 double If::getValue()

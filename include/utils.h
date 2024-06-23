@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <limits>
 #include <random>
 #include <string>
 
@@ -32,6 +33,7 @@ struct Utils
 
     const double pi = M_PI;
     const double twoPi = M_PI * 2;
+    const double infinity = std::numeric_limits<double>::infinity();
 
     double e;
 
