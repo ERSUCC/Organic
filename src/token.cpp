@@ -736,6 +736,13 @@ namespace Parser
             token->arguments->get("condition", this);
         }
 
+        else if (name == "if")
+        {
+            token->arguments->get("false", this);
+            token->arguments->get("true", this);
+            token->arguments->get("condition", this);
+        }
+
         else if (name == "delay")
         {
             token->arguments->get("feedback", this);
@@ -799,6 +806,7 @@ namespace Parser
             token->name == "random" ||
             token->name == "limit" ||
             token->name == "trigger" ||
+            token->name == "if" ||
             token->name == "delay" ||
             token->name == "lowpass" ||
             token->name == "perform" ||

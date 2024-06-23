@@ -398,6 +398,17 @@ void Machine::execute(unsigned int address)
 
                     case 0x58:
                     {
+                        ValueObject* condition = popStack();
+                        ValueObject* trueValue = popStack();
+                        ValueObject* falseValue = popStack();
+
+                        stack.push(new If(condition, trueValue, falseValue));
+
+                        break;
+                    }
+
+                    case 0x70:
+                    {
                         ValueObject* mix = popStack();
                         ValueObject* delay = popStack();
                         ValueObject* feedback = popStack();
@@ -407,7 +418,7 @@ void Machine::execute(unsigned int address)
                         break;
                     }
 
-                    case 0x70:
+                    case 0x90:
                     {
                         const unsigned int exec = popStack()->getValue();
 

@@ -523,3 +523,28 @@ void Trigger::finishStart()
 {
     condition->start(startTime);
 }
+
+If::If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue) :
+    condition(condition), trueValue(trueValue), falseValue(falseValue) {}
+
+double If::syncLength()
+{
+    return 0;
+}
+
+double If::getValue()
+{
+    if (condition->getValue() == 0)
+    {
+        return falseValue->getValue();
+    }
+
+    return trueValue->getValue();
+}
+
+void If::finishStart()
+{
+    condition->start(startTime);
+    trueValue->start(startTime);
+    falseValue->start(startTime);
+}

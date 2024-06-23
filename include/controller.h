@@ -293,3 +293,20 @@ private:
     bool triggered = false;
 
 };
+
+struct If : public ValueController
+{
+    If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue);
+
+    double syncLength() override;
+    double getValue() override;
+
+protected:
+    void finishStart() override;
+
+private:
+    ValueObject* condition;
+    ValueObject* trueValue;
+    ValueObject* falseValue;
+
+};
