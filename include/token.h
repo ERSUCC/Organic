@@ -176,6 +176,8 @@ namespace Parser
 
         const std::string str;
 
+        unsigned char count = 0;
+
     private:
         std::vector<const Argument*> arguments;
 

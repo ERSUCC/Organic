@@ -99,16 +99,24 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x07:
+            {
+                std::vector<ValueObject*> inputs;
+
+                for (unsigned char i = 0; i < program[address + 2]; i++)
+                {
+                    inputs.push_back(popStack());
+                }
+
                 switch (program[address + 1])
                 {
                     case 0x00:
-                        stack.push(((Variable*)popStack())->value);
+                        stack.push(((Variable*)inputs[0])->value);
 
                         break;
 
                     case 0x01:
                     {
-                        const unsigned int size = popStack()->getValue();
+                        const unsigned int size = inputs[0]->getValue();
 
                         std::vector<ValueObject*> values;
 
@@ -123,113 +131,58 @@ void Machine::execute(unsigned int address)
                     }
 
                     case 0x10:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValueAdd(one, two));
+                        stack.push(new ValueAdd(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x11:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValueSubtract(one, two));
+                        stack.push(new ValueSubtract(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x12:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValueMultiply(one, two));
+                        stack.push(new ValueMultiply(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x13:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValueDivide(one, two));
+                        stack.push(new ValueDivide(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x14:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValuePower(one, two));
+                        stack.push(new ValuePower(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x15:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValueEquals(one, two));
+                        stack.push(new ValueEquals(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x16:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValueLess(one, two));
+                        stack.push(new ValueLess(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x17:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValueGreater(one, two));
+                        stack.push(new ValueGreater(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x18:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValueLessEqual(one, two));
+                        stack.push(new ValueLessEqual(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x19:
-                    {
-                        ValueObject* one = popStack();
-                        ValueObject* two = popStack();
-
-                        stack.push(new ValueGreaterEqual(one, two));
+                        stack.push(new ValueGreaterEqual(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x30:
                     {
-                        ValueObject* volume = popStack();
-                        ValueObject* pan = popStack();
-                        ValueObject* effects = popStack();
-                        ValueObject* frequency = popStack();
-
-                        Sine* sine = new Sine(volume, pan, effects, frequency);
+                        Sine* sine = new Sine(inputs[0], inputs[1], inputs[2], inputs[3]);
 
                         audioSources.push_back(sine);
 
@@ -242,12 +195,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x31:
                     {
-                        ValueObject* volume = popStack();
-                        ValueObject* pan = popStack();
-                        ValueObject* effects = popStack();
-                        ValueObject* frequency = popStack();
-
-                        Square* square = new Square(volume, pan, effects, frequency);
+                        Square* square = new Square(inputs[0], inputs[1], inputs[2], inputs[3]);
 
                         audioSources.push_back(square);
 
@@ -260,12 +208,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x32:
                     {
-                        ValueObject* volume = popStack();
-                        ValueObject* pan = popStack();
-                        ValueObject* effects = popStack();
-                        ValueObject* frequency = popStack();
-
-                        Triangle* triangle = new Triangle(volume, pan, effects, frequency);
+                        Triangle* triangle = new Triangle(inputs[0], inputs[1], inputs[2], inputs[3]);
 
                         audioSources.push_back(triangle);
 
@@ -278,12 +221,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x33:
                     {
-                        ValueObject* volume = popStack();
-                        ValueObject* pan = popStack();
-                        ValueObject* effects = popStack();
-                        ValueObject* frequency = popStack();
-
-                        Saw* saw = new Saw(volume, pan, effects, frequency);
+                        Saw* saw = new Saw(inputs[0], inputs[1], inputs[2], inputs[3]);
 
                         audioSources.push_back(saw);
 
@@ -296,11 +234,7 @@ void Machine::execute(unsigned int address)
 
                     case 0x34:
                     {
-                        ValueObject* volume = popStack();
-                        ValueObject* pan = popStack();
-                        ValueObject* effects = popStack();
-
-                        Noise* noise = new Noise(volume, pan, effects);
+                        Noise* noise = new Noise(inputs[0], inputs[1], inputs[2]);
 
                         audioSources.push_back(noise);
 
@@ -312,120 +246,63 @@ void Machine::execute(unsigned int address)
                     }
 
                     case 0x50:
-                    {
-                        ValueObject* value = popStack();
-                        ValueObject* length = popStack();
-
-                        stack.push(new Hold(value, length));
+                        stack.push(new Hold(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x51:
-                    {
-                        ValueObject* from = popStack();
-                        ValueObject* to = popStack();
-                        ValueObject* length = popStack();
-
-                        stack.push(new LFO(from, to, length));
+                        stack.push(new LFO(inputs[0], inputs[1], inputs[2]));
 
                         break;
-                    }
 
                     case 0x52:
-                    {
-                        ValueObject* from = popStack();
-                        ValueObject* to = popStack();
-                        ValueObject* length = popStack();
-
-                        stack.push(new Sweep(from, to, length));
+                        stack.push(new Sweep(inputs[0], inputs[1], inputs[2]));
 
                         break;
-                    }
 
                     case 0x53:
-                    {
-                        List<ValueObject>* controllers = popStackAsList<ValueObject>();
-                        ValueObject* order = popStack();
-
-                        stack.push(new Sequence(controllers, order));
+                        stack.push(new Sequence(dynamic_cast<List<ValueObject>*>(inputs[0]), inputs[1])); // can this be uncasted?
 
                         break;
-                    }
 
                     case 0x54:
-                    {
-                        ValueObject* value = popStack();
-                        ValueObject* repeats = popStack();
-
-                        stack.push(new Repeat(value, repeats));
+                        stack.push(new Repeat(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x55:
-                    {
-                        ValueObject* from = popStack();
-                        ValueObject* to = popStack();
-                        ValueObject* length = popStack();
-                        ValueObject* type = popStack();
-
-                        stack.push(new Random(from, to, length, type));
+                        stack.push(new Random(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
-                    }
 
                     case 0x56:
-                    {
-                        ValueObject* value = popStack();
-                        ValueObject* min = popStack();
-                        ValueObject* max = popStack();
-
-                        stack.push(new Limit(value, min, max));
+                        stack.push(new Limit(inputs[0], inputs[1], inputs[2]));
 
                         break;
-                    }
 
                     case 0x57:
-                    {
-                        ValueObject* condition = popStack();
-                        ValueObject* value = popStack();
-
-                        stack.push(new Trigger(condition, value));
+                        stack.push(new Trigger(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x58:
-                    {
-                        ValueObject* condition = popStack();
-                        ValueObject* trueValue = popStack();
-                        ValueObject* falseValue = popStack();
-
-                        stack.push(new If(condition, trueValue, falseValue));
+                        stack.push(new If(inputs[0], inputs[1], inputs[2]));
 
                         break;
-                    }
 
                     case 0x70:
-                    {
-                        ValueObject* mix = popStack();
-                        ValueObject* delay = popStack();
-                        ValueObject* feedback = popStack();
-
-                        stack.push(new Delay(mix, delay, feedback));
+                        stack.push(new Delay(inputs[0], inputs[1], inputs[2]));
 
                         break;
-                    }
 
                     case 0x90:
                     {
-                        const unsigned int exec = popStack()->getValue();
+                        const unsigned int exec = inputs[0]->getValue();
 
                         events.push_back(new Event([=]()
                         {
                             execute(exec);
-                        }, popStack()));
+                        }, inputs[1]));
 
                         break;
                     }
@@ -440,9 +317,10 @@ void Machine::execute(unsigned int address)
                     }
                 }
 
-                address += 2;
+                address += 3;
 
                 break;
+            }
 
             case 0x08:
                 execute(popStack()->getValue());

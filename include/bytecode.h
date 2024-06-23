@@ -78,11 +78,13 @@ struct GetVariable : public BytecodeInstruction
 
 struct CallNative : public BytecodeInstruction
 {
-    CallNative(const std::string function);
+    CallNative(const std::string function, const unsigned char inputs);
 
     void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
 
     const std::string function;
+
+    const unsigned char inputs;
 };
 
 struct CallUser : public BytecodeInstruction

@@ -146,6 +146,8 @@ namespace Parser
 
     void ArgumentList::get(const std::string name, BytecodeTransformer* visitor)
     {
+        count++;
+
         for (unsigned int i = 0; i < arguments.size(); i++)
         {
             if (arguments[i]->name == name)
@@ -511,7 +513,7 @@ namespace Parser
         }
 
         currentScope->block->addInstruction(new StackPushInt(token->values.size()));
-        currentScope->block->addInstruction(new CallNative("list"));
+        currentScope->block->addInstruction(new CallNative("list", 1));
     }
 
     void BytecodeTransformer::visit(const AddObject* token)
@@ -519,7 +521,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("add"));
+        currentScope->block->addInstruction(new CallNative("add", 2));
     }
 
     void BytecodeTransformer::visit(const SubtractObject* token)
@@ -527,7 +529,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("subtract"));
+        currentScope->block->addInstruction(new CallNative("subtract", 2));
     }
 
     void BytecodeTransformer::visit(const MultiplyObject* token)
@@ -535,7 +537,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("multiply"));
+        currentScope->block->addInstruction(new CallNative("multiply", 2));
     }
 
     void BytecodeTransformer::visit(const DivideObject* token)
@@ -543,7 +545,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("divide"));
+        currentScope->block->addInstruction(new CallNative("divide", 2));
     }
 
     void BytecodeTransformer::visit(const PowerObject* token)
@@ -551,7 +553,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("power"));
+        currentScope->block->addInstruction(new CallNative("power", 2));
     }
 
     void BytecodeTransformer::visit(const EqualsObject* token)
@@ -559,7 +561,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("equal"));
+        currentScope->block->addInstruction(new CallNative("equal", 2));
     }
 
     void BytecodeTransformer::visit(const LessObject* token)
@@ -567,7 +569,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("less"));
+        currentScope->block->addInstruction(new CallNative("less", 2));
     }
 
     void BytecodeTransformer::visit(const GreaterObject* token)
@@ -575,7 +577,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("greater"));
+        currentScope->block->addInstruction(new CallNative("greater", 2));
     }
 
     void BytecodeTransformer::visit(const LessEqualObject* token)
@@ -583,7 +585,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("lessequal"));
+        currentScope->block->addInstruction(new CallNative("lessequal", 2));
     }
 
     void BytecodeTransformer::visit(const GreaterEqualObject* token)
@@ -591,7 +593,7 @@ namespace Parser
         token->value2->accept(this);
         token->value1->accept(this);
 
-        currentScope->block->addInstruction(new CallNative("greaterequal"));
+        currentScope->block->addInstruction(new CallNative("greaterequal", 2));
     }
 
     void BytecodeTransformer::visit(const ParenthesizedExpression* token)
@@ -779,7 +781,7 @@ namespace Parser
 
         token->arguments->confirmEmpty();
 
-        currentScope->block->addInstruction(new CallNative(name));
+        currentScope->block->addInstruction(new CallNative(name, token->arguments->count));
     }
 
     void BytecodeTransformer::visit(const CodeBlock* token)

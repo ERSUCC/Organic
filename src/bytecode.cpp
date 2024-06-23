@@ -136,8 +136,8 @@ void GetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) cons
     stream << (unsigned char)0x06 << resolver->variables[variable];
 }
 
-CallNative::CallNative(std::string function) :
-    BytecodeInstruction(2), function(function) {}
+CallNative::CallNative(const std::string function, const unsigned char inputs) :
+    BytecodeInstruction(3), function(function), inputs(inputs) {}
 
 void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
@@ -177,7 +177,7 @@ void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
 
     else if (function == "perform") id = 0x90;
 
-    stream << (unsigned char)0x07 << id;
+    stream << (unsigned char)0x07 << id << inputs;
 }
 
 CallUser::CallUser() :
