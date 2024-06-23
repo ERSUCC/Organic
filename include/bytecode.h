@@ -76,15 +76,6 @@ struct GetVariable : public BytecodeInstruction
     const std::string variable;
 };
 
-struct GetVariableCopy : public BytecodeInstruction
-{
-    GetVariableCopy(const std::string variable);
-
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
-
-    const std::string variable;
-};
-
 struct CallNative : public BytecodeInstruction
 {
     CallNative(const std::string function);

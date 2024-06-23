@@ -136,14 +136,6 @@ void GetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) cons
     stream << (unsigned char)0x06 << resolver->variables[variable];
 }
 
-GetVariableCopy::GetVariableCopy(const std::string variable) :
-    BytecodeInstruction(2), variable(variable) {}
-
-void GetVariableCopy::output(std::ofstream& stream, BytecodeResolver* resolver) const
-{
-    stream << (unsigned char)0x07 << resolver->variables[variable];
-}
-
 CallNative::CallNative(std::string function) :
     BytecodeInstruction(2), function(function) {}
 
@@ -151,7 +143,8 @@ void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
     unsigned char id;
 
-    if (function == "list") id = 0x00;
+    if (function == "copy") id = 0x00;
+    else if (function == "list") id = 0x01;
 
     else if (function == "add") id = 0x10;
     else if (function == "subtract") id = 0x11;
@@ -182,7 +175,7 @@ void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
 
     else if (function == "perform") id = 0x70;
 
-    stream << (unsigned char)0x08 << id;
+    stream << (unsigned char)0x07 << id;
 }
 
 CallUser::CallUser() :
@@ -190,7 +183,7 @@ CallUser::CallUser() :
 
 void CallUser::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
-    stream << (unsigned char)0x09;
+    stream << (unsigned char)0x08;
 }
 
 PrepareInputs::PrepareInputs() :
@@ -198,7 +191,7 @@ PrepareInputs::PrepareInputs() :
 
 void PrepareInputs::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
-    stream << (unsigned char)0x0a;
+    stream << (unsigned char)0x09;
 }
 
 SetInput::SetInput(const unsigned char input) :
@@ -206,7 +199,7 @@ SetInput::SetInput(const unsigned char input) :
 
 void SetInput::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
-    stream << (unsigned char)0x0b << input;
+    stream << (unsigned char)0x0a << input;
 }
 
 GetInput::GetInput(const unsigned char input) :
@@ -214,7 +207,7 @@ GetInput::GetInput(const unsigned char input) :
 
 void GetInput::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
-    stream << (unsigned char)0x0c << input;
+    stream << (unsigned char)0x0b << input;
 }
 
 BytecodeBlock::BytecodeBlock(const std::vector<std::string> inputs) :

@@ -487,39 +487,14 @@ namespace Parser
     {
         std::string name = token->str;
 
-        bool copy = false;
-
-        if (name[0] == '#')
-        {
-            name = name.substr(1);
-
-            copy = true;
-        }
-
         if (const std::optional<unsigned char> input = currentScope->getInput(name))
         {
-            if (copy)
-            {
-                // is this an error or not
-            }
-
-            else
-            {
-                currentScope->block->addInstruction(new GetInput(input.value()));
-            }
+            currentScope->block->addInstruction(new GetInput(input.value()));
         }
 
         else if (currentScope->getVariable(name))
         {
-            if (copy)
-            {
-                currentScope->block->addInstruction(new GetVariableCopy(name));
-            }
-
-            else
-            {
-                currentScope->block->addInstruction(new GetVariable(name));
-            }
+            currentScope->block->addInstruction(new GetVariable(name));
         }
 
         else
@@ -664,7 +639,12 @@ namespace Parser
             return;
         }
 
-        if (name == "sine")
+        if (name == "copy")
+        {
+            token->arguments->get("value", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
+        }
+
+        else if (name == "sine")
         {
             token->arguments->get("frequency", new Value(ParserLocation(0, 0, 0, 0), "0", 0), this);
             token->arguments->get("effects", new List(ParserLocation(0, 0, 0, 0), std::vector<const Token*>()), this);
@@ -805,7 +785,8 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Define* token)
     {
-        if (token->name == "sine" ||
+        if (token->name == "copy" ||
+            token->name == "sine" ||
             token->name == "square" ||
             token->name == "saw" ||
             token->name == "triangle" ||

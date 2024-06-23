@@ -99,16 +99,14 @@ void Machine::execute(unsigned int address)
                 break;
 
             case 0x07:
-                stack.push(variables[program[address + 1]]->value);
-
-                address += 2;
-
-                break;
-
-            case 0x08:
                 switch (program[address + 1])
                 {
                     case 0x00:
+                        stack.push(((Variable*)popStack())->value);
+
+                        break;
+
+                    case 0x01:
                     {
                         const unsigned int size = popStack()->getValue();
 
@@ -435,7 +433,7 @@ void Machine::execute(unsigned int address)
 
                 break;
 
-            case 0x09:
+            case 0x08:
                 execute(popStack()->getValue());
 
                 inputs.pop();
@@ -444,21 +442,21 @@ void Machine::execute(unsigned int address)
 
                 break;
 
-            case 0x0a:
+            case 0x09:
                 inputs.push(std::unordered_map<unsigned char, ValueObject*>());
 
                 address++;
 
                 break;
 
-            case 0x0b:
+            case 0x0a:
                 inputs.top()[program[address + 1]] = popStack();
 
                 address += 2;
 
                 break;
 
-            case 0x0c:
+            case 0x0b:
                 stack.push(inputs.top()[program[address + 1]]);
 
                 address += 2;

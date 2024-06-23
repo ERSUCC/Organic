@@ -251,21 +251,10 @@ namespace Parser
 
             else
             {
-                std::string name;
-
-                bool copy = false;
-
-                if (code[current] == '#')
-                {
-                    name += '#';
-
-                    copy = true;
-
-                    nextCharacter();
-                }
-
                 if (isalpha(code[current]) || code[current] == '_')
                 {
+                    std::string name;
+
                     while (current < code.size() && (isalnum(code[current]) || code[current] == '-' || code[current] == '_'))
                     {
                         name += code[current];
@@ -357,15 +346,7 @@ namespace Parser
 
                 else
                 {
-                    if (copy)
-                    {
-                        Utils::parseError("Expected variable name, received \"" + std::string(1, code[current]) + "\".", path, line, character);
-                    }
-
-                    else
-                    {
-                        Utils::parseError("Unrecognized symbol \"" + std::string(1, code[current]) + "\".", path, line, character);
-                    }
+                    Utils::parseError("Unrecognized symbol \"" + std::string(1, code[current]) + "\".", path, line, character);
                 }
             }
 
