@@ -27,7 +27,7 @@ Machine::Machine(const std::string path) : path(path)
     utils = Utils::get();
 }
 
-void Machine::execute(unsigned int address)
+void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
 {
     while (true)
     {
@@ -323,30 +323,30 @@ void Machine::execute(unsigned int address)
             }
 
             case 0x08:
-                execute(popStack()->getValue());
+            {
+                std::vector<ValueObject*> inputs;
 
-                inputs.pop();
+                for (unsigned char i = 0; i < program[address + 5]; i++)
+                {
+                    inputs.push_back(popStack());
+                }
 
-                address++;
+                execute(readInt(program[address + 1]), inputs);
+
+                address += 6;
 
                 break;
+            }
 
             case 0x09:
-                inputs.push(std::unordered_map<unsigned char, ValueObject*>());
-
-                address++;
-
-                break;
-
-            case 0x0a:
-                inputs.top()[program[address + 1]] = popStack();
+                inputs[program[address + 1]] = popStack();
 
                 address += 2;
 
                 break;
 
-            case 0x0b:
-                stack.push(inputs.top()[program[address + 1]]);
+            case 0x0a:
+                stack.push(inputs[program[address + 1]]);
 
                 address += 2;
 

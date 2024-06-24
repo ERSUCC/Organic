@@ -18,7 +18,7 @@ struct Machine
 {
     Machine(const std::string path);
 
-    void execute(unsigned int address);
+    void execute(unsigned int address, std::vector<ValueObject*>& inputs = std::vector<ValueObject*>());
 
     void processAudioSources(double* buffer, const unsigned int bufferLength);
     void performEvents();
@@ -40,8 +40,6 @@ private:
     std::stack<ValueObject*> stack;
 
     std::unordered_map<unsigned char, Variable*> variables;
-
-    std::stack<std::unordered_map<unsigned char, ValueObject*>> inputs;
 
     std::vector<AudioSource*> audioSources;
     std::vector<Event*> events;

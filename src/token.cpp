@@ -624,19 +624,14 @@ namespace Parser
 
         if (const BytecodeBlock* function = currentScope->getFunction(name))
         {
-            currentScope->block->addInstruction(new PrepareInputs());
-
-            for (unsigned int i = 0; i < function->inputs.size(); i++)
+            for (int i = function->inputs.size() - 1; i >= 0; i--)
             {
                 token->arguments->get(function->inputs[i], this);
-
-                currentScope->block->addInstruction(new SetInput(i));
             }
 
             token->arguments->confirmEmpty();
 
-            currentScope->block->addInstruction(new StackPushAddress(function));
-            currentScope->block->addInstruction(new CallUser());
+            currentScope->block->addInstruction(new CallUser(function, function->inputs.size()));
 
             return;
         }
