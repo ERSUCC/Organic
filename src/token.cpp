@@ -313,28 +313,31 @@ namespace Parser
         }
     }
 
-    bool Scope::getVariable(const std::string name)
+    std::optional<unsigned char> Scope::getVariable(const std::string name)
     {
         if (variables.count(name))
         {
             variablesUsed.insert(name);
 
-            return true;
+            return variables[name];
         }
 
-        if (parent && parent->getVariable(name))
+        if (parent)
         {
-            return true;
+            if (std::optional<unsigned char> result = parent->getVariable(name))
+            {
+                return result;
+            }
         }
 
-        return false;
+        return std::nullopt;
     }
 
     void Scope::addVariable(const std::string name)
     {
         if (!getVariable(name))
         {
-            variables.insert(name);
+            variables[name] = variables.size();
         }
     }
 
@@ -387,15 +390,15 @@ namespace Parser
     {
         // add parse locations to all of these if possible?
 
-        for (const std::string variable : variables)
+        for (const std::pair<std::string, unsigned char>& pair : variables)
         {
-            if (!variablesUsed.count(variable))
+            if (!variablesUsed.count(pair.first))
             {
-                Utils::warning("Warning: Unused variable \"" + variable + "\".");
+                Utils::warning("Warning: Unused variable \"" + pair.first + "\".");
             }
         }
 
-        for (const std::pair<std::string, BytecodeBlock*> pair : functions)
+        for (const std::pair<std::string, BytecodeBlock*>& pair : functions)
         {
             if (!functionsUsed.count(pair.first))
             {
@@ -403,7 +406,7 @@ namespace Parser
             }
         }
 
-        for (const std::pair<std::string, unsigned char> pair : inputs)
+        for (const std::pair<std::string, unsigned char>& pair : inputs)
         {
             if (!inputsUsed.count(pair.first))
             {
@@ -494,9 +497,9 @@ namespace Parser
             currentScope->block->addInstruction(new GetInput(input.value()));
         }
 
-        else if (currentScope->getVariable(name))
+        else if (const std::optional<unsigned char> result = currentScope->getVariable(name))
         {
-            currentScope->block->addInstruction(new GetVariable(name));
+            currentScope->block->addInstruction(new GetVariable(result.value()));
         }
 
         else
@@ -612,9 +615,9 @@ namespace Parser
 
         else
         {
-            currentScope->block->addInstruction(new SetVariable(token->variable));
-
             currentScope->addVariable(token->variable);
+
+            currentScope->block->addInstruction(new SetVariable(currentScope->getVariable(token->variable).value()));
         }
     }
 

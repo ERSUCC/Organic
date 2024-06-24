@@ -357,7 +357,7 @@ namespace Parser
     {
         Scope(Scope* parent = nullptr, const std::vector<std::string> inputs = std::vector<std::string>());
 
-        bool getVariable(const std::string name);
+        std::optional<unsigned char> getVariable(const std::string name);
         void addVariable(const std::string name);
 
         BytecodeBlock* getFunction(const std::string name);
@@ -372,7 +372,7 @@ namespace Parser
         BytecodeBlock* block;
 
     private:
-        std::unordered_set<std::string> variables;
+        std::unordered_map<std::string, unsigned char> variables;
         std::unordered_set<std::string> variablesUsed;
 
         std::unordered_map<std::string, BytecodeBlock*> functions;

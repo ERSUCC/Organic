@@ -106,34 +106,20 @@ void StackPushAddress::output(std::ofstream& stream, BytecodeResolver* resolver)
     }
 }
 
-SetVariable::SetVariable(const std::string variable) :
+SetVariable::SetVariable(const unsigned char variable) :
     BytecodeInstruction(2), variable(variable) {}
 
 void SetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
-    unsigned char id;
-
-    if (resolver->variables.count(variable))
-    {
-        id = resolver->variables[variable];
-    }
-
-    else
-    {
-        id = resolver->variables.size();
-
-        resolver->variables[variable] = id;
-    }
-
-    stream << (unsigned char)0x05 << id;
+    stream << (unsigned char)0x05 << variable;
 }
 
-GetVariable::GetVariable(const std::string variable) :
+GetVariable::GetVariable(const unsigned char variable) :
     BytecodeInstruction(2), variable(variable) {}
 
 void GetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) const
 {
-    stream << (unsigned char)0x06 << resolver->variables[variable];
+    stream << (unsigned char)0x06 << variable;
 }
 
 CallNative::CallNative(const std::string function, const unsigned char inputs) :
