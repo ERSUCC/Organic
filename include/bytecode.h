@@ -7,7 +7,6 @@
 
 #include "utils.h"
 
-struct BytecodeResolver;
 struct BytecodeBlock;
 
 std::vector<unsigned char> intToBytes(const unsigned int i);
@@ -17,7 +16,7 @@ struct BytecodeInstruction
 {
     BytecodeInstruction(const unsigned int size);
 
-    virtual void output(std::ofstream& stream, BytecodeResolver* resolver) const = 0;
+    virtual void output(std::ofstream& stream) const = 0;
 
     const unsigned int size;
 };
@@ -26,7 +25,7 @@ struct StackPushByte : public BytecodeInstruction
 {
     StackPushByte(const unsigned char value);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const unsigned char value;
@@ -37,7 +36,7 @@ struct StackPushInt : public BytecodeInstruction
 {
     StackPushInt(const unsigned int value);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const unsigned int value;
@@ -48,7 +47,7 @@ struct StackPushDouble : public BytecodeInstruction
 {
     StackPushDouble(const double value);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const double value;
@@ -59,7 +58,7 @@ struct StackPushAddress : public BytecodeInstruction
 {
     StackPushAddress(const BytecodeBlock* block);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const BytecodeBlock* block;
@@ -70,7 +69,7 @@ struct SetVariable : public BytecodeInstruction
 {
     SetVariable(const unsigned char variable);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const unsigned char variable;
@@ -81,7 +80,7 @@ struct GetVariable : public BytecodeInstruction
 {
     GetVariable(const unsigned char variable);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const unsigned char variable;
@@ -92,7 +91,7 @@ struct CallNative : public BytecodeInstruction
 {
     CallNative(const std::string function, const unsigned char inputs);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const std::string function;
@@ -105,7 +104,7 @@ struct CallUser : public BytecodeInstruction
 {
     CallUser(const BytecodeBlock* function, const unsigned char inputs);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const BytecodeBlock* function;
@@ -118,7 +117,7 @@ struct SetInput : public BytecodeInstruction
 {
     SetInput(const unsigned char input);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const unsigned char input;
@@ -129,7 +128,7 @@ struct GetInput : public BytecodeInstruction
 {
     GetInput(const unsigned char input);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const override;
+    void output(std::ofstream& stream) const override;
 
 private:
     const unsigned char input;
@@ -142,7 +141,7 @@ struct BytecodeBlock
 
     void addInstruction(const BytecodeInstruction* instruction);
 
-    void output(std::ofstream& stream, BytecodeResolver* resolver) const;
+    void output(std::ofstream& stream) const;
 
     const std::vector<std::string> inputs;
 

@@ -62,7 +62,7 @@ BytecodeInstruction::BytecodeInstruction(const unsigned int size) :
 StackPushByte::StackPushByte(const unsigned char value) :
     BytecodeInstruction(2), value(value) {}
 
-void StackPushByte::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void StackPushByte::output(std::ofstream& stream) const
 {
     stream << (unsigned char)0x01 << value;
 }
@@ -70,7 +70,7 @@ void StackPushByte::output(std::ofstream& stream, BytecodeResolver* resolver) co
 StackPushInt::StackPushInt(const unsigned int value) :
     BytecodeInstruction(5), value(value) {}
 
-void StackPushInt::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void StackPushInt::output(std::ofstream& stream) const
 {
     stream << (unsigned char)0x02;
 
@@ -83,7 +83,7 @@ void StackPushInt::output(std::ofstream& stream, BytecodeResolver* resolver) con
 StackPushDouble::StackPushDouble(const double value) :
     BytecodeInstruction(9), value(value) {}
 
-void StackPushDouble::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void StackPushDouble::output(std::ofstream& stream) const
 {
     stream << (unsigned char)0x03;
 
@@ -96,7 +96,7 @@ void StackPushDouble::output(std::ofstream& stream, BytecodeResolver* resolver) 
 StackPushAddress::StackPushAddress(const BytecodeBlock* block) :
     BytecodeInstruction(5), block(block) {}
 
-void StackPushAddress::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void StackPushAddress::output(std::ofstream& stream) const
 {
     stream << (unsigned char)0x04;
 
@@ -109,7 +109,7 @@ void StackPushAddress::output(std::ofstream& stream, BytecodeResolver* resolver)
 SetVariable::SetVariable(const unsigned char variable) :
     BytecodeInstruction(2), variable(variable) {}
 
-void SetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void SetVariable::output(std::ofstream& stream) const
 {
     stream << (unsigned char)0x05 << variable;
 }
@@ -117,7 +117,7 @@ void SetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) cons
 GetVariable::GetVariable(const unsigned char variable) :
     BytecodeInstruction(2), variable(variable) {}
 
-void GetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void GetVariable::output(std::ofstream& stream) const
 {
     stream << (unsigned char)0x06 << variable;
 }
@@ -125,7 +125,7 @@ void GetVariable::output(std::ofstream& stream, BytecodeResolver* resolver) cons
 CallNative::CallNative(const std::string function, const unsigned char inputs) :
     BytecodeInstruction(3), function(function), inputs(inputs) {}
 
-void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void CallNative::output(std::ofstream& stream) const
 {
     unsigned char id;
 
@@ -169,7 +169,7 @@ void CallNative::output(std::ofstream& stream, BytecodeResolver* resolver) const
 CallUser::CallUser(const BytecodeBlock* function, const unsigned char inputs) :
     BytecodeInstruction(6), function(function), inputs(inputs) {}
 
-void CallUser::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void CallUser::output(std::ofstream& stream) const
 {
     stream << (unsigned char)0x08;
 
@@ -184,7 +184,7 @@ void CallUser::output(std::ofstream& stream, BytecodeResolver* resolver) const
 SetInput::SetInput(const unsigned char input) :
     BytecodeInstruction(2), input(input) {}
 
-void SetInput::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void SetInput::output(std::ofstream& stream) const
 {
     stream << (unsigned char)0x09 << input;
 }
@@ -192,7 +192,7 @@ void SetInput::output(std::ofstream& stream, BytecodeResolver* resolver) const
 GetInput::GetInput(const unsigned char input) :
     BytecodeInstruction(2), input(input) {}
 
-void GetInput::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void GetInput::output(std::ofstream& stream) const
 {
     stream << (unsigned char)0x0a << input;
 }
@@ -207,11 +207,11 @@ void BytecodeBlock::addInstruction(const BytecodeInstruction* instruction)
     size += instruction->size;
 }
 
-void BytecodeBlock::output(std::ofstream& stream, BytecodeResolver* resolver) const
+void BytecodeBlock::output(std::ofstream& stream) const
 {
     for (const BytecodeInstruction* instruction : instructions)
     {
-        instruction->output(stream, resolver);
+        instruction->output(stream);
     }
 
     stream << (unsigned char)0x00;
@@ -239,7 +239,7 @@ void BytecodeResolver::output(const std::string path)
 
     for (BytecodeBlock* block : blocks)
     {
-        block->output(stream, this);
+        block->output(stream);
     }
 
     stream.close();
