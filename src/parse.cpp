@@ -729,18 +729,7 @@ namespace Parser
         {
             if (dynamic_cast<const Power*>(terms[i]))
             {
-                const Value* left = dynamic_cast<const Value*>(terms[i - 1]);
-                const Value* right = dynamic_cast<const Value*>(terms[i + 1]);
-
-                if (left && right)
-                {
-                    terms[i - 1] = new Value(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), terms[i]->str, pow(left->value, right->value));
-                }
-
-                else
-                {
-                    terms[i - 1] = new PowerObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
-                }
+                terms[i - 1] = new PowerObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -752,18 +741,7 @@ namespace Parser
         {
             if (dynamic_cast<const Multiply*>(terms[i]))
             {
-                const Value* left = dynamic_cast<const Value*>(terms[i - 1]);
-                const Value* right = dynamic_cast<const Value*>(terms[i + 1]);
-
-                if (left && right)
-                {
-                    terms[i - 1] = new Value(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), terms[i]->str, left->value * right->value);
-                }
-
-                else
-                {
-                    terms[i - 1] = new MultiplyObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
-                }
+                terms[i - 1] = new MultiplyObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -772,18 +750,7 @@ namespace Parser
 
             else if (dynamic_cast<const Divide*>(terms[i]))
             {
-                const Value* left = dynamic_cast<const Value*>(terms[i - 1]);
-                const Value* right = dynamic_cast<const Value*>(terms[i + 1]);
-
-                if (left && right)
-                {
-                    terms[i - 1] = new Value(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), terms[i]->str, left->value / right->value);
-                }
-
-                else
-                {
-                    terms[i - 1] = new DivideObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
-                }
+                terms[i - 1] = new DivideObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -795,18 +762,7 @@ namespace Parser
         {
             if (dynamic_cast<const Add*>(terms[i]))
             {
-                const Value* left = dynamic_cast<const Value*>(terms[i - 1]);
-                const Value* right = dynamic_cast<const Value*>(terms[i + 1]);
-
-                if (left && right)
-                {
-                    terms[i - 1] = new Value(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), terms[i]->str, left->value + right->value);
-                }
-
-                else
-                {
-                    terms[i - 1] = new AddObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
-                }
+                terms[i - 1] = new AddObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -815,18 +771,7 @@ namespace Parser
 
             else if (dynamic_cast<const Subtract*>(terms[i]))
             {
-                const Value* left = dynamic_cast<const Value*>(terms[i - 1]);
-                const Value* right = dynamic_cast<const Value*>(terms[i + 1]);
-
-                if (left && right)
-                {
-                    terms[i - 1] = new Value(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), terms[i]->str, left->value - right->value);
-                }
-
-                else
-                {
-                    terms[i - 1] = new SubtractObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
-                }
+                terms[i - 1] = new SubtractObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -841,7 +786,7 @@ namespace Parser
             Utils::parseError("Invalid expression.", path, startToken->location.line, startToken->location.character);
         }
 
-        return terms[0];
+        return foldConstants(terms[0]);
     }
 
     const Token* Parser::parseTerm(unsigned int pos) const
@@ -878,6 +823,103 @@ namespace Parser
         tokenError(getToken(pos), "expression term");
 
         return nullptr;
+    }
+
+    const Token* Parser::foldConstants(const Token* token) const
+    {
+        if (const ParenthesizedExpression* object = dynamic_cast<const ParenthesizedExpression*>(token))
+        {
+            const Token* result = foldConstants(object->value);
+
+            if (const Value* value = dynamic_cast<const Value*>(result))
+            {
+                return new Value(object->location, object->str, value->value);
+            }
+
+            return new ParenthesizedExpression(object->location, result);
+        }
+
+        if (const PowerObject* object = dynamic_cast<const PowerObject*>(token))
+        {
+            const Token* left = foldConstants(object->value1);
+            const Token* right = foldConstants(object->value2);
+
+            const Value* left_value = dynamic_cast<const Value*>(left);
+            const Value* right_value = dynamic_cast<const Value*>(right);
+
+            if (left_value && right_value)
+            {
+                return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, pow(left_value->value, right_value->value));
+            }
+
+            return new PowerObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+        }
+        
+        if (const MultiplyObject* object = dynamic_cast<const MultiplyObject*>(token))
+        {
+            const Token* left = foldConstants(object->value1);
+            const Token* right = foldConstants(object->value2);
+
+            const Value* left_value = dynamic_cast<const Value*>(left);
+            const Value* right_value = dynamic_cast<const Value*>(right);
+
+            if (left_value && right_value)
+            {
+                return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, left_value->value * right_value->value);
+            }
+
+            return new MultiplyObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+        }
+
+        if (const DivideObject* object = dynamic_cast<const DivideObject*>(token))
+        {
+            const Token* left = foldConstants(object->value1);
+            const Token* right = foldConstants(object->value2);
+
+            const Value* left_value = dynamic_cast<const Value*>(left);
+            const Value* right_value = dynamic_cast<const Value*>(right);
+
+            if (left_value && right_value)
+            {
+                return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, left_value->value / right_value->value);
+            }
+
+            return new DivideObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+        }
+
+        if (const AddObject* object = dynamic_cast<const AddObject*>(token))
+        {
+            const Token* left = foldConstants(object->value1);
+            const Token* right = foldConstants(object->value2);
+
+            const Value* left_value = dynamic_cast<const Value*>(left);
+            const Value* right_value = dynamic_cast<const Value*>(right);
+
+            if (left_value && right_value)
+            {
+                return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, left_value->value + right_value->value);
+            }
+
+            return new AddObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+        }
+
+        if (const SubtractObject* object = dynamic_cast<const SubtractObject*>(token))
+        {
+            const Token* left = foldConstants(object->value1);
+            const Token* right = foldConstants(object->value2);
+
+            const Value* left_value = dynamic_cast<const Value*>(left);
+            const Value* right_value = dynamic_cast<const Value*>(right);
+
+            if (left_value && right_value)
+            {
+                return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, left_value->value - right_value->value);
+            }
+
+            return new SubtractObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+        }
+
+        return token;
     }
 
     double Parser::getFrequency(const double note) const
