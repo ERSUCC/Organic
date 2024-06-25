@@ -5,51 +5,37 @@ namespace Parser
     ParserLocation::ParserLocation(const unsigned int line, const unsigned int character, const unsigned int start, const unsigned int end) :
         line(line), character(character), start(start), end(end) {}
 
-    Token::Token(const ParserLocation location, const std::string str) :
-        location(location), str(str) {}
+    Token::Token(const ParserLocation location) :
+        location(location) {}
 
     void Token::accept(BytecodeTransformer* visitor) const {}
 
-    std::string listToString(const std::vector<const Token*> list)
-    {
-        std::string result = "(";
-
-        if (list.size() > 0)
-        {
-            result += list[0]->str;
-
-            for (unsigned int i = 1; i < list.size(); i++)
-            {
-                result += ", " + list[i]->str;
-            }
-        }
-
-        return result + ")";
-    }
+    BasicToken::BasicToken(const ParserLocation location, const std::string str) :
+        Token(location), str(str) {}
 
     OpenParenthesis::OpenParenthesis(const ParserLocation location) :
-        Token(location, "(") {}
+        BasicToken(location, "(") {}
 
     CloseParenthesis::CloseParenthesis(const ParserLocation location) :
-        Token(location, ")") {}
+        BasicToken(location, ")") {}
 
     OpenCurlyBracket::OpenCurlyBracket(const ParserLocation location) :
-        Token(location, "{") {}
+        BasicToken(location, "{") {}
 
     CloseCurlyBracket::CloseCurlyBracket(const ParserLocation location) :
-        Token(location, "}") {}
+        BasicToken(location, "}") {}
 
     Colon::Colon(const ParserLocation location) :
-        Token(location, ":") {}
+        BasicToken(location, ":") {}
 
     Comma::Comma(const ParserLocation location) :
-        Token(location, ",") {}
+        BasicToken(location, ",") {}
 
     Equals::Equals(const ParserLocation location) :
-        Token(location, "=") {}
+        BasicToken(location, "=") {}
 
     Operator::Operator(const ParserLocation location, const std::string str) :
-        Token(location, str) {}
+        BasicToken(location, str) {}
 
     Add::Add(const ParserLocation location) :
         Operator(location, "+") {}
@@ -82,10 +68,10 @@ namespace Parser
         Operator(location, ">=") {}
 
     String::String(const ParserLocation location, const std::string str) :
-        Token(location, str) {}
+        BasicToken(location, str) {}
 
     Value::Value(const ParserLocation location, const std::string str, const double value) :
-        Token(location, str), value(value) {}
+        BasicToken(location, str), value(value) {}
 
     void Value::accept(BytecodeTransformer* visitor) const
     {
@@ -93,7 +79,7 @@ namespace Parser
     }
 
     NamedConstant::NamedConstant(const ParserLocation location, const std::string constant) :
-        Token(location, constant) {}
+        BasicToken(location, constant) {}
 
     void NamedConstant::accept(BytecodeTransformer* visitor) const
     {
@@ -101,7 +87,7 @@ namespace Parser
     }
 
     Variable::Variable(const ParserLocation location, const std::string variable) :
-        Token(location, variable) {}
+        BasicToken(location, variable) {}
 
     void Variable::accept(BytecodeTransformer* visitor) const
     {
@@ -109,27 +95,10 @@ namespace Parser
     }
 
     Argument::Argument(const ParserLocation location, const std::string name, const Token* value) :
-        Token(location, name + ": " + value->str), name(name), value(value) {}
+        Token(location), name(name), value(value) {}
     
-    std::string argumentsToString(const std::vector<const Argument*> arguments)
-    {
-        std::string result = "(";
-
-        if (arguments.size() > 0)
-        {
-            result += arguments[0]->str;
-
-            for (unsigned int i = 1; i < arguments.size(); i++)
-            {
-                result += ", " + arguments[i]->str;
-            }
-        }
-
-        return result + ")";
-    }
-
     ArgumentList::ArgumentList(const std::vector<const Argument*> arguments, const std::string name, const std::string path) :
-        arguments(arguments), name(name), path(path), str(argumentsToString(arguments))
+        arguments(arguments), name(name), path(path)
     {
         std::unordered_set<std::string> defined;
 
@@ -137,7 +106,7 @@ namespace Parser
         {
             if (defined.count(argument->name))
             {
-                Utils::parseError("Input \"" + argument->name + "\" specified more than once.", path, argument->location.line, argument->location.character);
+                Utils::parseError("Input \"" + argument->name + "\" specified more than once.", path, argument->location.line, argument->location.character); // add function name?
             }
 
             defined.insert(argument->name);
@@ -172,18 +141,18 @@ namespace Parser
     }
 
     List::List(const ParserLocation location, const std::vector<const Token*> values) :
-        Token(location, listToString(values)), values(values) {}
+        Token(location), values(values) {}
 
     void List::accept(BytecodeTransformer* visitor) const
     {
         visitor->visit(this);
     }
 
-    OperatorObject::OperatorObject(const ParserLocation location, const std::string op, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " " + op + " " + value2->str), value1(value1), value2(value2) {}
+    OperatorObject::OperatorObject(const ParserLocation location, const Token* value1, const Token* value2) :
+        Token(location), value1(value1), value2(value2) {}
 
     AddObject::AddObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, "+", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void AddObject::accept(BytecodeTransformer* visitor) const
     {
@@ -191,7 +160,7 @@ namespace Parser
     }
 
     SubtractObject::SubtractObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, "-", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void SubtractObject::accept(BytecodeTransformer* visitor) const
     {
@@ -199,7 +168,7 @@ namespace Parser
     }
 
     MultiplyObject::MultiplyObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, "*", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void MultiplyObject::accept(BytecodeTransformer* visitor) const
     {
@@ -207,7 +176,7 @@ namespace Parser
     }
 
     DivideObject::DivideObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, "/", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void DivideObject::accept(BytecodeTransformer* visitor) const
     {
@@ -215,7 +184,7 @@ namespace Parser
     }
 
     PowerObject::PowerObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, "^", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void PowerObject::accept(BytecodeTransformer* visitor) const
     {
@@ -223,7 +192,7 @@ namespace Parser
     }
 
     EqualsObject::EqualsObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, "==", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void EqualsObject::accept(BytecodeTransformer* visitor) const
     {
@@ -231,7 +200,7 @@ namespace Parser
     }
 
     LessObject::LessObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, "<", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void LessObject::accept(BytecodeTransformer* visitor) const
     {
@@ -239,7 +208,7 @@ namespace Parser
     }
 
     GreaterObject::GreaterObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, ">", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void GreaterObject::accept(BytecodeTransformer* visitor) const
     {
@@ -247,7 +216,7 @@ namespace Parser
     }
 
     LessEqualObject::LessEqualObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, "<=", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void LessEqualObject::accept(BytecodeTransformer* visitor) const
     {
@@ -255,7 +224,7 @@ namespace Parser
     }
 
     GreaterEqualObject::GreaterEqualObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, ">=", value1, value2) {}
+        OperatorObject(location, value1, value2) {}
 
     void GreaterEqualObject::accept(BytecodeTransformer* visitor) const
     {
@@ -263,18 +232,18 @@ namespace Parser
     }
 
     ParenthesizedExpression::ParenthesizedExpression(const ParserLocation location, const Token* value) :
-        Token(location, "(" + value->str + ")"), value(value) {}
+        Token(location), value(value) {}
     
     void ParenthesizedExpression::accept(BytecodeTransformer* visitor) const
     {
         visitor->visit(this);
     }
 
-    Instruction::Instruction(const ParserLocation location, const std::string str) :
-        Token(location, str) {}
+    Instruction::Instruction(const ParserLocation location) :
+        Token(location) {}
 
     Assign::Assign(const ParserLocation location, const std::string variable, const Token* value) :
-        Instruction(location, variable + " = " + value->str), variable(variable), value(value) {}
+        Instruction(location), variable(variable), value(value) {}
 
     void Assign::accept(BytecodeTransformer* visitor) const
     {
@@ -282,7 +251,7 @@ namespace Parser
     }
 
     Call::Call(const ParserLocation location, const std::string name, ArgumentList* arguments) :
-        Instruction(location, name + arguments->str), name(name), arguments(arguments) {}
+        Instruction(location), name(name), arguments(arguments) {}
 
     void Call::accept(BytecodeTransformer* visitor) const
     {
@@ -290,7 +259,7 @@ namespace Parser
     }
 
     CodeBlock::CodeBlock(const ParserLocation location, const std::vector<const Instruction*> instructions) :
-        Token(location, ""), instructions(instructions) {} // fix str, same as list
+        Token(location), instructions(instructions) {}
 
     void CodeBlock::accept(BytecodeTransformer* visitor) const
     {
@@ -298,7 +267,7 @@ namespace Parser
     }
 
     Define::Define(const ParserLocation location, const std::string name, const std::vector<std::string> inputs, const CodeBlock* body) :
-        Token(location, ""), name(name), inputs(inputs), body(body) {} // fix str, same as list
+        Token(location), name(name), inputs(inputs), body(body) {}
 
     void Define::accept(BytecodeTransformer* visitor) const
     {
@@ -419,7 +388,7 @@ namespace Parser
     }
 
     Program::Program(const std::vector<const Instruction*> instructions) :
-        Token(ParserLocation(0, 0, 0, 0), ""), instructions(instructions) {} // fix later, same as list
+        Token(ParserLocation(0, 0, 0, 0)), instructions(instructions) {}
 
     void Program::accept(BytecodeTransformer* visitor) const
     {

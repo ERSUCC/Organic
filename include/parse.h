@@ -20,11 +20,11 @@ namespace Parser
 
         void tokenize();
 
-        const Token* getToken(const unsigned int pos) const;
+        const BasicToken* getToken(const unsigned int pos) const;
         template <typename T> const T* getToken(const unsigned int pos) const;
         template <typename T> bool tokenIs(const unsigned int pos) const;
 
-        void tokenError(const Token* token, const std::string message) const;
+        void tokenError(const BasicToken* token, const std::string message) const;
 
         const Token* parseInstruction(unsigned int pos) const;
         const Token* parseDefine(unsigned int pos) const;
@@ -44,7 +44,7 @@ namespace Parser
 
         std::string code;
 
-        std::vector<Token*> tokens;
+        std::vector<BasicToken*> tokens;
 
         unsigned int current = 0;
         unsigned int line = 1;

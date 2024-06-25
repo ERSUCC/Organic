@@ -26,53 +26,56 @@ namespace Parser
 
     struct Token
     {
-        Token(const ParserLocation location, const std::string str);
+        Token(const ParserLocation location);
 
         virtual void accept(BytecodeTransformer* visitor) const;
 
         const ParserLocation location;
+    };
+
+    struct BasicToken : public Token
+    {
+        BasicToken(const ParserLocation location, const std::string str);
 
         const std::string str;
     };
 
-    std::string listToString(const std::vector<const Token*> list);
-
-    struct OpenParenthesis : public Token
+    struct OpenParenthesis : public BasicToken
     {
         OpenParenthesis(const ParserLocation location);
     };
 
-    struct CloseParenthesis : public Token
+    struct CloseParenthesis : public BasicToken
     {
         CloseParenthesis(const ParserLocation location);
     };
 
-    struct OpenCurlyBracket : public Token
+    struct OpenCurlyBracket : public BasicToken
     {
         OpenCurlyBracket(const ParserLocation location);
     };
 
-    struct CloseCurlyBracket : public Token
+    struct CloseCurlyBracket : public BasicToken
     {
         CloseCurlyBracket(const ParserLocation location);
     };
 
-    struct Colon : public Token
+    struct Colon : public BasicToken
     {
         Colon(const ParserLocation location);
     };
 
-    struct Comma : public Token
+    struct Comma : public BasicToken
     {
         Comma(const ParserLocation location);
     };
 
-    struct Equals : public Token
+    struct Equals : public BasicToken
     {
         Equals(const ParserLocation location);
     };
 
-    struct Operator : public Token
+    struct Operator : public BasicToken
     {
         Operator(const ParserLocation location, const std::string str);
     };
@@ -127,12 +130,12 @@ namespace Parser
         GreaterEqual(const ParserLocation location);
     };
 
-    struct String : public Token
+    struct String : public BasicToken
     {
         String(const ParserLocation location, const std::string str);
     };
 
-    struct Value : public Token
+    struct Value : public BasicToken
     {
         Value(const ParserLocation location, const std::string str, const double value);
 
@@ -141,14 +144,14 @@ namespace Parser
         const double value;
     };
 
-    struct NamedConstant : public Token
+    struct NamedConstant : public BasicToken
     {
         NamedConstant(const ParserLocation location, const std::string constant);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
-    struct Variable : public Token
+    struct Variable : public BasicToken
     {
         Variable(const ParserLocation location, const std::string variable);
 
@@ -164,8 +167,6 @@ namespace Parser
         const Token* value;
     };
 
-    std::string argumentsToString(const std::vector<const Argument*> arguments);
-
     struct ArgumentList
     {
         ArgumentList(const std::vector<const Argument*> arguments, const std::string name, const std::string path);
@@ -173,8 +174,6 @@ namespace Parser
         void get(const std::string name, BytecodeTransformer* visitor);
 
         void confirmEmpty() const;
-
-        const std::string str;
 
         unsigned char count = 0;
 
@@ -197,7 +196,7 @@ namespace Parser
 
     struct OperatorObject : public Token
     {
-        OperatorObject(const ParserLocation location, const std::string op, const Token* value1, const Token* value2);
+        OperatorObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         const Token* value1;
         const Token* value2;
@@ -285,7 +284,7 @@ namespace Parser
 
     struct Instruction : public Token
     {
-        Instruction(const ParserLocation location, const std::string str);
+        Instruction(const ParserLocation location);
     };
 
     struct Assign : public Instruction

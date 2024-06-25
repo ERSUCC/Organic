@@ -354,7 +354,7 @@ namespace Parser
         }
     }
 
-    const Token* Parser::getToken(const unsigned int pos) const
+    const BasicToken* Parser::getToken(const unsigned int pos) const
     {
         if (pos >= tokens.size())
         {
@@ -381,7 +381,7 @@ namespace Parser
         return dynamic_cast<const T*>(getToken(pos));
     }
 
-    void Parser::tokenError(const Token* token, const std::string expected) const
+    void Parser::tokenError(const BasicToken* token, const std::string expected) const
     {
         Utils::parseError("Expected " + expected + ", received \"" + token->str + "\".", path, token->location.line, token->location.character);
     }
@@ -439,7 +439,7 @@ namespace Parser
 
     const Token* Parser::parseDefine(unsigned int pos) const
     {
-        const Token* name = getToken(pos);
+        const BasicToken* name = getToken(pos);
         
         pos += 2;
 
@@ -478,7 +478,7 @@ namespace Parser
 
     const Token* Parser::parseAssign(unsigned int pos) const
     {
-        const Token* name = getToken(pos);
+        const BasicToken* name = getToken(pos);
         const Token* value = parseExpression(pos + 2);
 
         return new Assign(ParserLocation(name->location.line, name->location.character, pos, value->location.end), name->str, value);
@@ -531,7 +531,7 @@ namespace Parser
             }
         }
 
-        const Token* str = getToken(start);
+        const BasicToken* str = getToken(start);
 
         return new Call(ParserLocation(str->location.line, str->location.character, start, pos + 1), str->str, new ArgumentList(arguments, str->str, path));
     }
@@ -575,7 +575,7 @@ namespace Parser
                 tokenError(getToken(pos), "\")\"");
             }
 
-            const Token* token = getToken(start);
+            const BasicToken* token = getToken(start);
 
             if (list.empty())
             {
@@ -613,7 +613,7 @@ namespace Parser
 
                 pos++;
 
-                const Token* startToken = getToken(pStart);
+                const BasicToken* startToken = getToken(pStart);
 
                 terms.push_back(new ParenthesizedExpression(ParserLocation(startToken->location.line, startToken->location.character, pStart, pos), token));
             }
@@ -781,7 +781,7 @@ namespace Parser
 
         if (terms.size() != 1)
         {
-            const Token* startToken = getToken(start);
+            const BasicToken* startToken = getToken(start);
 
             Utils::parseError("Invalid expression.", path, startToken->location.line, startToken->location.character);
         }
@@ -803,7 +803,7 @@ namespace Parser
                 return parseCall(pos);
             }
 
-            const Token* str = getToken(pos);
+            const BasicToken* str = getToken(pos);
 
             if (str->str == "sequence-forwards" ||
                 str->str == "sequence-backwards" ||
@@ -833,7 +833,7 @@ namespace Parser
 
             if (const Value* value = dynamic_cast<const Value*>(result))
             {
-                return new Value(object->location, object->str, value->value);
+                return new Value(object->location, "(" + value->str + ")", value->value);
             }
 
             return new ParenthesizedExpression(object->location, result);
@@ -851,7 +851,7 @@ namespace Parser
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, pow(left_value->value, right_value->value));
+                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " ^ " + right_value->str, pow(left_value->value, right_value->value));
                 }
 
                 return new PowerObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
@@ -861,7 +861,7 @@ namespace Parser
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, left_value->value * right_value->value);
+                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " * " + right_value->str, left_value->value * right_value->value);
                 }
 
                 return new MultiplyObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
@@ -871,7 +871,7 @@ namespace Parser
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, left_value->value / right_value->value);
+                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " / " + right_value->str, left_value->value / right_value->value);
                 }
 
                 return new DivideObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
@@ -881,7 +881,7 @@ namespace Parser
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, left_value->value + right_value->value);
+                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " + " + right_value->str, left_value->value + right_value->value);
                 }
 
                 return new AddObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
@@ -891,7 +891,7 @@ namespace Parser
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), object->str, left_value->value - right_value->value);
+                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " - " + right_value->str, left_value->value - right_value->value);
                 }
 
                 return new SubtractObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
