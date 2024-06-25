@@ -195,103 +195,82 @@ namespace Parser
         const std::vector<const Token*> values;
     };
 
-    struct AddObject : public Token
+    struct OperatorObject : public Token
+    {
+        OperatorObject(const ParserLocation location, const std::string op, const Token* value1, const Token* value2);
+
+        const Token* value1;
+        const Token* value2;
+    };
+
+    struct AddObject : public OperatorObject
     {
         AddObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
-        const Token* value2;
     };
 
-    struct SubtractObject : public Token
+    struct SubtractObject : public OperatorObject
     {
         SubtractObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
-        const Token* value2;
     };
 
-    struct MultiplyObject : public Token
+    struct MultiplyObject : public OperatorObject
     {
         MultiplyObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
-        const Token* value2;
     };
 
-    struct DivideObject : public Token
+    struct DivideObject : public OperatorObject
     {
         DivideObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
-        const Token* value2;
     };
 
-    struct PowerObject : public Token
+    struct PowerObject : public OperatorObject
     {
         PowerObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
-        const Token* value2;
     };
 
-    struct EqualsObject : public Token
+    struct EqualsObject : public OperatorObject
     {
         EqualsObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
-        const Token* value2;
     };
 
-    struct LessObject : public Token
+    struct LessObject : public OperatorObject
     {
         LessObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
-        const Token* value2;
     };
 
-    struct GreaterObject : public Token
+    struct GreaterObject : public OperatorObject
     {
         GreaterObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
-        const Token* value2;
     };
 
-    struct LessEqualObject : public Token
+    struct LessEqualObject : public OperatorObject
     {
         LessEqualObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
-        const Token* value2;
     };
 
-    struct GreaterEqualObject : public Token
+    struct GreaterEqualObject : public OperatorObject
     {
         GreaterEqualObject(const ParserLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value1;
         const Token* value2;
     };
 

@@ -179,8 +179,11 @@ namespace Parser
         visitor->visit(this);
     }
 
+    OperatorObject::OperatorObject(const ParserLocation location, const std::string op, const Token* value1, const Token* value2) :
+        Token(location, value1->str + " " + op + " " + value2->str), value1(value1), value2(value2) {}
+
     AddObject::AddObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " + " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, "+", value1, value2) {}
 
     void AddObject::accept(BytecodeTransformer* visitor) const
     {
@@ -188,7 +191,7 @@ namespace Parser
     }
 
     SubtractObject::SubtractObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " - " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, "-", value1, value2) {}
 
     void SubtractObject::accept(BytecodeTransformer* visitor) const
     {
@@ -196,7 +199,7 @@ namespace Parser
     }
 
     MultiplyObject::MultiplyObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " * " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, "*", value1, value2) {}
 
     void MultiplyObject::accept(BytecodeTransformer* visitor) const
     {
@@ -204,7 +207,7 @@ namespace Parser
     }
 
     DivideObject::DivideObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " / " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, "/", value1, value2) {}
 
     void DivideObject::accept(BytecodeTransformer* visitor) const
     {
@@ -212,7 +215,7 @@ namespace Parser
     }
 
     PowerObject::PowerObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " ^ " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, "^", value1, value2) {}
 
     void PowerObject::accept(BytecodeTransformer* visitor) const
     {
@@ -220,7 +223,7 @@ namespace Parser
     }
 
     EqualsObject::EqualsObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " == " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, "==", value1, value2) {}
 
     void EqualsObject::accept(BytecodeTransformer* visitor) const
     {
@@ -228,7 +231,7 @@ namespace Parser
     }
 
     LessObject::LessObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " < " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, "<", value1, value2) {}
 
     void LessObject::accept(BytecodeTransformer* visitor) const
     {
@@ -236,7 +239,7 @@ namespace Parser
     }
 
     GreaterObject::GreaterObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " > " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, ">", value1, value2) {}
 
     void GreaterObject::accept(BytecodeTransformer* visitor) const
     {
@@ -244,7 +247,7 @@ namespace Parser
     }
 
     LessEqualObject::LessEqualObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " <= " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, "<=", value1, value2) {}
 
     void LessEqualObject::accept(BytecodeTransformer* visitor) const
     {
@@ -252,7 +255,7 @@ namespace Parser
     }
 
     GreaterEqualObject::GreaterEqualObject(const ParserLocation location, const Token* value1, const Token* value2) :
-        Token(location, value1->str + " >= " + value2->str), value1(value1), value2(value2) {}
+        OperatorObject(location, ">=", value1, value2) {}
 
     void GreaterEqualObject::accept(BytecodeTransformer* visitor) const
     {
