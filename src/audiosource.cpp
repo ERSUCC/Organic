@@ -88,7 +88,7 @@ void Oscillator::prepareForEffects(const unsigned int bufferLength)
 
         if (utils->channels == 1)
         {
-            effectBuffer[i] = volumeValue * value;
+            effectBuffer[i] = value;
         }
 
         else

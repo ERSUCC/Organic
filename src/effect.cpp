@@ -8,19 +8,22 @@ Delay::Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
 
 void Delay::apply(double* buffer, const unsigned int bufferLength)
 {
+    const double delayValue = delay->getValue();
+
+    if (delayValue == 0)
+    {
+        return;
+    }
+
     for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
-        const double delayValue = delay->getValue();
-
         if (utils->channels == 1)
         {
-            if (utils->time >= bufferTime + delayValue)
+            if (utils->time >= startTime + delayValue)
             {
                 buffer[i] += this->buffer.front() * mix->getValue() * feedback->getValue();
 
                 this->buffer.pop();
-
-                bufferTime = utils->time - delayValue;
             }
 
             this->buffer.push(buffer[i]);
@@ -28,7 +31,7 @@ void Delay::apply(double* buffer, const unsigned int bufferLength)
 
         else
         {
-            if (utils->time >= bufferTime + delayValue)
+            if (utils->time >= startTime + delayValue)
             {
                 const double mixValue = mix->getValue();
                 const double feedbackValue = feedback->getValue();
@@ -40,8 +43,6 @@ void Delay::apply(double* buffer, const unsigned int bufferLength)
                 buffer[i + 1] += this->buffer.front() * mixValue * feedbackValue;
 
                 this->buffer.pop();
-
-                bufferTime = utils->time - delayValue;
             }
 
             this->buffer.push(buffer[i]);

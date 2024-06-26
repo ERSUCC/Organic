@@ -76,7 +76,7 @@ void Organic::startPlayback()
         Utils::error(audio.getErrorText());
     }
 
-    machine->execute(4);
+    machine->execute(4, std::vector<ValueObject*>()); // second argument could be used for command line inputs or something
 
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
@@ -110,7 +110,7 @@ void Organic::startExport()
 
     double* buffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
 
-    machine->execute(4);
+    machine->execute(4, std::vector<ValueObject*>()); // second argument could be used for command line inputs or something
 
     for (unsigned int i = 0; i < steps; i += utils->bufferLength)
     {

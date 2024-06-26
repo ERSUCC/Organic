@@ -29,8 +29,6 @@ protected:
 private:
     std::queue<double> buffer;
 
-    double bufferTime = 0;
-
 };
 
 struct LowPassFilter : public Effect
