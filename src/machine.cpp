@@ -301,7 +301,9 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
 
                         events.push_back(new Event([=]()
                         {
-                            execute(exec, std::vector<ValueObject*>());
+                            std::vector<ValueObject*> inputs;
+
+                            execute(exec, inputs);
                         }, inputs[1]));
 
                         break;
