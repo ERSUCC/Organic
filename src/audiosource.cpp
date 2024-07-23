@@ -140,12 +140,7 @@ Triangle::Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, 
 
 double Triangle::getValue()
 {
-    if (sin(phase) < 0)
-    {
-        return -fmod(phase - utils->pi, utils->pi) * 2 / utils->pi + 1;
-    }
-
-    return fmod(phase, utils->pi) * 2 / utils->pi - 1;
+    return 2 * fabs(fmod(phase, utils->twoPi) - utils->pi) / utils->pi - 1;
 }
 
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
