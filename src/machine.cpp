@@ -83,8 +83,11 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
                     variables[id] = new Variable(popStack());
                 }
 
-                variables[id]->stop();
-                variables[id]->start(utils->time);
+                if (variables[id]->enabled)
+                {
+                    variables[id]->stop();
+                    variables[id]->start(utils->time);
+                }
 
                 address += 2;
 

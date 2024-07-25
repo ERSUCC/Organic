@@ -141,10 +141,28 @@ Sequence::Sequence(List<ValueObject>* controllers, ValueObject* order) :
 double Sequence::syncLength()
 {
     double length = 0;
-    
-    for (ValueObject* controller : controllers->objects)
+
+    if (order->getValue() == OrderEnum::PingPong)
     {
-        length += controller->syncLength();
+        length += controllers->objects[0]->syncLength();
+
+        for (unsigned int i = 1; i < controllers->objects.size() - 1; i++)
+        {
+            length += controllers->objects[i]->syncLength() * 2;
+        }
+
+        if (controllers->objects.size() > 1)
+        {
+            length += controllers->objects.back()->syncLength();
+        }
+    }
+
+    else
+    {
+        for (ValueObject* controller : controllers->objects)
+        {
+            length += controller->syncLength();
+        }
     }
 
     return length;
