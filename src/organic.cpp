@@ -9,6 +9,8 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 {
     AudioData* data = (AudioData*)userData;
 
+    data->callbackActive = true;
+
     data->machine->processAudioSources((double*)output, frames);
 
     return 0;
@@ -25,7 +27,7 @@ Organic::Organic(const std::string program, const std::vector<std::string>& flag
 
 void Organic::start()
 {
-    if (options.setMono)
+    if (options.mono)
     {
         utils->channels = 1;
     }
@@ -79,6 +81,8 @@ void Organic::startPlayback()
     std::vector<ValueObject*> inputs; // could be used for command line inputs or something
 
     machine->execute(4, inputs);
+
+    while (!audioData.callbackActive) {}
 
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();

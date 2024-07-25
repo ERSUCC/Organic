@@ -15,6 +15,8 @@ struct AudioData
 {
     Utils* utils;
     Machine* machine;
+
+    bool callbackActive = false;
 };
 
 void rtAudioError(RtAudioErrorType type, const std::string& message);
