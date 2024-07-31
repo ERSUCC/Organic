@@ -38,9 +38,16 @@ std::vector<Effect*> AudioSource::getEffectsList() const
         current = variable->value;
     }
 
-    if (List<Effect>* list = dynamic_cast<List<Effect>*>(current))
+    if (List<ValueObject>* list = dynamic_cast<List<ValueObject>*>(current))
     {
-        return list->objects;
+        std::vector<Effect*> effects;
+
+        for (ValueObject* object : list->objects)
+        {
+            effects.push_back(dynamic_cast<Effect*>(object)); // error if this is nullptr?
+        }
+
+        return effects;
     }
 
     // potentially error if can't cast to effect
