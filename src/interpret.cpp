@@ -48,7 +48,6 @@ InterpreterOptions Interpreter::interpret()
 
         else if (flag == "--mono")
         {
-            options.mono = true;
             options.setMono = true;
         }
 

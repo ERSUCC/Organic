@@ -27,7 +27,7 @@ Organic::Organic(const std::string program, const std::vector<std::string>& flag
 
 void Organic::start()
 {
-    if (options.mono)
+    if (options.setMono)
     {
         utils->channels = 1;
     }
