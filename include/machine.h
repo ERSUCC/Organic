@@ -18,7 +18,7 @@ struct Machine
 {
     Machine(const std::string path);
 
-    void execute(unsigned int address, std::vector<ValueObject*>& inputs);
+    void execute(unsigned int address, std::vector<ValueObject*>& inputs, const double startTime);
 
     void processAudioSources(double* buffer, const unsigned int bufferLength);
     void performEvents();

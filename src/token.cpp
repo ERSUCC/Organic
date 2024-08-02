@@ -129,7 +129,7 @@ namespace Parser
             }
         }
 
-        (new Value(ParserLocation(0, 0, 0, 0), "0", 0))->accept(visitor);
+        visitor->currentScope->block->addInstruction(new StackPushDouble(0));
     }
 
     void ArgumentList::confirmEmpty() const
@@ -721,6 +721,8 @@ namespace Parser
 
         else if (name == "perform")
         {
+            token->arguments->get("interval", this);
+            token->arguments->get("repeats", this);
             token->arguments->get("delay", this);
 
             currentScope = new Scope(currentScope);

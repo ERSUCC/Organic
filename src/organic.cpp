@@ -80,7 +80,7 @@ void Organic::startPlayback()
 
     std::vector<ValueObject*> inputs; // could be used for command line inputs or something
 
-    machine->execute(4, inputs);
+    machine->execute(4, inputs, 0);
 
     while (!audioData.callbackActive) {}
 
@@ -118,7 +118,7 @@ void Organic::startExport()
 
     std::vector<ValueObject*> inputs; // could be used for command line inputs or something
 
-    machine->execute(4, inputs);
+    machine->execute(4, inputs, 0);
 
     for (unsigned int i = 0; i < steps; i += utils->bufferLength)
     {

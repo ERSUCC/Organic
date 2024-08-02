@@ -1,29 +1,41 @@
 #include "../include/event.h"
 
-Event::Event(const std::function<void(void)> action, ValueObject* delay) :
-    action(action), delay(delay) {}
+Event::Event(const std::function<void(double)> action, ValueObject* delay, ValueObject* repeats, ValueObject* interval) :
+    action(action), delay(delay), repeats(repeats), interval(interval) {}
 
 bool Event::ready() const
 {
-    return utils->time >= startTime + delay->getValue();
+    return utils->time >= next;
 }
 
 bool Event::hasNext() const
 {
-    return false;
+    return repeats->getValue() == 0 || times < repeats->getValue();
 }
 
 void Event::perform()
 {
-    action();
+    action(next);
+
+    times++;
+
+    next += interval->getValue();
 }
 
 void Event::finishStart()
 {
     delay->start(startTime);
+    repeats->start(startTime);
+    interval->start(startTime);
+
+    times = 0;
+
+    next = startTime + delay->getValue();
 }
 
 void Event::finishStop()
 {
     delay->stop();
+    repeats->stop();
+    interval->stop();
 }

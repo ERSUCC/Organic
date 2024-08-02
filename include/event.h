@@ -6,7 +6,7 @@
 
 struct Event : public Sync
 {
-    Event(const std::function<void(void)> action, ValueObject* delay);
+    Event(const std::function<void(double)> action, ValueObject* delay, ValueObject* repeats, ValueObject* interval);
 
     bool ready() const;
     bool hasNext() const;
@@ -17,10 +17,14 @@ protected:
     void finishStart() override;
     void finishStop() override;
 
-    const std::function<void(void)> action;
+    const std::function<void(double)> action;
 
     ValueObject* delay;
+    ValueObject* repeats;
+    ValueObject* interval;
 
     double next;
+
+    unsigned int times;
 
 };

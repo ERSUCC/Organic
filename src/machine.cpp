@@ -27,7 +27,7 @@ Machine::Machine(const std::string path) : path(path)
     utils = Utils::get();
 }
 
-void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
+void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, const double startTime)
 {
     while (true)
     {
@@ -189,7 +189,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
 
                         audioSources.push_back(sine);
 
-                        sine->start(utils->time);
+                        sine->start(startTime);
 
                         stack.push(sine);
 
@@ -202,7 +202,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
 
                         audioSources.push_back(square);
 
-                        square->start(utils->time);
+                        square->start(startTime);
 
                         stack.push(square);
 
@@ -215,7 +215,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
 
                         audioSources.push_back(triangle);
 
-                        triangle->start(utils->time);
+                        triangle->start(startTime);
 
                         stack.push(triangle);
 
@@ -228,7 +228,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
 
                         audioSources.push_back(saw);
 
-                        saw->start(utils->time);
+                        saw->start(startTime);
 
                         stack.push(saw);
 
@@ -241,7 +241,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
 
                         audioSources.push_back(noise);
 
-                        noise->start(utils->time);
+                        noise->start(startTime);
 
                         stack.push(noise);
 
@@ -302,12 +302,16 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
                     {
                         const unsigned int exec = inputs[0]->getValue();
 
-                        events.push_back(new Event([=]()
+                        Event* event = new Event([=](double startTime)
                         {
                             std::vector<ValueObject*> inputs;
 
-                            execute(exec, inputs);
-                        }, inputs[1]));
+                            execute(exec, inputs, startTime);
+                        }, inputs[1], inputs[2], inputs[3]);
+
+                        events.push_back(event);
+
+                        event->start(startTime);
 
                         break;
                     }
@@ -336,7 +340,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
                     inputs.push_back(popStack());
                 }
 
-                execute(readInt(address + 1), inputs);
+                execute(readInt(address + 1), inputs, startTime);
 
                 address += 6;
 
