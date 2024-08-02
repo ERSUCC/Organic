@@ -45,8 +45,4 @@ private:
     std::vector<AudioSource*> audioSources;
     std::vector<Event*> events;
 
-    unsigned int audioSourcesLength = 0;
-
-    std::atomic<bool> audioSourcesChanging = false;
-
 };
