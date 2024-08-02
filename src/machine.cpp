@@ -187,7 +187,11 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                     {
                         Sine* sine = new Sine(inputs[0], inputs[1], inputs[2], inputs[3]);
 
+                        audioSourcesChanging = true;
+
                         audioSources.push_back(sine);
+
+                        audioSourcesChanging = false;
 
                         sine->start(startTime);
 
@@ -200,7 +204,11 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                     {
                         Square* square = new Square(inputs[0], inputs[1], inputs[2], inputs[3]);
 
+                        audioSourcesChanging = true;
+
                         audioSources.push_back(square);
+
+                        audioSourcesChanging = false;
 
                         square->start(startTime);
 
@@ -213,7 +221,11 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                     {
                         Triangle* triangle = new Triangle(inputs[0], inputs[1], inputs[2], inputs[3]);
 
+                        audioSourcesChanging = true;
+
                         audioSources.push_back(triangle);
+
+                        audioSourcesChanging = false;
 
                         triangle->start(startTime);
 
@@ -226,7 +238,11 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                     {
                         Saw* saw = new Saw(inputs[0], inputs[1], inputs[2], inputs[3]);
 
+                        audioSourcesChanging = true;
+
                         audioSources.push_back(saw);
+
+                        audioSourcesChanging = false;
 
                         saw->start(startTime);
 
@@ -239,7 +255,11 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                     {
                         Noise* noise = new Noise(inputs[0], inputs[1], inputs[2]);
 
+                        audioSourcesChanging = true;
+
                         audioSources.push_back(noise);
+
+                        audioSourcesChanging = false;
 
                         noise->start(startTime);
 
@@ -370,9 +390,14 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
 
 void Machine::processAudioSources(double* buffer, const unsigned int bufferLength)
 {
+    if (audioSourcesLength != audioSources.size() && !audioSourcesChanging)
+    {
+        audioSourcesLength = audioSources.size();
+    }
+
     std::fill(buffer, buffer + bufferLength * utils->channels, 0);
 
-    for (unsigned int i = 0; i < audioSources.size(); i++)
+    for (unsigned int i = 0; i < audioSourcesLength; i++)
     {
         audioSources[i]->fillBuffer(buffer, bufferLength);
     }
