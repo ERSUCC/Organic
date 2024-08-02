@@ -89,18 +89,36 @@ sine(volume: 1, frequency: freq * 4)
 sine(volume: 1, frequency: freq * 8)
 ```
 
-One special function, `perform`, allows you to schedule code to be run in the future, rather than being executed immediately. You can use `perform` as follows:
+If you have a section of code that you want to be executed multiple times, either with the same or with different values, you can define your own function to more easily duplicate those lines of code. Functions are defined as follows:
 
 ```
-// start a note
+my-function(my-input-1, my-input-2) = {
+    // your code here
+}
+```
 
-triangle(volume: 1, frequency: 220)
+The above code example would create a function called "my-function" with two named inputs, "my-input-1" and "my-input-2", which when called would run the code placed in between the curly braces. You can call a function you define just like any other function in Organic, for example:
+
+```
+my-function(my-input-1: 100, my-input-2: 433)
+```
+
+One special function, `perform`, allows you to schedule functions to be run in the future, rather than being executed immediately. You can use `perform` as follows:
+
+```
+// define a function to create a triangle wave at a given frequency
+
+make-triangle(frequency) = {
+    triangle(volume: 1, frequency: frequency)
+}
+
+// call the function immediately to create the first note
+
+make-triangle(frequency: 220)
 
 // wait 5 seconds, then double the first note up an octave
 
-perform(function: {
-    triangle(volume: 1, frequency: 440)
-}, delay: 5000)
+perform(function: make-triangle(frequency: 440), delay: 5000)
 ```
 
 The examples above show minimal examples of all key aspects of the language and its syntax. More examples and detailed descriptions of functions can be found in the Organic documentation (TODO).
