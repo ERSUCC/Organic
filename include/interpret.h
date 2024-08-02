@@ -12,6 +12,7 @@ struct InterpreterOptions
 {
     double time = 0;
     std::string exportPath;
+    bool mono = false;
 
     bool setTime = false;
     bool setExport = false;

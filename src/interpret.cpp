@@ -18,6 +18,11 @@ InterpreterOptions Interpreter::interpret()
 
         if (flag == "--time")
         {
+            if (options.setTime)
+            {
+                Utils::argumentError("The option \"time\" was already set.");
+            }
+
             std::string next = nextOption(flag);
 
             size_t end;
@@ -42,12 +47,23 @@ InterpreterOptions Interpreter::interpret()
 
         else if (flag == "--export")
         {
+            if (options.setExport)
+            {
+                Utils::argumentError("The option \"export\" was already set.");
+            }
+
             options.exportPath = nextOption(flag);
             options.setExport = true;
         }
 
         else if (flag == "--mono")
         {
+            if (options.setMono)
+            {
+                Utils::argumentError("The option \"mono\" was already set.");
+            }
+
+            options.mono = true;
             options.setMono = true;
         }
 
