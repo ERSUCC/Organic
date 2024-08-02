@@ -471,23 +471,6 @@ namespace Parser
 
         pos += 2;
 
-        const CodeBlock* body = dynamic_cast<const CodeBlock*>(parseCodeBlock(pos));
-
-        return new Define(ParserLocation(name->location.line, name->location.character, name->location.start, body->location.end), name->str, inputs, body);
-    }
-
-    const Token* Parser::parseAssign(unsigned int pos) const
-    {
-        const BasicToken* name = getToken(pos);
-        const Token* value = parseExpression(pos + 2);
-
-        return new Assign(ParserLocation(name->location.line, name->location.character, pos, value->location.end), name->str, value);
-    }
-
-    const Token* Parser::parseCodeBlock(unsigned int pos) const
-    {
-        const unsigned int start = pos;
-
         const OpenCurlyBracket* open = getToken<OpenCurlyBracket>(pos++);
 
         std::vector<const Instruction*> instructions;
@@ -501,7 +484,15 @@ namespace Parser
             pos = instruction->location.end;
         }
 
-        return new CodeBlock(ParserLocation(open->location.line, open->location.character, start, pos + 1), instructions);
+        return new Define(ParserLocation(name->location.line, name->location.character, name->location.start, pos + 1), name->str, inputs, instructions);
+    }
+
+    const Token* Parser::parseAssign(unsigned int pos) const
+    {
+        const BasicToken* name = getToken(pos);
+        const Token* value = parseExpression(pos + 2);
+
+        return new Assign(ParserLocation(name->location.line, name->location.character, pos, value->location.end), name->str, value);
     }
 
     const Token* Parser::parseCall(unsigned int pos) const

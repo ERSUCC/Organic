@@ -258,16 +258,8 @@ namespace Parser
         visitor->visit(this);
     }
 
-    CodeBlock::CodeBlock(const ParserLocation location, const std::vector<const Instruction*> instructions) :
-        Token(location), instructions(instructions) {}
-
-    void CodeBlock::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    Define::Define(const ParserLocation location, const std::string name, const std::vector<std::string> inputs, const CodeBlock* body) :
-        Token(location), name(name), inputs(inputs), body(body) {}
+    Define::Define(const ParserLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Instruction*> instructions) :
+        Token(location), name(name), inputs(inputs), instructions(instructions) {}
 
     void Define::accept(BytecodeTransformer* visitor) const
     {
@@ -754,14 +746,6 @@ namespace Parser
         currentScope->block->addInstruction(new CallNative(name, token->arguments->count));
     }
 
-    void BytecodeTransformer::visit(const CodeBlock* token)
-    {
-        for (const Instruction* instruction : token->instructions)
-        {
-            instruction->accept(this);
-        }
-    }
-
     void BytecodeTransformer::visit(const Define* token)
     {
         if (token->name == "copy" ||
@@ -789,7 +773,10 @@ namespace Parser
 
         currentScope = new Scope(currentScope, token->inputs);
 
-        token->body->accept(this);
+        for (const Instruction* instruction : token->instructions)
+        {
+            instruction->accept(this);
+        }
 
         currentScope->checkUses();
 

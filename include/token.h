@@ -309,18 +309,9 @@ namespace Parser
         ArgumentList* arguments;
     };
 
-    struct CodeBlock : public Token
-    {
-        CodeBlock(const ParserLocation location, const std::vector<const Instruction*> instructions);
-
-        void accept(BytecodeTransformer* visitor) const override;
-
-        const std::vector<const Instruction*> instructions;
-    };
-
     struct Define : public Token
     {
-        Define(const ParserLocation location, const std::string name, const std::vector<std::string> inputs, const CodeBlock* body);
+        Define(const ParserLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Instruction*> instructions);
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -328,7 +319,7 @@ namespace Parser
 
         const std::vector<std::string> inputs;
 
-        const CodeBlock* body;
+        const std::vector<const Instruction*> instructions;
     };
 
     struct Scope
@@ -393,7 +384,6 @@ namespace Parser
         void visit(const ParenthesizedExpression* token);
         void visit(const Assign* token);
         void visit(const Call* token);
-        void visit(const CodeBlock* token);
         void visit(const Define* token);
         void visit(const Program* token);
 

@@ -336,7 +336,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs)
                     inputs.push_back(popStack());
                 }
 
-                execute(readInt(program[address + 1]), inputs);
+                execute(readInt(address + 1), inputs);
 
                 address += 6;
 
@@ -407,9 +407,9 @@ unsigned int Machine::readInt(const unsigned int address) const
     else
     {
         bytes[0] = program[address + 3];
-        bytes[0] = program[address + 2];
-        bytes[0] = program[address + 1];
-        bytes[0] = program[address];
+        bytes[1] = program[address + 2];
+        bytes[2] = program[address + 1];
+        bytes[3] = program[address];
     }
 
     return *reinterpret_cast<unsigned int*>(bytes);
@@ -433,14 +433,14 @@ double Machine::readDouble(const unsigned int address) const
 
     else
     {
-        bytes[1] = program[address + 7];
-        bytes[2] = program[address + 6];
-        bytes[3] = program[address + 5];
-        bytes[4] = program[address + 4];
-        bytes[5] = program[address + 3];
-        bytes[6] = program[address + 2];
-        bytes[7] = program[address + 1];
-        bytes[0] = program[address];
+        bytes[0] = program[address + 7];
+        bytes[1] = program[address + 6];
+        bytes[2] = program[address + 5];
+        bytes[3] = program[address + 4];
+        bytes[4] = program[address + 3];
+        bytes[5] = program[address + 2];
+        bytes[6] = program[address + 1];
+        bytes[7] = program[address];
     }
 
     return *reinterpret_cast<double*>(bytes);
