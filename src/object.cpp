@@ -25,12 +25,7 @@ void Sync::repeat(double time)
 
 void Sync::stop()
 {
-    if (enabled)
-    {
-        enabled = false;
-
-        finishStop();
-    }
+    enabled = false;
 }
 
 double Sync::syncLength()
@@ -40,7 +35,6 @@ double Sync::syncLength()
 
 void Sync::finishStart() {}
 void Sync::finishRepeat() {}
-void Sync::finishStop() {}
 
 double ValueObject::getValue()
 {
@@ -68,9 +62,4 @@ double Variable::getValue()
 void Variable::finishStart()
 {
     value->start(startTime);
-}
-
-void Variable::finishStop()
-{
-    value->stop();
 }

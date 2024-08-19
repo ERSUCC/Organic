@@ -38,7 +38,6 @@ struct Oscillator : public AudioSource
 
 protected:
     void finishStart() override;
-    void finishStop() override;
 
     void prepareForEffects(const unsigned int bufferLength) override;
 

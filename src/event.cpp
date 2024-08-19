@@ -32,10 +32,3 @@ void Event::finishStart()
 
     next = startTime + delay->getValue();
 }
-
-void Event::finishStop()
-{
-    delay->stop();
-    repeats->stop();
-    interval->stop();
-}

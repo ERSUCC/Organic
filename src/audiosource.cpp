@@ -75,13 +75,6 @@ void Oscillator::finishStart()
     }
 }
 
-void Oscillator::finishStop()
-{
-    volume->stop();
-    pan->stop();
-    frequency->stop();
-}
-
 void Oscillator::prepareForEffects(const unsigned int bufferLength)
 {
     phaseDelta = utils->twoPi * frequency->getValue() / utils->sampleRate;

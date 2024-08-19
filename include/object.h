@@ -20,7 +20,6 @@ struct Sync
 protected:
     virtual void finishStart();
     virtual void finishRepeat();
-    virtual void finishStop();
 
     Utils* utils;
 
@@ -49,6 +48,5 @@ struct Variable : public ValueObject
 
 private:
     void finishStart() override;
-    void finishStop() override;
 
 };

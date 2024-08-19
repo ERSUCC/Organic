@@ -58,13 +58,6 @@ void Delay::finishStart()
     feedback->start(startTime);
 }
 
-void Delay::finishStop()
-{
-    mix->stop();
-    delay->stop();
-    feedback->stop();
-}
-
 LowPassFilter::LowPassFilter(ValueObject* mix, ValueObject* cutoff) :
     Effect(mix), cutoff(cutoff) {}
 
@@ -119,10 +112,4 @@ void LowPassFilter::finishStart()
 {
     mix->start(startTime);
     cutoff->start(startTime);
-}
-
-void LowPassFilter::finishStop()
-{
-    mix->stop();
-    cutoff->stop();
 }

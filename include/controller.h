@@ -16,7 +16,6 @@ struct ValueCombination : public ValueController
 
 protected:
     void finishStart() override;
-    void finishStop() override;
 
     virtual double getValueInternal() = 0;
 

@@ -24,12 +24,6 @@ void ValueCombination::finishStart()
     value2->start(startTime);
 }
 
-void ValueCombination::finishStop()
-{
-    value1->stop();
-    value2->stop();
-}
-
 ValueAdd::ValueAdd(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 

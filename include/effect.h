@@ -24,7 +24,6 @@ struct Delay : public Effect
 
 protected:
     void finishStart() override;
-    void finishStop() override;
 
 private:
     std::queue<double> buffer;
@@ -41,7 +40,6 @@ struct LowPassFilter : public Effect
 
 protected:
     void finishStart() override;
-    void finishStop() override;
 
 private:
     double raw1[2] = { 0 };
