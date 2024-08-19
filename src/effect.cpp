@@ -51,7 +51,7 @@ void Delay::apply(double* buffer, const unsigned int bufferLength)
     }
 }
 
-void Delay::finishStart()
+void Delay::init()
 {
     mix->start(startTime);
     delay->start(startTime);
@@ -108,7 +108,7 @@ void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
     }
 }
 
-void LowPassFilter::finishStart()
+void LowPassFilter::init()
 {
     mix->start(startTime);
     cutoff->start(startTime);

@@ -37,7 +37,7 @@ struct Oscillator : public AudioSource
     double phaseDelta;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
     void prepareForEffects(const unsigned int bufferLength) override;
 
@@ -91,7 +91,7 @@ struct Sample : public AudioSource
     ~Sample();
 
 protected:
-    void finishStart() override;
+    void init() override;
 
     void prepareForEffects(const unsigned int bufferLength) override;
 

@@ -23,7 +23,7 @@ struct Delay : public Effect
     ValueObject* feedback;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
 private:
     std::queue<double> buffer;
@@ -39,7 +39,7 @@ struct LowPassFilter : public Effect
     ValueObject* cutoff;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
 private:
     double raw1[2] = { 0 };

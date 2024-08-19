@@ -14,7 +14,7 @@ struct Event : public Sync
     void perform();
 
 protected:
-    void finishStart() override;
+    void init() override;
 
     const std::function<void(double)> action;
 

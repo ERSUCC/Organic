@@ -63,7 +63,7 @@ std::vector<Effect*> AudioSource::getEffectsList() const
 Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     AudioSource(volume, pan, effects), frequency(frequency) {}
 
-void Oscillator::finishStart()
+void Oscillator::init()
 {
     volume->start(startTime);
     pan->start(startTime);
@@ -214,7 +214,7 @@ Sample::~Sample()
     free(data);
 }
 
-void Sample::finishStart()
+void Sample::init()
 {
     std::fill(grains.begin(), grains.end(), 0);
 

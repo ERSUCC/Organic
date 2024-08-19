@@ -22,7 +22,7 @@ void Event::perform()
     next += interval->getValue();
 }
 
-void Event::finishStart()
+void Event::init()
 {
     delay->start(startTime);
     repeats->start(startTime);

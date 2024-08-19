@@ -18,8 +18,8 @@ struct Sync
     bool enabled = false;
 
 protected:
-    virtual void finishStart();
-    virtual void finishRepeat();
+    virtual void init();
+    virtual void reinit();
 
     Utils* utils;
 
@@ -46,7 +46,7 @@ struct Variable : public ValueObject
 
     ValueObject* value;
 
-private:
-    void finishStart() override;
+protected:
+    void init() override;
 
 };

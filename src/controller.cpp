@@ -18,7 +18,7 @@ double ValueCombination::getValue()
     return getValueInternal();
 }
 
-void ValueCombination::finishStart()
+void ValueCombination::init()
 {
     value1->start(startTime);
     value2->start(startTime);
@@ -182,7 +182,7 @@ double Sequence::getValue()
     return controllers->objects[current]->getValue();
 }
 
-void Sequence::finishStart()
+void Sequence::init()
 {
     switches = 0;
 
@@ -227,7 +227,7 @@ void Sequence::finishStart()
     controllers->objects[current]->start(startTime);
 }
 
-void Sequence::finishRepeat()
+void Sequence::reinit()
 {
     switch ((unsigned int)order->getValue())
     {
@@ -312,7 +312,7 @@ double Repeat::getValue()
     return value->getValue();
 }
 
-void Repeat::finishStart()
+void Repeat::init()
 {
     value->start(startTime);
     repeats->start(startTime);
@@ -320,7 +320,7 @@ void Repeat::finishStart()
     times = 0;
 }
 
-void Repeat::finishRepeat()
+void Repeat::reinit()
 {
     value->start(repeatTime);
 }
@@ -351,7 +351,7 @@ double Hold::getValue()
     return value->getValue();
 }
 
-void Hold::finishStart()
+void Hold::init()
 {
     value->start(startTime);
     length->start(startTime);
@@ -377,7 +377,7 @@ double Sweep::getValue()
     return from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / syncLength();
 }
 
-void Sweep::finishStart()
+void Sweep::init()
 {
     from->start(startTime);
     to->start(startTime);
@@ -404,7 +404,7 @@ double LFO::getValue()
     return from->getValue() + (to->getValue() - from->getValue()) * (-cos(utils->twoPi * (utils->time - startTime) / syncLength()) / 2 + 0.5);
 }
 
-void LFO::finishStart()
+void LFO::init()
 {
     from->start(startTime);
     to->start(startTime);
@@ -439,7 +439,7 @@ double Random::getValue()
     }
 }
 
-void Random::finishStart()
+void Random::init()
 {
     from->start(startTime);
     to->start(startTime);
@@ -494,7 +494,7 @@ double Limit::getValue()
     return valueValue;
 }
 
-void Limit::finishStart()
+void Limit::init()
 {
     value->start(startTime);
     min->start(startTime);
@@ -531,7 +531,7 @@ double Trigger::getValue()
     return 0;
 }
 
-void Trigger::finishStart()
+void Trigger::init()
 {
     condition->start(startTime);
 }
@@ -554,7 +554,7 @@ double If::getValue()
     return trueValue->getValue();
 }
 
-void If::finishStart()
+void If::init()
 {
     condition->start(startTime);
     trueValue->start(startTime);

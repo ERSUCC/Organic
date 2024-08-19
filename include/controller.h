@@ -15,7 +15,7 @@ struct ValueCombination : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
     virtual double getValueInternal() = 0;
 
@@ -130,8 +130,8 @@ struct Sequence : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
-    void finishRepeat() override;
+    void init() override;
+    void reinit() override;
 
 private:
     List<ValueObject>* controllers;
@@ -158,8 +158,8 @@ struct Repeat : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
-    void finishRepeat() override;
+    void init() override;
+    void reinit() override;
 
 private:
     ValueObject* value;
@@ -186,7 +186,7 @@ struct Hold : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
 private:
     ValueObject* value;
@@ -202,7 +202,7 @@ struct Sweep : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
 private:
     ValueObject* from;
@@ -219,7 +219,7 @@ struct LFO : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
 private:
     ValueObject* from;
@@ -242,7 +242,7 @@ struct Random : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
 private:
     ValueObject* from;
@@ -266,7 +266,7 @@ struct Limit : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
 private:
     ValueObject* value;
@@ -283,7 +283,7 @@ struct Trigger : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
 private:
     ValueObject* condition;
@@ -301,7 +301,7 @@ struct If : public ValueController
     double getValue() override;
 
 protected:
-    void finishStart() override;
+    void init() override;
 
 private:
     ValueObject* condition;

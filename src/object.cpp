@@ -12,7 +12,7 @@ void Sync::start(double time)
 
         enabled = true;
 
-        finishStart();
+        init();
     }
 }
 
@@ -20,7 +20,7 @@ void Sync::repeat(double time)
 {
     repeatTime = time;
 
-    finishRepeat();
+    reinit();
 }
 
 void Sync::stop()
@@ -33,8 +33,8 @@ double Sync::syncLength()
     return 0;
 }
 
-void Sync::finishStart() {}
-void Sync::finishRepeat() {}
+void Sync::init() {}
+void Sync::reinit() {}
 
 double ValueObject::getValue()
 {
@@ -59,7 +59,7 @@ double Variable::getValue()
     return value->getValue();
 }
 
-void Variable::finishStart()
+void Variable::init()
 {
     value->start(startTime);
 }
