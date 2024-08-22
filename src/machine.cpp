@@ -128,7 +128,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                             values.push_back(popStack());
                         }
 
-                        stack.push(new List<ValueObject>(values));
+                        stack.push(new List(values));
 
                         break;
                     }
@@ -264,7 +264,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                         break;
 
                     case 0x53:
-                        stack.push(new Sequence(dynamic_cast<List<ValueObject>*>(inputs[0]), inputs[1])); // can this be uncasted?
+                        stack.push(new Sequence(inputs[0]->getList(), inputs[1]));
 
                         break;
 
@@ -457,35 +457,4 @@ ValueObject* Machine::popStack()
     stack.pop();
 
     return value;
-}
-
-template <typename T> T* Machine::popStackAs()
-{
-    T* value = dynamic_cast<T*>(stack.top());
-
-    stack.pop();
-
-    return value;
-}
-
-template <typename T> List<T>* Machine::popStackAsList()
-{
-    ValueObject* object = popStack();
-
-    std::vector<T*> objects;
-
-    if (const List<ValueObject>* list = dynamic_cast<const List<ValueObject>*>(object))
-    {
-        for (ValueObject* object : list->objects)
-        {
-            objects.push_back(dynamic_cast<T*>(object));
-        }
-    }
-
-    else if (object)
-    {
-        objects.push_back(dynamic_cast<T*>(object));
-    }
-
-    return new List<T>(objects);
 }

@@ -25,22 +25,22 @@ protected:
 
 };
 
-template <typename T> struct List;
+struct List;
 
 struct ValueObject : public Sync
 {
     virtual double getValue();
 
-    virtual List<ValueObject>* getList();
+    virtual List* getList();
 };
 
-template <typename T> struct List : public ValueObject
+struct List : public ValueObject
 {
-    List(const std::vector<T*> objects);
+    List(const std::vector<ValueObject*> objects);
 
-    List<ValueObject>* getList() override;
+    List* getList() override;
 
-    const std::vector<T*> objects;
+    const std::vector<ValueObject*> objects;
 };
 
 struct Variable : public ValueObject
@@ -50,7 +50,7 @@ struct Variable : public ValueObject
     double syncLength() override;
     double getValue() override;
 
-    List<ValueObject>* getList() override;
+    List* getList() override;
 
     ValueObject* value;
 

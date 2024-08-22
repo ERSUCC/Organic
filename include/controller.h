@@ -124,7 +124,7 @@ struct Sequence : public ValueController
         Random
     };
 
-    Sequence(List<ValueObject>* controllers, ValueObject* order);
+    Sequence(List* controllers, ValueObject* order);
 
     double syncLength() override;
     double getValue() override;
@@ -134,7 +134,7 @@ protected:
     void reinit() override;
 
 private:
-    List<ValueObject>* controllers;
+    List* controllers;
 
     ValueObject* order;
 

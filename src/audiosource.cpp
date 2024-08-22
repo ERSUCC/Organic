@@ -13,51 +13,17 @@ AudioSource::~AudioSource()
 
 void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength)
 {
-    if (enabled)
+    prepareForEffects(bufferLength);
+
+    for (ValueObject* effect : effects->getList()->objects)
     {
-        prepareForEffects(bufferLength);
-
-        for (Effect* effect : getEffectsList())
-        {
-            effect->apply(effectBuffer, bufferLength);
-        }
-
-        for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
-        {
-            buffer[i] += effectBuffer[i] * utils->volume;
-        }
-    }
-}
-
-std::vector<Effect*> AudioSource::getEffectsList() const
-{
-    ValueObject* current = effects;
-
-    while (Variable* variable = dynamic_cast<Variable*>(current))
-    {
-        current = variable->value;
+        dynamic_cast<Effect*>(effect)->apply(effectBuffer, bufferLength);
     }
 
-    if (List<ValueObject>* list = dynamic_cast<List<ValueObject>*>(current))
+    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
     {
-        std::vector<Effect*> effects;
-
-        for (ValueObject* object : list->objects)
-        {
-            effects.push_back(dynamic_cast<Effect*>(object)); // error if this is nullptr?
-        }
-
-        return effects;
+        buffer[i] += effectBuffer[i] * utils->volume;
     }
-
-    // potentially error if can't cast to effect
-
-    if (Effect* effect = dynamic_cast<Effect*>(current))
-    {
-        return std::vector<Effect*> { effect };
-    }
-
-    return std::vector<Effect*>();
 }
 
 Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
@@ -69,7 +35,7 @@ void Oscillator::init()
     pan->start(startTime);
     frequency->start(startTime);
 
-    for (Effect* effect : getEffectsList())
+    for (ValueObject* effect : effects->getList()->objects)
     {
         effect->start(startTime);
     }
@@ -218,7 +184,7 @@ void Sample::init()
 {
     std::fill(grains.begin(), grains.end(), 0);
 
-    for (Effect* effect : getEffectsList())
+    for (ValueObject* effect : effects->getList()->objects)
     {
         effect->start(startTime);
     }

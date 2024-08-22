@@ -41,15 +41,15 @@ double ValueObject::getValue()
     return 0;
 }
 
-List<ValueObject>* ValueObject::getList()
+List* ValueObject::getList()
 {
-    return new List<ValueObject>({ this });
+    return new List({ this });
 }
 
-template <typename T> List<T>::List(const std::vector<T*> objects) :
+List::List(const std::vector<ValueObject*> objects) :
     objects(objects) {}
 
-template <typename T> List<ValueObject>* List<T>::getList()
+List* List::getList()
 {
     return this;
 }
@@ -72,7 +72,7 @@ double Variable::getValue()
     return value->getValue();
 }
 
-List<ValueObject>* Variable::getList()
+List* Variable::getList()
 {
     return value->getList();
 }

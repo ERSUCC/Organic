@@ -19,8 +19,6 @@ struct AudioSource : public ValueObject
 protected:
     virtual void prepareForEffects(const unsigned int bufferLength) = 0;
 
-    std::vector<Effect*> getEffectsList() const;
-
     double* effectBuffer;
 
     ValueObject* volume;

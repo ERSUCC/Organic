@@ -129,7 +129,7 @@ double ValueGreaterEqual::getValueInternal()
     return 0;
 }
 
-Sequence::Sequence(List<ValueObject>* controllers, ValueObject* order) :
+Sequence::Sequence(List* controllers, ValueObject* order) :
     controllers(controllers), order(order) {}
 
 double Sequence::syncLength()

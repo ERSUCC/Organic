@@ -29,8 +29,6 @@ private:
     double readDouble(const unsigned int address) const;
 
     ValueObject* popStack();
-    template <typename T> T* popStackAs();
-    template <typename T> List<T>* popStackAsList();
 
     Utils* utils;
 
