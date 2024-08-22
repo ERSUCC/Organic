@@ -21,6 +21,13 @@ struct BytecodeInstruction
     const unsigned int size;
 };
 
+struct StackPushDefault : public BytecodeInstruction
+{
+    StackPushDefault();
+
+    void output(std::ofstream& stream) const override;
+};
+
 struct StackPushByte : public BytecodeInstruction
 {
     StackPushByte(const unsigned char value);

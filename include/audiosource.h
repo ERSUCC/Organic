@@ -8,13 +8,19 @@
 
 #include "effect.h"
 #include "object.h"
+#include "utils.h"
 
 struct AudioSource : public ValueObject
 {
-    AudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects);
-    ~AudioSource();
+    virtual void fillBuffer(double* buffer, const unsigned int bufferLength) = 0;
+};
 
-    void fillBuffer(double* buffer, const unsigned int bufferLength);
+struct SingleAudioSource : public AudioSource
+{
+    SingleAudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects);
+    ~SingleAudioSource();
+
+    void fillBuffer(double* buffer, const unsigned int bufferLength) override;
 
 protected:
     virtual void prepareForEffects(const unsigned int bufferLength) = 0;
@@ -27,7 +33,7 @@ protected:
 
 };
 
-struct Oscillator : public AudioSource
+struct Oscillator : public SingleAudioSource
 {
     Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
 
@@ -71,7 +77,7 @@ struct Triangle : public Oscillator
     double getValue() override;
 };
 
-struct Noise : public AudioSource
+struct Noise : public SingleAudioSource
 {
     Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects);
 
@@ -83,7 +89,7 @@ private:
 
 };
 
-struct Sample : public AudioSource
+struct Sample : public SingleAudioSource
 {
     Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, std::string path, unsigned int grains, bool looping);
     ~Sample();
@@ -101,5 +107,24 @@ private:
     std::vector<unsigned int> grains;
 
     bool looping;
+
+};
+
+struct Blend : public AudioSource
+{
+    Blend(ValueObject* audioSources, ValueObject* position);
+    ~Blend();
+
+    void fillBuffer(double* buffer, const unsigned int bufferLength) override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* audioSources;
+    ValueObject* position;
+
+    double* buffer1;
+    double* buffer2;
 
 };

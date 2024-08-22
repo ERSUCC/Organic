@@ -1,17 +1,17 @@
 #include "../include/audiosource.h"
 
-AudioSource::AudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
+SingleAudioSource::SingleAudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     volume(volume), pan(pan), effects(effects)
 {
     effectBuffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
 }
 
-AudioSource::~AudioSource()
+SingleAudioSource::~SingleAudioSource()
 {
     free(effectBuffer);
 }
 
-void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength)
+void SingleAudioSource::fillBuffer(double* buffer, const unsigned int bufferLength)
 {
     prepareForEffects(bufferLength);
 
@@ -27,7 +27,7 @@ void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength)
 }
 
 Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
-    AudioSource(volume, pan, effects), frequency(frequency) {}
+    SingleAudioSource(volume, pan, effects), frequency(frequency) {}
 
 void Oscillator::init()
 {
@@ -110,7 +110,7 @@ double Triangle::getValue()
 }
 
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
-    AudioSource(volume, pan, effects) {}
+    SingleAudioSource(volume, pan, effects) {}
 
 void Noise::prepareForEffects(const unsigned int bufferLength)
 {
@@ -135,7 +135,7 @@ void Noise::prepareForEffects(const unsigned int bufferLength)
 }
 
 Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, std::string path, unsigned int grains, bool looping) :
-    AudioSource(volume, pan, effects), grains(grains, 0), looping(looping)
+    SingleAudioSource(volume, pan, effects), grains(grains, 0), looping(looping)
 {
     AudioFile<double> file(path);
 
@@ -232,6 +232,57 @@ void Sample::prepareForEffects(const unsigned int bufferLength)
         if (utils->channels == 2)
         {
             effectBuffer[i + 1] /= grains.size();
+        }
+    }
+}
+
+Blend::Blend(ValueObject* audioSources, ValueObject* position) :
+    audioSources(audioSources), position(position)
+{
+    buffer1 = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
+    buffer2 = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
+}
+
+Blend::~Blend()
+{
+    free(buffer1);
+    free(buffer2);
+}
+
+void Blend::init()
+{
+    for (ValueObject* object : audioSources->getList()->objects)
+    {
+        object->start(startTime);
+    }
+
+    position->start(startTime);
+}
+
+void Blend::fillBuffer(double* buffer, const unsigned int bufferLength)
+{
+    std::vector<ValueObject*> objects = audioSources->getList()->objects;
+
+    const double positionValue = position->getValue(); // ensure between 0 and 1 or everything might break
+
+    const unsigned int startIndex = positionValue * (objects.size() - 1);
+
+    if (startIndex >= objects.size() - 1)
+    {
+        dynamic_cast<AudioSource*>(objects.back()->expandVariable())->fillBuffer(buffer, bufferLength);
+    }
+
+    else
+    {
+        std::fill(buffer1, buffer1 + bufferLength * utils->channels, 0);
+        std::fill(buffer2, buffer2 + bufferLength * utils->channels, 0);
+
+        dynamic_cast<AudioSource*>(objects[startIndex]->expandVariable())->fillBuffer(buffer1, bufferLength);
+        dynamic_cast<AudioSource*>(objects[startIndex + 1]->expandVariable())->fillBuffer(buffer2, bufferLength);
+
+        for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
+        {
+            buffer[i] += (buffer1[i] + (buffer2[i] - buffer1[i]) * positionValue);
         }
     }
 }

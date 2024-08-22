@@ -40,36 +40,43 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
         {
             case 0x00:
                 return;
-
+            
             case 0x01:
+                stack.push(new Default());
+
+                address++;
+
+                break;
+
+            case 0x02:
                 stack.push(new Value(program[address + 1])); // probably shouldn't coerce these to double
 
                 address += 2;
 
                 break;
 
-            case 0x02:
+            case 0x03:
                 stack.push(new Value(readInt(address + 1))); // probably shouldn't coerce these to double
 
                 address += 5;
 
                 break;
 
-            case 0x03:
+            case 0x04:
                 stack.push(new Value(readDouble(address + 1)));
 
                 address += 9;
 
                 break;
 
-            case 0x04:
+            case 0x05:
                 stack.push(new Value(readInt(address + 1))); // probably shouldn't coerce these to double
 
                 address += 5;
 
                 break;
 
-            case 0x05:
+            case 0x06:
             {
                 const unsigned char id = program[address + 1];
 
@@ -94,14 +101,14 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                 break;
             }
 
-            case 0x06:
+            case 0x07:
                 stack.push(variables[program[address + 1]]);
 
                 address += 2;
 
                 break;
 
-            case 0x07:
+            case 0x08:
             {
                 std::vector<ValueObject*> inputs;
 
@@ -187,9 +194,9 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                     {
                         Sine* sine = new Sine(inputs[0], inputs[1], inputs[2], inputs[3]);
 
-                        audioSources.push_back(sine);
+                        // audioSources.push_back(sine);
 
-                        sine->start(startTime);
+                        // sine->start(startTime);
 
                         stack.push(sine);
 
@@ -226,9 +233,9 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                     {
                         Saw* saw = new Saw(inputs[0], inputs[1], inputs[2], inputs[3]);
 
-                        audioSources.push_back(saw);
+                        // audioSources.push_back(saw);
 
-                        saw->start(startTime);
+                        // saw->start(startTime);
 
                         stack.push(saw);
 
@@ -244,6 +251,19 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                         noise->start(startTime);
 
                         stack.push(noise);
+
+                        break;
+                    }
+
+                    case 0x35:
+                    {
+                        Blend* blend = new Blend(inputs[0], inputs[1]);
+
+                        audioSources.push_back(blend);
+                        
+                        blend->start(startTime);
+
+                        stack.push(blend);
 
                         break;
                     }
@@ -331,7 +351,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                 break;
             }
 
-            case 0x08:
+            case 0x09:
             {
                 std::vector<ValueObject*> inputs;
 
@@ -347,14 +367,14 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                 break;
             }
 
-            case 0x09:
+            case 0x0a:
                 inputs[program[address + 1]] = popStack();
 
                 address += 2;
 
                 break;
 
-            case 0x0a:
+            case 0x0b:
                 stack.push(inputs[program[address + 1]]);
 
                 address += 2;

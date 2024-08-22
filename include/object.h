@@ -31,7 +31,14 @@ struct ValueObject : public Sync
 {
     virtual double getValue();
 
+    virtual ValueObject* expandVariable();
+
     virtual List* getList();
+};
+
+struct Default : public ValueObject
+{
+    List* getList() override;
 };
 
 struct List : public ValueObject
@@ -49,6 +56,8 @@ struct Variable : public ValueObject
 
     double syncLength() override;
     double getValue() override;
+
+    ValueObject* expandVariable() override;
 
     List* getList() override;
 

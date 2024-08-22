@@ -59,12 +59,20 @@ std::vector<unsigned char> doubleToBytes(const double d)
 BytecodeInstruction::BytecodeInstruction(const unsigned int size) :
     size(size) {}
 
+StackPushDefault::StackPushDefault() :
+    BytecodeInstruction(1) {}
+
+void StackPushDefault::output(std::ofstream& stream) const
+{
+    stream << (unsigned char)0x01;
+}
+
 StackPushByte::StackPushByte(const unsigned char value) :
     BytecodeInstruction(2), value(value) {}
 
 void StackPushByte::output(std::ofstream& stream) const
 {
-    stream << (unsigned char)0x01 << value;
+    stream << (unsigned char)0x02 << value;
 }
 
 StackPushInt::StackPushInt(const unsigned int value) :
@@ -72,7 +80,7 @@ StackPushInt::StackPushInt(const unsigned int value) :
 
 void StackPushInt::output(std::ofstream& stream) const
 {
-    stream << (unsigned char)0x02;
+    stream << (unsigned char)0x03;
 
     for (const unsigned char b : intToBytes(value))
     {
@@ -85,7 +93,7 @@ StackPushDouble::StackPushDouble(const double value) :
 
 void StackPushDouble::output(std::ofstream& stream) const
 {
-    stream << (unsigned char)0x03;
+    stream << (unsigned char)0x04;
 
     for (const unsigned char b : doubleToBytes(value))
     {
@@ -98,7 +106,7 @@ StackPushAddress::StackPushAddress(const BytecodeBlock* block) :
 
 void StackPushAddress::output(std::ofstream& stream) const
 {
-    stream << (unsigned char)0x04;
+    stream << (unsigned char)0x05;
 
     for (const unsigned char b : intToBytes(block->offset))
     {
@@ -111,7 +119,7 @@ SetVariable::SetVariable(const unsigned char variable) :
 
 void SetVariable::output(std::ofstream& stream) const
 {
-    stream << (unsigned char)0x05 << variable;
+    stream << (unsigned char)0x06 << variable;
 }
 
 GetVariable::GetVariable(const unsigned char variable) :
@@ -119,7 +127,7 @@ GetVariable::GetVariable(const unsigned char variable) :
 
 void GetVariable::output(std::ofstream& stream) const
 {
-    stream << (unsigned char)0x06 << variable;
+    stream << (unsigned char)0x07 << variable;
 }
 
 CallNative::CallNative(const std::string function, const unsigned char inputs) :
@@ -148,6 +156,7 @@ void CallNative::output(std::ofstream& stream) const
     else if (function == "triangle") id = 0x32;
     else if (function == "saw") id = 0x33;
     else if (function == "noise") id = 0x34;
+    else if (function == "blend") id = 0x35;
 
     else if (function == "hold") id = 0x50;
     else if (function == "lfo") id = 0x51;
@@ -163,7 +172,7 @@ void CallNative::output(std::ofstream& stream) const
 
     else if (function == "perform") id = 0x90;
 
-    stream << (unsigned char)0x07 << id << inputs;
+    stream << (unsigned char)0x08 << id << inputs;
 }
 
 CallUser::CallUser(const BytecodeBlock* function, const unsigned char inputs) :
@@ -171,7 +180,7 @@ CallUser::CallUser(const BytecodeBlock* function, const unsigned char inputs) :
 
 void CallUser::output(std::ofstream& stream) const
 {
-    stream << (unsigned char)0x08;
+    stream << (unsigned char)0x09;
 
     for (const unsigned char b : intToBytes(function->offset))
     {
@@ -186,7 +195,7 @@ SetInput::SetInput(const unsigned char input) :
 
 void SetInput::output(std::ofstream& stream) const
 {
-    stream << (unsigned char)0x09 << input;
+    stream << (unsigned char)0x0a << input;
 }
 
 GetInput::GetInput(const unsigned char input) :
@@ -194,7 +203,7 @@ GetInput::GetInput(const unsigned char input) :
 
 void GetInput::output(std::ofstream& stream) const
 {
-    stream << (unsigned char)0x0a << input;
+    stream << (unsigned char)0x0b << input;
 }
 
 BytecodeBlock::BytecodeBlock(const std::vector<std::string> inputs) :

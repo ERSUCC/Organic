@@ -129,7 +129,7 @@ namespace Parser
             }
         }
 
-        visitor->currentScope->block->addInstruction(new StackPushDouble(0));
+        visitor->currentScope->block->addInstruction(new StackPushDefault());
     }
 
     void ArgumentList::confirmEmpty() const
@@ -647,6 +647,12 @@ namespace Parser
             token->arguments->get("volume", this);
         }
 
+        else if (name == "blend")
+        {
+            token->arguments->get("position", this);
+            token->arguments->get("values", this);
+        }
+
         else if (name == "hold")
         {
             token->arguments->get("length", this);
@@ -712,11 +718,6 @@ namespace Parser
             token->arguments->get("feedback", this);
             token->arguments->get("delay", this);
             token->arguments->get("mix", this);
-        }
-
-        else if (name == "lowpass")
-        {
-            // stuff idk haven't solidified yet
         }
 
         else if (name == "perform")

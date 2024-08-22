@@ -41,9 +41,19 @@ double ValueObject::getValue()
     return 0;
 }
 
+ValueObject* ValueObject::expandVariable()
+{
+    return this;
+}
+
 List* ValueObject::getList()
 {
     return new List({ this });
+}
+
+List* Default::getList()
+{
+    return new List({});
 }
 
 List::List(const std::vector<ValueObject*> objects) :
@@ -70,6 +80,11 @@ double Variable::getValue()
     }
 
     return value->getValue();
+}
+
+ValueObject* Variable::expandVariable()
+{
+    return value->expandVariable();
 }
 
 List* Variable::getList()
