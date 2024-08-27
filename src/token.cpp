@@ -106,7 +106,7 @@ namespace Parser
         {
             if (defined.count(argument->name))
             {
-                Utils::parseError("Input \"" + argument->name + "\" specified more than once.", path, argument->location.line, argument->location.character); // add function name?
+                Utils::parseError("Input \"" + argument->name + "\" specified more than once in function \"" + name + "\".", path, argument->location.line, argument->location.character);
             }
 
             defined.insert(argument->name);

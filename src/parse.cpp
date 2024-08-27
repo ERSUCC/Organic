@@ -539,9 +539,10 @@ namespace Parser
             tokenError(getToken(pos + 1), "\":\"");
         }
 
+        const BasicToken* start = getToken(pos);
         const Token* value = parseExpression(pos + 2);
 
-        return new Argument(ParserLocation(value->location.line, value->location.character, pos, value->location.end), getToken(pos)->str, value);
+        return new Argument(ParserLocation(start->location.line, start->location.character, pos, value->location.end), start->str, value);
     }
 
     const Token* Parser::parseExpression(unsigned int pos) const

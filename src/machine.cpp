@@ -49,14 +49,14 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                 break;
 
             case 0x02:
-                stack.push(new Value(program[address + 1])); // probably shouldn't coerce these to double
+                stack.push(new Value(program[address + 1]));
 
                 address += 2;
 
                 break;
 
             case 0x03:
-                stack.push(new Value(readInt(address + 1))); // probably shouldn't coerce these to double
+                stack.push(new Value(readInt(address + 1)));
 
                 address += 5;
 
@@ -70,7 +70,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                 break;
 
             case 0x05:
-                stack.push(new Value(readInt(address + 1))); // probably shouldn't coerce these to double
+                stack.push(new Value(readInt(address + 1)));
 
                 address += 5;
 
