@@ -170,7 +170,8 @@ void CallNative::output(std::ofstream& stream) const
 
     else if (function == "delay") id = 0x70;
 
-    else if (function == "perform") id = 0x90;
+    else if (function == "play") id = 0x90;
+    else if (function == "perform") id = 0x91;
 
     stream << (unsigned char)0x08 << id << inputs;
 }

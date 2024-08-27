@@ -720,6 +720,11 @@ namespace Parser
             token->arguments->get("mix", this);
         }
 
+        else if (name == "play")
+        {
+            token->arguments->get("source", this);
+        }
+
         else if (name == "perform")
         {
             token->arguments->get("interval", this);

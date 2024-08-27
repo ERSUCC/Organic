@@ -191,82 +191,34 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                         break;
 
                     case 0x30:
-                    {
-                        Sine* sine = new Sine(inputs[0], inputs[1], inputs[2], inputs[3]);
-
-                        // audioSources.push_back(sine);
-
-                        // sine->start(startTime);
-
-                        stack.push(sine);
+                        stack.push(new Sine(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
-                    }
 
                     case 0x31:
-                    {
-                        Square* square = new Square(inputs[0], inputs[1], inputs[2], inputs[3]);
-
-                        audioSources.push_back(square);
-
-                        square->start(startTime);
-
-                        stack.push(square);
+                        stack.push(new Square(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
-                    }
 
                     case 0x32:
-                    {
-                        Triangle* triangle = new Triangle(inputs[0], inputs[1], inputs[2], inputs[3]);
-
-                        audioSources.push_back(triangle);
-
-                        triangle->start(startTime);
-
-                        stack.push(triangle);
+                        stack.push(new Triangle(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
-                    }
 
                     case 0x33:
-                    {
-                        Saw* saw = new Saw(inputs[0], inputs[1], inputs[2], inputs[3]);
-
-                        // audioSources.push_back(saw);
-
-                        // saw->start(startTime);
-
-                        stack.push(saw);
+                        stack.push(new Saw(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
-                    }
 
                     case 0x34:
-                    {
-                        Noise* noise = new Noise(inputs[0], inputs[1], inputs[2]);
-
-                        audioSources.push_back(noise);
-
-                        noise->start(startTime);
-
-                        stack.push(noise);
+                        stack.push(new Noise(inputs[0], inputs[1], inputs[2]));
 
                         break;
-                    }
 
                     case 0x35:
-                    {
-                        Blend* blend = new Blend(inputs[0], inputs[1]);
-
-                        audioSources.push_back(blend);
-                        
-                        blend->start(startTime);
-
-                        stack.push(blend);
+                        stack.push(new Blend(inputs[0], inputs[1]));
 
                         break;
-                    }
 
                     case 0x50:
                         stack.push(new Hold(inputs[0], inputs[1]));
@@ -319,6 +271,17 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                         break;
 
                     case 0x90:
+                    {
+                        AudioSource* audioSource = dynamic_cast<AudioSource*>(inputs[0]);
+
+                        audioSources.push_back(audioSource);
+
+                        audioSource->start(startTime);
+
+                        break;
+                    }
+
+                    case 0x91:
                     {
                         const unsigned int exec = inputs[0]->getValue();
 
