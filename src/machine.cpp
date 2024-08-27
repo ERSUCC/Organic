@@ -359,6 +359,11 @@ void Machine::processAudioSources(double* buffer, const unsigned int bufferLengt
     {
         audioSources[i]->fillBuffer(buffer, bufferLength);
     }
+
+    for (unsigned int i = 0; i < bufferLength; i++)
+    {
+        buffer[i] *= utils->volume;
+    }
 }
 
 void Machine::performEvents()

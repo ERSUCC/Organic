@@ -22,7 +22,7 @@ void SingleAudioSource::fillBuffer(double* buffer, const unsigned int bufferLeng
 
     for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
     {
-        buffer[i] += effectBuffer[i] * utils->volume;
+        buffer[i] += effectBuffer[i];
     }
 }
 
