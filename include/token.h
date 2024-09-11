@@ -50,6 +50,16 @@ namespace Parser
         CloseParenthesis(const ParserLocation location);
     };
 
+    struct OpenSquareBracket : public BasicToken
+    {
+        OpenSquareBracket(const ParserLocation location);
+    };
+
+    struct CloseSquareBracket : public BasicToken
+    {
+        CloseSquareBracket(const ParserLocation location);
+    };
+
     struct OpenCurlyBracket : public BasicToken
     {
         OpenCurlyBracket(const ParserLocation location);

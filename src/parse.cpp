@@ -101,6 +101,20 @@ namespace Parser
                 nextCharacter();
             }
 
+            else if (code[current] == '[')
+            {
+                tokens.push_back(new OpenSquareBracket(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+
+                nextCharacter();
+            }
+
+            else if (code[current] == ']')
+            {
+                tokens.push_back(new CloseSquareBracket(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+
+                nextCharacter();
+            }
+
             else if (code[current] == '{')
             {
                 tokens.push_back(new OpenCurlyBracket(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
@@ -547,37 +561,37 @@ namespace Parser
 
     const Token* Parser::parseExpression(unsigned int pos) const
     {
-        if (tokenIs<OpenParenthesis>(pos) && tokenIs<Comma>(parseExpression(pos + 1)->location.end))
+        if (tokenIs<OpenSquareBracket>(pos))
         {
-            const unsigned int start = pos;
-
-            std::vector<const Token*> list;
-
-            do
-            {
-                const Token* expression = parseExpression(pos + 1);
-
-                list.push_back(expression);
-
-                pos = expression->location.end;
-            } while (tokenIs<Comma>(pos));
-
-            if (!tokenIs<CloseParenthesis>(pos))
-            {
-                tokenError(getToken(pos), "\")\"");
-            }
-
-            const BasicToken* token = getToken(start);
-
-            if (list.empty())
-            {
-                tokenError(token, "expression");
-            }
-
-            return new List(ParserLocation(token->location.line, token->location.character, start, pos + 1), list);
+            return parseList(pos);
         }
 
         return parseTerms(pos);
+    }
+
+    const Token* Parser::parseList(unsigned int pos) const
+    {
+        const unsigned int start = pos;
+
+        std::vector<const Token*> items;
+
+        do
+        {
+            const Token* token = parseExpression(pos + 1);
+
+            items.push_back(token);
+
+            pos = token->location.end;
+        } while (tokenIs<Comma>(pos));
+
+        if (!tokenIs<CloseSquareBracket>(pos))
+        {
+            tokenError(getToken(pos), "\"]\"");
+        }
+
+        const BasicToken* token = getToken(start);
+
+        return new List(ParserLocation(token->location.line, token->location.character, start, pos + 1), items);
     }
 
     const Token* Parser::parseTerms(unsigned int pos) const
@@ -599,8 +613,6 @@ namespace Parser
                 if (!tokenIs<CloseParenthesis>(pos))
                 {
                     tokenError(getToken(pos), "\")\"");
-
-                    return nullptr;
                 }
 
                 pos++;

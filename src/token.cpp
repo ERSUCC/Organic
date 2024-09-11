@@ -18,6 +18,12 @@ namespace Parser
 
     CloseParenthesis::CloseParenthesis(const ParserLocation location) :
         BasicToken(location, ")") {}
+    
+    OpenSquareBracket::OpenSquareBracket(const ParserLocation location) :
+        BasicToken(location, "[") {}
+    
+    CloseSquareBracket::CloseSquareBracket(const ParserLocation location) :
+        BasicToken(location, "]") {}
 
     OpenCurlyBracket::OpenCurlyBracket(const ParserLocation location) :
         BasicToken(location, "{") {}

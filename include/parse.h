@@ -32,6 +32,7 @@ namespace Parser
         const Token* parseCall(unsigned int pos) const;
         const Token* parseArgument(unsigned int pos) const;
         const Token* parseExpression(unsigned int pos) const;
+        const Token* parseList(unsigned int pos) const;
         const Token* parseTerms(unsigned int pos) const;
         const Token* parseTerm(unsigned int pos) const;
 

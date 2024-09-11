@@ -236,7 +236,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                         break;
 
                     case 0x53:
-                        stack.push(new Sequence(inputs[0]->getList(), inputs[1]));
+                        stack.push(new Sequence(inputs[0], inputs[1]));
 
                         break;
 

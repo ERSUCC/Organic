@@ -38,7 +38,13 @@ struct ValueObject : public Sync
 
 struct Default : public ValueObject
 {
+    Default();
+
     List* getList() override;
+
+private:
+    List* list;
+
 };
 
 struct List : public ValueObject

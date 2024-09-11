@@ -38,17 +38,22 @@ void Utils::error(const std::string message)
     exit(1);
 }
 
-void Utils::parseError(const std::string message, const std::string file, const unsigned int line, const unsigned int character)
-{
-    error("Parse error in \"" + file + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ": " + message);
-}
-
 void Utils::argumentError(const std::string message)
 {
     error("Argument error: " + message);
 }
 
+void Utils::parseError(const std::string message, const std::string file, const unsigned int line, const unsigned int character)
+{
+    error("Parse error in \"" + file + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ": " + message);
+}
+
 void Utils::machineError(const std::string message, const std::string file)
 {
     error("Virtual machine error in \"" + file + "\": " + message);
+}
+
+void Utils::runtimeError(const std::string message)
+{
+    error("Runtime error: " + message);
 }

@@ -48,12 +48,17 @@ ValueObject* ValueObject::expandVariable()
 
 List* ValueObject::getList()
 {
-    return new List({ this });
+    Utils::runtimeError("Expected list.");
+
+    return nullptr;
 }
+
+Default::Default() :
+    list(new List({})) {}
 
 List* Default::getList()
 {
-    return new List({});
+    return list;
 }
 
 List::List(const std::vector<ValueObject*> objects) :

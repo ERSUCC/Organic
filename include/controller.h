@@ -124,7 +124,7 @@ struct Sequence : public ValueController
         Random
     };
 
-    Sequence(List* controllers, ValueObject* order);
+    Sequence(ValueObject* controllers, ValueObject* order);
 
     double syncLength() override;
     double getValue() override;
@@ -134,8 +134,7 @@ protected:
     void reinit() override;
 
 private:
-    List* controllers;
-
+    ValueObject* controllers;
     ValueObject* order;
 
     std::uniform_int_distribution<> udist;
