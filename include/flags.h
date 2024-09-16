@@ -8,7 +8,7 @@
 #include "parse.h"
 #include "utils.h"
 
-struct InterpreterOptions
+struct ProgramOptions
 {
     double time = 0;
     std::string exportPath;
@@ -21,11 +21,11 @@ struct InterpreterOptions
     std::string bytecodePath;
 };
 
-struct Interpreter
+struct FlagParser
 {
-    Interpreter(const std::string path, const std::vector<std::string>& flags);
+    FlagParser(const std::string path, const std::vector<std::string>& flags);
 
-    InterpreterOptions interpret();
+    ProgramOptions getOptions();
 
 private:
     std::string nextOption(const std::string previous);

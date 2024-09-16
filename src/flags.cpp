@@ -1,6 +1,6 @@
-#include "../include/interpret.h"
+#include "../include/flags.h"
 
-Interpreter::Interpreter(const std::string path, const std::vector<std::string>& flags) : path(path)
+FlagParser::FlagParser(const std::string path, const std::vector<std::string>& flags) : path(path)
 {
     for (const std::string flag : flags)
     {
@@ -8,9 +8,9 @@ Interpreter::Interpreter(const std::string path, const std::vector<std::string>&
     }
 }
 
-InterpreterOptions Interpreter::interpret()
+ProgramOptions FlagParser::getOptions()
 {
-    InterpreterOptions options;
+    ProgramOptions options;
 
     while (!flags.empty())
     {
@@ -83,7 +83,7 @@ InterpreterOptions Interpreter::interpret()
     return options;
 }
 
-std::string Interpreter::nextOption(const std::string previous)
+std::string FlagParser::nextOption(const std::string previous)
 {
     if (flags.empty())
     {

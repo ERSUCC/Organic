@@ -20,7 +20,7 @@ Organic::Organic(const std::string program, const std::vector<std::string>& flag
 {
     utils = Utils::get();
 
-    options = (new Interpreter(program, flags))->interpret();
+    options = (new FlagParser(program, flags))->getOptions();
 
     machine = new Machine(options.bytecodePath);
 }

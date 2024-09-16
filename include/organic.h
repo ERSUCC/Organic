@@ -7,7 +7,7 @@
 #include "../deps/AudioFile.h"
 #include "../deps/RtAudio.h"
 
-#include "interpret.h"
+#include "flags.h"
 #include "machine.h"
 #include "utils.h"
 
@@ -34,7 +34,7 @@ private:
 
     Utils* utils;
 
-    InterpreterOptions options;
+    ProgramOptions options;
 
     Machine* machine;
 

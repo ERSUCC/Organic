@@ -10,7 +10,7 @@ add_executable(organic src/audiosource.cpp
                        src/controller.cpp
                        src/effect.cpp
                        src/event.cpp
-                       src/interpret.cpp
+                       src/flags.cpp
                        src/machine.cpp
                        src/main.cpp
                        src/object.cpp
