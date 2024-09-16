@@ -11,6 +11,7 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
 
     data->callbackActive = true;
 
+    data->machine->updateEvents();
     data->machine->processAudioSources((double*)output, frames);
 
     return 0;
@@ -90,8 +91,6 @@ void Organic::startPlayback()
     while (!options.setTime || utils->time < options.time)
     {
         utils->time = (clock.now() - start).count() / 1000000.0;
-
-        machine->performEvents();
     }
 
     if (audio.isStreamRunning())
@@ -124,7 +123,7 @@ void Organic::startExport()
     {
         utils->time = i * 1000.0 / utils->sampleRate;
 
-        machine->performEvents();
+        machine->updateEvents();
         machine->processAudioSources(buffer, utils->bufferLength);
 
         for (int j = 0; j < utils->bufferLength && i + j < steps; j++)

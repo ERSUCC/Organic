@@ -351,6 +351,19 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
     }
 }
 
+void Machine::updateEvents()
+{
+    for (unsigned int i = 0; i < events.size(); i++)
+    {
+        events[i]->update();
+
+        if (!events[i]->enabled)
+        {
+            events.erase(events.begin() + i--);
+        }
+    }
+}
+
 void Machine::processAudioSources(double* buffer, const unsigned int bufferLength)
 {
     std::fill(buffer, buffer + bufferLength * utils->channels, 0);
@@ -363,24 +376,6 @@ void Machine::processAudioSources(double* buffer, const unsigned int bufferLengt
     for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
     {
         buffer[i] *= utils->volume;
-    }
-}
-
-void Machine::performEvents()
-{
-    for (unsigned int i = 0; i < events.size(); i++)
-    {
-        if (events[i]->ready())
-        {
-            events[i]->perform();
-
-            if (!events[i]->hasNext())
-            {
-                events.erase(events.begin() + i);
-
-                i--;
-            }
-        }
     }
 }
 

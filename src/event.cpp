@@ -3,23 +3,24 @@
 Event::Event(const std::function<void(double)> action, ValueObject* delay, ValueObject* repeats, ValueObject* interval) :
     action(action), delay(delay), repeats(repeats), interval(interval) {}
 
-bool Event::ready() const
+void Event::update()
 {
-    return utils->time >= next;
-}
+    const double next = repeatTime + delayTime + interval->getValue();
 
-bool Event::hasNext() const
-{
-    return repeats->getValue() == 0 || times < repeats->getValue();
-}
+    if (utils->time >= next)
+    {
+        action(next);
 
-void Event::perform()
-{
-    action(next);
+        if (repeats->getValue() == 0 || ++times < repeats->getValue())
+        {
+            repeat(next);
+        }
 
-    times++;
-
-    next += interval->getValue();
+        else
+        {
+            stop();
+        }
+    }
 }
 
 void Event::init()
@@ -28,7 +29,12 @@ void Event::init()
     repeats->start(startTime);
     interval->start(startTime);
 
-    times = 0;
+    delayTime = delay->getValue();
 
-    next = startTime + delay->getValue();
+    times = 0;
+}
+
+void Event::reinit()
+{
+    delayTime = 0;
 }

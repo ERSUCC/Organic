@@ -20,8 +20,8 @@ struct Machine
 
     void execute(unsigned int address, std::vector<ValueObject*>& inputs, const double startTime);
 
+    void updateEvents();
     void processAudioSources(double* buffer, const unsigned int bufferLength);
-    void performEvents();
 
 private:
     unsigned int readInt(const unsigned int address) const;

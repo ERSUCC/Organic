@@ -8,13 +8,11 @@ struct Event : public Sync
 {
     Event(const std::function<void(double)> action, ValueObject* delay, ValueObject* repeats, ValueObject* interval);
 
-    bool ready() const;
-    bool hasNext() const;
-
-    void perform();
+    void update();
 
 protected:
     void init() override;
+    void reinit() override;
 
     const std::function<void(double)> action;
 
@@ -22,7 +20,7 @@ protected:
     ValueObject* repeats;
     ValueObject* interval;
 
-    double next;
+    double delayTime;
 
     unsigned int times;
 
