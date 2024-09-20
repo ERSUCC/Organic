@@ -5,9 +5,7 @@
 
 #include "object.h"
 
-struct ValueController : public ValueObject {};
-
-struct ValueCombination : public ValueController
+struct ValueCombination : public ValueObject
 {
     ValueCombination(ValueObject* value1, ValueObject* value2);
 
@@ -114,7 +112,7 @@ protected:
 
 };
 
-struct Sequence : public ValueController
+struct Sequence : public ValueObject
 {
     enum OrderEnum
     {
@@ -149,7 +147,7 @@ private:
 
 };
 
-struct Repeat : public ValueController
+struct Repeat : public ValueObject
 {
     Repeat(ValueObject* value, ValueObject* repeats);
 
@@ -168,7 +166,7 @@ private:
 
 };
 
-struct Value : public ValueController
+struct Value : public ValueObject
 {
     Value(double value);
 
@@ -177,7 +175,7 @@ struct Value : public ValueController
     double value;
 };
 
-struct Hold : public ValueController
+struct Hold : public ValueObject
 {
     Hold(ValueObject* value, ValueObject* length);
 
@@ -193,7 +191,7 @@ private:
 
 };
 
-struct Sweep : public ValueController
+struct Sweep : public ValueObject
 {
     Sweep(ValueObject* from, ValueObject* to, ValueObject* length);
 
@@ -210,7 +208,7 @@ private:
 
 };
 
-struct LFO : public ValueController
+struct LFO : public ValueObject
 {
     LFO(ValueObject* from, ValueObject* to, ValueObject* length);
 
@@ -227,7 +225,7 @@ private:
 
 };
 
-struct Random : public ValueController
+struct Random : public ValueObject
 {
     enum TypeEnum
     {
@@ -257,7 +255,7 @@ private:
 
 };
 
-struct Limit : public ValueController
+struct Limit : public ValueObject
 {
     Limit(ValueObject* value, ValueObject* min, ValueObject* max);
 
@@ -274,7 +272,7 @@ private:
 
 };
 
-struct Trigger : public ValueController
+struct Trigger : public ValueObject
 {
     Trigger(ValueObject* condition, ValueObject* value);
 
@@ -292,7 +290,7 @@ private:
 
 };
 
-struct If : public ValueController
+struct If : public ValueObject
 {
     If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue);
 
