@@ -334,7 +334,7 @@ namespace Parser
 
     struct Scope
     {
-        Scope(Scope* parent = nullptr, const std::vector<std::string> inputs = std::vector<std::string>());
+        Scope(Scope* parent = nullptr, const std::string currentFunction = "", const std::vector<std::string> inputs = std::vector<std::string>());
 
         std::optional<unsigned char> getVariable(const std::string name);
         void addVariable(const std::string name);
@@ -344,9 +344,13 @@ namespace Parser
 
         std::optional<unsigned char> getInput(const std::string input);
 
+        bool checkRecursive(const std::string function) const;
+
         void checkUses() const;
 
         Scope* parent;
+
+        const std::string currentFunction;
 
         BytecodeBlock* block;
 

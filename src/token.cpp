@@ -272,8 +272,8 @@ namespace Parser
         visitor->visit(this);
     }
 
-    Scope::Scope(Scope* parent, const std::vector<std::string> inputs) :
-        parent(parent)
+    Scope::Scope(Scope* parent, const std::string currentFunction, const std::vector<std::string> inputs) :
+        parent(parent), currentFunction(currentFunction)
     {
         block = new BytecodeBlock(inputs);
 
@@ -354,6 +354,11 @@ namespace Parser
         }
 
         return std::nullopt;
+    }
+
+    bool Scope::checkRecursive(const std::string function) const
+    {
+        return currentFunction == function || (parent && parent->checkRecursive(function));
     }
 
     void Scope::checkUses() const
@@ -750,6 +755,11 @@ namespace Parser
             currentScope->block->addInstruction(new StackPushAddress(block));
         }
 
+        else if (currentScope->checkRecursive(name))
+        {
+            return Utils::parseError("Calling a function in its own definition is not allowed.", sourcePath, token->location.line, token->location.character);
+        }
+
         else
         {
             return Utils::parseError("Unknown function name \"" + name + "\".", sourcePath, token->location.line, token->location.character);
@@ -785,7 +795,12 @@ namespace Parser
             return Utils::parseError("A function already exists with the name \"" + token->name + "\".", sourcePath, token->location.line, token->location.character);
         }
 
-        currentScope = new Scope(currentScope, token->inputs);
+        if (currentScope->checkRecursive(token->name))
+        {
+            return Utils::parseError("Redefining a function in its own definition is not allowed.", sourcePath, token->location.line, token->location.character);
+        }
+
+        currentScope = new Scope(currentScope, token->name, token->inputs);
 
         for (const Instruction* instruction : token->instructions)
         {
