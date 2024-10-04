@@ -2,9 +2,6 @@
 
 namespace Parser
 {
-    ParserLocation::ParserLocation(const unsigned int line, const unsigned int character, const unsigned int start, const unsigned int end) :
-        line(line), character(character), start(start), end(end) {}
-    
     ReturnType::ReturnType(const BasicReturnType primaryType, const ReturnType* subType) :
         primaryType(primaryType), subType(subType) {}
     
@@ -123,9 +120,7 @@ namespace Parser
         return !(subType || other->subType);
     }
 
-    Token::Token() {}
-    
-    Token::Token(const ParserLocation location) :
+    Token::Token(const SourceLocation location) :
         location(location) {}
 
     const ReturnType* Token::returnType(const BytecodeTransformer* visitor) const
@@ -135,76 +130,73 @@ namespace Parser
 
     void Token::accept(BytecodeTransformer* visitor) const {}
 
-    BasicToken::BasicToken() :
-        Token() {}
-
-    BasicToken::BasicToken(const ParserLocation location, const std::string str) :
+    BasicToken::BasicToken(const SourceLocation location, const std::string str) :
         Token(location), str(str) {}
 
-    OpenParenthesis::OpenParenthesis(const ParserLocation location) :
+    OpenParenthesis::OpenParenthesis(const SourceLocation location) :
         BasicToken(location, "(") {}
 
-    CloseParenthesis::CloseParenthesis(const ParserLocation location) :
+    CloseParenthesis::CloseParenthesis(const SourceLocation location) :
         BasicToken(location, ")") {}
     
-    OpenSquareBracket::OpenSquareBracket(const ParserLocation location) :
+    OpenSquareBracket::OpenSquareBracket(const SourceLocation location) :
         BasicToken(location, "[") {}
     
-    CloseSquareBracket::CloseSquareBracket(const ParserLocation location) :
+    CloseSquareBracket::CloseSquareBracket(const SourceLocation location) :
         BasicToken(location, "]") {}
 
-    OpenCurlyBracket::OpenCurlyBracket(const ParserLocation location) :
+    OpenCurlyBracket::OpenCurlyBracket(const SourceLocation location) :
         BasicToken(location, "{") {}
 
-    CloseCurlyBracket::CloseCurlyBracket(const ParserLocation location) :
+    CloseCurlyBracket::CloseCurlyBracket(const SourceLocation location) :
         BasicToken(location, "}") {}
 
-    Colon::Colon(const ParserLocation location) :
+    Colon::Colon(const SourceLocation location) :
         BasicToken(location, ":") {}
 
-    Comma::Comma(const ParserLocation location) :
+    Comma::Comma(const SourceLocation location) :
         BasicToken(location, ",") {}
 
-    Equals::Equals(const ParserLocation location) :
+    Equals::Equals(const SourceLocation location) :
         BasicToken(location, "=") {}
 
-    Operator::Operator(const ParserLocation location, const std::string str) :
+    Operator::Operator(const SourceLocation location, const std::string str) :
         BasicToken(location, str) {}
 
-    Add::Add(const ParserLocation location) :
+    Add::Add(const SourceLocation location) :
         Operator(location, "+") {}
 
-    Subtract::Subtract(const ParserLocation location) :
+    Subtract::Subtract(const SourceLocation location) :
         Operator(location, "-") {}
 
-    Multiply::Multiply(const ParserLocation location) :
+    Multiply::Multiply(const SourceLocation location) :
         Operator(location, "*") {}
 
-    Divide::Divide(const ParserLocation location) :
+    Divide::Divide(const SourceLocation location) :
         Operator(location, "/") {}
 
-    Power::Power(const ParserLocation location) :
+    Power::Power(const SourceLocation location) :
         Operator(location, "^") {}
 
-    DoubleEquals::DoubleEquals(const ParserLocation location) :
+    DoubleEquals::DoubleEquals(const SourceLocation location) :
         Operator(location, "==") {}
 
-    Less::Less(const ParserLocation location) :
+    Less::Less(const SourceLocation location) :
         Operator(location, "<") {}
 
-    Greater::Greater(const ParserLocation location) :
+    Greater::Greater(const SourceLocation location) :
         Operator(location, ">") {}
 
-    LessEqual::LessEqual(const ParserLocation location) :
+    LessEqual::LessEqual(const SourceLocation location) :
         Operator(location, "<=") {}
 
-    GreaterEqual::GreaterEqual(const ParserLocation location) :
+    GreaterEqual::GreaterEqual(const SourceLocation location) :
         Operator(location, ">=") {}
 
-    String::String(const ParserLocation location, const std::string str) :
+    String::String(const SourceLocation location, const std::string str) :
         BasicToken(location, str) {}
 
-    Value::Value(const ParserLocation location, const std::string str, const double value) :
+    Value::Value(const SourceLocation location, const std::string str, const double value) :
         BasicToken(location, str), value(value) {}
 
     const ReturnType* Value::returnType(const BytecodeTransformer* visitor) const
@@ -217,7 +209,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    NamedConstant::NamedConstant(const ParserLocation location, const std::string constant) :
+    NamedConstant::NamedConstant(const SourceLocation location, const std::string constant) :
         BasicToken(location, constant) {}
     
     const ReturnType* NamedConstant::returnType(const BytecodeTransformer* visitor) const
@@ -245,7 +237,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    Variable::Variable(const ParserLocation location, const std::string variable) :
+    Variable::Variable(const SourceLocation location, const std::string variable) :
         BasicToken(location, variable) {}
 
     const ReturnType* Variable::returnType(const BytecodeTransformer* visitor) const
@@ -255,7 +247,7 @@ namespace Parser
             return info->value->returnType(visitor);
         }
 
-        Utils::parseError("Unrecognized variable name \"" + str + "\".", visitor->sourcePath, location.line, location.character);
+        Utils::parseError("Unrecognized variable name \"" + str + "\".", location);
 
         return new ReturnType(BasicReturnType::None);
     }
@@ -265,11 +257,11 @@ namespace Parser
         visitor->visit(this);
     }
 
-    Argument::Argument(const ParserLocation location, const std::string name, const Token* value) :
+    Argument::Argument(const SourceLocation location, const std::string name, const Token* value) :
         Token(location), name(name), value(value) {}
     
-    ArgumentList::ArgumentList(const std::vector<const Argument*> arguments, const std::string name, const std::string path) :
-        arguments(arguments), name(name), path(path)
+    ArgumentList::ArgumentList(const std::vector<const Argument*> arguments, const std::string name) :
+        arguments(arguments), name(name)
     {
         std::unordered_set<std::string> defined;
 
@@ -277,7 +269,7 @@ namespace Parser
         {
             if (defined.count(argument->name))
             {
-                Utils::parseError("Input \"" + argument->name + "\" specified more than once in function \"" + name + "\".", path, argument->location.line, argument->location.character);
+                Utils::parseError("Input \"" + argument->name + "\" specified more than once in function \"" + name + "\".", argument->location);
             }
 
             defined.insert(argument->name);
@@ -301,7 +293,7 @@ namespace Parser
                     return;
                 }
 
-                Utils::parseError("Expected \"" + expectedType->getTypeName() + "\", received \"" + arguments[i]->value->returnType(visitor)->getTypeName() + "\".", path, arguments[i]->value->location.line, arguments[i]->value->location.character);
+                Utils::parseError("Expected \"" + expectedType->getTypeName() + "\", received \"" + arguments[i]->value->returnType(visitor)->getTypeName() + "\".", arguments[i]->value->location);
             }
         }
 
@@ -312,11 +304,11 @@ namespace Parser
     {
         if (!arguments.empty())
         {
-            Utils::parseError("Invalid input name \"" + arguments[0]->name + "\" for function \"" + name + "\".", path, arguments[0]->location.line, arguments[0]->location.character);
+            Utils::parseError("Invalid input name \"" + arguments[0]->name + "\" for function \"" + name + "\".", arguments[0]->location);
         }
     }
 
-    List::List(const ParserLocation location, const std::vector<const Token*> values) :
+    List::List(const SourceLocation location, const std::vector<const Token*> values) :
         Token(location), values(values) {}
 
     const ReturnType* List::returnType(const BytecodeTransformer* visitor) const
@@ -334,10 +326,10 @@ namespace Parser
         visitor->visit(this);
     }
 
-    OperatorObject::OperatorObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    OperatorObject::OperatorObject(const SourceLocation location, const Token* value1, const Token* value2) :
         Token(location), value1(value1), value2(value2) {}
 
-    ArithmeticExpression::ArithmeticExpression(const ParserLocation location, const Token* value1, const Token* value2) :
+    ArithmeticExpression::ArithmeticExpression(const SourceLocation location, const Token* value1, const Token* value2) :
         OperatorObject(location, value1, value2) {}
 
     const ReturnType* ArithmeticExpression::returnType(const BytecodeTransformer* visitor) const
@@ -345,7 +337,7 @@ namespace Parser
         return new ReturnType(BasicReturnType::Value);
     }
 
-    AddObject::AddObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    AddObject::AddObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ArithmeticExpression(location, value1, value2) {}
 
     void AddObject::accept(BytecodeTransformer* visitor) const
@@ -353,7 +345,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    SubtractObject::SubtractObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    SubtractObject::SubtractObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ArithmeticExpression(location, value1, value2) {}
 
     void SubtractObject::accept(BytecodeTransformer* visitor) const
@@ -361,7 +353,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    MultiplyObject::MultiplyObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    MultiplyObject::MultiplyObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ArithmeticExpression(location, value1, value2) {}
 
     void MultiplyObject::accept(BytecodeTransformer* visitor) const
@@ -369,7 +361,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    DivideObject::DivideObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    DivideObject::DivideObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ArithmeticExpression(location, value1, value2) {}
 
     void DivideObject::accept(BytecodeTransformer* visitor) const
@@ -377,7 +369,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    PowerObject::PowerObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    PowerObject::PowerObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ArithmeticExpression(location, value1, value2) {}
 
     void PowerObject::accept(BytecodeTransformer* visitor) const
@@ -385,7 +377,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    ConditionalExpression::ConditionalExpression(const ParserLocation location, const Token* value1, const Token* value2) :
+    ConditionalExpression::ConditionalExpression(const SourceLocation location, const Token* value1, const Token* value2) :
         OperatorObject(location, value1, value2) {}
 
     const ReturnType* ConditionalExpression::returnType(const BytecodeTransformer* visitor) const
@@ -393,7 +385,7 @@ namespace Parser
         return new ReturnType(BasicReturnType::Boolean);
     }
 
-    EqualsObject::EqualsObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    EqualsObject::EqualsObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ConditionalExpression(location, value1, value2) {}
 
     void EqualsObject::accept(BytecodeTransformer* visitor) const
@@ -401,7 +393,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    LessObject::LessObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    LessObject::LessObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ConditionalExpression(location, value1, value2) {}
 
     void LessObject::accept(BytecodeTransformer* visitor) const
@@ -409,7 +401,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    GreaterObject::GreaterObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    GreaterObject::GreaterObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ConditionalExpression(location, value1, value2) {}
 
     void GreaterObject::accept(BytecodeTransformer* visitor) const
@@ -417,7 +409,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    LessEqualObject::LessEqualObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    LessEqualObject::LessEqualObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ConditionalExpression(location, value1, value2) {}
 
     void LessEqualObject::accept(BytecodeTransformer* visitor) const
@@ -425,7 +417,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    GreaterEqualObject::GreaterEqualObject(const ParserLocation location, const Token* value1, const Token* value2) :
+    GreaterEqualObject::GreaterEqualObject(const SourceLocation location, const Token* value1, const Token* value2) :
         ConditionalExpression(location, value1, value2) {}
 
     void GreaterEqualObject::accept(BytecodeTransformer* visitor) const
@@ -433,7 +425,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    ParenthesizedExpression::ParenthesizedExpression(const ParserLocation location, const Token* value) :
+    ParenthesizedExpression::ParenthesizedExpression(const SourceLocation location, const Token* value) :
         Token(location), value(value) {}
     
     const ReturnType* ParenthesizedExpression::returnType(const BytecodeTransformer* visitor) const
@@ -446,7 +438,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    Assign::Assign(const ParserLocation location, const std::string variable, const Token* value) :
+    Assign::Assign(const SourceLocation location, const std::string variable, const Token* value) :
         Token(location), variable(variable), value(value) {}
 
     void Assign::accept(BytecodeTransformer* visitor) const
@@ -454,7 +446,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    Call::Call(const ParserLocation location, const std::string name, ArgumentList* arguments) :
+    Call::Call(const SourceLocation location, const std::string name, ArgumentList* arguments) :
         Token(location), name(name), arguments(arguments) {}
     
     const ReturnType* Call::returnType(const BytecodeTransformer* visitor) const
@@ -501,7 +493,7 @@ namespace Parser
         visitor->visit(this);
     }
 
-    Define::Define(const ParserLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Token*> instructions) :
+    Define::Define(const SourceLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Token*> instructions) :
         Token(location), name(name), inputs(inputs), instructions(instructions) {}
 
     const ReturnType* Define::returnType(const BytecodeTransformer* visitor) const
@@ -565,7 +557,7 @@ namespace Parser
                 return info;
             }
 
-            Utils::parseError("The type \"" + value->returnType(visitor)->getTypeName() + "\" does not match the type \"" + info->value->returnType(visitor)->getTypeName() + "\" of the target variable.", visitor->sourcePath, value->location.line, value->location.character);
+            Utils::parseError("The type \"" + value->returnType(visitor)->getTypeName() + "\" does not match the type \"" + info->value->returnType(visitor)->getTypeName() + "\" of the target variable.", value->location);
         }
 
         VariableInfo* info = new VariableInfo(variables.size(), value);
@@ -659,17 +651,11 @@ namespace Parser
     }
 
     Program::Program(const std::vector<const Token*> instructions) :
-        Token(ParserLocation(0, 0, 0, 0)), instructions(instructions) {}
+        instructions(instructions) {}
 
-    void Program::accept(BytecodeTransformer* visitor) const
+    BytecodeTransformer::BytecodeTransformer(const std::string sourcePath)
     {
-        visitor->visit(this);
-    }
-
-    BytecodeTransformer::BytecodeTransformer(const std::string path) :
-        sourcePath(path)
-    {
-        outputPath = std::filesystem::path(path).replace_extension("obc").string();
+        outputPath = std::filesystem::path(sourcePath).replace_extension("obc").string();
 
         utils = Utils::get();
 
@@ -747,7 +733,7 @@ namespace Parser
 
         else
         {
-            Utils::parseError("Unrecognized variable name \"" + name + "\".", sourcePath, token->location.line, token->location.character);
+            Utils::parseError("Unrecognized variable name \"" + name + "\".", token->location);
         }
     }
 
@@ -757,7 +743,7 @@ namespace Parser
         {
             if (!token->values[0]->returnType(this)->checkType(token->values[i]->returnType(this)))
             {
-                Utils::parseError("All elements in a list must have the same type.", sourcePath, token->values[i]->location.line, token->values[i]->location.character);
+                Utils::parseError("All elements in a list must have the same type.", token->values[i]->location);
             }
 
             token->values[i]->accept(this);
@@ -1009,12 +995,12 @@ namespace Parser
 
         else if (currentScope->checkRecursive(name))
         {
-            return Utils::parseError("Calling a function in its own definition is not allowed.", sourcePath, token->location.line, token->location.character);
+            return Utils::parseError("Calling a function in its own definition is not allowed.", token->location);
         }
 
         else
         {
-            return Utils::parseError("Unknown function name \"" + name + "\".", sourcePath, token->location.line, token->location.character);
+            return Utils::parseError("Unknown function name \"" + name + "\".", token->location);
         }
 
         token->arguments->confirmEmpty();
@@ -1046,12 +1032,12 @@ namespace Parser
             token->name == "perform" ||
             currentScope->getFunction(token->name))
         {
-            return Utils::parseError("A function already exists with the name \"" + token->name + "\".", sourcePath, token->location.line, token->location.character);
+            return Utils::parseError("A function already exists with the name \"" + token->name + "\".", token->location);
         }
 
         if (currentScope->checkRecursive(token->name))
         {
-            return Utils::parseError("Redefining a function in its own definition is not allowed.", sourcePath, token->location.line, token->location.character);
+            return Utils::parseError("Redefining a function in its own definition is not allowed.", token->location);
         }
 
         currentScope = new Scope(this, currentScope, token->name, token->inputs);

@@ -16,7 +16,7 @@ namespace Parser
         file.close();
     }
 
-    Program* Parser::parse()
+    const Program* Parser::parse()
     {
         tokenize();
 
@@ -89,56 +89,56 @@ namespace Parser
 
             else if (code[current] == '(')
             {
-                tokens.push_back(new OpenParenthesis(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new OpenParenthesis(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == ')')
             {
-                tokens.push_back(new CloseParenthesis(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new CloseParenthesis(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == '[')
             {
-                tokens.push_back(new OpenSquareBracket(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new OpenSquareBracket(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == ']')
             {
-                tokens.push_back(new CloseSquareBracket(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new CloseSquareBracket(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == '{')
             {
-                tokens.push_back(new OpenCurlyBracket(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new OpenCurlyBracket(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == '}')
             {
-                tokens.push_back(new CloseCurlyBracket(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new CloseCurlyBracket(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == ':')
             {
-                tokens.push_back(new Colon(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new Colon(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == ',')
             {
-                tokens.push_back(new Comma(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new Comma(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
@@ -149,48 +149,48 @@ namespace Parser
 
                 if (code[current] == '=')
                 {
-                    tokens.push_back(new DoubleEquals(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                    tokens.push_back(new DoubleEquals(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                     nextCharacter();
                 }
 
                 else
                 {
-                    tokens.push_back(new Equals(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                    tokens.push_back(new Equals(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
                 }
             }
 
             else if (code[current] == '+')
             {
-                tokens.push_back(new Add(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new Add(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == '-')
             {
-                tokens.push_back(new Subtract(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new Subtract(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == '*')
             {
-                tokens.push_back(new Multiply(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new Multiply(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == '/')
             {
-                tokens.push_back(new Divide(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new Divide(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
 
             else if (code[current] == '^')
             {
-                tokens.push_back(new Power(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                tokens.push_back(new Power(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                 nextCharacter();
             }
@@ -201,14 +201,14 @@ namespace Parser
 
                 if (code[current] == '=')
                 {
-                    tokens.push_back(new LessEqual(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                    tokens.push_back(new LessEqual(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                     nextCharacter();
                 }
 
                 else
                 {
-                    tokens.push_back(new Less(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                    tokens.push_back(new Less(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
                 }
             }
 
@@ -218,14 +218,14 @@ namespace Parser
 
                 if (code[current] == '=')
                 {
-                    tokens.push_back(new GreaterEqual(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                    tokens.push_back(new GreaterEqual(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
 
                     nextCharacter();
                 }
 
                 else
                 {
-                    tokens.push_back(new Greater(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1)));
+                    tokens.push_back(new Greater(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1)));
                 }
             }
 
@@ -254,12 +254,12 @@ namespace Parser
 
                 if (dynamic_cast<Subtract*>(tokens.back()) && (dynamic_cast<Equals*>(tokens[tokens.size() - 2]) || dynamic_cast<Colon*>(tokens[tokens.size() - 2]) || dynamic_cast<OpenParenthesis*>(tokens[tokens.size() - 2]) || dynamic_cast<Operator*>(tokens[tokens.size() - 2])))
                 {
-                    tokens[tokens.size() - 1] = new Value(ParserLocation(tokens.back()->location.line, tokens.back()->location.character, tokens.size() - 1, tokens.size()), "-" + constant, std::stod("-" + constant));
+                    tokens[tokens.size() - 1] = new Value(SourceLocation(path, tokens.back()->location.line, tokens.back()->location.character, tokens.size() - 1, tokens.size()), "-" + constant, std::stod("-" + constant));
                 }
 
                 else
                 {
-                    tokens.push_back(new Value(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1), constant, std::stod(constant)));
+                    tokens.push_back(new Value(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), constant, std::stod(constant)));
                 }
             }
 
@@ -325,36 +325,36 @@ namespace Parser
                     {
                         if (name.size() == 2 && isdigit(name[1]))
                         {
-                            tokens.push_back(new Value(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1), name, getFrequency(base + 12 * (name[1] - 48))));
+                            tokens.push_back(new Value(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name, getFrequency(base + 12 * (name[1] - 48))));
                         }
 
                         else if (name.size() == 3 && isdigit(name[2]))
                         {
                             if (name[1] == 's')
                             {
-                                tokens.push_back(new Value(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1), name, getFrequency(base + 12 * (name[2] - 48) + 1)));
+                                tokens.push_back(new Value(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name, getFrequency(base + 12 * (name[2] - 48) + 1)));
                             }
 
                             else if (name[1] == 'f')
                             {
-                                tokens.push_back(new Value(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1), name, getFrequency(base + 12 * (name[2] - 48) - 1)));
+                                tokens.push_back(new Value(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name, getFrequency(base + 12 * (name[2] - 48) - 1)));
                             }
 
                             else
                             {
-                                tokens.push_back(new String(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
+                                tokens.push_back(new String(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
                             }
                         }
 
                         else
                         {
-                            tokens.push_back(new String(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
+                            tokens.push_back(new String(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
                         }
                     }
 
                     else
                     {
-                        tokens.push_back(new String(ParserLocation(startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
+                        tokens.push_back(new String(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
                     }
                 }
 
@@ -397,7 +397,7 @@ namespace Parser
 
     void Parser::tokenError(const BasicToken* token, const std::string expected) const
     {
-        Utils::parseError("Expected " + expected + ", received \"" + token->str + "\".", path, token->location.line, token->location.character);
+        Utils::parseError("Expected " + expected + ", received \"" + token->str + "\".", token->location);
     }
 
     const Token* Parser::parseInstruction(unsigned int pos) const
@@ -498,7 +498,7 @@ namespace Parser
             pos = instruction->location.end;
         }
 
-        return new Define(ParserLocation(name->location.line, name->location.character, name->location.start, pos + 1), name->str, inputs, instructions);
+        return new Define(SourceLocation(path, name->location.line, name->location.character, name->location.start, pos + 1), name->str, inputs, instructions);
     }
 
     const Token* Parser::parseAssign(unsigned int pos) const
@@ -506,7 +506,7 @@ namespace Parser
         const BasicToken* name = getToken(pos);
         const Token* value = parseExpression(pos + 2);
 
-        return new Assign(ParserLocation(name->location.line, name->location.character, pos, value->location.end), name->str, value);
+        return new Assign(SourceLocation(path, name->location.line, name->location.character, pos, value->location.end), name->str, value);
     }
 
     const Token* Parser::parseCall(unsigned int pos) const
@@ -538,7 +538,7 @@ namespace Parser
 
         const BasicToken* str = getToken(start);
 
-        return new Call(ParserLocation(str->location.line, str->location.character, start, pos + 1), str->str, new ArgumentList(arguments, str->str, path));
+        return new Call(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), str->str, new ArgumentList(arguments, str->str));
     }
 
     const Token* Parser::parseArgument(unsigned int pos) const
@@ -556,7 +556,7 @@ namespace Parser
         const BasicToken* start = getToken(pos);
         const Token* value = parseExpression(pos + 2);
 
-        return new Argument(ParserLocation(start->location.line, start->location.character, pos, value->location.end), start->str, value);
+        return new Argument(SourceLocation(path, start->location.line, start->location.character, pos, value->location.end), start->str, value);
     }
 
     const Token* Parser::parseExpression(unsigned int pos) const
@@ -591,7 +591,7 @@ namespace Parser
 
         const BasicToken* token = getToken(start);
 
-        return new List(ParserLocation(token->location.line, token->location.character, start, pos + 1), items);
+        return new List(SourceLocation(path, token->location.line, token->location.character, start, pos + 1), items);
     }
 
     const Token* Parser::parseTerms(unsigned int pos) const
@@ -619,7 +619,7 @@ namespace Parser
 
                 const BasicToken* startToken = getToken(pStart);
 
-                terms.push_back(new ParenthesizedExpression(ParserLocation(startToken->location.line, startToken->location.character, pStart, pos), token));
+                terms.push_back(new ParenthesizedExpression(SourceLocation(path, startToken->location.line, startToken->location.character, pStart, pos), token));
             }
 
             else
@@ -652,12 +652,12 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->location.line, terms[i]->location.character);
+                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
 
-                terms[i - 1] = new EqualsObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new EqualsObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -668,12 +668,12 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->location.line, terms[i]->location.character);
+                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
 
-                terms[i - 1] = new LessObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new LessObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -684,12 +684,12 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->location.line, terms[i]->location.character);
+                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
                 
-                terms[i - 1] = new GreaterObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new GreaterObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -700,12 +700,12 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->location.line, terms[i]->location.character);
+                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
 
-                terms[i - 1] = new LessEqualObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new LessEqualObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -716,12 +716,12 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", path, terms[i]->location.line, terms[i]->location.character);
+                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
                 
-                terms[i - 1] = new GreaterEqualObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new GreaterEqualObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -733,7 +733,7 @@ namespace Parser
         {
             if (dynamic_cast<const Power*>(terms[i]))
             {
-                terms[i - 1] = new PowerObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new PowerObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -745,7 +745,7 @@ namespace Parser
         {
             if (dynamic_cast<const Multiply*>(terms[i]))
             {
-                terms[i - 1] = new MultiplyObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new MultiplyObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -754,7 +754,7 @@ namespace Parser
 
             else if (dynamic_cast<const Divide*>(terms[i]))
             {
-                terms[i - 1] = new DivideObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new DivideObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -766,7 +766,7 @@ namespace Parser
         {
             if (dynamic_cast<const Add*>(terms[i]))
             {
-                terms[i - 1] = new AddObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new AddObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -775,7 +775,7 @@ namespace Parser
 
             else if (dynamic_cast<const Subtract*>(terms[i]))
             {
-                terms[i - 1] = new SubtractObject(ParserLocation(terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new SubtractObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -785,9 +785,7 @@ namespace Parser
 
         if (terms.size() != 1)
         {
-            const BasicToken* startToken = getToken(start);
-
-            Utils::parseError("Invalid expression.", path, startToken->location.line, startToken->location.character);
+            Utils::parseError("Invalid expression.", getToken(start)->location);
         }
 
         return foldConstants(terms[0]);
@@ -818,10 +816,10 @@ namespace Parser
                 str->str == "pi" ||
                 str->str == "e")
             {
-                return new NamedConstant(ParserLocation(str->location.line, str->location.character, pos, pos + 1), str->str);
+                return new NamedConstant(SourceLocation(path, str->location.line, str->location.character, pos, pos + 1), str->str);
             }
 
-            return new Variable(ParserLocation(str->location.line, str->location.character, pos, pos + 1), str->str);
+            return new Variable(SourceLocation(path, str->location.line, str->location.character, pos, pos + 1), str->str);
         }
 
         tokenError(getToken(pos), "expression term");
@@ -855,50 +853,50 @@ namespace Parser
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " ^ " + right_value->str, pow(left_value->value, right_value->value));
+                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " ^ " + right_value->str, pow(left_value->value, right_value->value));
                 }
 
-                return new PowerObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+                return new PowerObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
             }
             
             if (const MultiplyObject* object = dynamic_cast<const MultiplyObject*>(token))
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " * " + right_value->str, left_value->value * right_value->value);
+                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " * " + right_value->str, left_value->value * right_value->value);
                 }
 
-                return new MultiplyObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+                return new MultiplyObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
             }
 
             if (const DivideObject* object = dynamic_cast<const DivideObject*>(token))
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " / " + right_value->str, left_value->value / right_value->value);
+                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " / " + right_value->str, left_value->value / right_value->value);
                 }
 
-                return new DivideObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+                return new DivideObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
             }
 
             if (const AddObject* object = dynamic_cast<const AddObject*>(token))
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " + " + right_value->str, left_value->value + right_value->value);
+                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " + " + right_value->str, left_value->value + right_value->value);
                 }
 
-                return new AddObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+                return new AddObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
             }
 
             if (const SubtractObject* object = dynamic_cast<const SubtractObject*>(token))
             {
                 if (left_value && right_value)
                 {
-                    return new Value(ParserLocation(left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " - " + right_value->str, left_value->value - right_value->value);
+                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " - " + right_value->str, left_value->value - right_value->value);
                 }
 
-                return new SubtractObject(ParserLocation(left->location.line, left->location.character, left->location.start, right->location.end), left, right);
+                return new SubtractObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
             }
         }
 

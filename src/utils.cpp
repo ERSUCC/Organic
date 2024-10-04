@@ -43,6 +43,11 @@ void Utils::argumentError(const std::string message)
     error("Argument error: " + message);
 }
 
+void Utils::parseError(const std::string message, const SourceLocation location)
+{
+    error("Parse error in \"" + location.path + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ": " + message);
+}
+
 void Utils::parseError(const std::string message, const std::string file, const unsigned int line, const unsigned int character)
 {
     error("Parse error in \"" + file + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ": " + message);

@@ -9,20 +9,11 @@
 
 #include "bytecode.h"
 #include "controller.h"
+#include "location.h"
 
 namespace Parser
 {
     struct BytecodeTransformer;
-
-    struct ParserLocation
-    {
-        ParserLocation(const unsigned int line, const unsigned int character, const unsigned int start, const unsigned int end);
-
-        const unsigned int line;
-        const unsigned int character;
-        const unsigned int start;
-        const unsigned int end;
-    };
 
     enum class BasicReturnType
     {
@@ -53,132 +44,130 @@ namespace Parser
 
     struct Token
     {
-        Token();
-        Token(const ParserLocation location);
+        Token(const SourceLocation location);
 
         virtual const ReturnType* returnType(const BytecodeTransformer* visitor) const;
 
         virtual void accept(BytecodeTransformer* visitor) const;
 
-        const ParserLocation location = ParserLocation(0, 0, 0, 0);
+        const SourceLocation location;
     };
 
     struct BasicToken : public Token
     {
-        BasicToken();
-        BasicToken(const ParserLocation location, const std::string str);
+        BasicToken(const SourceLocation location, const std::string str);
 
         const std::string str;
     };
 
     struct OpenParenthesis : public BasicToken
     {
-        OpenParenthesis(const ParserLocation location);
+        OpenParenthesis(const SourceLocation location);
     };
 
     struct CloseParenthesis : public BasicToken
     {
-        CloseParenthesis(const ParserLocation location);
+        CloseParenthesis(const SourceLocation location);
     };
 
     struct OpenSquareBracket : public BasicToken
     {
-        OpenSquareBracket(const ParserLocation location);
+        OpenSquareBracket(const SourceLocation location);
     };
 
     struct CloseSquareBracket : public BasicToken
     {
-        CloseSquareBracket(const ParserLocation location);
+        CloseSquareBracket(const SourceLocation location);
     };
 
     struct OpenCurlyBracket : public BasicToken
     {
-        OpenCurlyBracket(const ParserLocation location);
+        OpenCurlyBracket(const SourceLocation location);
     };
 
     struct CloseCurlyBracket : public BasicToken
     {
-        CloseCurlyBracket(const ParserLocation location);
+        CloseCurlyBracket(const SourceLocation location);
     };
 
     struct Colon : public BasicToken
     {
-        Colon(const ParserLocation location);
+        Colon(const SourceLocation location);
     };
 
     struct Comma : public BasicToken
     {
-        Comma(const ParserLocation location);
+        Comma(const SourceLocation location);
     };
 
     struct Equals : public BasicToken
     {
-        Equals(const ParserLocation location);
+        Equals(const SourceLocation location);
     };
 
     struct Operator : public BasicToken
     {
-        Operator(const ParserLocation location, const std::string str);
+        Operator(const SourceLocation location, const std::string str);
     };
 
     struct Add : public Operator
     {
-        Add(const ParserLocation location);
+        Add(const SourceLocation location);
     };
 
     struct Subtract : public Operator
     {
-        Subtract(const ParserLocation location);
+        Subtract(const SourceLocation location);
     };
 
     struct Multiply : public Operator
     {
-        Multiply(const ParserLocation location);
+        Multiply(const SourceLocation location);
     };
 
     struct Divide : public Operator
     {
-        Divide(const ParserLocation location);
+        Divide(const SourceLocation location);
     };
 
     struct Power : public Operator
     {
-        Power(const ParserLocation location);
+        Power(const SourceLocation location);
     };
 
     struct DoubleEquals : public Operator
     {
-        DoubleEquals(const ParserLocation location);
+        DoubleEquals(const SourceLocation location);
     };
 
     struct Less : public Operator
     {
-        Less(const ParserLocation location);
+        Less(const SourceLocation location);
     };
 
     struct Greater : public Operator
     {
-        Greater(const ParserLocation location);
+        Greater(const SourceLocation location);
     };
 
     struct LessEqual : public Operator
     {
-        LessEqual(const ParserLocation location);
+        LessEqual(const SourceLocation location);
     };
 
     struct GreaterEqual : public Operator
     {
-        GreaterEqual(const ParserLocation location);
+        GreaterEqual(const SourceLocation location);
     };
 
     struct String : public BasicToken
     {
-        String(const ParserLocation location, const std::string str);
+        String(const SourceLocation location, const std::string str);
     };
 
     struct Value : public BasicToken
     {
-        Value(const ParserLocation location, const std::string str, const double value);
+        Value(const SourceLocation location, const std::string str, const double value);
 
         const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
@@ -189,7 +178,7 @@ namespace Parser
 
     struct NamedConstant : public BasicToken
     {
-        NamedConstant(const ParserLocation location, const std::string constant);
+        NamedConstant(const SourceLocation location, const std::string constant);
 
         const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
@@ -198,7 +187,7 @@ namespace Parser
 
     struct Variable : public BasicToken
     {
-        Variable(const ParserLocation location, const std::string variable);
+        Variable(const SourceLocation location, const std::string variable);
 
         const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
@@ -207,7 +196,7 @@ namespace Parser
 
     struct Argument : public Token
     {
-        Argument(const ParserLocation location, const std::string name, const Token* value);
+        Argument(const SourceLocation location, const std::string name, const Token* value);
 
         const std::string name;
 
@@ -216,7 +205,7 @@ namespace Parser
 
     struct ArgumentList
     {
-        ArgumentList(const std::vector<const Argument*> arguments, const std::string name, const std::string path);
+        ArgumentList(const std::vector<const Argument*> arguments, const std::string name);
 
         void get(const std::string name, BytecodeTransformer* visitor, ReturnType* expectedType = new ReturnType(BasicReturnType::Any));
 
@@ -228,13 +217,12 @@ namespace Parser
         std::vector<const Argument*> arguments;
 
         const std::string name;
-        const std::string path;
 
     };
 
     struct List : public Token
     {
-        List(const ParserLocation location, const std::vector<const Token*> values);
+        List(const SourceLocation location, const std::vector<const Token*> values);
 
         const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
@@ -245,7 +233,7 @@ namespace Parser
 
     struct OperatorObject : public Token
     {
-        OperatorObject(const ParserLocation location, const Token* value1, const Token* value2);
+        OperatorObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         const Token* value1;
         const Token* value2;
@@ -253,84 +241,84 @@ namespace Parser
 
     struct ArithmeticExpression : public OperatorObject
     {
-        ArithmeticExpression(const ParserLocation location, const Token* value1, const Token* value2);
+        ArithmeticExpression(const SourceLocation location, const Token* value1, const Token* value2);
 
         const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
     };
 
     struct AddObject : public ArithmeticExpression
     {
-        AddObject(const ParserLocation location, const Token* value1, const Token* value2);
+        AddObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
     struct SubtractObject : public ArithmeticExpression
     {
-        SubtractObject(const ParserLocation location, const Token* value1, const Token* value2);
+        SubtractObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
     struct MultiplyObject : public ArithmeticExpression
     {
-        MultiplyObject(const ParserLocation location, const Token* value1, const Token* value2);
+        MultiplyObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
     struct DivideObject : public ArithmeticExpression
     {
-        DivideObject(const ParserLocation location, const Token* value1, const Token* value2);
+        DivideObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
     struct PowerObject : public ArithmeticExpression
     {
-        PowerObject(const ParserLocation location, const Token* value1, const Token* value2);
+        PowerObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
     struct ConditionalExpression : public OperatorObject
     {
-        ConditionalExpression(const ParserLocation location, const Token* value1, const Token* value2);
+        ConditionalExpression(const SourceLocation location, const Token* value1, const Token* value2);
 
         const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
     };
 
     struct EqualsObject : public ConditionalExpression
     {
-        EqualsObject(const ParserLocation location, const Token* value1, const Token* value2);
+        EqualsObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
     struct LessObject : public ConditionalExpression
     {
-        LessObject(const ParserLocation location, const Token* value1, const Token* value2);
+        LessObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
     struct GreaterObject : public ConditionalExpression
     {
-        GreaterObject(const ParserLocation location, const Token* value1, const Token* value2);
+        GreaterObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
     struct LessEqualObject : public ConditionalExpression
     {
-        LessEqualObject(const ParserLocation location, const Token* value1, const Token* value2);
+        LessEqualObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
     };
 
     struct GreaterEqualObject : public ConditionalExpression
     {
-        GreaterEqualObject(const ParserLocation location, const Token* value1, const Token* value2);
+        GreaterEqualObject(const SourceLocation location, const Token* value1, const Token* value2);
 
         void accept(BytecodeTransformer* visitor) const override;
         const Token* value2;
@@ -338,7 +326,7 @@ namespace Parser
 
     struct ParenthesizedExpression : public Token
     {
-        ParenthesizedExpression(const ParserLocation, const Token* value);
+        ParenthesizedExpression(const SourceLocation, const Token* value);
 
         const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
@@ -349,7 +337,7 @@ namespace Parser
 
     struct Assign : public Token
     {
-        Assign(const ParserLocation location, const std::string variable, const Token* value);
+        Assign(const SourceLocation location, const std::string variable, const Token* value);
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -360,7 +348,7 @@ namespace Parser
 
     struct Call : public Token
     {
-        Call(const ParserLocation location, const std::string name, ArgumentList* arguments);
+        Call(const SourceLocation location, const std::string name, ArgumentList* arguments);
 
         const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
@@ -373,7 +361,7 @@ namespace Parser
 
     struct Define : public Token
     {
-        Define(const ParserLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Token*> instructions);
+        Define(const SourceLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Token*> instructions);
 
         const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
@@ -440,11 +428,9 @@ namespace Parser
 
     };
 
-    struct Program : public Token
+    struct Program
     {
         Program(const std::vector<const Token*> instructions);
-
-        void accept(BytecodeTransformer* visitor) const override;
 
         const std::vector<const Token*> instructions;
     };
@@ -476,8 +462,6 @@ namespace Parser
         void visit(const Program* token);
 
         Scope* currentScope;
-
-        const std::string sourcePath;
 
     private:
         std::string outputPath;

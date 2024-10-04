@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "location.h"
 #include "token.h"
 
 namespace Parser
@@ -12,7 +13,7 @@ namespace Parser
     {
         Parser(const std::string path);
 
-        Program* parse();
+        const Program* parse();
 
     private:
         void skipWhitespace();

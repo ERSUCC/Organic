@@ -14,6 +14,8 @@
 #include <random>
 #include <string>
 
+#include "location.h"
+
 struct Utils
 {
     static Utils* get();
@@ -22,6 +24,7 @@ struct Utils
     static void error(const std::string message);
 
     static void argumentError(const std::string message);
+    static void parseError(const std::string message, const SourceLocation location);
     static void parseError(const std::string message, const std::string file, const unsigned int line, const unsigned int character);
     static void machineError(const std::string message, const std::string file);
     static void runtimeError(const std::string message);
