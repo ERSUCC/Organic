@@ -913,7 +913,7 @@ namespace Parser
         else if (name == "blend")
         {
             token->arguments->get("position", this, new ReturnType(BasicReturnType::Value));
-            token->arguments->get("values", this, new ReturnType(BasicReturnType::List, new ReturnType(BasicReturnType::AudioSource)));
+            token->arguments->get("sources", this, new ReturnType(BasicReturnType::List, new ReturnType(BasicReturnType::AudioSource)));
         }
 
         else if (name == "hold")
