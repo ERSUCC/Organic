@@ -109,14 +109,12 @@ private:
 
 struct CallUser : public BytecodeInstruction
 {
-    CallUser(const BytecodeBlock* function, const unsigned char inputs);
+    CallUser(const BytecodeBlock* function);
 
     void output(std::ofstream& stream) const override;
 
 private:
     const BytecodeBlock* function;
-
-    const unsigned char inputs;
 
 };
 

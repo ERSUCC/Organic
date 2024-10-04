@@ -22,11 +22,11 @@ namespace Parser
 
         current = 0;
 
-        std::vector<const Instruction*> instructions;
+        std::vector<const Token*> instructions;
 
         while (current < tokens.size())
         {
-            const Instruction* token = (const Instruction*)parseInstruction(current);
+            const Token* token = parseInstruction(current);
 
             instructions.push_back(token);
 
@@ -487,11 +487,11 @@ namespace Parser
 
         const OpenCurlyBracket* open = getToken<OpenCurlyBracket>(pos++);
 
-        std::vector<const Instruction*> instructions;
+        std::vector<const Token*> instructions;
 
         while (!tokenIs<CloseCurlyBracket>(pos))
         {
-            const Instruction* instruction = (const Instruction*)parseInstruction(pos);
+            const Token* instruction = parseInstruction(pos);
 
             instructions.push_back(instruction);
 

@@ -176,8 +176,8 @@ void CallNative::output(std::ofstream& stream) const
     stream << (unsigned char)0x08 << id << inputs;
 }
 
-CallUser::CallUser(const BytecodeBlock* function, const unsigned char inputs) :
-    BytecodeInstruction(6), function(function), inputs(inputs) {}
+CallUser::CallUser(const BytecodeBlock* function) :
+    BytecodeInstruction(6), function(function) {}
 
 void CallUser::output(std::ofstream& stream) const
 {
@@ -188,7 +188,7 @@ void CallUser::output(std::ofstream& stream) const
         stream << b;
     }
 
-    stream << inputs;
+    stream << (unsigned char)function->inputs.size();
 }
 
 SetInput::SetInput(const unsigned char input) :
