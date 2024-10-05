@@ -113,3 +113,8 @@ void Variable::init()
 {
     value->start(startTime);
 }
+
+double Time::getValue()
+{
+    return utils->time;
+}

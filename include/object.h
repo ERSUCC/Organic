@@ -77,3 +77,8 @@ protected:
     void init() override;
 
 };
+
+struct Time : public ValueObject
+{
+    double getValue() override;
+};

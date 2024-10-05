@@ -883,6 +883,8 @@ namespace Parser
             token->arguments->get("value", this);
         }
 
+        else if (name == "time") {}
+
         else if (name == "sine" ||
                  name == "square" ||
                  name == "saw" ||

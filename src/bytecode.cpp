@@ -139,6 +139,7 @@ void CallNative::output(std::ofstream& stream) const
 
     if (function == "copy") id = 0x00;
     else if (function == "list") id = 0x01;
+    else if (function == "time") id = 0x02;
 
     else if (function == "add") id = 0x10;
     else if (function == "subtract") id = 0x11;

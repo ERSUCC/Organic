@@ -140,6 +140,11 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                         break;
                     }
 
+                    case 0x02:
+                        stack.push(new Time());
+
+                        break;
+
                     case 0x10:
                         stack.push(new ValueAdd(inputs[0], inputs[1]));
 
