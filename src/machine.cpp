@@ -42,7 +42,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                 return;
             
             case 0x01:
-                stack.push(new Default());
+                stack.push(Default::get());
 
                 address++;
 

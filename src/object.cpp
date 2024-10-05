@@ -56,6 +56,18 @@ List* ValueObject::getList()
 Default::Default() :
     list(new List({})) {}
 
+Default* Default::get()
+{
+    static Default* instance;
+
+    if (!instance)
+    {
+        instance = new Default();
+    }
+
+    return instance;
+}
+
 List* Default::getList()
 {
     return list;

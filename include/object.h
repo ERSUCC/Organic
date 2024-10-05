@@ -38,11 +38,15 @@ struct ValueObject : public Sync
 
 struct Default : public ValueObject
 {
-    Default();
+    static Default* get();
 
     List* getList() override;
 
 private:
+    Default();
+
+    static Default* instance;
+
     List* list;
 
 };
