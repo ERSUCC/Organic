@@ -10,10 +10,10 @@ namespace Parser
         switch (primaryType)
         {
             case BasicReturnType::None:
-                return "none";
+                return "nothing";
             
             case BasicReturnType::Any:
-                return "any";
+                return "anything";
             
             case BasicReturnType::SequenceOrder:
                 return "sequence order constant";
@@ -42,6 +42,11 @@ namespace Parser
     
     bool ReturnType::checkType(const ReturnType* other) const
     {
+        if (!other)
+        {
+            return false;
+        }
+
         switch (primaryType)
         {
             case BasicReturnType::None:
@@ -112,12 +117,12 @@ namespace Parser
                 break;
         }
 
-        if (subType && other->subType)
+        if (subType)
         {
             return subType->checkType(other->subType);
         }
 
-        return !(subType || other->subType);
+        return !other->subType;
     }
 
     Token::Token(const SourceLocation location) :
@@ -924,7 +929,7 @@ namespace Parser
 
         else if (name == "sequence")
         {
-            token->arguments->get("order", this); // specific return type for sequence order
+            token->arguments->get("order", this, new ReturnType(BasicReturnType::SequenceOrder));
             token->arguments->get("values", this, new ReturnType(BasicReturnType::List, new ReturnType(BasicReturnType::Value)));
         }
 
@@ -936,7 +941,7 @@ namespace Parser
 
         else if (name == "random")
         {
-            token->arguments->get("type", this); // specific return type for random type
+            token->arguments->get("type", this, new ReturnType(BasicReturnType::RandomType));
             token->arguments->get("length", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("to", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("from", this, new ReturnType(BasicReturnType::Value));
