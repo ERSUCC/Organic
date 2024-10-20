@@ -573,6 +573,13 @@ namespace Parser
     {
         const unsigned int start = pos;
 
+        const BasicToken* startToken = getToken(start);
+
+        if (tokenIs<CloseSquareBracket>(pos + 1))
+        {
+            Utils::parseError("Empty lists are not allowed.", SourceLocation(path, startToken->location.line, startToken->location.character, start, pos + 1));
+        }
+
         std::vector<const Token*> items;
 
         do
@@ -589,9 +596,7 @@ namespace Parser
             tokenError(getToken(pos), "\"]\"");
         }
 
-        const BasicToken* token = getToken(start);
-
-        return new List(SourceLocation(path, token->location.line, token->location.character, start, pos + 1), items);
+        return new List(SourceLocation(path, startToken->location.line, startToken->location.character, start, pos + 1), items);
     }
 
     const Token* Parser::parseTerms(unsigned int pos) const
@@ -648,6 +653,8 @@ namespace Parser
 
         for (unsigned int i = 1; i < terms.size() - 1; i++)
         {
+            const SourceLocation span = SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
+
             if (dynamic_cast<const DoubleEquals*>(terms[i]))
             {
                 if (comparison)
@@ -657,7 +664,7 @@ namespace Parser
 
                 comparison = true;
 
-                terms[i - 1] = new EqualsObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "equal", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -673,7 +680,7 @@ namespace Parser
 
                 comparison = true;
 
-                terms[i - 1] = new LessObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "less", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -689,7 +696,7 @@ namespace Parser
 
                 comparison = true;
                 
-                terms[i - 1] = new GreaterObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "greater", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -705,7 +712,7 @@ namespace Parser
 
                 comparison = true;
 
-                terms[i - 1] = new LessEqualObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "lessequal", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -721,7 +728,7 @@ namespace Parser
 
                 comparison = true;
                 
-                terms[i - 1] = new GreaterEqualObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "greaterequal", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -731,9 +738,11 @@ namespace Parser
 
         for (unsigned int i = 1; i < terms.size() - 1; i++)
         {
+            const SourceLocation span = SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
+
             if (dynamic_cast<const Power*>(terms[i]))
             {
-                terms[i - 1] = new PowerObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "power", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -743,9 +752,11 @@ namespace Parser
 
         for (unsigned int i = 1; i < terms.size() - 1; i++)
         {
+            const SourceLocation span = SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
+
             if (dynamic_cast<const Multiply*>(terms[i]))
             {
-                terms[i - 1] = new MultiplyObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "multiply", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -754,7 +765,7 @@ namespace Parser
 
             else if (dynamic_cast<const Divide*>(terms[i]))
             {
-                terms[i - 1] = new DivideObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "divide", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -764,9 +775,11 @@ namespace Parser
 
         for (unsigned int i = 1; i < terms.size() - 1; i++)
         {
+            const SourceLocation span = SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
+
             if (dynamic_cast<const Add*>(terms[i]))
             {
-                terms[i - 1] = new AddObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "add", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -775,7 +788,7 @@ namespace Parser
 
             else if (dynamic_cast<const Subtract*>(terms[i]))
             {
-                terms[i - 1] = new SubtractObject(SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end), terms[i - 1], terms[i + 1]);
+                terms[i - 1] = new CallAlias(span, "subtract", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -788,7 +801,7 @@ namespace Parser
             Utils::parseError("Invalid expression.", getToken(start)->location);
         }
 
-        return foldConstants(terms[0]);
+        return terms[0];
     }
 
     const Token* Parser::parseTerm(unsigned int pos) const
@@ -825,82 +838,6 @@ namespace Parser
         tokenError(getToken(pos), "expression term");
 
         return nullptr;
-    }
-
-    const Token* Parser::foldConstants(const Token* token) const
-    {
-        if (const ParenthesizedExpression* object = dynamic_cast<const ParenthesizedExpression*>(token))
-        {
-            const Token* result = foldConstants(object->value);
-
-            if (const Value* value = dynamic_cast<const Value*>(result))
-            {
-                return new Value(object->location, "(" + value->str + ")", value->value);
-            }
-
-            return new ParenthesizedExpression(object->location, result);
-        }
-
-        if (const OperatorObject* object = dynamic_cast<const OperatorObject*>(token))
-        {
-            const Token* left = foldConstants(object->value1);
-            const Token* right = foldConstants(object->value2);
-
-            const Value* left_value = dynamic_cast<const Value*>(left);
-            const Value* right_value = dynamic_cast<const Value*>(right);
-
-            if (const PowerObject* object = dynamic_cast<const PowerObject*>(token))
-            {
-                if (left_value && right_value)
-                {
-                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " ^ " + right_value->str, pow(left_value->value, right_value->value));
-                }
-
-                return new PowerObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
-            }
-            
-            if (const MultiplyObject* object = dynamic_cast<const MultiplyObject*>(token))
-            {
-                if (left_value && right_value)
-                {
-                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " * " + right_value->str, left_value->value * right_value->value);
-                }
-
-                return new MultiplyObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
-            }
-
-            if (const DivideObject* object = dynamic_cast<const DivideObject*>(token))
-            {
-                if (left_value && right_value)
-                {
-                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " / " + right_value->str, left_value->value / right_value->value);
-                }
-
-                return new DivideObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
-            }
-
-            if (const AddObject* object = dynamic_cast<const AddObject*>(token))
-            {
-                if (left_value && right_value)
-                {
-                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " + " + right_value->str, left_value->value + right_value->value);
-                }
-
-                return new AddObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
-            }
-
-            if (const SubtractObject* object = dynamic_cast<const SubtractObject*>(token))
-            {
-                if (left_value && right_value)
-                {
-                    return new Value(SourceLocation(path, left_value->location.line, left_value->location.character, left_value->location.start, right_value->location.end), left_value->str + " - " + right_value->str, left_value->value - right_value->value);
-                }
-
-                return new SubtractObject(SourceLocation(path, left->location.line, left->location.character, left->location.start, right->location.end), left, right);
-            }
-        }
-
-        return token;
     }
 
     double Parser::getFrequency(const double note) const

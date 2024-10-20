@@ -30,15 +30,16 @@ namespace Parser
 
     struct ReturnType
     {
-        ReturnType(const BasicReturnType primaryType, const ReturnType* subType = nullptr);
+        ReturnType(const BasicReturnType primaryType, ReturnType* subType = nullptr);
 
         std::string getTypeName() const;
 
         bool checkType(const ReturnType* other) const;
 
+        ReturnType* subType;
+
     private:
         const BasicReturnType primaryType;
-        const ReturnType* subType;
 
     };
 
@@ -46,7 +47,7 @@ namespace Parser
     {
         Token(const SourceLocation location);
 
-        virtual const ReturnType* returnType(const BytecodeTransformer* visitor) const;
+        virtual ReturnType* returnType(const BytecodeTransformer* visitor) const;
 
         virtual void accept(BytecodeTransformer* visitor) const;
 
@@ -169,7 +170,7 @@ namespace Parser
     {
         Value(const SourceLocation location, const std::string str, const double value);
 
-        const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -180,7 +181,7 @@ namespace Parser
     {
         NamedConstant(const SourceLocation location, const std::string constant);
 
-        const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
     };
@@ -189,7 +190,7 @@ namespace Parser
     {
         Variable(const SourceLocation location, const std::string variable);
 
-        const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
     };
@@ -206,6 +207,8 @@ namespace Parser
     struct ArgumentList
     {
         ArgumentList(const std::vector<const Argument*> arguments, const std::string name);
+
+        static ArgumentList* constructAlias(const std::vector<const Token*>& arguments, const std::string name);
 
         void get(const std::string name, BytecodeTransformer* visitor, ReturnType* expectedType = new ReturnType(BasicReturnType::Any));
 
@@ -224,111 +227,18 @@ namespace Parser
     {
         List(const SourceLocation location, const std::vector<const Token*> values);
 
-        const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
         const std::vector<const Token*> values;
     };
 
-    struct OperatorObject : public Token
-    {
-        OperatorObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        const Token* value1;
-        const Token* value2;
-    };
-
-    struct ArithmeticExpression : public OperatorObject
-    {
-        ArithmeticExpression(const SourceLocation location, const Token* value1, const Token* value2);
-
-        const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
-    };
-
-    struct AddObject : public ArithmeticExpression
-    {
-        AddObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-    };
-
-    struct SubtractObject : public ArithmeticExpression
-    {
-        SubtractObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-    };
-
-    struct MultiplyObject : public ArithmeticExpression
-    {
-        MultiplyObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-    };
-
-    struct DivideObject : public ArithmeticExpression
-    {
-        DivideObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-    };
-
-    struct PowerObject : public ArithmeticExpression
-    {
-        PowerObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-    };
-
-    struct ConditionalExpression : public OperatorObject
-    {
-        ConditionalExpression(const SourceLocation location, const Token* value1, const Token* value2);
-
-        const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
-    };
-
-    struct EqualsObject : public ConditionalExpression
-    {
-        EqualsObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-    };
-
-    struct LessObject : public ConditionalExpression
-    {
-        LessObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-    };
-
-    struct GreaterObject : public ConditionalExpression
-    {
-        GreaterObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-    };
-
-    struct LessEqualObject : public ConditionalExpression
-    {
-        LessEqualObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-    };
-
-    struct GreaterEqualObject : public ConditionalExpression
-    {
-        GreaterEqualObject(const SourceLocation location, const Token* value1, const Token* value2);
-
-        void accept(BytecodeTransformer* visitor) const override;
-        const Token* value2;
-    };
-
     struct ParenthesizedExpression : public Token
     {
         ParenthesizedExpression(const SourceLocation, const Token* value);
 
-        const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -350,7 +260,7 @@ namespace Parser
     {
         Call(const SourceLocation location, const std::string name, ArgumentList* arguments);
 
-        const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -359,11 +269,20 @@ namespace Parser
         ArgumentList* arguments;
     };
 
+    struct CallAlias : public Call
+    {
+        CallAlias(const SourceLocation location, const std::string name, const std::vector<const Token*>& arguments);
+
+        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+
+        void accept(BytecodeTransformer* visitor) const override;
+    };
+
     struct Define : public Token
     {
         Define(const SourceLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Token*> instructions);
 
-        const ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -373,6 +292,8 @@ namespace Parser
 
         const std::vector<const Token*> instructions;
     };
+
+    struct Scope;
 
     struct VariableInfo
     {
@@ -385,11 +306,20 @@ namespace Parser
 
     struct FunctionInfo
     {
-        FunctionInfo(const BytecodeBlock* body, const ReturnType* returnType);
+        FunctionInfo(Scope* scope, ReturnType* returnType);
 
-        const BytecodeBlock* body;
+        Scope* scope;
 
-        const ReturnType* returnType;
+        ReturnType* returnType;
+    };
+
+    struct InputInfo
+    {
+        InputInfo(const unsigned char id, ReturnType* returnType);
+
+        const unsigned char id;
+
+        ReturnType* returnType;
     };
 
     struct Scope
@@ -400,9 +330,10 @@ namespace Parser
         VariableInfo* addVariable(const std::string name, const Token* value);
 
         FunctionInfo* getFunction(const std::string name);
-        FunctionInfo* addFunction(const std::string name, const BytecodeBlock* body, const ReturnType* returnType);
+        FunctionInfo* addFunction(const std::string name, Scope* scope, ReturnType* returnType);
 
-        std::optional<unsigned char> getInput(const std::string input);
+        InputInfo* getInput(const std::string name);
+        InputInfo* setInputType(const std::string name, ReturnType* returnType);
 
         bool checkRecursive(const std::string function) const;
 
@@ -423,7 +354,7 @@ namespace Parser
         std::unordered_map<std::string, FunctionInfo*> functions;
         std::unordered_set<std::string> functionsUsed;
 
-        std::unordered_map<std::string, unsigned char> inputs;
+        std::unordered_map<std::string, InputInfo*> inputs;
         std::unordered_set<std::string> inputsUsed;
 
     };
@@ -445,23 +376,16 @@ namespace Parser
         void visit(const NamedConstant* token);
         void visit(const Variable* token);
         void visit(const List* token);
-        void visit(const AddObject* token);
-        void visit(const SubtractObject* token);
-        void visit(const MultiplyObject* token);
-        void visit(const DivideObject* token);
-        void visit(const PowerObject* token);
-        void visit(const EqualsObject* token);
-        void visit(const LessObject* token);
-        void visit(const GreaterObject* token);
-        void visit(const LessEqualObject* token);
-        void visit(const GreaterEqualObject* token);
         void visit(const ParenthesizedExpression* token);
         void visit(const Assign* token);
         void visit(const Call* token);
+        void visit(const CallAlias* token);
         void visit(const Define* token);
         void visit(const Program* token);
 
         Scope* currentScope;
+
+        ReturnType* expectedType = new ReturnType(BasicReturnType::Any);
 
     private:
         std::string outputPath;

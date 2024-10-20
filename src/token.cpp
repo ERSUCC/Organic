@@ -2,7 +2,7 @@
 
 namespace Parser
 {
-    ReturnType::ReturnType(const BasicReturnType primaryType, const ReturnType* subType) :
+    ReturnType::ReturnType(const BasicReturnType primaryType, ReturnType* subType) :
         primaryType(primaryType), subType(subType) {}
     
     std::string ReturnType::getTypeName() const
@@ -128,7 +128,7 @@ namespace Parser
     Token::Token(const SourceLocation location) :
         location(location) {}
 
-    const ReturnType* Token::returnType(const BytecodeTransformer* visitor) const
+    ReturnType* Token::returnType(const BytecodeTransformer* visitor) const
     {
         return new ReturnType(BasicReturnType::Any);
     }
@@ -204,7 +204,7 @@ namespace Parser
     Value::Value(const SourceLocation location, const std::string str, const double value) :
         BasicToken(location, str), value(value) {}
 
-    const ReturnType* Value::returnType(const BytecodeTransformer* visitor) const
+    ReturnType* Value::returnType(const BytecodeTransformer* visitor) const
     {
         return new ReturnType(BasicReturnType::Value);
     }
@@ -217,7 +217,7 @@ namespace Parser
     NamedConstant::NamedConstant(const SourceLocation location, const std::string constant) :
         BasicToken(location, constant) {}
     
-    const ReturnType* NamedConstant::returnType(const BytecodeTransformer* visitor) const
+    ReturnType* NamedConstant::returnType(const BytecodeTransformer* visitor) const
     {
         if (str == "sequence-forwards" || str == "sequence-backwards" || str == "sequence-ping-pong" || str == "sequence-random")
         {
@@ -245,11 +245,16 @@ namespace Parser
     Variable::Variable(const SourceLocation location, const std::string variable) :
         BasicToken(location, variable) {}
 
-    const ReturnType* Variable::returnType(const BytecodeTransformer* visitor) const
+    ReturnType* Variable::returnType(const BytecodeTransformer* visitor) const
     {
         if (VariableInfo* info = visitor->currentScope->getVariable(str))
         {
             return info->value->returnType(visitor);
+        }
+
+        else if (InputInfo* info = visitor->currentScope->getInput(str))
+        {
+            return info->returnType;
         }
 
         Utils::parseError("Unrecognized variable name \"" + str + "\".", location);
@@ -281,6 +286,18 @@ namespace Parser
         }
     }
 
+    ArgumentList* ArgumentList::constructAlias(const std::vector<const Token*>& arguments, const std::string name)
+    {
+        std::vector<const Argument*> named;
+
+        for (unsigned int i = 0; i < arguments.size(); i++)
+        {
+            named.push_back(new Argument(arguments[i]->location, std::to_string(i), arguments[i]));
+        }
+
+        return new ArgumentList(named, name);
+    }
+
     void ArgumentList::get(const std::string name, BytecodeTransformer* visitor, ReturnType* expectedType)
     {
         count++;
@@ -289,16 +306,20 @@ namespace Parser
         {
             if (arguments[i]->name == name)
             {
-                if (expectedType->checkType(arguments[i]->value->returnType(visitor)))
+                visitor->expectedType = expectedType;
+
+                arguments[i]->value->accept(visitor);
+
+                const ReturnType* argumentType = arguments[i]->value->returnType(visitor);
+
+                if (!expectedType->checkType(argumentType))
                 {
-                    arguments[i]->value->accept(visitor);
-
-                    arguments.erase(arguments.begin() + i);
-
-                    return;
+                    Utils::parseError("Expected \"" + expectedType->getTypeName() + "\", received \"" + argumentType->getTypeName() + "\".", arguments[i]->value->location);
                 }
 
-                Utils::parseError("Expected \"" + expectedType->getTypeName() + "\", received \"" + arguments[i]->value->returnType(visitor)->getTypeName() + "\".", arguments[i]->value->location);
+                arguments.erase(arguments.begin() + i);
+
+                return;
             }
         }
 
@@ -316,13 +337,8 @@ namespace Parser
     List::List(const SourceLocation location, const std::vector<const Token*> values) :
         Token(location), values(values) {}
 
-    const ReturnType* List::returnType(const BytecodeTransformer* visitor) const
+    ReturnType* List::returnType(const BytecodeTransformer* visitor) const
     {
-        if (values.empty())
-        {
-            return new ReturnType(BasicReturnType::List, new ReturnType(BasicReturnType::Any)); // this probably won't work, find a better way
-        }
-
         return new ReturnType(BasicReturnType::List, values[0]->returnType(visitor));
     }
 
@@ -331,109 +347,10 @@ namespace Parser
         visitor->visit(this);
     }
 
-    OperatorObject::OperatorObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        Token(location), value1(value1), value2(value2) {}
-
-    ArithmeticExpression::ArithmeticExpression(const SourceLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, value1, value2) {}
-
-    const ReturnType* ArithmeticExpression::returnType(const BytecodeTransformer* visitor) const
-    {
-        return new ReturnType(BasicReturnType::Value);
-    }
-
-    AddObject::AddObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ArithmeticExpression(location, value1, value2) {}
-
-    void AddObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    SubtractObject::SubtractObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ArithmeticExpression(location, value1, value2) {}
-
-    void SubtractObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    MultiplyObject::MultiplyObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ArithmeticExpression(location, value1, value2) {}
-
-    void MultiplyObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    DivideObject::DivideObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ArithmeticExpression(location, value1, value2) {}
-
-    void DivideObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    PowerObject::PowerObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ArithmeticExpression(location, value1, value2) {}
-
-    void PowerObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    ConditionalExpression::ConditionalExpression(const SourceLocation location, const Token* value1, const Token* value2) :
-        OperatorObject(location, value1, value2) {}
-
-    const ReturnType* ConditionalExpression::returnType(const BytecodeTransformer* visitor) const
-    {
-        return new ReturnType(BasicReturnType::Boolean);
-    }
-
-    EqualsObject::EqualsObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ConditionalExpression(location, value1, value2) {}
-
-    void EqualsObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    LessObject::LessObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ConditionalExpression(location, value1, value2) {}
-
-    void LessObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    GreaterObject::GreaterObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ConditionalExpression(location, value1, value2) {}
-
-    void GreaterObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    LessEqualObject::LessEqualObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ConditionalExpression(location, value1, value2) {}
-
-    void LessEqualObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
-    GreaterEqualObject::GreaterEqualObject(const SourceLocation location, const Token* value1, const Token* value2) :
-        ConditionalExpression(location, value1, value2) {}
-
-    void GreaterEqualObject::accept(BytecodeTransformer* visitor) const
-    {
-        visitor->visit(this);
-    }
-
     ParenthesizedExpression::ParenthesizedExpression(const SourceLocation location, const Token* value) :
         Token(location), value(value) {}
     
-    const ReturnType* ParenthesizedExpression::returnType(const BytecodeTransformer* visitor) const
+    ReturnType* ParenthesizedExpression::returnType(const BytecodeTransformer* visitor) const
     {
         return value->returnType(visitor);
     }
@@ -454,7 +371,7 @@ namespace Parser
     Call::Call(const SourceLocation location, const std::string name, ArgumentList* arguments) :
         Token(location), name(name), arguments(arguments) {}
     
-    const ReturnType* Call::returnType(const BytecodeTransformer* visitor) const
+    ReturnType* Call::returnType(const BytecodeTransformer* visitor) const
     {
         if (name == "hold" ||
             name == "lfo" ||
@@ -498,10 +415,41 @@ namespace Parser
         visitor->visit(this);
     }
 
+    CallAlias::CallAlias(const SourceLocation location, const std::string name, const std::vector<const Token*>& arguments) :
+        Call(location, name, ArgumentList::constructAlias(arguments, name)) {}
+    
+    ReturnType* CallAlias::returnType(const BytecodeTransformer* visitor) const
+    {
+        if (name == "add" ||
+            name == "subtract" ||
+            name == "multiply" ||
+            name == "divide" ||
+            name == "power")
+        {
+            return new ReturnType(BasicReturnType::Value);
+        }
+
+        else if (name == "equal" ||
+                 name == "less" ||
+                 name == "greater" ||
+                 name == "lessequal" ||
+                 name == "greaterequal")
+        {
+            return new ReturnType(BasicReturnType::Boolean);
+        }
+
+        return new ReturnType(BasicReturnType::None);
+    }
+
+    void CallAlias::accept(BytecodeTransformer* visitor) const
+    {
+        visitor->visit(this);
+    }
+
     Define::Define(const SourceLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Token*> instructions) :
         Token(location), name(name), inputs(inputs), instructions(instructions) {}
 
-    const ReturnType* Define::returnType(const BytecodeTransformer* visitor) const
+    ReturnType* Define::returnType(const BytecodeTransformer* visitor) const
     {
         if (instructions.empty())
         {
@@ -519,8 +467,11 @@ namespace Parser
     VariableInfo::VariableInfo(const unsigned char id, const Token* value) :
         id(id), value(value) {}
     
-    FunctionInfo::FunctionInfo(const BytecodeBlock* body, const ReturnType* returnType) :
-        body(body), returnType(returnType) {}
+    FunctionInfo::FunctionInfo(Scope* scope, ReturnType* returnType) :
+        scope(scope), returnType(returnType) {}
+
+    InputInfo::InputInfo(const unsigned char id, ReturnType* returnType) :
+        id(id), returnType(returnType) {}
 
     Scope::Scope(const BytecodeTransformer* visitor, Scope* parent, const std::string currentFunction, const std::vector<std::string> inputs) :
         visitor(visitor), parent(parent), currentFunction(currentFunction)
@@ -529,7 +480,7 @@ namespace Parser
 
         for (unsigned int i = 0; i < inputs.size(); i++)
         {
-            this->inputs[inputs[i]] = i;
+            this->inputs[inputs[i]] = new InputInfo(i, nullptr);
         }
     }
 
@@ -592,33 +543,45 @@ namespace Parser
         return nullptr;
     }
 
-    FunctionInfo* Scope::addFunction(const std::string name, const BytecodeBlock* body, const ReturnType* returnType)
+    FunctionInfo* Scope::addFunction(const std::string name, Scope* scope, ReturnType* returnType)
     {
-        FunctionInfo* info = new FunctionInfo(body, returnType);
+        FunctionInfo* info = new FunctionInfo(scope, returnType);
 
         functions[name] = info;
 
         return info;
     }
 
-    std::optional<unsigned char> Scope::getInput(const std::string input)
+    InputInfo* Scope::getInput(const std::string name)
     {
-        if (inputs.count(input))
+        if (inputs.count(name))
         {
-            inputsUsed.insert(input);
+            inputsUsed.insert(name);
 
-            return inputs[input];
+            return inputs[name];
         }
 
         if (parent)
         {
-            if (std::optional<unsigned char> result = parent->getInput(input))
+            if (InputInfo* info = parent->getInput(name))
             {
-                return result;
+                return info;
             }
         }
 
-        return std::nullopt;
+        return nullptr;
+    }
+
+    InputInfo* Scope::setInputType(const std::string name, ReturnType* returnType)
+    {
+        if (inputs.count(name))
+        {
+            inputs[name] = new InputInfo(inputs[name]->id, returnType);
+
+            return inputs[name];
+        }
+
+        return parent->setInputType(name, returnType);
     }
 
     bool Scope::checkRecursive(const std::string function) const
@@ -646,7 +609,7 @@ namespace Parser
             }
         }
 
-        for (const std::pair<std::string, unsigned char>& pair : inputs)
+        for (const std::pair<std::string, InputInfo*>& pair : inputs)
         {
             if (!inputsUsed.count(pair.first))
             {
@@ -724,118 +687,48 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Variable* token)
     {
-        std::string name = token->str;
-
-        if (const std::optional<unsigned char> input = currentScope->getInput(name))
+        if (const InputInfo* info = currentScope->getInput(token->str))
         {
-            currentScope->block->addInstruction(new GetInput(input.value()));
+            if (!info->returnType)
+            {
+                currentScope->setInputType(token->str, expectedType);
+            }
+
+            currentScope->block->addInstruction(new GetInput(info->id));
         }
 
-        else if (const VariableInfo* result = currentScope->getVariable(name))
+        else if (const VariableInfo* info = currentScope->getVariable(token->str))
         {
-            currentScope->block->addInstruction(new GetVariable(result->id));
+            currentScope->block->addInstruction(new GetVariable(info->id));
         }
 
         else
         {
-            Utils::parseError("Unrecognized variable name \"" + name + "\".", token->location);
+            Utils::parseError("Unrecognized variable name \"" + token->str + "\".", token->location);
         }
     }
 
     void BytecodeTransformer::visit(const List* token)
     {
+        ReturnType* innerType = expectedType->subType;
+
         for (int i = token->values.size() - 1; i >= 0; i--)
+        {
+            expectedType = innerType;
+
+            token->values[i]->accept(this);
+        }
+
+        for (unsigned int i = 1; i < token->values.size(); i++)
         {
             if (!token->values[0]->returnType(this)->checkType(token->values[i]->returnType(this)))
             {
                 Utils::parseError("All elements in a list must have the same type.", token->values[i]->location);
             }
-
-            token->values[i]->accept(this);
         }
 
         currentScope->block->addInstruction(new StackPushInt(token->values.size()));
         currentScope->block->addInstruction(new CallNative("list", 1));
-    }
-
-    void BytecodeTransformer::visit(const AddObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("add", 2));
-    }
-
-    void BytecodeTransformer::visit(const SubtractObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("subtract", 2));
-    }
-
-    void BytecodeTransformer::visit(const MultiplyObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("multiply", 2));
-    }
-
-    void BytecodeTransformer::visit(const DivideObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("divide", 2));
-    }
-
-    void BytecodeTransformer::visit(const PowerObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("power", 2));
-    }
-
-    void BytecodeTransformer::visit(const EqualsObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("equal", 2));
-    }
-
-    void BytecodeTransformer::visit(const LessObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("less", 2));
-    }
-
-    void BytecodeTransformer::visit(const GreaterObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("greater", 2));
-    }
-
-    void BytecodeTransformer::visit(const LessEqualObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("lessequal", 2));
-    }
-
-    void BytecodeTransformer::visit(const GreaterEqualObject* token)
-    {
-        token->value2->accept(this);
-        token->value1->accept(this);
-
-        currentScope->block->addInstruction(new CallNative("greaterequal", 2));
     }
 
     void BytecodeTransformer::visit(const ParenthesizedExpression* token)
@@ -847,48 +740,52 @@ namespace Parser
     {
         token->value->accept(this);
 
-        if (std::optional<unsigned char> input = currentScope->getInput(token->variable))
+        if (const InputInfo* info = currentScope->getInput(token->variable))
         {
-            currentScope->block->addInstruction(new SetInput(input.value()));
+            currentScope->block->addInstruction(new SetInput(info->id));
         }
 
         else
         {
-            const VariableInfo* info = currentScope->addVariable(token->variable, token->value);
-
-            currentScope->block->addInstruction(new SetVariable(info->id));
+            currentScope->block->addInstruction(new SetVariable(currentScope->addVariable(token->variable, token->value)->id));
         }
     }
 
     void BytecodeTransformer::visit(const Call* token)
     {
-        const std::string name = token->name;
-
-        if (const FunctionInfo* info = currentScope->getFunction(name))
+        if (const FunctionInfo* info = currentScope->getFunction(token->name))
         {
-            for (int i = info->body->inputs.size() - 1; i >= 0; i--)
+            for (int i = info->scope->block->inputs.size() - 1; i >= 0; i--)
             {
-                token->arguments->get(info->body->inputs[i], this);
+                if (const ReturnType* inputType = info->scope->getInput(info->scope->block->inputs[i])->returnType)
+                {
+                    token->arguments->get(info->scope->block->inputs[i], this, info->scope->getInput(info->scope->block->inputs[i])->returnType);
+                }
+
+                else
+                {
+                    token->arguments->get(info->scope->block->inputs[i], this);
+                }
             }
 
             token->arguments->confirmEmpty();
 
-            currentScope->block->addInstruction(new CallUser(info->body));
+            currentScope->block->addInstruction(new CallUser(info->scope->block));
 
             return;
         }
 
-        if (name == "copy")
+        if (token->name == "copy")
         {
             token->arguments->get("value", this);
         }
 
-        else if (name == "time") {}
+        else if (token->name == "time") {}
 
-        else if (name == "sine" ||
-                 name == "square" ||
-                 name == "saw" ||
-                 name == "triangle")
+        else if (token->name == "sine" ||
+                 token->name == "square" ||
+                 token->name == "saw" ||
+                 token->name == "triangle")
         {
             token->arguments->get("frequency", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("effects", this, new ReturnType(BasicReturnType::List, new ReturnType(BasicReturnType::Effect)));
@@ -896,52 +793,52 @@ namespace Parser
             token->arguments->get("volume", this, new ReturnType(BasicReturnType::Value));
         }
 
-        else if (name == "noise")
+        else if (token->name == "noise")
         {
             token->arguments->get("effects", this, new ReturnType(BasicReturnType::List, new ReturnType(BasicReturnType::Effect)));
             token->arguments->get("pan", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("volume", this, new ReturnType(BasicReturnType::Value));
         }
 
-        else if (name == "blend")
+        else if (token->name == "blend")
         {
             token->arguments->get("position", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("sources", this, new ReturnType(BasicReturnType::List, new ReturnType(BasicReturnType::AudioSource)));
         }
 
-        else if (name == "hold")
+        else if (token->name == "hold")
         {
             token->arguments->get("length", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("value", this, new ReturnType(BasicReturnType::Value));
         }
 
-        else if (name == "lfo")
+        else if (token->name == "lfo")
         {
             token->arguments->get("length", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("to", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("from", this, new ReturnType(BasicReturnType::Value));
         }
 
-        else if (name == "sweep")
+        else if (token->name == "sweep")
         {
             token->arguments->get("length", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("to", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("from", this, new ReturnType(BasicReturnType::Value));
         }
 
-        else if (name == "sequence")
+        else if (token->name == "sequence")
         {
             token->arguments->get("order", this, new ReturnType(BasicReturnType::SequenceOrder));
             token->arguments->get("values", this, new ReturnType(BasicReturnType::List, new ReturnType(BasicReturnType::Value)));
         }
 
-        else if (name == "repeat")
+        else if (token->name == "repeat")
         {
             token->arguments->get("repeats", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("value", this, new ReturnType(BasicReturnType::Value));
         }
 
-        else if (name == "random")
+        else if (token->name == "random")
         {
             token->arguments->get("type", this, new ReturnType(BasicReturnType::RandomType));
             token->arguments->get("length", this, new ReturnType(BasicReturnType::Value));
@@ -949,39 +846,39 @@ namespace Parser
             token->arguments->get("from", this, new ReturnType(BasicReturnType::Value));
         }
 
-        else if (name == "limit")
+        else if (token->name == "limit")
         {
             token->arguments->get("max", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("min", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("value", this, new ReturnType(BasicReturnType::Value));
         }
 
-        else if (name == "trigger")
+        else if (token->name == "trigger")
         {
             token->arguments->get("value", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("condition", this, new ReturnType(BasicReturnType::Boolean));
         }
 
-        else if (name == "if")
+        else if (token->name == "if")
         {
             token->arguments->get("false", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("true", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("condition", this, new ReturnType(BasicReturnType::Boolean));
         }
 
-        else if (name == "delay")
+        else if (token->name == "delay")
         {
             token->arguments->get("feedback", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("delay", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("mix", this, new ReturnType(BasicReturnType::Value));
         }
 
-        else if (name == "play")
+        else if (token->name == "play")
         {
             token->arguments->get("source", this, new ReturnType(BasicReturnType::AudioSource));
         }
 
-        else if (name == "perform")
+        else if (token->name == "perform")
         {
             token->arguments->get("interval", this, new ReturnType(BasicReturnType::Value));
             token->arguments->get("repeats", this, new ReturnType(BasicReturnType::Value));
@@ -1000,19 +897,84 @@ namespace Parser
             currentScope->block->addInstruction(new StackPushAddress(block));
         }
 
-        else if (currentScope->checkRecursive(name))
+        else if (currentScope->checkRecursive(token->name))
         {
             return Utils::parseError("Calling a function in its own definition is not allowed.", token->location);
         }
 
         else
         {
-            return Utils::parseError("Unknown function name \"" + name + "\".", token->location);
+            return Utils::parseError("Unknown function name \"" + token->name + "\".", token->location);
         }
 
         token->arguments->confirmEmpty();
 
-        currentScope->block->addInstruction(new CallNative(name, token->arguments->count));
+        currentScope->block->addInstruction(new CallNative(token->name, token->arguments->count));
+    }
+
+    void BytecodeTransformer::visit(const CallAlias* token)
+    {
+        if (token->name == "add")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        else if (token->name == "subtract")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        else if (token->name == "multiply")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        else if (token->name == "divide")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        else if (token->name == "power")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        else if (token->name == "equal")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        else if (token->name == "less")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        else if (token->name == "greater")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        else if (token->name == "lessequal")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        else if (token->name == "greaterequal")
+        {
+            token->arguments->get("1", this, new ReturnType(BasicReturnType::Value));
+            token->arguments->get("0", this, new ReturnType(BasicReturnType::Value));
+        }
+
+        currentScope->block->addInstruction(new CallNative(token->name, token->arguments->count));
     }
 
     void BytecodeTransformer::visit(const Define* token)
@@ -1060,9 +1022,9 @@ namespace Parser
 
         resolver->addBlock(block);
 
-        currentScope = currentScope->parent;
+        currentScope->parent->addFunction(token->name, currentScope, token->returnType(this));
 
-        currentScope->addFunction(token->name, block, token->returnType(this));
+        currentScope = currentScope->parent;
     }
 
     void BytecodeTransformer::visit(const Program* token)
