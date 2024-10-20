@@ -1,7 +1,6 @@
 #pragma once
 
 #include <filesystem>
-#include <optional>
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
@@ -10,6 +9,7 @@
 #include "bytecode.h"
 #include "controller.h"
 #include "location.h"
+#include "utils.h"
 
 namespace Parser
 {
@@ -21,7 +21,7 @@ namespace Parser
         Any,
         SequenceOrder,
         RandomType,
-        Value,
+        Number,
         Boolean,
         List,
         AudioSource,
