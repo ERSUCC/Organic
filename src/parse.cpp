@@ -252,7 +252,7 @@ namespace Parser
                     nextCharacter();
                 }
 
-                if (!tokens.empty() && tokenIs<Subtract>(tokens.size() - 1) && tokens.size() < 2 || (!tokenIs<String>(tokens.size() - 2) && !tokenIs<Value>(tokens.size() - 2)))
+                if (!tokens.empty() && tokenIs<Subtract>(tokens.size() - 1) && (tokens.size() < 2 || (!tokenIs<String>(tokens.size() - 2) && !tokenIs<Value>(tokens.size() - 2))))
                 {
                     tokens[tokens.size() - 1] = new Value(SourceLocation(path, tokens.back()->location.line, tokens.back()->location.character, tokens.size() - 1, tokens.size()), "-" + constant, std::stod("-" + constant));
                 }
