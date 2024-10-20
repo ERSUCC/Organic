@@ -15,7 +15,7 @@ namespace Parser
 {
     struct BytecodeTransformer;
 
-    enum class BasicReturnType
+    enum class BasicType
     {
         None,
         Any,
@@ -28,18 +28,18 @@ namespace Parser
         Effect
     };
 
-    struct ReturnType
+    struct Type
     {
-        ReturnType(const BasicReturnType primaryType, ReturnType* subType = nullptr);
+        Type(const BasicType primaryType, Type* subType = nullptr);
 
-        std::string getTypeName() const;
+        std::string name() const;
 
-        bool checkType(const ReturnType* other) const;
+        bool checkType(const Type* other) const;
 
-        ReturnType* subType;
+        Type* subType;
 
     private:
-        const BasicReturnType primaryType;
+        const BasicType primaryType;
 
     };
 
@@ -47,7 +47,7 @@ namespace Parser
     {
         Token(const SourceLocation location);
 
-        virtual ReturnType* returnType(const BytecodeTransformer* visitor) const;
+        virtual Type* type(const BytecodeTransformer* visitor) const;
 
         virtual void accept(BytecodeTransformer* visitor) const;
 
@@ -170,7 +170,7 @@ namespace Parser
     {
         Value(const SourceLocation location, const std::string str, const double value);
 
-        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        Type* type(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -181,7 +181,7 @@ namespace Parser
     {
         NamedConstant(const SourceLocation location, const std::string constant);
 
-        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        Type* type(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
     };
@@ -190,7 +190,7 @@ namespace Parser
     {
         Variable(const SourceLocation location, const std::string variable);
 
-        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        Type* type(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
     };
@@ -210,7 +210,7 @@ namespace Parser
 
         static ArgumentList* constructAlias(const std::vector<const Token*>& arguments, const std::string name);
 
-        void get(const std::string name, BytecodeTransformer* visitor, ReturnType* expectedType = new ReturnType(BasicReturnType::Any));
+        void get(const std::string name, BytecodeTransformer* visitor, Type* expectedType = new Type(BasicType::Any));
 
         void confirmEmpty() const;
 
@@ -227,7 +227,7 @@ namespace Parser
     {
         List(const SourceLocation location, const std::vector<const Token*> values);
 
-        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        Type* type(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -238,7 +238,7 @@ namespace Parser
     {
         ParenthesizedExpression(const SourceLocation, const Token* value);
 
-        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        Type* type(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -260,7 +260,7 @@ namespace Parser
     {
         Call(const SourceLocation location, const std::string name, ArgumentList* arguments);
 
-        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        Type* type(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -273,7 +273,7 @@ namespace Parser
     {
         CallAlias(const SourceLocation location, const std::string name, const std::vector<const Token*>& arguments);
 
-        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        Type* type(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
     };
@@ -282,7 +282,7 @@ namespace Parser
     {
         Define(const SourceLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Token*> instructions);
 
-        ReturnType* returnType(const BytecodeTransformer* visitor) const override;
+        Type* type(const BytecodeTransformer* visitor) const override;
 
         void accept(BytecodeTransformer* visitor) const override;
 
@@ -306,20 +306,20 @@ namespace Parser
 
     struct FunctionInfo
     {
-        FunctionInfo(Scope* scope, ReturnType* returnType);
+        FunctionInfo(Scope* scope, Type* type);
 
         Scope* scope;
 
-        ReturnType* returnType;
+        Type* type;
     };
 
     struct InputInfo
     {
-        InputInfo(const unsigned char id, ReturnType* returnType);
+        InputInfo(const unsigned char id, Type* type);
 
         const unsigned char id;
 
-        ReturnType* returnType;
+        Type* type;
     };
 
     struct Scope
@@ -330,10 +330,10 @@ namespace Parser
         VariableInfo* addVariable(const std::string name, const Token* value);
 
         FunctionInfo* getFunction(const std::string name);
-        FunctionInfo* addFunction(const std::string name, Scope* scope, ReturnType* returnType);
+        FunctionInfo* addFunction(const std::string name, Scope* scope, Type* type);
 
         InputInfo* getInput(const std::string name);
-        InputInfo* setInputType(const std::string name, ReturnType* returnType);
+        InputInfo* setInputType(const std::string name, Type* type);
 
         bool checkRecursive(const std::string function) const;
 
@@ -385,7 +385,7 @@ namespace Parser
 
         Scope* currentScope;
 
-        ReturnType* expectedType = new ReturnType(BasicReturnType::Any);
+        Type* expectedType = new Type(BasicType::Any);
 
     private:
         std::string outputPath;
