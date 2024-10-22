@@ -443,7 +443,7 @@ namespace Parser
                 tokenError(getToken(pos + 2), "\"{\"");
             }
 
-            return parseCall(start);
+            return parseCall(start, true);
         }
 
         tokenError(getToken(pos + 1), "\"=\" or \"(\"");
@@ -509,7 +509,7 @@ namespace Parser
         return new Assign(SourceLocation(path, name->location.line, name->location.character, pos, value->location.end), name->str, value);
     }
 
-    const Token* Parser::parseCall(unsigned int pos) const
+    const Token* Parser::parseCall(unsigned int pos, const bool topLevel) const
     {
         const unsigned int start = pos;
 
@@ -538,7 +538,7 @@ namespace Parser
 
         const BasicToken* str = getToken(start);
 
-        return new Call(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), str->str, new ArgumentList(arguments, str->str));
+        return new Call(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), str->str, new ArgumentList(arguments, str->str), topLevel);
     }
 
     const Token* Parser::parseArgument(unsigned int pos) const
@@ -815,7 +815,7 @@ namespace Parser
         {
             if (tokenIs<OpenParenthesis>(pos + 1))
             {
-                return parseCall(pos);
+                return parseCall(pos, false);
             }
 
             const BasicToken* str = getToken(pos);

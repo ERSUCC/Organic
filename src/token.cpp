@@ -125,8 +125,8 @@ namespace Parser
         return !other->subType;
     }
 
-    Token::Token(const SourceLocation location) :
-        location(location) {}
+    Token::Token(const SourceLocation location, const bool topLevel) :
+        location(location), topLevel(topLevel) {}
 
     Type* Token::type(const BytecodeTransformer* visitor) const
     {
@@ -361,15 +361,15 @@ namespace Parser
     }
 
     Assign::Assign(const SourceLocation location, const std::string variable, const Token* value) :
-        Token(location), variable(variable), value(value) {}
+        Token(location, true), variable(variable), value(value) {}
 
     void Assign::accept(BytecodeTransformer* visitor) const
     {
         visitor->visit(this);
     }
 
-    Call::Call(const SourceLocation location, const std::string name, ArgumentList* arguments) :
-        Token(location), name(name), arguments(arguments) {}
+    Call::Call(const SourceLocation location, const std::string name, ArgumentList* arguments, const bool topLevel) :
+        Token(location, topLevel), name(name), arguments(arguments) {}
     
     Type* Call::type(const BytecodeTransformer* visitor) const
     {
@@ -416,7 +416,7 @@ namespace Parser
     }
 
     CallAlias::CallAlias(const SourceLocation location, const std::string name, const std::vector<const Token*>& arguments) :
-        Call(location, name, ArgumentList::constructAlias(arguments, name)) {}
+        Call(location, name, ArgumentList::constructAlias(arguments, name), false) {}
     
     Type* CallAlias::type(const BytecodeTransformer* visitor) const
     {
@@ -447,7 +447,7 @@ namespace Parser
     }
 
     Define::Define(const SourceLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Token*> instructions) :
-        Token(location), name(name), inputs(inputs), instructions(instructions) {}
+        Token(location, true), name(name), inputs(inputs), instructions(instructions) {}
 
     Type* Define::type(const BytecodeTransformer* visitor) const
     {
@@ -775,6 +775,8 @@ namespace Parser
             return;
         }
 
+        bool audioSource = false;
+
         if (token->name == "copy")
         {
             token->arguments->get("value", this);
@@ -787,6 +789,8 @@ namespace Parser
                  token->name == "saw" ||
                  token->name == "triangle")
         {
+            audioSource = true;
+
             token->arguments->get("frequency", this, new Type(BasicType::Number));
             token->arguments->get("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
             token->arguments->get("pan", this, new Type(BasicType::Number));
@@ -795,6 +799,8 @@ namespace Parser
 
         else if (token->name == "noise")
         {
+            audioSource = true;
+
             token->arguments->get("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
             token->arguments->get("pan", this, new Type(BasicType::Number));
             token->arguments->get("volume", this, new Type(BasicType::Number));
@@ -802,6 +808,8 @@ namespace Parser
 
         else if (token->name == "blend")
         {
+            audioSource = true;
+
             token->arguments->get("position", this, new Type(BasicType::Number));
             token->arguments->get("sources", this, new Type(BasicType::List, new Type(BasicType::AudioSource)));
         }
@@ -873,11 +881,6 @@ namespace Parser
             token->arguments->get("mix", this, new Type(BasicType::Number));
         }
 
-        else if (token->name == "play")
-        {
-            token->arguments->get("source", this, new Type(BasicType::AudioSource));
-        }
-
         else if (token->name == "perform")
         {
             token->arguments->get("interval", this, new Type(BasicType::Number));
@@ -910,6 +913,11 @@ namespace Parser
         token->arguments->confirmEmpty();
 
         currentScope->block->addInstruction(new CallNative(token->name, token->arguments->count));
+
+        if (audioSource && token->topLevel)
+        {
+            currentScope->block->addInstruction(new CallNative("play", 1));
+        }
     }
 
     void BytecodeTransformer::visit(const CallAlias* token)

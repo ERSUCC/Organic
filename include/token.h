@@ -45,13 +45,15 @@ namespace Parser
 
     struct Token
     {
-        Token(const SourceLocation location);
+        Token(const SourceLocation location, const bool topLevel = false);
 
         virtual Type* type(const BytecodeTransformer* visitor) const;
 
         virtual void accept(BytecodeTransformer* visitor) const;
 
         const SourceLocation location;
+
+        const bool topLevel;
     };
 
     struct BasicToken : public Token
@@ -258,7 +260,7 @@ namespace Parser
 
     struct Call : public Token
     {
-        Call(const SourceLocation location, const std::string name, ArgumentList* arguments);
+        Call(const SourceLocation location, const std::string name, ArgumentList* arguments, const bool topLevel);
 
         Type* type(const BytecodeTransformer* visitor) const override;
 
