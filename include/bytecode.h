@@ -138,11 +138,9 @@ private:
 
 struct BytecodeResolver
 {
-    void output(const std::string path);
+    void output(const std::string path, const unsigned char variables);
 
     void addBlock(BytecodeBlock* block);
-
-    std::unordered_map<std::string, unsigned char> variables;
 
 private:
     std::vector<BytecodeBlock*> blocks;

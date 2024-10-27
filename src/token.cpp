@@ -1049,7 +1049,7 @@ namespace Parser
 
         currentScope->checkUses();
 
-        resolver->output(outputPath);
+        resolver->output(outputPath, nextVariable);
     }
 
     unsigned char BytecodeTransformer::newVariableId()

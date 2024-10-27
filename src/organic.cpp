@@ -79,9 +79,7 @@ void Organic::startPlayback()
         Utils::error(audio.getErrorText());
     }
 
-    std::vector<ValueObject*> inputs; // could be used for command line inputs or something
-
-    machine->execute(4, inputs, 0);
+    machine->run();
 
     while (!audioData.callbackActive) {}
 
@@ -115,9 +113,7 @@ void Organic::startExport()
 
     double* buffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
 
-    std::vector<ValueObject*> inputs; // could be used for command line inputs or something
-
-    machine->execute(4, inputs, 0);
+    machine->run();
 
     for (unsigned int i = 0; i < steps; i += utils->bufferLength)
     {

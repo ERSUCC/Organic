@@ -19,21 +19,119 @@ Machine::Machine(const std::string path) : path(path)
 
     program = std::vector<unsigned char>(str.begin(), str.end());
 
-    if (program.size() <= 4 || program[0] != 'B' || program[1] != 'A' || program[2] != 'C' || program[3] != 'H')
+    if (program.size() <= 5 || program[0] != 'B' || program[1] != 'A' || program[2] != 'C' || program[3] != 'H')
     {
         Utils::machineError("Invalid bytecode format.", path);
     }
 
     utils = Utils::get();
+
+    variables = (Variable**)calloc(program[4], sizeof(Variable*));
 }
 
-void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, const double startTime)
+void Machine::run()
+{
+    execute(5, 0);
+}
+
+void Machine::updateEvents()
+{
+    for (unsigned int i = 0; i < events.size(); i++)
+    {
+        events[i]->update();
+
+        if (!events[i]->enabled)
+        {
+            events.erase(events.begin() + i--);
+        }
+    }
+}
+
+void Machine::processAudioSources(double* buffer, const unsigned int bufferLength)
+{
+    std::fill(buffer, buffer + bufferLength * utils->channels, 0);
+
+    for (unsigned int i = 0; i < audioSources.size(); i++)
+    {
+        audioSources[i]->fillBuffer(buffer, bufferLength);
+    }
+
+    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
+    {
+        buffer[i] *= utils->volume;
+    }
+}
+
+unsigned int Machine::readInt(const unsigned int address) const
+{
+    unsigned char bytes[4];
+
+    if (utils->littleEndian)
+    {
+        bytes[0] = program[address];
+        bytes[1] = program[address + 1];
+        bytes[2] = program[address + 2];
+        bytes[3] = program[address + 3];
+    }
+
+    else
+    {
+        bytes[0] = program[address + 3];
+        bytes[1] = program[address + 2];
+        bytes[2] = program[address + 1];
+        bytes[3] = program[address];
+    }
+
+    return *reinterpret_cast<unsigned int*>(bytes);
+}
+
+double Machine::readDouble(const unsigned int address) const
+{
+    unsigned char bytes[8];
+
+    if (utils->littleEndian)
+    {
+        bytes[0] = program[address];
+        bytes[1] = program[address + 1];
+        bytes[2] = program[address + 2];
+        bytes[3] = program[address + 3];
+        bytes[4] = program[address + 4];
+        bytes[5] = program[address + 5];
+        bytes[6] = program[address + 6];
+        bytes[7] = program[address + 7];
+    }
+
+    else
+    {
+        bytes[0] = program[address + 7];
+        bytes[1] = program[address + 6];
+        bytes[2] = program[address + 5];
+        bytes[3] = program[address + 4];
+        bytes[4] = program[address + 3];
+        bytes[5] = program[address + 2];
+        bytes[6] = program[address + 1];
+        bytes[7] = program[address];
+    }
+
+    return *reinterpret_cast<double*>(bytes);
+}
+
+ValueObject* Machine::popStack()
+{
+    ValueObject* value = stack.top();
+
+    stack.pop();
+
+    return value;
+}
+
+void Machine::execute(unsigned int address, const double startTime)
 {
     while (true)
     {
         if (address >= program.size())
         {
-            return Utils::machineError("Invalid execution address.", path);
+            return Utils::machineError("Invalid execution address.", path); // should this be less cs-y, eg. "bytecode/intermediate file) is invalid/corrupted"
         }
 
         switch (program[address])
@@ -80,7 +178,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
             {
                 const unsigned char id = program[address + 1];
 
-                if (variables.count(id))
+                if (variables[id])
                 {
                     variables[id]->value = popStack();
                 }
@@ -294,9 +392,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
 
                         Event* event = new Event([=](double startTime)
                         {
-                            std::vector<ValueObject*> inputs;
-
-                            execute(exec, inputs, startTime);
+                            execute(exec, startTime);
                         }, inputs[1], inputs[2], inputs[3]);
 
                         events.push_back(event);
@@ -322,110 +418,15 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
             }
 
             case 0x09:
-            {
-                std::vector<ValueObject*> inputs;
-
-                execute(readInt(address + 1), inputs, startTime);
+                execute(readInt(address + 1), startTime);
 
                 address += 6;
 
                 break;
-            }
 
             default:
                 return Utils::machineError("Unrecognized instruction code.", path);
 
         }
     }
-}
-
-void Machine::updateEvents()
-{
-    for (unsigned int i = 0; i < events.size(); i++)
-    {
-        events[i]->update();
-
-        if (!events[i]->enabled)
-        {
-            events.erase(events.begin() + i--);
-        }
-    }
-}
-
-void Machine::processAudioSources(double* buffer, const unsigned int bufferLength)
-{
-    std::fill(buffer, buffer + bufferLength * utils->channels, 0);
-
-    for (unsigned int i = 0; i < audioSources.size(); i++)
-    {
-        audioSources[i]->fillBuffer(buffer, bufferLength);
-    }
-
-    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
-    {
-        buffer[i] *= utils->volume;
-    }
-}
-
-unsigned int Machine::readInt(const unsigned int address) const
-{
-    unsigned char bytes[4];
-
-    if (utils->littleEndian)
-    {
-        bytes[0] = program[address];
-        bytes[1] = program[address + 1];
-        bytes[2] = program[address + 2];
-        bytes[3] = program[address + 3];
-    }
-
-    else
-    {
-        bytes[0] = program[address + 3];
-        bytes[1] = program[address + 2];
-        bytes[2] = program[address + 1];
-        bytes[3] = program[address];
-    }
-
-    return *reinterpret_cast<unsigned int*>(bytes);
-}
-
-double Machine::readDouble(const unsigned int address) const
-{
-    unsigned char bytes[8];
-
-    if (utils->littleEndian)
-    {
-        bytes[0] = program[address];
-        bytes[1] = program[address + 1];
-        bytes[2] = program[address + 2];
-        bytes[3] = program[address + 3];
-        bytes[4] = program[address + 4];
-        bytes[5] = program[address + 5];
-        bytes[6] = program[address + 6];
-        bytes[7] = program[address + 7];
-    }
-
-    else
-    {
-        bytes[0] = program[address + 7];
-        bytes[1] = program[address + 6];
-        bytes[2] = program[address + 5];
-        bytes[3] = program[address + 4];
-        bytes[4] = program[address + 3];
-        bytes[5] = program[address + 2];
-        bytes[6] = program[address + 1];
-        bytes[7] = program[address];
-    }
-
-    return *reinterpret_cast<double*>(bytes);
-}
-
-ValueObject* Machine::popStack()
-{
-    ValueObject* value = stack.top();
-
-    stack.pop();
-
-    return value;
 }

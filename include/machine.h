@@ -1,11 +1,11 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <stack>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "audiosource.h"
@@ -18,7 +18,7 @@ struct Machine
 {
     Machine(const std::string path);
 
-    void execute(unsigned int address, std::vector<ValueObject*>& inputs, const double startTime);
+    void run();
 
     void updateEvents();
     void processAudioSources(double* buffer, const unsigned int bufferLength);
@@ -29,6 +29,8 @@ private:
 
     ValueObject* popStack();
 
+    void execute(unsigned int address, const double startTime);
+
     Utils* utils;
 
     const std::string path;
@@ -37,7 +39,7 @@ private:
 
     std::stack<ValueObject*> stack;
 
-    std::unordered_map<unsigned char, Variable*> variables;
+    Variable** variables;
 
     std::vector<AudioSource*> audioSources;
     std::vector<Event*> events;

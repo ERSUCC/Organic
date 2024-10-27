@@ -212,7 +212,7 @@ void BytecodeBlock::output(std::ofstream& stream) const
     stream << (unsigned char)0x00;
 }
 
-void BytecodeResolver::output(const std::string path)
+void BytecodeResolver::output(const std::string path, const unsigned char variables)
 {
     std::ofstream stream(path, std::ios::binary);
 
@@ -221,9 +221,9 @@ void BytecodeResolver::output(const std::string path)
         return Utils::error("Error creating intermediate file \"" + path + "\".");
     }
 
-    stream << "BACH";
+    stream << "BACH" << variables;
 
-    unsigned int offset = 4;
+    unsigned int offset = 5;
 
     for (BytecodeBlock* block : blocks)
     {
