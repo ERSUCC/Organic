@@ -33,7 +33,7 @@ void Utils::warning(const std::string message)
 
 void Utils::parseWarning(const std::string message, const SourceLocation location)
 {
-    warning("Parse warning in \"" + location.path + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ": " + message);
+    warning("Parse warning in \"" + location.path + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
 }
 
 void Utils::error(const std::string message)
@@ -50,17 +50,17 @@ void Utils::argumentError(const std::string message)
 
 void Utils::parseError(const std::string message, const SourceLocation location)
 {
-    error("Parse error in \"" + location.path + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ": " + message);
+    error("Parse error in \"" + location.path + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
 }
 
 void Utils::parseError(const std::string message, const std::string file, const unsigned int line, const unsigned int character)
 {
-    error("Parse error in \"" + file + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ": " + message);
+    error("Parse error in \"" + file + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ":\n\t" + message);
 }
 
 void Utils::machineError(const std::string message, const std::string file)
 {
-    error("Virtual machine error in \"" + file + "\": " + message);
+    error("Virtual machine error in \"" + file + "\":\n\t" + message);
 }
 
 void Utils::runtimeError(const std::string message)
