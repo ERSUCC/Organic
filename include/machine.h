@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <stack>
@@ -9,6 +10,7 @@
 #include <vector>
 
 #include "audiosource.h"
+#include "constants.h"
 #include "controller.h"
 #include "event.h"
 #include "object.h"

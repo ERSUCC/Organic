@@ -17,21 +17,21 @@ Machine::Machine(const std::string path) : path(path)
 
     const std::string& str = stream.str();
 
-    program = std::vector<unsigned char>(str.begin(), str.end());
-
-    if (program.size() <= 5 || program[0] != 'B' || program[1] != 'A' || program[2] != 'C' || program[3] != 'H')
+    if (str.size() <= BytecodeConstants::HEADER_LENGTH || strncmp(str.c_str(), BytecodeConstants::OBC_ID, BytecodeConstants::OBC_ID_LENGTH))
     {
         Utils::machineError("Invalid bytecode format.", path);
     }
 
-    utils = Utils::get();
+    program = std::vector<unsigned char>(str.begin(), str.end());
 
-    variables = (Variable**)calloc(program[4], sizeof(Variable*));
+    variables = (Variable**)calloc(program[BytecodeConstants::OBC_ID_LENGTH], sizeof(Variable*));
+
+    utils = Utils::get();
 }
 
 void Machine::run()
 {
-    execute(5, 0);
+    execute(BytecodeConstants::HEADER_LENGTH, 0);
 }
 
 void Machine::updateEvents()
@@ -136,45 +136,45 @@ void Machine::execute(unsigned int address, const double startTime)
 
         switch (program[address])
         {
-            case 0x00:
+            case BytecodeConstants::RETURN:
                 return;
             
-            case 0x01:
+            case BytecodeConstants::STACK_PUSH_DEFAULT:
                 stack.push(Default::get());
 
                 address++;
 
                 break;
 
-            case 0x02:
+            case BytecodeConstants::STACK_PUSH_BYTE:
                 stack.push(new Value(program[address + 1]));
 
                 address += 2;
 
                 break;
 
-            case 0x03:
+            case BytecodeConstants::STACK_PUSH_INT:
                 stack.push(new Value(readInt(address + 1)));
 
                 address += 5;
 
                 break;
 
-            case 0x04:
+            case BytecodeConstants::STACK_PUSH_DOUBLE:
                 stack.push(new Value(readDouble(address + 1)));
 
                 address += 9;
 
                 break;
 
-            case 0x05:
+            case BytecodeConstants::STACK_PUSH_ADDRESS:
                 stack.push(new Value(readInt(address + 1)));
 
                 address += 5;
 
                 break;
 
-            case 0x06:
+            case BytecodeConstants::SET_VARIABLE:
             {
                 const unsigned char id = program[address + 1];
 
@@ -199,14 +199,14 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
             }
 
-            case 0x07:
+            case BytecodeConstants::GET_VARIABLE:
                 stack.push(variables[program[address + 1]]);
 
                 address += 2;
 
                 break;
 
-            case 0x08:
+            case BytecodeConstants::CALL_NATIVE:
             {
                 std::vector<ValueObject*> inputs;
 
@@ -217,12 +217,12 @@ void Machine::execute(unsigned int address, const double startTime)
 
                 switch (program[address + 1])
                 {
-                    case 0x00:
+                    case BytecodeConstants::COPY:
                         stack.push(((Variable*)inputs[0])->value);
 
                         break;
 
-                    case 0x01:
+                    case BytecodeConstants::LIST:
                     {
                         const unsigned int size = inputs[0]->getValue();
 
@@ -238,142 +238,142 @@ void Machine::execute(unsigned int address, const double startTime)
                         break;
                     }
 
-                    case 0x02:
+                    case BytecodeConstants::TIME:
                         stack.push(new Time());
 
                         break;
 
-                    case 0x10:
+                    case BytecodeConstants::ADD:
                         stack.push(new ValueAdd(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x11:
+                    case BytecodeConstants::SUBTRACT:
                         stack.push(new ValueSubtract(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x12:
+                    case BytecodeConstants::MULTIPLY:
                         stack.push(new ValueMultiply(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x13:
+                    case BytecodeConstants::DIVIDE:
                         stack.push(new ValueDivide(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x14:
+                    case BytecodeConstants::POWER:
                         stack.push(new ValuePower(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x15:
+                    case BytecodeConstants::EQUAL:
                         stack.push(new ValueEquals(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x16:
+                    case BytecodeConstants::LESS:
                         stack.push(new ValueLess(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x17:
+                    case BytecodeConstants::GREATER:
                         stack.push(new ValueGreater(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x18:
+                    case BytecodeConstants::LESSEQUAL:
                         stack.push(new ValueLessEqual(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x19:
+                    case BytecodeConstants::GREATEREQUAL:
                         stack.push(new ValueGreaterEqual(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x30:
+                    case BytecodeConstants::SINE:
                         stack.push(new Sine(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
 
-                    case 0x31:
+                    case BytecodeConstants::SQUARE:
                         stack.push(new Square(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
 
-                    case 0x32:
+                    case BytecodeConstants::TRIANGLE:
                         stack.push(new Triangle(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
 
-                    case 0x33:
+                    case BytecodeConstants::SAW:
                         stack.push(new Saw(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
 
-                    case 0x34:
+                    case BytecodeConstants::NOISE:
                         stack.push(new Noise(inputs[0], inputs[1], inputs[2]));
 
                         break;
 
-                    case 0x35:
+                    case BytecodeConstants::BLEND:
                         stack.push(new Blend(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x50:
+                    case BytecodeConstants::HOLD:
                         stack.push(new Hold(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x51:
+                    case BytecodeConstants::LFO:
                         stack.push(new LFO(inputs[0], inputs[1], inputs[2]));
 
                         break;
 
-                    case 0x52:
+                    case BytecodeConstants::SWEEP:
                         stack.push(new Sweep(inputs[0], inputs[1], inputs[2]));
 
                         break;
 
-                    case 0x53:
+                    case BytecodeConstants::SEQUENCE:
                         stack.push(new Sequence(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x54:
+                    case BytecodeConstants::REPEAT:
                         stack.push(new Repeat(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x55:
+                    case BytecodeConstants::RANDOM:
                         stack.push(new Random(inputs[0], inputs[1], inputs[2], inputs[3]));
 
                         break;
 
-                    case 0x56:
+                    case BytecodeConstants::LIMIT:
                         stack.push(new Limit(inputs[0], inputs[1], inputs[2]));
 
                         break;
 
-                    case 0x57:
+                    case BytecodeConstants::TRIGGER:
                         stack.push(new Trigger(inputs[0], inputs[1]));
 
                         break;
 
-                    case 0x58:
+                    case BytecodeConstants::IF:
                         stack.push(new If(inputs[0], inputs[1], inputs[2]));
 
                         break;
 
-                    case 0x70:
+                    case BytecodeConstants::DELAY:
                         stack.push(new Delay(inputs[0], inputs[1], inputs[2]));
 
                         break;
 
-                    case 0x90:
+                    case BytecodeConstants::PLAY:
                     {
                         AudioSource* audioSource = dynamic_cast<AudioSource*>(inputs[0]);
 
@@ -386,7 +386,7 @@ void Machine::execute(unsigned int address, const double startTime)
                         break;
                     }
 
-                    case 0x91:
+                    case BytecodeConstants::PERFORM:
                     {
                         const unsigned int exec = inputs[0]->getValue();
 
@@ -408,7 +408,7 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         code << std::hex << program[address + 1];
 
-                        return Utils::machineError("Unrecognized function code \"" + code.str() + "\"", path);
+                        return Utils::machineError("Unrecognized function code \"" + code.str() + "\"", path); // same as other error
                     }
                 }
 
@@ -417,7 +417,7 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
             }
 
-            case 0x09:
+            case BytecodeConstants::CALL_USER:
                 execute(readInt(address + 1), startTime);
 
                 address += 6;
