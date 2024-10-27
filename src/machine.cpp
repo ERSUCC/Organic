@@ -17,7 +17,7 @@ Machine::Machine(const std::string path) : path(path)
 
     const std::string& str = stream.str();
 
-    if (str.size() <= BytecodeConstants::HEADER_LENGTH || strncmp(str.c_str(), BytecodeConstants::OBC_ID, BytecodeConstants::OBC_ID_LENGTH))
+    if (str.size() <= BytecodeConstants::HEADER_LENGTH || str.compare(0, BytecodeConstants::OBC_ID_LENGTH, BytecodeConstants::OBC_ID))
     {
         Utils::machineError("Invalid bytecode format.", path);
     }

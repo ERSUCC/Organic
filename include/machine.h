@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <stack>
