@@ -736,6 +736,11 @@ namespace Parser
     {
         token->value->accept(this);
 
+        if ((new Type(BasicType::None))->checkType(token->value->type(this)))
+        {
+            Utils::parseError("Functions that return nothing cannot be assigned to a variable.", token->value->location);
+        }
+
         if (const InputInfo* info = currentScope->getInput(token->variable))
         {
             currentScope->block->addInstruction(new SetVariable(info->id));
