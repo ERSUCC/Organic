@@ -197,6 +197,15 @@ namespace Parser
         void accept(BytecodeTransformer* visitor) const override;
     };
 
+    struct Input : public BasicToken
+    {
+        Input(const SourceLocation location, const std::string name);
+
+        Type* type(const BytecodeTransformer* visitor) const override;
+
+        Type* assumedType = nullptr;
+    };
+
     struct Argument : public Token
     {
         Argument(const SourceLocation location, const std::string name, const Token* value);
@@ -282,7 +291,7 @@ namespace Parser
 
     struct Define : public Token
     {
-        Define(const SourceLocation location, const std::string name, const std::vector<std::string> inputs, const std::vector<const Token*> instructions);
+        Define(const SourceLocation location, const std::string name, const std::vector<Input*> inputs, const std::vector<const Token*> instructions);
 
         Type* type(const BytecodeTransformer* visitor) const override;
 
@@ -290,7 +299,7 @@ namespace Parser
 
         const std::string name;
 
-        const std::vector<std::string> inputs;
+        const std::vector<Input*> inputs;
 
         const std::vector<const Token*> instructions;
     };
@@ -317,16 +326,16 @@ namespace Parser
 
     struct InputInfo
     {
-        InputInfo(const unsigned char id, Type* type);
+        InputInfo(const unsigned char id, Input* token);
 
         const unsigned char id;
 
-        Type* type;
+        Input* token;
     };
 
     struct Scope
     {
-        Scope(const BytecodeTransformer* visitor, Scope* parent = nullptr, const std::string currentFunction = "", const std::vector<std::string> inputs = std::vector<std::string>());
+        Scope(BytecodeTransformer* visitor, Scope* parent = nullptr, const std::string currentFunction = "", const std::vector<Input*> inputs = std::vector<Input*>());
 
         VariableInfo* getVariable(const std::string name);
         VariableInfo* addVariable(const std::string name, const Token* value);
@@ -335,7 +344,6 @@ namespace Parser
         FunctionInfo* addFunction(const std::string name, Scope* scope, Type* type);
 
         InputInfo* getInput(const std::string name);
-        InputInfo* setInputType(const std::string name, Type* type);
 
         bool checkRecursive(const std::string function) const;
 
@@ -347,8 +355,10 @@ namespace Parser
 
         BytecodeBlock* block;
 
+        const std::vector<Input*> inputList;
+
     private:
-        const BytecodeTransformer* visitor;
+        BytecodeTransformer* visitor;
 
         std::unordered_map<std::string, VariableInfo*> variables;
         std::unordered_set<std::string> variablesUsed;
@@ -389,12 +399,16 @@ namespace Parser
 
         Type* expectedType = new Type(BasicType::Any);
 
+        unsigned char newVariableId();
+
     private:
         std::string outputPath;
 
         BytecodeResolver* resolver = new BytecodeResolver();
 
         Utils* utils;
+
+        unsigned char nextVariable = 0;
 
     };
 }

@@ -457,7 +457,7 @@ namespace Parser
         
         pos += 2;
 
-        std::vector<std::string> inputs;
+        std::vector<Input*> inputs;
 
         if (!tokenIs<CloseParenthesis>(pos))
         {
@@ -472,7 +472,7 @@ namespace Parser
                     tokenError(getToken(pos), "input name");
                 }
 
-                inputs.push_back(input->str);
+                inputs.push_back(new Input(input->location, input->str));
 
                 pos++;
             } while (tokenIs<Comma>(pos));

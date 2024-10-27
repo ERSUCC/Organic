@@ -21,6 +21,9 @@ struct Utils
     static Utils* get();
 
     static void warning(const std::string message);
+
+    static void parseWarning(const std::string message, const SourceLocation location);
+
     static void error(const std::string message);
 
     static void argumentError(const std::string message);

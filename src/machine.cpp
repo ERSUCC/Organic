@@ -93,7 +93,7 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
                 if (variables[id]->enabled)
                 {
                     variables[id]->stop();
-                    variables[id]->start(utils->time);
+                    variables[id]->start(startTime);
                 }
 
                 address += 2;
@@ -283,6 +283,8 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
 
                         audioSource->start(startTime);
 
+                        stack.push(audioSource);
+
                         break;
                     }
 
@@ -323,31 +325,12 @@ void Machine::execute(unsigned int address, std::vector<ValueObject*>& inputs, c
             {
                 std::vector<ValueObject*> inputs;
 
-                for (unsigned char i = 0; i < program[address + 5]; i++)
-                {
-                    inputs.push_back(popStack());
-                }
-
                 execute(readInt(address + 1), inputs, startTime);
 
                 address += 6;
 
                 break;
             }
-
-            case 0x0a:
-                inputs[program[address + 1]] = popStack();
-
-                address += 2;
-
-                break;
-
-            case 0x0b:
-                stack.push(inputs[program[address + 1]]);
-
-                address += 2;
-
-                break;
 
             default:
                 return Utils::machineError("Unrecognized instruction code.", path);

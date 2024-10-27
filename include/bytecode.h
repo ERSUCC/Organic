@@ -118,37 +118,15 @@ private:
 
 };
 
-struct SetInput : public BytecodeInstruction
-{
-    SetInput(const unsigned char input);
-
-    void output(std::ofstream& stream) const override;
-
-private:
-    const unsigned char input;
-
-};
-
-struct GetInput : public BytecodeInstruction
-{
-    GetInput(const unsigned char input);
-
-    void output(std::ofstream& stream) const override;
-
-private:
-    const unsigned char input;
-
-};
-
 struct BytecodeBlock
 {
-    BytecodeBlock(const std::vector<std::string> inputs);
+    BytecodeBlock(const unsigned char inputs);
 
     void addInstruction(const BytecodeInstruction* instruction);
 
     void output(std::ofstream& stream) const;
 
-    const std::vector<std::string> inputs;
+    const unsigned char inputs;
 
     unsigned int offset;
     unsigned int size = 1;

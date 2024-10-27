@@ -31,6 +31,11 @@ void Utils::warning(const std::string message)
     std::cout << message << "\n";
 }
 
+void Utils::parseWarning(const std::string message, const SourceLocation location)
+{
+    warning("Parse warning in \"" + location.path + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ": " + message);
+}
+
 void Utils::error(const std::string message)
 {
     std::cout << message << "\n";

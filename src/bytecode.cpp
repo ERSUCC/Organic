@@ -189,26 +189,10 @@ void CallUser::output(std::ofstream& stream) const
         stream << b;
     }
 
-    stream << (unsigned char)function->inputs.size();
+    stream << function->inputs;
 }
 
-SetInput::SetInput(const unsigned char input) :
-    BytecodeInstruction(2), input(input) {}
-
-void SetInput::output(std::ofstream& stream) const
-{
-    stream << (unsigned char)0x0a << input;
-}
-
-GetInput::GetInput(const unsigned char input) :
-    BytecodeInstruction(2), input(input) {}
-
-void GetInput::output(std::ofstream& stream) const
-{
-    stream << (unsigned char)0x0b << input;
-}
-
-BytecodeBlock::BytecodeBlock(const std::vector<std::string> inputs) :
+BytecodeBlock::BytecodeBlock(const unsigned char inputs) :
     inputs(inputs) {}
 
 void BytecodeBlock::addInstruction(const BytecodeInstruction* instruction)
