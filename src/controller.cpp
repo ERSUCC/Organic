@@ -134,6 +134,11 @@ Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
 
 double Sequence::syncLength()
 {
+    if (controllers->getList()->objects.empty())
+    {
+        return 0;
+    }
+
     double length = 0;
 
     if (order->getValue() == OrderEnum::PingPong)
@@ -164,6 +169,11 @@ double Sequence::syncLength()
 
 double Sequence::getValue()
 {
+    if (controllers->getList()->objects.empty())
+    {
+        return 0;
+    }
+
     if (!controllers->getList()->objects[current]->enabled)
     {
         last = current;
@@ -184,6 +194,11 @@ double Sequence::getValue()
 
 void Sequence::init()
 {
+    if (controllers->getList()->objects.empty())
+    {
+        return;
+    }
+
     switches = 0;
 
     chosen.clear();
@@ -229,6 +244,11 @@ void Sequence::init()
 
 void Sequence::reinit()
 {
+    if (controllers->getList()->objects.empty())
+    {
+        return;
+    }
+
     switch ((unsigned int)order->getValue())
     {
         case OrderEnum::Forwards:
