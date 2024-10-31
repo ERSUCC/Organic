@@ -317,11 +317,11 @@ namespace Parser
 
     struct FunctionInfo
     {
-        FunctionInfo(Scope* scope, Type* type);
+        FunctionInfo(Scope* scope, const Define* token);
 
         Scope* scope;
 
-        Type* type;
+        const Define* token;
     };
 
     struct InputInfo
@@ -341,7 +341,7 @@ namespace Parser
         VariableInfo* addVariable(const std::string name, const Token* value);
 
         FunctionInfo* getFunction(const std::string name);
-        FunctionInfo* addFunction(const std::string name, Scope* scope, Type* type);
+        FunctionInfo* addFunction(const std::string name, Scope* scope, const Define* token);
 
         InputInfo* getInput(const std::string name);
 

@@ -413,7 +413,7 @@ namespace Parser
 
         if (FunctionInfo* info = visitor->currentScope->getFunction(name))
         {
-            return info->type;
+            return info->token->type(visitor);
         }
 
         return new Type(BasicType::None);
@@ -476,8 +476,8 @@ namespace Parser
     VariableInfo::VariableInfo(const unsigned char id, const Token* value) :
         id(id), value(value) {}
     
-    FunctionInfo::FunctionInfo(Scope* scope, Type* type) :
-        scope(scope), type(type) {}
+    FunctionInfo::FunctionInfo(Scope* scope, const Define* token) :
+        scope(scope), token(token) {}
 
     InputInfo::InputInfo(const unsigned char id, Input* token) :
         id(id), token(token) {}
@@ -542,9 +542,9 @@ namespace Parser
         return nullptr;
     }
 
-    FunctionInfo* Scope::addFunction(const std::string name, Scope* scope, Type* type)
+    FunctionInfo* Scope::addFunction(const std::string name, Scope* scope, const Define* token)
     {
-        FunctionInfo* info = new FunctionInfo(scope, type);
+        FunctionInfo* info = new FunctionInfo(scope, token);
 
         functions[name] = info;
 
@@ -590,7 +590,7 @@ namespace Parser
         {
             if (!functionsUsed.count(pair.first))
             {
-                Utils::warning("Warning: Unused function \"" + pair.first + "\".");
+                Utils::parseWarning("Warning: Unused function \"" + pair.first + "\".", pair.second->token->location);
             }
         }
 
@@ -598,7 +598,7 @@ namespace Parser
         {
             if (!inputsUsed.count(pair.first))
             {
-                Utils::warning("Warning: Unused input \"" + pair.first + "\" in function \"" + currentFunction + "\".");
+                Utils::parseWarning("Warning: Unused input \"" + pair.first + "\".", pair.second->token->location);
             }
         }
     }
@@ -1021,7 +1021,7 @@ namespace Parser
 
         resolver->addBlock(block);
 
-        currentScope->parent->addFunction(token->name, currentScope, token->type(this));
+        currentScope->parent->addFunction(token->name, currentScope, token);
 
         currentScope = currentScope->parent;
     }
