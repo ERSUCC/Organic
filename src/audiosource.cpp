@@ -17,7 +17,7 @@ void SingleAudioSource::fillBuffer(double* buffer, const unsigned int bufferLeng
 
     for (ValueObject* effect : effects->getList()->objects)
     {
-        dynamic_cast<Effect*>(effect)->apply(effectBuffer, bufferLength);
+        dynamic_cast<Effect*>(effect->expandVariable())->apply(effectBuffer, bufferLength);
     }
 
     for (unsigned int i = 0; i < bufferLength * utils->channels; i++)

@@ -17,9 +17,8 @@ struct BytecodeConstants
     static constexpr unsigned char CALL_NATIVE = 0x8;
     static constexpr unsigned char CALL_USER = 0x9;
 
-    static constexpr unsigned char COPY = 0x0;
-    static constexpr unsigned char LIST = 0x1;
-    static constexpr unsigned char TIME = 0x2;
+    static constexpr unsigned char LIST = 0x0;
+    static constexpr unsigned char TIME = 0x1;
 
     static constexpr unsigned char ADD = 0x10;
     static constexpr unsigned char SUBTRACT = 0x11;

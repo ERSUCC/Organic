@@ -175,29 +175,11 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
 
             case BytecodeConstants::SET_VARIABLE:
-            {
-                const unsigned char id = program[address + 1];
-
-                if (variables[id])
-                {
-                    variables[id]->value = popStack();
-                }
-
-                else
-                {
-                    variables[id] = new Variable(popStack());
-                }
-
-                if (variables[id]->enabled)
-                {
-                    variables[id]->stop();
-                    variables[id]->start(startTime);
-                }
+                variables[program[address + 1]] = new Variable(popStack());
 
                 address += 2;
 
                 break;
-            }
 
             case BytecodeConstants::GET_VARIABLE:
                 stack.push(variables[program[address + 1]]);
@@ -217,11 +199,6 @@ void Machine::execute(unsigned int address, const double startTime)
 
                 switch (program[address + 1])
                 {
-                    case BytecodeConstants::COPY:
-                        stack.push(((Variable*)inputs[0])->value);
-
-                        break;
-
                     case BytecodeConstants::LIST:
                     {
                         const unsigned int size = inputs[0]->getValue();

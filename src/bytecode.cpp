@@ -137,8 +137,7 @@ void CallNative::output(std::ofstream& stream) const
 {
     unsigned char id;
 
-    if (function == "copy") id = BytecodeConstants::COPY;
-    else if (function == "list") id = BytecodeConstants::LIST;
+    if (function == "list") id = BytecodeConstants::LIST;
     else if (function == "time") id = BytecodeConstants::TIME;
 
     else if (function == "add") id = BytecodeConstants::ADD;

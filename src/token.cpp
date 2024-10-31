@@ -381,7 +381,8 @@ namespace Parser
     
     Type* Call::type(const BytecodeTransformer* visitor) const
     {
-        if (name == "hold" ||
+        if (name == "time" ||
+            name == "hold" ||
             name == "lfo" ||
             name == "sweep" ||
             name == "sequence" ||
@@ -514,16 +515,6 @@ namespace Parser
 
     VariableInfo* Scope::addVariable(const std::string name, const Token* value)
     {
-        if (VariableInfo* info = getVariable(name))
-        {
-            if (info->value->type(visitor)->checkType(value->type(visitor)))
-            {
-                return info;
-            }
-
-            Utils::parseError("The type \"" + value->type(visitor)->name() + "\" does not match the type \"" + info->value->type(visitor)->name() + "\" of the target variable.", value->location);
-        }
-
         VariableInfo* info = new VariableInfo(visitor->newVariableId(), value);
 
         variables[name] = info;
@@ -587,8 +578,6 @@ namespace Parser
 
     void Scope::checkUses() const
     {
-        // add parse locations to all of these if possible?
-
         for (const std::pair<std::string, VariableInfo*>& pair : variables)
         {
             if (!variablesUsed.count(pair.first))
@@ -601,7 +590,7 @@ namespace Parser
         {
             if (!functionsUsed.count(pair.first))
             {
-                Utils::warning("Warning: Unused function \"" + pair.first + "\".");
+                Utils::warning("Warning: Unused function \"" + pair.first + "\"."); // this needs parselocation, store starting token in FunctionInfo
             }
         }
 
@@ -609,7 +598,7 @@ namespace Parser
         {
             if (!inputsUsed.count(pair.first))
             {
-                Utils::warning("Warning: Unused input \"" + pair.first + "\" in function \"" + currentFunction + "\"."); // may be an issue for top level defs
+                Utils::warning("Warning: Unused input \"" + pair.first + "\" in function \"" + currentFunction + "\".");
             }
         }
     }
@@ -743,7 +732,12 @@ namespace Parser
 
         if (const InputInfo* info = currentScope->getInput(token->variable))
         {
-            currentScope->block->addInstruction(new SetVariable(info->id));
+            Utils::parseError("Function inputs cannot be redefined.", token->location);
+        }
+
+        else if (VariableInfo* info = currentScope->getVariable(token->variable))
+        {
+            Utils::parseError("Variables cannot be redefined.", token->location);
         }
 
         else
@@ -780,12 +774,7 @@ namespace Parser
 
         bool audioSource = false;
 
-        if (token->name == "copy")
-        {
-            token->arguments->get("value", this);
-        }
-
-        else if (token->name == "time") {}
+        if (token->name == "time") {}
 
         else if (token->name == "sine" ||
                  token->name == "square" ||
@@ -990,8 +979,7 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Define* token)
     {
-        if (token->name == "copy" ||
-            token->name == "sine" ||
+        if (token->name == "sine" ||
             token->name == "square" ||
             token->name == "saw" ||
             token->name == "triangle" ||
