@@ -62,8 +62,3 @@ void Utils::machineError(const std::string message, const std::string file)
 {
     error("Virtual machine error in \"" + file + "\":\n\t" + message);
 }
-
-void Utils::runtimeError(const std::string message)
-{
-    error("Runtime error:\n\t" + message);
-}

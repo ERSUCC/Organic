@@ -48,8 +48,6 @@ ValueObject* ValueObject::expandVariable()
 
 List* ValueObject::getList()
 {
-    Utils::runtimeError("Expected list.");
-
     return nullptr;
 }
 
