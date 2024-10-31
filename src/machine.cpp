@@ -131,7 +131,7 @@ void Machine::execute(unsigned int address, const double startTime)
     {
         if (address >= program.size())
         {
-            return Utils::machineError("Invalid execution address.", path); // should this be less cs-y, eg. "bytecode/intermediate file) is invalid/corrupted"
+            return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.", path);
         }
 
         switch (program[address])
@@ -380,13 +380,8 @@ void Machine::execute(unsigned int address, const double startTime)
                     }
 
                     default:
-                    {
-                        std::ostringstream code;
+                        return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.", path);
 
-                        code << std::hex << program[address + 1];
-
-                        return Utils::machineError("Unrecognized function code \"" + code.str() + "\"", path); // same as other error
-                    }
                 }
 
                 address += 3;
@@ -402,7 +397,7 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
 
             default:
-                return Utils::machineError("Unrecognized instruction code.", path);
+                return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.", path);
 
         }
     }

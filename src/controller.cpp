@@ -276,11 +276,6 @@ void Sequence::reinit()
 
             break;
         }
-
-        default:
-            // should this be an error?
-
-            break;
     }
 
     controllers->getList()->objects[current]->start(repeatTime);
@@ -433,10 +428,9 @@ double Random::getValue()
 
         case TypeEnum::Linear:
             return current + (next - current) * (utils->time - startTime) / syncLength();
-
-        default:
-            return 0; // should this be an error?
     }
+
+    return 0;
 }
 
 void Random::init()

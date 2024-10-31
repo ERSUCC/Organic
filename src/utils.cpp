@@ -45,7 +45,7 @@ void Utils::error(const std::string message)
 
 void Utils::argumentError(const std::string message)
 {
-    error("Argument error: " + message);
+    error("Argument error:\n\t" + message);
 }
 
 void Utils::parseError(const std::string message, const SourceLocation location)
@@ -65,5 +65,5 @@ void Utils::machineError(const std::string message, const std::string file)
 
 void Utils::runtimeError(const std::string message)
 {
-    error("Runtime error: " + message);
+    error("Runtime error:\n\t" + message);
 }

@@ -590,7 +590,7 @@ namespace Parser
         {
             if (!functionsUsed.count(pair.first))
             {
-                Utils::warning("Warning: Unused function \"" + pair.first + "\"."); // this needs parselocation, store starting token in FunctionInfo
+                Utils::warning("Warning: Unused function \"" + pair.first + "\".");
             }
         }
 
@@ -881,7 +881,7 @@ namespace Parser
 
             currentScope = new Scope(this, currentScope);
 
-            token->arguments->get("function", this); // somehow specify function not something like lfo?
+            token->arguments->get("function", this);
 
             BytecodeBlock* block = currentScope->block;
 
