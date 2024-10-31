@@ -263,7 +263,12 @@ void Blend::fillBuffer(double* buffer, const unsigned int bufferLength)
 {
     std::vector<ValueObject*> objects = audioSources->getList()->objects;
 
-    double positionValue = position->getValue() * (objects.size() - 1);
+    if (objects.empty())
+    {
+        return;
+    }
+
+    double positionValue = fmin(1, fmax(0, position->getValue())) * (objects.size() - 1);
 
     const unsigned int startIndex = positionValue;
 
