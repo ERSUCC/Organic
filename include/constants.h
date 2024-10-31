@@ -2,7 +2,7 @@
 
 struct BytecodeConstants
 {
-    static constexpr char* OBC_ID = "BACH";
+    static constexpr char OBC_ID[] = "BACH";
     static constexpr unsigned int OBC_ID_LENGTH = 4;
     static constexpr unsigned int HEADER_LENGTH = 5;
 
