@@ -134,7 +134,9 @@ Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
 
 double Sequence::syncLength()
 {
-    if (controllers->getList()->objects.empty())
+    const std::vector<ValueObject*>& objects = controllers->getList()->objects;
+
+    if (objects.empty())
     {
         return 0;
     }
@@ -143,22 +145,22 @@ double Sequence::syncLength()
 
     if (order->getValue() == OrderEnum::PingPong)
     {
-        length += controllers->getList()->objects[0]->syncLength();
+        length += objects[0]->syncLength();
 
-        for (unsigned int i = 1; i < controllers->getList()->objects.size() - 1; i++)
+        for (unsigned int i = 1; i < objects.size() - 1; i++)
         {
-            length += controllers->getList()->objects[i]->syncLength() * 2;
+            length += objects[i]->syncLength() * 2;
         }
 
-        if (controllers->getList()->objects.size() > 1)
+        if (objects.size() > 1)
         {
-            length += controllers->getList()->objects.back()->syncLength();
+            length += objects.back()->syncLength();
         }
     }
 
     else
     {
-        for (ValueObject* controller : controllers->getList()->objects)
+        for (ValueObject* controller : objects)
         {
             length += controller->syncLength();
         }
@@ -169,18 +171,20 @@ double Sequence::syncLength()
 
 double Sequence::getValue()
 {
-    if (controllers->getList()->objects.empty())
+    const std::vector<ValueObject*>& objects = controllers->getList()->objects;
+
+    if (objects.empty())
     {
         return 0;
     }
 
-    if (!controllers->getList()->objects[current]->enabled)
+    if (!objects[current]->enabled)
     {
         last = current;
 
         if (++switches <= max_switches)
         {
-            repeat(repeatTime + controllers->getList()->objects[current]->syncLength());
+            repeat(repeatTime + objects[current]->syncLength());
         }
 
         else
@@ -189,12 +193,14 @@ double Sequence::getValue()
         }
     }
 
-    return controllers->getList()->objects[current]->getValue();
+    return objects[current]->getValue();
 }
 
 void Sequence::init()
 {
-    if (controllers->getList()->objects.empty())
+    const std::vector<ValueObject*>& objects = controllers->getList()->objects;
+
+    if (objects.empty())
     {
         return;
     }
@@ -203,23 +209,23 @@ void Sequence::init()
 
     chosen.clear();
 
-    udist = std::uniform_int_distribution<>(0, controllers->getList()->objects.size() - 1);
+    udist = std::uniform_int_distribution<>(0, objects.size() - 1);
 
     const unsigned int orderNum = (unsigned int)order->getValue();
 
     if (orderNum == OrderEnum::PingPong)
     {
-        max_switches = controllers->getList()->objects.size() * 2 - 2;
+        max_switches = objects.size() * 2 - 2;
     }
 
     else
     {
-        max_switches = controllers->getList()->objects.size() - 1;
+        max_switches = objects.size() - 1;
     }
 
     if (orderNum == OrderEnum::Backwards)
     {
-        current = controllers->getList()->objects.size() - 1;
+        current = objects.size() - 1;
     }
 
     else if (orderNum == OrderEnum::Random)
@@ -228,7 +234,7 @@ void Sequence::init()
 
         if (current == last)
         {
-            current = (current + 1) % controllers->getList()->objects.size();
+            current = (current + 1) % objects.size();
         }
 
         chosen.insert(current);
@@ -239,12 +245,14 @@ void Sequence::init()
         current = 0;
     }
 
-    controllers->getList()->objects[current]->start(startTime);
+    objects[current]->start(startTime);
 }
 
 void Sequence::reinit()
 {
-    if (controllers->getList()->objects.empty())
+    const std::vector<ValueObject*>& objects = controllers->getList()->objects;
+
+    if (objects.empty())
     {
         return;
     }
@@ -252,7 +260,7 @@ void Sequence::reinit()
     switch ((unsigned int)order->getValue())
     {
         case OrderEnum::Forwards:
-            current = (current + 1) % controllers->getList()->objects.size();
+            current = (current + 1) % objects.size();
 
             break;
 
@@ -262,7 +270,7 @@ void Sequence::reinit()
 
             if (current < 0)
             {
-                current = controllers->getList()->objects.size() - 1;
+                current = objects.size() - 1;
             }
 
             break;
@@ -270,7 +278,7 @@ void Sequence::reinit()
 
         case OrderEnum::PingPong:
         {
-            if ((direction == -1 && current <= 0) || current >= controllers->getList()->objects.size() - 1)
+            if ((direction == -1 && current <= 0) || current >= objects.size() - 1)
             {
                 direction *= -1;
             }
@@ -282,13 +290,13 @@ void Sequence::reinit()
 
         case OrderEnum::Random:
         {
-            if (chosen.size() < controllers->getList()->objects.size())
+            if (chosen.size() < objects.size())
             {
                 current = udist(utils->rng);
 
                 while (chosen.count(current))
                 {
-                    current = (current + 1) % controllers->getList()->objects.size();
+                    current = (current + 1) % objects.size();
                 }
 
                 chosen.insert(current);
@@ -298,7 +306,7 @@ void Sequence::reinit()
         }
     }
 
-    controllers->getList()->objects[current]->start(repeatTime);
+    objects[current]->start(repeatTime);
 }
 
 Repeat::Repeat(ValueObject* value, ValueObject* repeats) :

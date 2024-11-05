@@ -2,6 +2,7 @@
 
 #include <random>
 #include <unordered_set>
+#include <vector>
 
 #include "object.h"
 

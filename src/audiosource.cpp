@@ -261,7 +261,7 @@ void Blend::init()
 
 void Blend::fillBuffer(double* buffer, const unsigned int bufferLength)
 {
-    std::vector<ValueObject*> objects = audioSources->getList()->objects;
+    const std::vector<ValueObject*>& objects = audioSources->getList()->objects;
 
     if (objects.empty())
     {
