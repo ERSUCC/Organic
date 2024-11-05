@@ -1,80 +1,25 @@
 time = 50
-
 base = 110
-freq = base
 
-doom = 1
+doom = sequence(values: [
+    hold(value: 1, length: time * 11 + 2000),
+    sweep(from: 1, to: 0, length: 10000)
+])
 
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
+add-overtone(overtone) = {
+    triangle(volume: 0.5, frequency: (base * overtone) * doom)
+}
 
-    freq = #freq + base
-})
+add-overtone(overtone: 1)
 
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time * 2)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time * 3)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time * 4)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time * 5)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time * 6)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time * 7)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time * 8)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time * 9)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-
-    freq = #freq + base
-}, delay: time * 10)
-
-perform(function: {
-    triangle(volume: 1, frequency: #freq * doom)
-}, delay: time * 11)
-
-perform(function: {
-    doom = sweep(from: 1, to: 0, length: 10000)
-}, delay: time * 11 + 2000)
+perform(function: add-overtone(overtone: 2), delay: time, repeats: 1)
+perform(function: add-overtone(overtone: 3), delay: time * 2, repeats: 1)
+perform(function: add-overtone(overtone: 4), delay: time * 3, repeats: 1)
+perform(function: add-overtone(overtone: 5), delay: time * 4, repeats: 1)
+perform(function: add-overtone(overtone: 6), delay: time * 5, repeats: 1)
+perform(function: add-overtone(overtone: 7), delay: time * 6, repeats: 1)
+perform(function: add-overtone(overtone: 8), delay: time * 7, repeats: 1)
+perform(function: add-overtone(overtone: 9), delay: time * 8, repeats: 1)
+perform(function: add-overtone(overtone: 10), delay: time * 9, repeats: 1)
+perform(function: add-overtone(overtone: 11), delay: time * 10, repeats: 1)
+perform(function: add-overtone(overtone: 12), delay: time * 11, repeats: 1)

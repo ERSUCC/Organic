@@ -9,17 +9,17 @@ phase_length = 8000
 note_length = repeat(value: lfo(from: 50, to: 250, length: phase_length))
 note_attack = note_length / 4
 
-spread-saw(volume: repeat(value: sequence(values: (
+spread-saw(volume: repeat(value: sequence(values: [
     sweep(from: 0, to: 0.5, length: note_attack),
     sweep(from: 0.5, to: 0, length: note_length - note_attack)
-))), frequency: 220, spread: repeat(value: lfo(from: 1, to: 7, length: phase_length)))
+])), frequency: 220, spread: repeat(value: lfo(from: 1, to: 7, length: phase_length)))
 
-spread-saw(volume: repeat(value: sequence(values: (
+spread-saw(volume: repeat(value: sequence(values: [
     sweep(from: 0, to: 0.3, length: note_attack),
     sweep(from: 0.3, to: 0, length: note_length - note_attack)
-))), frequency: 330, spread: repeat(value: lfo(from: 1, to: 7, length: phase_length)))
+])), frequency: 330, spread: repeat(value: lfo(from: 1, to: 7, length: phase_length)))
 
-spread-saw(volume: repeat(value: sequence(values: (
+spread-saw(volume: repeat(value: sequence(values: [
     sweep(from: 0, to: 0.3, length: note_attack),
     sweep(from: 0.3, to: 0, length: note_length - note_attack)
-))), frequency: 385, spread: repeat(value: lfo(from: 1, to: 7, length: phase_length)))
+])), frequency: 385, spread: repeat(value: lfo(from: 1, to: 7, length: phase_length)))

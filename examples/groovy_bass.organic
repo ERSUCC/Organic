@@ -1,30 +1,30 @@
 note_attack = 15
 note_length = 100
 
-peak = repeat(value: sequence(values: (
+peak = repeat(value: sequence(values: [
     hold(value: 0.5, length: note_length),
     hold(value: 0.5, length: note_length),
     hold(value: 1, length: note_length),
     hold(value: 1, length: note_length)
-), order: sequence-random))
+], order: sequence-random))
 
-attack = repeat(value: sequence(values: (
+attack = repeat(value: sequence(values: [
     sweep(from: 0, to: peak, length: note_attack),
     sweep(from: peak, to: 0, length: note_length - note_attack)
-))) * 0.5
+])) * 0.5
 
 kick_attack = 10
 kick_decay = 100
 
-kick_volume = repeat(value: sequence(values: (
+kick_volume = repeat(value: sequence(values: [
     sweep(from: 0, to: 2, length: kick_attack),
     sweep(from: 2, to: 0, length: kick_decay),
     hold(value: 0, length: (note_length * 4) - (kick_attack + kick_decay))
-)))
+]))
 
 sidechain = limit(value: attack - kick_volume / 2, min: 0, max: 1)
 
-saw(frequency: 55, volume: sidechain)
-saw(frequency: 110, volume: sidechain)
+square(frequency: 55, volume: sidechain)
+square(frequency: 110, volume: sidechain)
 
 sine(frequency: 55, volume: kick_volume)

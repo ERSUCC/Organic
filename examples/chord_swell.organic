@@ -1,12 +1,8 @@
 note_length = 32000
-max_volume = 0.5
 
-swell = repeat(value: sequence(values: (
-    sweep(from: 0, to: max_volume, length: note_length / 2),
-    sweep(from: max_volume, to: 0, length: note_length / 2)
-)))
+swell = repeat(value: lfo(from: 0, to: 1, length: note_length))
 
-sine(frequency: repeat(value: sequence(values: (
+sine(frequency: repeat(value: sequence(values: [
     hold(value: af2, length: note_length),
     hold(value: g2, length: note_length),
     hold(value: c3, length: note_length),
@@ -14,34 +10,34 @@ sine(frequency: repeat(value: sequence(values: (
     hold(value: c3, length: note_length),
     hold(value: c3, length: note_length),
     hold(value: g2, length: note_length)
-))), volume: swell)
+])), volume: swell * 0.75)
 
-sine(frequency: repeat(value: sequence(values: (
-    hold(value: c3, length: note_length),
-    hold(value: c3, length: note_length),
-    hold(value: d3, length: note_length),
-    hold(value: d3, length: note_length),
-    hold(value: f3, length: note_length),
-    hold(value: ef3, length: note_length),
-    hold(value: d3, length: note_length)
-))), volume: swell * 0.5)
+sine(frequency: repeat(value: sequence(values: [
+    hold(value: c4, length: note_length),
+    hold(value: c4, length: note_length),
+    hold(value: d4, length: note_length),
+    hold(value: d4, length: note_length),
+    hold(value: f4, length: note_length),
+    hold(value: ef4, length: note_length),
+    hold(value: d4, length: note_length)
+])), volume: swell)
 
-sine(frequency: repeat(value: sequence(values: (
-    hold(value: ef3, length: note_length),
-    hold(value: ef3, length: note_length),
-    hold(value: f3, length: note_length),
-    hold(value: g3, length: note_length),
-    hold(value: af3, length: note_length),
-    hold(value: g3, length: note_length),
-    hold(value: f3, length: note_length)
-))), volume: swell * 0.5)
+sine(frequency: repeat(value: sequence(values: [
+    hold(value: ef4, length: note_length),
+    hold(value: ef4, length: note_length),
+    hold(value: f4, length: note_length),
+    hold(value: g4, length: note_length),
+    hold(value: af4, length: note_length),
+    hold(value: g4, length: note_length),
+    hold(value: f4, length: note_length)
+])), volume: swell)
 
-sine(frequency: repeat(value: sequence(values: (
-    hold(value: g3, length: note_length),
-    hold(value: g3, length: note_length),
-    hold(value: c4, length: note_length),
-    hold(value: c4, length: note_length),
-    hold(value: c4, length: note_length),
-    hold(value: c4, length: note_length),
-    hold(value: b3, length: note_length)
-))), volume: swell * 0.5)
+sine(frequency: repeat(value: sequence(values: [
+    hold(value: g4, length: note_length),
+    hold(value: g4, length: note_length),
+    hold(value: c5, length: note_length),
+    hold(value: c5, length: note_length),
+    hold(value: c5, length: note_length),
+    hold(value: c5, length: note_length),
+    hold(value: b4, length: note_length)
+])), volume: swell * 0.5)
