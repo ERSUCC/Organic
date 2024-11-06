@@ -10,7 +10,7 @@ struct Sync
     void repeat(double time);
     void stop();
 
-    virtual double syncLength();
+    virtual double syncLength() const;
 
     double startTime = 0;
     double repeatTime = 0;
@@ -64,7 +64,7 @@ struct Variable : public ValueObject
 {
     Variable(ValueObject* value);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
     ValueObject* expandVariable() override;

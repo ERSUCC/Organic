@@ -3,7 +3,7 @@
 ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
     value1(value1), value2(value2) {}
 
-double ValueCombination::syncLength()
+double ValueCombination::syncLength() const
 {
     return value1->syncLength();
 }
@@ -132,7 +132,7 @@ double ValueGreaterEqual::getValueInternal()
 Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
     controllers(controllers), order(order) {}
 
-double Sequence::syncLength()
+double Sequence::syncLength() const
 {
     const std::vector<ValueObject*>& objects = controllers->getList()->objects;
 
@@ -312,7 +312,7 @@ void Sequence::reinit()
 Repeat::Repeat(ValueObject* value, ValueObject* repeats) :
     value(value), repeats(repeats) {}
 
-double Repeat::syncLength()
+double Repeat::syncLength() const
 {
     return value->syncLength() * repeats->getValue();
 }
@@ -359,7 +359,7 @@ double Value::getValue()
 Hold::Hold(ValueObject* value, ValueObject* length) :
     value(value), length(length) {}
 
-double Hold::syncLength()
+double Hold::syncLength() const
 {
     return length->getValue();
 }
@@ -383,7 +383,7 @@ void Hold::init()
 Sweep::Sweep(ValueObject* from, ValueObject* to, ValueObject* length) :
     from(from), to(to), length(length) {}
 
-double Sweep::syncLength()
+double Sweep::syncLength() const
 {
     return length->getValue();
 }
@@ -410,7 +410,7 @@ void Sweep::init()
 LFO::LFO(ValueObject* from, ValueObject* to, ValueObject* length) :
     from(from), to(to), length(length) {}
 
-double LFO::syncLength()
+double LFO::syncLength() const
 {
     return length->getValue();
 }
@@ -437,7 +437,7 @@ void LFO::init()
 Random::Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type) :
     from(from), to(to), length(length), type(type) {}
 
-double Random::syncLength()
+double Random::syncLength() const
 {
     return length->getValue();
 }
@@ -487,7 +487,7 @@ void Random::init()
 Limit::Limit(ValueObject* value, ValueObject* min, ValueObject* max) :
     value(value), min(min), max(max) {}
 
-double Limit::syncLength()
+double Limit::syncLength() const
 {
     return value->syncLength();
 }
@@ -526,7 +526,7 @@ void Limit::init()
 Trigger::Trigger(ValueObject* condition, ValueObject* value) :
     condition(condition), value(value) {}
 
-double Trigger::syncLength()
+double Trigger::syncLength() const
 {
     return value->syncLength();
 }
@@ -561,7 +561,7 @@ void Trigger::init()
 If::If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue) :
     condition(condition), trueValue(trueValue), falseValue(falseValue) {}
 
-double If::syncLength()
+double If::syncLength() const
 {
     return utils->infinity;
 }

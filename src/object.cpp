@@ -28,7 +28,7 @@ void Sync::stop()
     enabled = false;
 }
 
-double Sync::syncLength()
+double Sync::syncLength() const
 {
     return 0;
 }
@@ -82,7 +82,7 @@ List* List::getList()
 Variable::Variable(ValueObject* value) :
     value(value) {}
 
-double Variable::syncLength()
+double Variable::syncLength() const
 {
     return value->syncLength();
 }

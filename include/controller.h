@@ -10,7 +10,7 @@ struct ValueCombination : public ValueObject
 {
     ValueCombination(ValueObject* value1, ValueObject* value2);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
@@ -125,7 +125,7 @@ struct Sequence : public ValueObject
 
     Sequence(ValueObject* controllers, ValueObject* order);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
@@ -152,7 +152,7 @@ struct Repeat : public ValueObject
 {
     Repeat(ValueObject* value, ValueObject* repeats);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
@@ -180,7 +180,7 @@ struct Hold : public ValueObject
 {
     Hold(ValueObject* value, ValueObject* length);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
@@ -196,7 +196,7 @@ struct Sweep : public ValueObject
 {
     Sweep(ValueObject* from, ValueObject* to, ValueObject* length);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
@@ -213,7 +213,7 @@ struct LFO : public ValueObject
 {
     LFO(ValueObject* from, ValueObject* to, ValueObject* length);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
@@ -236,7 +236,7 @@ struct Random : public ValueObject
 
     Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
@@ -260,7 +260,7 @@ struct Limit : public ValueObject
 {
     Limit(ValueObject* value, ValueObject* min, ValueObject* max);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
@@ -277,7 +277,7 @@ struct Trigger : public ValueObject
 {
     Trigger(ValueObject* condition, ValueObject* value);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
@@ -295,7 +295,7 @@ struct If : public ValueObject
 {
     If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue);
 
-    double syncLength() override;
+    double syncLength() const override;
     double getValue() override;
 
 protected:
