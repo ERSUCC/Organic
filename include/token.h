@@ -223,6 +223,8 @@ namespace Parser
 
         void get(const std::string name, BytecodeTransformer* visitor, Type* expectedType = new Type(BasicType::Any));
 
+        bool has(const std::string name) const;
+
         void confirmEmpty() const;
 
         unsigned char count = 0;

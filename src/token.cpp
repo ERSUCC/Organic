@@ -334,6 +334,19 @@ namespace Parser
         visitor->currentScope->block->addInstruction(new StackPushDefault());
     }
 
+    bool ArgumentList::has(const std::string name) const
+    {
+        for (unsigned int i = 0; i < arguments.size(); i++)
+        {
+            if (arguments[i]->name == name)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     void ArgumentList::confirmEmpty() const
     {
         if (!arguments.empty())
@@ -875,6 +888,11 @@ namespace Parser
 
         else if (token->name == "perform")
         {
+            if (!token->arguments->has("function"))
+            {
+                return Utils::parseWarning("This function call does nothing and will be ignored.", token->location);
+            }
+
             token->arguments->get("interval", this, new Type(BasicType::Number));
             token->arguments->get("repeats", this, new Type(BasicType::Number));
             token->arguments->get("delay", this, new Type(BasicType::Number));
