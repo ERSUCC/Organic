@@ -40,17 +40,17 @@ namespace Parser
         return "";
     }
     
-    bool Type::checkType(const Type* other) const
+    bool Type::checkType(const Type* expected) const
     {
-        if (!other)
+        if (!expected)
         {
             return false;
         }
 
-        switch (primaryType)
+        switch (expected->primaryType)
         {
             case BasicType::None:
-                if (other->primaryType != BasicType::None)
+                if (primaryType != BasicType::None)
                 {
                     return false;
                 }
@@ -61,7 +61,7 @@ namespace Parser
                 break;
             
             case BasicType::SequenceOrder:
-                if (other->primaryType != BasicType::SequenceOrder)
+                if (primaryType != BasicType::SequenceOrder)
                 {
                     return false;
                 }
@@ -69,7 +69,7 @@ namespace Parser
                 break;
             
             case BasicType::RandomType:
-                if (other->primaryType != BasicType::RandomType)
+                if (primaryType != BasicType::RandomType)
                 {
                     return false;
                 }
@@ -77,7 +77,7 @@ namespace Parser
                 break;
             
             case BasicType::Number:
-                if (other->primaryType != BasicType::Number)
+                if (primaryType != BasicType::Number)
                 {
                     return false;
                 }
@@ -85,7 +85,7 @@ namespace Parser
                 break;
             
             case BasicType::Boolean:
-                if (other->primaryType != BasicType::Boolean)
+                if (primaryType != BasicType::Boolean)
                 {
                     return false;
                 }
@@ -93,7 +93,7 @@ namespace Parser
                 break;
 
             case BasicType::List:
-                if (other->primaryType != BasicType::List)
+                if (primaryType != BasicType::List)
                 {
                     return false;
                 }
@@ -101,7 +101,7 @@ namespace Parser
                 break;
 
             case BasicType::AudioSource:
-                if (other->primaryType != BasicType::AudioSource)
+                if (primaryType != BasicType::AudioSource)
                 {
                     return false;
                 }
@@ -109,7 +109,7 @@ namespace Parser
                 break;
 
             case BasicType::Effect:
-                if (other->primaryType != BasicType::Effect)
+                if (primaryType != BasicType::Effect)
                 {
                     return false;
                 }
@@ -119,10 +119,10 @@ namespace Parser
 
         if (subType)
         {
-            return subType->checkType(other->subType);
+            return subType->checkType(expected->subType);
         }
 
-        return !other->subType;
+        return !expected->subType;
     }
 
     Token::Token(const SourceLocation location, const bool topLevel) :
@@ -320,7 +320,7 @@ namespace Parser
 
                 const Type* argumentType = arguments[i]->value->type(visitor);
 
-                if (!expectedType->checkType(argumentType))
+                if (!argumentType->checkType(expectedType))
                 {
                     Utils::parseError("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", arguments[i]->value->location);
                 }
@@ -706,7 +706,7 @@ namespace Parser
 
         for (unsigned int i = 1; i < token->values.size(); i++)
         {
-            if (!token->values[0]->type(this)->checkType(token->values[i]->type(this)))
+            if (!token->values[i]->type(this)->checkType(token->values[0]->type(this)))
             {
                 Utils::parseError("All elements in a list must have the same type.", token->values[i]->location);
             }
@@ -725,7 +725,7 @@ namespace Parser
     {
         token->value->accept(this);
 
-        if ((new Type(BasicType::None))->checkType(token->value->type(this)))
+        if (token->value->type(this)->checkType(new Type(BasicType::None)))
         {
             Utils::parseError("Functions that return nothing cannot be assigned to a variable.", token->value->location);
         }

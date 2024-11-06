@@ -34,7 +34,7 @@ namespace Parser
 
         std::string name() const;
 
-        bool checkType(const Type* other) const;
+        bool checkType(const Type* expected) const;
 
         Type* subType;
 
