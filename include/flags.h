@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "bytecode.h"
-#include "parse.h"
 #include "utils.h"
 
 struct ProgramOptions
@@ -17,8 +15,6 @@ struct ProgramOptions
     bool setTime = false;
     bool setExport = false;
     bool setMono = false;
-
-    std::string bytecodePath;
 };
 
 struct FlagParser

@@ -23,7 +23,26 @@ Organic::Organic(const std::string program, const std::vector<std::string>& flag
 
     options = (new FlagParser(program, flags))->getOptions();
 
-    machine = new Machine(options.bytecodePath);
+    const std::string bytecodePath = std::filesystem::path(program).replace_extension("obc").string();
+
+    std::ofstream stream(bytecodePath, std::ios::binary);
+
+    if (!stream.is_open())
+    {
+        Utils::error("Error creating intermediate file \"" + bytecodePath + "\".");
+    }
+
+    (new Parser::BytecodeTransformer(std::filesystem::path(program).parent_path().string(), stream, [](Parser::BytecodeTransformer* transformer, const std::string path)
+    {
+        for (const Parser::Token* instruction : (new Parser::Parser(path))->parse()->instructions)
+        {
+            instruction->accept(transformer);
+        }
+    }))->visit((new Parser::Parser(program))->parse());
+
+    stream.close();
+
+    machine = new Machine(bytecodePath);
 }
 
 void Organic::start()

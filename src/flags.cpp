@@ -32,7 +32,7 @@ ProgramOptions FlagParser::getOptions()
                 options.time = std::stod(next, &end);
             }
 
-            catch (std::invalid_argument error)
+            catch (const std::invalid_argument& error)
             {
                 Utils::argumentError("Expected number, received \"" + next + "\".");
             }
@@ -77,8 +77,6 @@ ProgramOptions FlagParser::getOptions()
     {
         Utils::argumentError("Cannot export without a time limit.");
     }
-
-    options.bytecodePath = (new Parser::BytecodeTransformer(path))->transform((new Parser::Parser(path))->parse());
 
     return options;
 }

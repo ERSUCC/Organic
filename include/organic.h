@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -9,6 +10,8 @@
 
 #include "flags.h"
 #include "machine.h"
+#include "parse.h"
+#include "token.h"
 #include "utils.h"
 
 struct AudioData

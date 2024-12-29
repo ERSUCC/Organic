@@ -5,10 +5,10 @@ namespace Parser
     Parser::Parser(const std::string path) : path(path)
     {
         std::ifstream file(path);
-        
+
         if (!file.is_open())
         {
-            Utils::argumentError("Could not open \"" + path + "\".");
+            Utils::error("Could not open \"" + path + "\".");
         }
 
         std::getline(file, code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
@@ -229,6 +229,24 @@ namespace Parser
                 }
             }
 
+            else if (code[current] == '"')
+            {
+                nextCharacter();
+
+                std::string str;
+
+                while (code[current] != '"')
+                {
+                    str += code[current];
+
+                    nextCharacter();
+                }
+
+                tokens.push_back(new String(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), str));
+
+                nextCharacter();
+            }
+
             else if (isdigit(code[current]))
             {
                 std::string constant;
@@ -252,7 +270,7 @@ namespace Parser
                     nextCharacter();
                 }
 
-                if (!tokens.empty() && tokenIs<Subtract>(tokens.size() - 1) && (tokens.size() < 2 || (!tokenIs<String>(tokens.size() - 2) && !tokenIs<Value>(tokens.size() - 2))))
+                if (!tokens.empty() && tokenIs<Subtract>(tokens.size() - 1) && (tokens.size() < 2 || (!tokenIs<Identifier>(tokens.size() - 2) && !tokenIs<Value>(tokens.size() - 2))))
                 {
                     tokens[tokens.size() - 1] = new Value(SourceLocation(path, tokens.back()->location.line, tokens.back()->location.character, tokens.size() - 1, tokens.size()), "-" + constant, std::stod("-" + constant));
                 }
@@ -342,19 +360,19 @@ namespace Parser
 
                             else
                             {
-                                tokens.push_back(new String(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
+                                tokens.push_back(new Identifier(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
                             }
                         }
 
                         else
                         {
-                            tokens.push_back(new String(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
+                            tokens.push_back(new Identifier(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
                         }
                     }
 
                     else
                     {
-                        tokens.push_back(new String(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
+                        tokens.push_back(new Identifier(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
                     }
                 }
 
@@ -402,7 +420,7 @@ namespace Parser
 
     const Token* Parser::parseInstruction(unsigned int pos) const
     {
-        if (!tokenIs<String>(pos))
+        if (!tokenIs<Identifier>(pos))
         {
             tokenError(getToken(pos), "variable or function name");
         }
@@ -451,10 +469,10 @@ namespace Parser
         return nullptr;
     }
 
-    const Token* Parser::parseDefine(unsigned int pos) const
+    const Define* Parser::parseDefine(unsigned int pos) const
     {
         const BasicToken* name = getToken(pos);
-        
+
         pos += 2;
 
         std::vector<Input*> inputs;
@@ -465,7 +483,7 @@ namespace Parser
 
             do
             {
-                const String* input = getToken<String>(++pos);
+                const Identifier* input = getToken<Identifier>(++pos);
 
                 if (!input)
                 {
@@ -501,7 +519,7 @@ namespace Parser
         return new Define(SourceLocation(path, name->location.line, name->location.character, name->location.start, pos + 1), name->str, inputs, instructions);
     }
 
-    const Token* Parser::parseAssign(unsigned int pos) const
+    const Assign* Parser::parseAssign(unsigned int pos) const
     {
         const BasicToken* name = getToken(pos);
         const Token* value = parseExpression(pos + 2);
@@ -523,7 +541,7 @@ namespace Parser
 
             do
             {
-                const Argument* argument = (const Argument*)parseArgument(pos + 1);
+                const Argument* argument = parseArgument(pos + 1);
 
                 arguments.push_back(argument);
 
@@ -538,12 +556,42 @@ namespace Parser
 
         const BasicToken* str = getToken(start);
 
+        if (str->str == "include")
+        {
+            if (!topLevel)
+            {
+                Utils::parseError("Cannot call function \"include\" here.", str->location);
+            }
+
+            if (arguments.empty())
+            {
+                Utils::parseWarning("This include call is empty, it will have no effect.", str->location);
+            }
+
+            if (arguments[0]->name != "file")
+            {
+                Utils::parseError("Invalid input name \"" + arguments[0]->name + "\" for function \"include\".", arguments[0]->location);
+            }
+
+            if (arguments.size() > 1)
+            {
+                Utils::parseError("Invalid input name \"" + arguments[1]->name + "\" for function \"include\".", arguments[0]->location);
+            }
+
+            if (const String* file = dynamic_cast<const String*>(arguments[0]->value))
+            {
+                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), file->str);
+            }
+
+            Utils::parseError("Expected \"string\".", arguments[0]->value->location);
+        }
+
         return new Call(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), str->str, new ArgumentList(arguments, str->str), topLevel);
     }
 
-    const Token* Parser::parseArgument(unsigned int pos) const
+    const Argument* Parser::parseArgument(unsigned int pos) const
     {
-        if (!tokenIs<String>(pos))
+        if (!tokenIs<Identifier>(pos))
         {
             tokenError(getToken(pos), "input name");
         }
@@ -569,7 +617,7 @@ namespace Parser
         return parseTerms(pos);
     }
 
-    const Token* Parser::parseList(unsigned int pos) const
+    const List* Parser::parseList(unsigned int pos) const
     {
         const unsigned int start = pos;
 
@@ -695,7 +743,7 @@ namespace Parser
                 }
 
                 comparison = true;
-                
+
                 terms[i - 1] = new CallAlias(span, "greater", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
@@ -727,7 +775,7 @@ namespace Parser
                 }
 
                 comparison = true;
-                
+
                 terms[i - 1] = new CallAlias(span, "greaterequal", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
@@ -806,12 +854,12 @@ namespace Parser
 
     const Token* Parser::parseTerm(unsigned int pos) const
     {
-        if (tokenIs<Value>(pos))
+        if (tokenIs<Value>(pos) || tokenIs<String>(pos))
         {
             return getToken(pos);
         }
 
-        if (tokenIs<String>(pos))
+        if (tokenIs<Identifier>(pos))
         {
             if (tokenIs<OpenParenthesis>(pos + 1))
             {

@@ -9,6 +9,9 @@
 			"include": "#function"
 		},
 		{
+			"include": "#string"
+		},
+		{
 			"include": "#constant"
 		},
 		{
@@ -41,6 +44,15 @@
 							"name": "support.function.organic"
 						}
 					}
+				}
+			]
+		},
+		"string": {
+			"patterns": [
+				{
+					"name": "string.quoted.double.organic",
+					"begin": "\"",
+					"end": "\""
 				}
 			]
 		},

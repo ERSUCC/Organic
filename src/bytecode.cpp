@@ -14,7 +14,7 @@ std::vector<unsigned char> intToBytes(const unsigned int i)
             bytes[3]
         };
     }
-    
+
     return std::vector<unsigned char>
     {
         bytes[3],
@@ -211,15 +211,8 @@ void BytecodeBlock::output(std::ofstream& stream) const
     stream << BytecodeConstants::RETURN;
 }
 
-void BytecodeResolver::output(const std::string path, const unsigned char variables)
+void BytecodeResolver::output(std::ofstream& stream, const unsigned char variables)
 {
-    std::ofstream stream(path, std::ios::binary);
-
-    if (!stream.is_open())
-    {
-        return Utils::error("Error creating intermediate file \"" + path + "\".");
-    }
-
     stream << BytecodeConstants::OBC_ID << variables;
 
     unsigned int offset = BytecodeConstants::HEADER_LENGTH;
@@ -235,8 +228,6 @@ void BytecodeResolver::output(const std::string path, const unsigned char variab
     {
         block->output(stream);
     }
-
-    stream.close();
 }
 
 void BytecodeResolver::addBlock(BytecodeBlock* block)

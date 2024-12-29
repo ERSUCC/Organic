@@ -4,42 +4,45 @@ namespace Parser
 {
     Type::Type(const BasicType primaryType, Type* subType) :
         primaryType(primaryType), subType(subType) {}
-    
+
     std::string Type::name() const
     {
         switch (primaryType)
         {
             case BasicType::None:
                 return "nothing";
-            
+
             case BasicType::Any:
                 return "anything";
-            
+
             case BasicType::SequenceOrder:
                 return "sequence order constant";
-            
+
             case BasicType::RandomType:
                 return "random type constant";
-            
+
             case BasicType::Number:
                 return "number";
-            
+
             case BasicType::Boolean:
                 return "boolean";
-            
+
+            case BasicType::String:
+                return "string";
+
             case BasicType::List:
                 return "list of " + subType->name();
-            
+
             case BasicType::AudioSource:
                 return "audio source";
-            
+
             case BasicType::Effect:
                 return "effect";
         }
 
         return "";
     }
-    
+
     bool Type::checkType(const Type* expected) const
     {
         if (!expected)
@@ -56,10 +59,10 @@ namespace Parser
                 }
 
                 break;
-            
+
             case BasicType::Any:
                 break;
-            
+
             case BasicType::SequenceOrder:
                 if (primaryType != BasicType::SequenceOrder)
                 {
@@ -67,7 +70,7 @@ namespace Parser
                 }
 
                 break;
-            
+
             case BasicType::RandomType:
                 if (primaryType != BasicType::RandomType)
                 {
@@ -75,7 +78,7 @@ namespace Parser
                 }
 
                 break;
-            
+
             case BasicType::Number:
                 if (primaryType != BasicType::Number)
                 {
@@ -83,9 +86,17 @@ namespace Parser
                 }
 
                 break;
-            
+
             case BasicType::Boolean:
                 if (primaryType != BasicType::Boolean)
+                {
+                    return false;
+                }
+
+                break;
+
+            case BasicType::String:
+                if (primaryType != BasicType::String)
                 {
                     return false;
                 }
@@ -143,10 +154,10 @@ namespace Parser
 
     CloseParenthesis::CloseParenthesis(const SourceLocation location) :
         BasicToken(location, ")") {}
-    
+
     OpenSquareBracket::OpenSquareBracket(const SourceLocation location) :
         BasicToken(location, "[") {}
-    
+
     CloseSquareBracket::CloseSquareBracket(const SourceLocation location) :
         BasicToken(location, "]") {}
 
@@ -198,7 +209,7 @@ namespace Parser
     GreaterEqual::GreaterEqual(const SourceLocation location) :
         Operator(location, ">=") {}
 
-    String::String(const SourceLocation location, const std::string str) :
+    Identifier::Identifier(const SourceLocation location, const std::string str) :
         BasicToken(location, str) {}
 
     Value::Value(const SourceLocation location, const std::string str, const double value) :
@@ -216,7 +227,7 @@ namespace Parser
 
     NamedConstant::NamedConstant(const SourceLocation location, const std::string constant) :
         BasicToken(location, constant) {}
-    
+
     Type* NamedConstant::type(const BytecodeTransformer* visitor) const
     {
         if (str == "sequence-forwards" || str == "sequence-backwards" || str == "sequence-ping-pong" || str == "sequence-random")
@@ -269,15 +280,23 @@ namespace Parser
 
     Input::Input(const SourceLocation location, const std::string name) :
         BasicToken(location, name) {}
-    
+
     Type* Input::type(const BytecodeTransformer* visitor) const
     {
         return assumedType;
     }
 
+    String::String(const SourceLocation location, const std::string str) :
+        BasicToken(location, str) {}
+
+    Type* String::type(const BytecodeTransformer* visitor) const
+    {
+        return new Type(BasicType::String);
+    }
+
     Argument::Argument(const SourceLocation location, const std::string name, const Token* value) :
         Token(location), name(name), value(value) {}
-    
+
     ArgumentList::ArgumentList(const std::vector<const Argument*> arguments, const std::string name) :
         arguments(arguments), name(name)
     {
@@ -370,12 +389,12 @@ namespace Parser
 
     ParenthesizedExpression::ParenthesizedExpression(const SourceLocation location, const Token* value) :
         Token(location), value(value) {}
-    
+
     Type* ParenthesizedExpression::type(const BytecodeTransformer* visitor) const
     {
         return value->type(visitor);
     }
-    
+
     void ParenthesizedExpression::accept(BytecodeTransformer* visitor) const
     {
         visitor->visit(this);
@@ -391,7 +410,7 @@ namespace Parser
 
     Call::Call(const SourceLocation location, const std::string name, ArgumentList* arguments, const bool topLevel) :
         Token(location, topLevel), name(name), arguments(arguments) {}
-    
+
     Type* Call::type(const BytecodeTransformer* visitor) const
     {
         if (name == "time" ||
@@ -431,7 +450,7 @@ namespace Parser
 
         return new Type(BasicType::None);
     }
-    
+
     void Call::accept(BytecodeTransformer* visitor) const
     {
         visitor->visit(this);
@@ -439,7 +458,7 @@ namespace Parser
 
     CallAlias::CallAlias(const SourceLocation location, const std::string name, const std::vector<const Token*>& arguments) :
         Call(location, name, ArgumentList::constructAlias(arguments, name), false) {}
-    
+
     Type* CallAlias::type(const BytecodeTransformer* visitor) const
     {
         if (name == "add" ||
@@ -480,15 +499,23 @@ namespace Parser
 
         return instructions.back()->type(visitor);
     }
-    
+
     void Define::accept(BytecodeTransformer* visitor) const
+    {
+        visitor->visit(this);
+    }
+
+    Include::Include(const SourceLocation location, const std::string file) :
+        Token(location, true), file(file) {}
+
+    void Include::accept(BytecodeTransformer* visitor) const
     {
         visitor->visit(this);
     }
 
     VariableInfo::VariableInfo(const unsigned char id, const Token* value) :
         id(id), value(value) {}
-    
+
     FunctionInfo::FunctionInfo(Scope* scope, const Define* token) :
         scope(scope), token(token) {}
 
@@ -619,20 +646,12 @@ namespace Parser
     Program::Program(const std::vector<const Token*> instructions) :
         instructions(instructions) {}
 
-    BytecodeTransformer::BytecodeTransformer(const std::string sourcePath)
+    BytecodeTransformer::BytecodeTransformer(const std::string sourceDir, std::ofstream& outputStream, const std::function<void(BytecodeTransformer*, const std::string)> parseSource) :
+        sourceDir(sourceDir), outputStream(outputStream), parseSource(parseSource)
     {
-        outputPath = std::filesystem::path(sourcePath).replace_extension("obc").string();
-
         utils = Utils::get();
 
         currentScope = new Scope(this);
-    }
-
-    std::string BytecodeTransformer::transform(const Program* program)
-    {
-        visit(program);
-
-        return outputPath;
     }
 
     void BytecodeTransformer::visit(const Value* token)
@@ -1044,6 +1063,25 @@ namespace Parser
         currentScope = currentScope->parent;
     }
 
+    void BytecodeTransformer::visit(const Include* token)
+    {
+        const std::string relativePath = std::filesystem::weakly_canonical(std::filesystem::path(sourceDir) / token->file).string();
+
+        if (!std::filesystem::exists(relativePath))
+        {
+            Utils::error("Source file \"" + relativePath + "\" does not exist.");
+        }
+
+        if (!std::filesystem::is_regular_file(relativePath))
+        {
+            Utils::error("\"" + relativePath + "\" is not a file.");
+        }
+
+        sourceDir = std::filesystem::path(relativePath).parent_path().string();
+
+        parseSource(this, relativePath);
+    }
+
     void BytecodeTransformer::visit(const Program* token)
     {
         resolver->addBlock(currentScope->block);
@@ -1055,7 +1093,7 @@ namespace Parser
 
         currentScope->checkUses();
 
-        resolver->output(outputPath, nextVariable);
+        resolver->output(outputStream, nextVariable);
     }
 
     unsigned char BytecodeTransformer::newVariableId()

@@ -17,6 +17,11 @@ int main(int argc, char** argv)
         Utils::argumentError("Specified program file does not exist.");
     }
 
+    if (!std::filesystem::is_regular_file(argv[1]))
+    {
+        Utils::argumentError("Specified program is not a file.");
+    }
+
     const std::string path = std::filesystem::canonical(argv[1]).string();
 
     std::vector<std::string> flags;

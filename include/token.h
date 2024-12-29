@@ -1,6 +1,8 @@
 #pragma once
 
 #include <filesystem>
+#include <fstream>
+#include <functional>
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
@@ -23,6 +25,7 @@ namespace Parser
         RandomType,
         Number,
         Boolean,
+        String,
         List,
         AudioSource,
         Effect
@@ -163,9 +166,9 @@ namespace Parser
         GreaterEqual(const SourceLocation location);
     };
 
-    struct String : public BasicToken
+    struct Identifier : public BasicToken
     {
-        String(const SourceLocation location, const std::string str);
+        Identifier(const SourceLocation location, const std::string str);
     };
 
     struct Value : public BasicToken
@@ -204,6 +207,13 @@ namespace Parser
         Type* type(const BytecodeTransformer* visitor) const override;
 
         Type* assumedType = nullptr;
+    };
+
+    struct String : public BasicToken
+    {
+        String(const SourceLocation location, const std::string str);
+
+        Type* type(const BytecodeTransformer* visitor) const override;
     };
 
     struct Argument : public Token
@@ -306,6 +316,15 @@ namespace Parser
         const std::vector<const Token*> instructions;
     };
 
+    struct Include : public Token
+    {
+        Include(const SourceLocation location, const std::string file);
+
+        void accept(BytecodeTransformer* visitor) const override;
+
+        const std::string file;
+    };
+
     struct Scope;
 
     struct VariableInfo
@@ -382,9 +401,7 @@ namespace Parser
 
     struct BytecodeTransformer
     {
-        BytecodeTransformer(const std::string sourcePath);
-
-        std::string transform(const Program* program);
+        BytecodeTransformer(const std::string sourceDir, std::ofstream& outputStream, const std::function<void(BytecodeTransformer*, const std::string)> parseSource);
 
         void visit(const Value* token);
         void visit(const NamedConstant* token);
@@ -395,16 +412,21 @@ namespace Parser
         void visit(const Call* token);
         void visit(const CallAlias* token);
         void visit(const Define* token);
+        void visit(const Include* token);
         void visit(const Program* token);
+
+        unsigned char newVariableId();
 
         Scope* currentScope;
 
         Type* expectedType = new Type(BasicType::Any);
 
-        unsigned char newVariableId();
-
     private:
-        std::string outputPath;
+        std::string sourceDir;
+
+        std::ofstream& outputStream;
+
+        const std::function<void(BytecodeTransformer*, const std::string)> parseSource;
 
         BytecodeResolver* resolver = new BytecodeResolver();
 

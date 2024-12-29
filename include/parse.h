@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -28,12 +29,12 @@ namespace Parser
         void tokenError(const BasicToken* token, const std::string message) const;
 
         const Token* parseInstruction(unsigned int pos) const;
-        const Token* parseDefine(unsigned int pos) const;
-        const Token* parseAssign(unsigned int pos) const;
+        const Define* parseDefine(unsigned int pos) const;
+        const Assign* parseAssign(unsigned int pos) const;
         const Token* parseCall(unsigned int pos, const bool topLevel) const;
-        const Token* parseArgument(unsigned int pos) const;
+        const Argument* parseArgument(unsigned int pos) const;
         const Token* parseExpression(unsigned int pos) const;
-        const Token* parseList(unsigned int pos) const;
+        const List* parseList(unsigned int pos) const;
         const Token* parseTerms(unsigned int pos) const;
         const Token* parseTerm(unsigned int pos) const;
 

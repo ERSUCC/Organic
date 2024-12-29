@@ -139,7 +139,7 @@ private:
 
 struct BytecodeResolver
 {
-    void output(const std::string path, const unsigned char variables);
+    void output(std::ofstream& stream, const unsigned char variables);
 
     void addBlock(BytecodeBlock* block);
 
