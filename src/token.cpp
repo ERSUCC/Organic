@@ -505,8 +505,8 @@ namespace Parser
         visitor->visit(this);
     }
 
-    Include::Include(const SourceLocation location, const std::string file) :
-        Token(location, true), file(file) {}
+    Include::Include(const SourceLocation location, const Program* program) :
+        Token(location, true), program(program) {}
 
     void Include::accept(BytecodeTransformer* visitor) const
     {
@@ -646,8 +646,8 @@ namespace Parser
     Program::Program(const SourceLocation location, const std::vector<const Token*> instructions) :
         Token(location, true), instructions(instructions) {}
 
-    BytecodeTransformer::BytecodeTransformer(std::ofstream& outputStream, const std::function<void(BytecodeTransformer*, const std::string)> parseSource) :
-        outputStream(outputStream), parseSource(parseSource)
+    BytecodeTransformer::BytecodeTransformer(std::ofstream& outputStream) :
+        outputStream(outputStream)
     {
         utils = Utils::get();
 
@@ -1065,35 +1065,24 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Include* token)
     {
-        const std::string relativePath = std::filesystem::weakly_canonical(std::filesystem::path(sourceDir) / token->file).string();
+        const std::string sourcePath = token->program->location.path;
 
-        if (!std::filesystem::exists(relativePath))
+        if (includedPaths.count(sourcePath))
         {
-            Utils::error("Source file \"" + relativePath + "\" does not exist.");
+            Utils::error("Source file \"" + sourcePath + "\" has already been included.");
         }
 
-        if (!std::filesystem::is_regular_file(relativePath))
+        includedPaths.insert(sourcePath);
+
+        for (const Token* instruction : token->program->instructions)
         {
-            Utils::error("\"" + relativePath + "\" is not a file.");
+            instruction->accept(this);
         }
-
-        if (includedPaths.count(relativePath))
-        {
-            Utils::error("Source file \"" + relativePath + "\" has already been included.");
-        }
-
-        includedPaths.insert(relativePath);
-
-        sourceDir = std::filesystem::path(relativePath).parent_path().string();
-
-        parseSource(this, relativePath);
     }
 
     void BytecodeTransformer::visit(const Program* token)
     {
         includedPaths.insert(token->location.path);
-
-        sourceDir = std::filesystem::path(token->location.path).parent_path().string();
 
         resolver->addBlock(currentScope->block);
 

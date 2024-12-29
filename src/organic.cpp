@@ -32,13 +32,7 @@ Organic::Organic(const std::string program, const std::vector<std::string>& flag
         Utils::error("Error creating intermediate file \"" + bytecodePath + "\".");
     }
 
-    (new Parser::BytecodeTransformer(stream, [](Parser::BytecodeTransformer* transformer, const std::string path)
-    {
-        for (const Parser::Token* instruction : (new Parser::Parser(path))->parse()->instructions)
-        {
-            instruction->accept(transformer);
-        }
-    }))->visit((new Parser::Parser(program))->parse());
+    (new Parser::BytecodeTransformer(stream))->visit((new Parser::Parser(program))->parse());
 
     stream.close();
 

@@ -2,7 +2,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <functional>
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
@@ -316,15 +315,6 @@ namespace Parser
         const std::vector<const Token*> instructions;
     };
 
-    struct Include : public Token
-    {
-        Include(const SourceLocation location, const std::string file);
-
-        void accept(BytecodeTransformer* visitor) const override;
-
-        const std::string file;
-    };
-
     struct Scope;
 
     struct VariableInfo
@@ -399,9 +389,18 @@ namespace Parser
         const std::vector<const Token*> instructions;
     };
 
+    struct Include : public Token
+    {
+        Include(const SourceLocation location, const Program* program);
+
+        void accept(BytecodeTransformer* visitor) const override;
+
+        const Program* program;
+    };
+
     struct BytecodeTransformer
     {
-        BytecodeTransformer(std::ofstream& outputStream, const std::function<void(BytecodeTransformer*, const std::string)> parseSource);
+        BytecodeTransformer(std::ofstream& outputStream);
 
         void visit(const Value* token);
         void visit(const NamedConstant* token);
@@ -423,10 +422,6 @@ namespace Parser
 
     private:
         std::ofstream& outputStream;
-
-        const std::function<void(BytecodeTransformer*, const std::string)> parseSource;
-
-        std::string sourceDir;
 
         std::unordered_set<std::string> includedPaths;
 

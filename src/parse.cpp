@@ -570,7 +570,9 @@ namespace Parser
 
             if (arguments.empty())
             {
-                Utils::parseWarning("This include call is empty, it will have no effect.", str->location);
+                Utils::parseWarning("This include call does not specify a source file, it will have no effect.", str->location);
+
+                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), new Program(SourceLocation("", 0, 0, 0, 0), {}));
             }
 
             if (arguments[0]->name != "file")
@@ -585,7 +587,19 @@ namespace Parser
 
             if (const String* file = dynamic_cast<const String*>(arguments[0]->value))
             {
-                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), file->str);
+                const std::string sourcePath = std::filesystem::weakly_canonical(std::filesystem::path(path).parent_path() / file->str).string();
+
+                if (!std::filesystem::exists(sourcePath))
+                {
+                    Utils::error("Source file \"" + sourcePath + "\" does not exist.");
+                }
+
+                if (!std::filesystem::is_regular_file(sourcePath))
+                {
+                    Utils::error("\"" + sourcePath + "\" is not a file.");
+                }
+
+                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), (new Parser(sourcePath))->parse());
             }
 
             Utils::parseError("Expected \"string\".", arguments[0]->value->location);
