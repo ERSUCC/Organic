@@ -392,16 +392,16 @@ namespace Parser
 
     };
 
-    struct Program
+    struct Program : public Token
     {
-        Program(const std::vector<const Token*> instructions);
+        Program(const SourceLocation location, const std::vector<const Token*> instructions);
 
         const std::vector<const Token*> instructions;
     };
 
     struct BytecodeTransformer
     {
-        BytecodeTransformer(const std::string sourceDir, std::ofstream& outputStream, const std::function<void(BytecodeTransformer*, const std::string)> parseSource);
+        BytecodeTransformer(std::ofstream& outputStream, const std::function<void(BytecodeTransformer*, const std::string)> parseSource);
 
         void visit(const Value* token);
         void visit(const NamedConstant* token);
@@ -422,11 +422,13 @@ namespace Parser
         Type* expectedType = new Type(BasicType::Any);
 
     private:
-        std::string sourceDir;
-
         std::ofstream& outputStream;
 
         const std::function<void(BytecodeTransformer*, const std::string)> parseSource;
+
+        std::string sourceDir;
+
+        std::unordered_set<std::string> includedPaths;
 
         BytecodeResolver* resolver = new BytecodeResolver();
 

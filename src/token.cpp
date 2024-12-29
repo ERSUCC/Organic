@@ -643,11 +643,11 @@ namespace Parser
         }
     }
 
-    Program::Program(const std::vector<const Token*> instructions) :
-        instructions(instructions) {}
+    Program::Program(const SourceLocation location, const std::vector<const Token*> instructions) :
+        Token(location, true), instructions(instructions) {}
 
-    BytecodeTransformer::BytecodeTransformer(const std::string sourceDir, std::ofstream& outputStream, const std::function<void(BytecodeTransformer*, const std::string)> parseSource) :
-        sourceDir(sourceDir), outputStream(outputStream), parseSource(parseSource)
+    BytecodeTransformer::BytecodeTransformer(std::ofstream& outputStream, const std::function<void(BytecodeTransformer*, const std::string)> parseSource) :
+        outputStream(outputStream), parseSource(parseSource)
     {
         utils = Utils::get();
 
@@ -1077,6 +1077,13 @@ namespace Parser
             Utils::error("\"" + relativePath + "\" is not a file.");
         }
 
+        if (includedPaths.count(relativePath))
+        {
+            Utils::error("Source file \"" + relativePath + "\" has already been included.");
+        }
+
+        includedPaths.insert(relativePath);
+
         sourceDir = std::filesystem::path(relativePath).parent_path().string();
 
         parseSource(this, relativePath);
@@ -1084,6 +1091,10 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Program* token)
     {
+        includedPaths.insert(token->location.path);
+
+        sourceDir = std::filesystem::path(token->location.path).parent_path().string();
+
         resolver->addBlock(currentScope->block);
 
         for (const Token* instruction : token->instructions)

@@ -33,7 +33,12 @@ namespace Parser
             current = token->location.end;
         }
 
-        return new Program(instructions);
+        if (instructions.empty())
+        {
+            return new Program(SourceLocation(path, 0, 0, 0, 0), instructions);
+        }
+
+        return new Program(SourceLocation(path, instructions[0]->location.line, instructions[0]->location.character, instructions[0]->location.start, instructions.back()->location.end), instructions);
     }
 
     void Parser::skipWhitespace()
@@ -575,7 +580,7 @@ namespace Parser
 
             if (arguments.size() > 1)
             {
-                Utils::parseError("Invalid input name \"" + arguments[1]->name + "\" for function \"include\".", arguments[0]->location);
+                Utils::parseError("Invalid input name \"" + arguments[1]->name + "\" for function \"include\".", arguments[1]->location);
             }
 
             if (const String* file = dynamic_cast<const String*>(arguments[0]->value))
