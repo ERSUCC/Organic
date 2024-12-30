@@ -570,7 +570,7 @@ namespace Parser
 
             if (arguments.empty())
             {
-                Utils::parseWarning("This include call does not specify a source file, it will have no effect.", str->location);
+                Utils::includeWarning("This include does not specify a source file, it will have no effect.", str->location);
 
                 return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), new Program(SourceLocation("", 0, 0, 0, 0), {}));
             }

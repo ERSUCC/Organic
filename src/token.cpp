@@ -1069,7 +1069,9 @@ namespace Parser
 
         if (includedPaths.count(sourcePath))
         {
-            Utils::includeError("Source file \"" + sourcePath + "\" has already been included.", token->location);
+            Utils::includeWarning("Source file \"" + sourcePath + "\" has already been included, this include will be ignored.", token->location);
+
+            return;
         }
 
         includedPaths.insert(sourcePath);

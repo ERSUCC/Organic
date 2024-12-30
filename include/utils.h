@@ -23,6 +23,7 @@ struct Utils
     static void warning(const std::string message);
 
     static void parseWarning(const std::string message, const SourceLocation& location);
+    static void includeWarning(const std::string message, const SourceLocation& location);
 
     static void error(const std::string message);
 
