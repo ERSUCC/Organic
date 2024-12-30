@@ -400,7 +400,7 @@ namespace Parser
 
     struct BytecodeTransformer
     {
-        BytecodeTransformer(std::ofstream& outputStream);
+        BytecodeTransformer(const std::string sourcePath, std::ofstream& outputStream);
 
         void visit(const Value* token);
         void visit(const NamedConstant* token);
@@ -415,6 +415,8 @@ namespace Parser
         void visit(const Program* token);
 
         unsigned char newVariableId();
+
+        const std::string sourcePath;
 
         Scope* currentScope;
 

@@ -620,7 +620,7 @@ namespace Parser
     {
         for (const std::pair<std::string, VariableInfo*>& pair : variables)
         {
-            if (!variablesUsed.count(pair.first))
+            if (!variablesUsed.count(pair.first) && pair.second->value->location.path == visitor->sourcePath)
             {
                 Utils::parseWarning("Unused variable \"" + pair.first + "\".", pair.second->value->location);
             }
@@ -628,7 +628,7 @@ namespace Parser
 
         for (const std::pair<std::string, FunctionInfo*>& pair : functions)
         {
-            if (!functionsUsed.count(pair.first))
+            if (!functionsUsed.count(pair.first) && pair.second->token->location.path == visitor->sourcePath)
             {
                 Utils::parseWarning("Warning: Unused function \"" + pair.first + "\".", pair.second->token->location);
             }
@@ -636,7 +636,7 @@ namespace Parser
 
         for (const std::pair<std::string, InputInfo*>& pair : inputs)
         {
-            if (!inputsUsed.count(pair.first))
+            if (!inputsUsed.count(pair.first) && pair.second->token->location.path == visitor->sourcePath)
             {
                 Utils::parseWarning("Warning: Unused input \"" + pair.first + "\".", pair.second->token->location);
             }
@@ -646,8 +646,8 @@ namespace Parser
     Program::Program(const SourceLocation location, const std::vector<const Token*> instructions) :
         Token(location, true), instructions(instructions) {}
 
-    BytecodeTransformer::BytecodeTransformer(std::ofstream& outputStream) :
-        outputStream(outputStream)
+    BytecodeTransformer::BytecodeTransformer(const std::string sourcePath, std::ofstream& outputStream) :
+        sourcePath(sourcePath), outputStream(outputStream)
     {
         utils = Utils::get();
 
