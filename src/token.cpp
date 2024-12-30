@@ -1069,7 +1069,7 @@ namespace Parser
 
         if (includedPaths.count(sourcePath))
         {
-            Utils::error("Source file \"" + sourcePath + "\" has already been included.");
+            Utils::includeError("Source file \"" + sourcePath + "\" has already been included.", token->location);
         }
 
         includedPaths.insert(sourcePath);

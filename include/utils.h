@@ -22,14 +22,16 @@ struct Utils
 
     static void warning(const std::string message);
 
-    static void parseWarning(const std::string message, const SourceLocation location);
+    static void parseWarning(const std::string message, const SourceLocation& location);
 
     static void error(const std::string message);
 
     static void argumentError(const std::string message);
-    static void parseError(const std::string message, const SourceLocation location);
+    static void parseError(const std::string message, const SourceLocation& location);
     static void parseError(const std::string message, const std::string file, const unsigned int line, const unsigned int character);
+    static void includeError(const std::string message, const SourceLocation& location);
     static void machineError(const std::string message, const std::string file);
+    static void fileError(const std::string message);
 
     bool littleEndian = false;
 
@@ -52,5 +54,5 @@ private:
     Utils();
 
     static Utils* instance;
-    
+
 };

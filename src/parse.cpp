@@ -8,7 +8,7 @@ namespace Parser
 
         if (!file.is_open())
         {
-            Utils::error("Could not open \"" + path + "\".");
+            Utils::fileError("Could not open \"" + path + "\".");
         }
 
         std::getline(file, code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
@@ -591,12 +591,12 @@ namespace Parser
 
                 if (!std::filesystem::exists(sourcePath))
                 {
-                    Utils::error("Source file \"" + sourcePath + "\" does not exist.");
+                    Utils::includeError("Source file \"" + sourcePath + "\" does not exist.", str->location);
                 }
 
                 if (!std::filesystem::is_regular_file(sourcePath))
                 {
-                    Utils::error("\"" + sourcePath + "\" is not a file.");
+                    Utils::includeError("\"" + sourcePath + "\" is not a file.", str->location);
                 }
 
                 return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), (new Parser(sourcePath))->parse());

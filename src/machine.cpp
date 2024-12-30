@@ -6,7 +6,7 @@ Machine::Machine(const std::string path) : path(path)
 
     if (!file.is_open())
     {
-        Utils::error("Could not open \"" + path + "\".");
+        Utils::fileError("Could not open \"" + path + "\".");
     }
 
     std::ostringstream stream(std::ios::binary);
@@ -138,7 +138,7 @@ void Machine::execute(unsigned int address, const double startTime)
         {
             case BytecodeConstants::RETURN:
                 return;
-            
+
             case BytecodeConstants::STACK_PUSH_DEFAULT:
                 stack.push(Default::get());
 
