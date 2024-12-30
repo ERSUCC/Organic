@@ -1,22 +1,5 @@
 #include "../include/organic.h"
 
-void rtAudioError(RtAudioErrorType type, const std::string& message)
-{
-    Utils::error(message);
-}
-
-int processAudio(void* output, void* input, unsigned int frames, double streamTime, RtAudioStreamStatus status, void* userData)
-{
-    AudioData* data = (AudioData*)userData;
-
-    data->callbackActive = true;
-
-    data->machine->updateEvents();
-    data->machine->processAudioSources((double*)output, frames);
-
-    return 0;
-}
-
 Organic::Organic(const std::filesystem::path& path, const std::vector<std::string>& flags)
 {
     utils = Utils::get();
@@ -59,7 +42,7 @@ void Organic::start()
 
 void Organic::startPlayback()
 {
-    RtAudio audio(RtAudio::Api::UNSPECIFIED, rtAudioError);
+    RtAudio audio(RtAudio::Api::UNSPECIFIED, std::bind(&Utils::error, std::placeholders::_2));
 
     const std::vector<unsigned int>& ids = audio.getDeviceIds();
 
@@ -73,11 +56,9 @@ void Organic::startPlayback()
     parameters.deviceId = audio.getDefaultOutputDevice();
     parameters.nChannels = utils->channels;
 
-    AudioData audioData { utils, machine };
-
     unsigned int bufferFrames = utils->bufferLength;
 
-    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, &processAudio, (void*)&audioData))
+    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, std::bind(&Organic::processAudio, this, std::placeholders::_1, std::placeholders::_3), nullptr))
     {
         Utils::error(audio.getErrorText());
     }
@@ -94,7 +75,7 @@ void Organic::startPlayback()
 
     machine->run();
 
-    while (!audioData.callbackActive) {}
+    while (!callbackActive) {}
 
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
@@ -147,4 +128,14 @@ void Organic::startExport()
     }
 
     file.save(options.exportPath);
+}
+
+int Organic::processAudio(void* output, unsigned int frames)
+{
+    callbackActive = true;
+
+    machine->updateEvents();
+    machine->processAudioSources((double*)output, frames);
+
+    return 0;
 }

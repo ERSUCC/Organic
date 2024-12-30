@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <filesystem>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -14,17 +15,6 @@
 #include "token.h"
 #include "utils.h"
 
-struct AudioData
-{
-    Utils* utils;
-    Machine* machine;
-
-    bool callbackActive = false;
-};
-
-void rtAudioError(RtAudioErrorType type, const std::string& message);
-int processAudio(void* output, void* input, unsigned int frames, double streamTime, RtAudioStreamStatus status, void* userData);
-
 struct Organic
 {
     Organic(const std::filesystem::path& path, const std::vector<std::string>& flags);
@@ -35,10 +25,14 @@ private:
     void startPlayback();
     void startExport();
 
+    int processAudio(void* output, unsigned int frames);
+
     Utils* utils;
 
     ProgramOptions options;
 
     Machine* machine;
+
+    bool callbackActive = false;
 
 };
