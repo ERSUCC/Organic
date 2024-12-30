@@ -42,13 +42,13 @@ void Organic::start()
 
 void Organic::startPlayback()
 {
-    RtAudio audio(RtAudio::Api::UNSPECIFIED, std::bind(&Utils::error, std::placeholders::_2));
+    RtAudio audio(RtAudio::Api::UNSPECIFIED, std::bind(&Utils::audioError, std::placeholders::_2));
 
     const std::vector<unsigned int>& ids = audio.getDeviceIds();
 
     if (ids.size() < 1)
     {
-        Utils::error("No audio device detected.");
+        Utils::audioError("No available audio devices detected.");
     }
 
     RtAudio::StreamParameters parameters;
@@ -60,7 +60,7 @@ void Organic::startPlayback()
 
     if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, std::bind(&Organic::processAudio, this, std::placeholders::_1, std::placeholders::_3), nullptr))
     {
-        Utils::error(audio.getErrorText());
+        Utils::audioError(audio.getErrorText());
     }
 
     if (audio.startStream())
@@ -70,7 +70,7 @@ void Organic::startPlayback()
             audio.closeStream();
         }
 
-        Utils::error(audio.getErrorText());
+        Utils::audioError(audio.getErrorText());
     }
 
     machine->run();

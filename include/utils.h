@@ -21,12 +21,8 @@ struct Utils
 {
     static Utils* get();
 
-    static void warning(const std::string message);
-
     static void parseWarning(const std::string message, const SourceLocation& location);
     static void includeWarning(const std::string message, const SourceLocation& location);
-
-    static void error(const std::string message);
 
     static void argumentError(const std::string message);
     static void parseError(const std::string message, const SourceLocation& location);
@@ -34,6 +30,7 @@ struct Utils
     static void includeError(const std::string message, const SourceLocation& location);
     static void machineError(const std::string message);
     static void fileError(const std::string message);
+    static void audioError(const std::string message);
 
     bool littleEndian = false;
 
@@ -54,6 +51,9 @@ struct Utils
 
 private:
     Utils();
+
+    static void warning(const std::string message);
+    static void error(const std::string message);
 
     static Utils* instance;
 

@@ -26,11 +26,6 @@ Utils* Utils::get()
     return instance;
 }
 
-void Utils::warning(const std::string message)
-{
-    std::cout << message << "\n";
-}
-
 void Utils::parseWarning(const std::string message, const SourceLocation& location)
 {
     warning("Parse warning in \"" + location.path.string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
@@ -39,13 +34,6 @@ void Utils::parseWarning(const std::string message, const SourceLocation& locati
 void Utils::includeWarning(const std::string message, const SourceLocation& location)
 {
     warning("Include warning in \"" + location.path.string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
-}
-
-void Utils::error(const std::string message)
-{
-    std::cout << message << "\n";
-
-    exit(1);
 }
 
 void Utils::argumentError(const std::string message)
@@ -76,4 +64,21 @@ void Utils::machineError(const std::string message)
 void Utils::fileError(const std::string message)
 {
     error("File error:\n\t" + message);
+}
+
+void Utils::audioError(const std::string message)
+{
+    error("Audio error:\n\t" + message);
+}
+
+void Utils::warning(const std::string message)
+{
+    std::cout << message << "\n";
+}
+
+void Utils::error(const std::string message)
+{
+    std::cout << message << "\n";
+
+    exit(1);
 }
