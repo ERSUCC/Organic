@@ -400,7 +400,7 @@ namespace Parser
 
     struct BytecodeTransformer
     {
-        BytecodeTransformer(const std::string sourcePath, std::ofstream& outputStream);
+        BytecodeTransformer(const std::filesystem::path& sourcePath, std::ofstream& outputStream);
 
         void visit(const Value* token);
         void visit(const NamedConstant* token);
@@ -416,7 +416,7 @@ namespace Parser
 
         unsigned char newVariableId();
 
-        const std::string sourcePath;
+        const std::filesystem::path& sourcePath;
 
         Scope* currentScope;
 
@@ -425,7 +425,7 @@ namespace Parser
     private:
         std::ofstream& outputStream;
 
-        std::unordered_set<std::string> includedPaths;
+        std::unordered_set<std::filesystem::path> includedPaths;
 
         BytecodeResolver* resolver = new BytecodeResolver();
 

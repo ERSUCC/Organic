@@ -1,12 +1,12 @@
 #include "../include/machine.h"
 
-Machine::Machine(const std::string path) : path(path)
+Machine::Machine(const std::filesystem::path& path)
 {
     std::ifstream file(path, std::ios::binary);
 
     if (!file.is_open())
     {
-        Utils::fileError("Could not open \"" + path + "\".");
+        Utils::fileError("Could not open \"" + path.string() + "\".");
     }
 
     std::ostringstream stream(std::ios::binary);
@@ -19,7 +19,7 @@ Machine::Machine(const std::string path) : path(path)
 
     if (str.size() <= BytecodeConstants::HEADER_LENGTH || str.compare(0, BytecodeConstants::OBC_ID_LENGTH, BytecodeConstants::OBC_ID))
     {
-        Utils::machineError("Invalid bytecode format.", path);
+        Utils::machineError("Invalid bytecode format.");
     }
 
     program = std::vector<unsigned char>(str.begin(), str.end());
@@ -27,6 +27,11 @@ Machine::Machine(const std::string path) : path(path)
     variables = (Variable**)calloc(program[BytecodeConstants::OBC_ID_LENGTH], sizeof(Variable*));
 
     utils = Utils::get();
+}
+
+Machine::~Machine()
+{
+    free(variables);
 }
 
 void Machine::run()
@@ -131,7 +136,7 @@ void Machine::execute(unsigned int address, const double startTime)
     {
         if (address >= program.size())
         {
-            return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.", path);
+            return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.");
         }
 
         switch (program[address])
@@ -380,7 +385,7 @@ void Machine::execute(unsigned int address, const double startTime)
                     }
 
                     default:
-                        return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.", path);
+                        return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.");
 
                 }
 
@@ -397,7 +402,7 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
 
             default:
-                return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.", path);
+                return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.");
 
         }
     }

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <stack>
@@ -17,7 +18,8 @@
 
 struct Machine
 {
-    Machine(const std::string path);
+    Machine(const std::filesystem::path& path);
+    ~Machine();
 
     void run();
 
@@ -33,8 +35,6 @@ private:
     void execute(unsigned int address, const double startTime);
 
     Utils* utils;
-
-    const std::string path;
 
     std::vector<unsigned char> program;
 

@@ -646,7 +646,7 @@ namespace Parser
     Program::Program(const SourceLocation location, const std::vector<const Token*> instructions) :
         Token(location, true), instructions(instructions) {}
 
-    BytecodeTransformer::BytecodeTransformer(const std::string sourcePath, std::ofstream& outputStream) :
+    BytecodeTransformer::BytecodeTransformer(const std::filesystem::path& sourcePath, std::ofstream& outputStream) :
         sourcePath(sourcePath), outputStream(outputStream)
     {
         utils = Utils::get();
@@ -1065,11 +1065,11 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Include* token)
     {
-        const std::string sourcePath = token->program->location.path;
+        const std::filesystem::path& sourcePath = token->program->location.path;
 
         if (includedPaths.count(sourcePath))
         {
-            Utils::includeWarning("Source file \"" + sourcePath + "\" has already been included, this include will be ignored.", token->location);
+            Utils::includeWarning("Source file \"" + sourcePath.string() + "\" has already been included, this include will be ignored.", token->location);
 
             return;
         }

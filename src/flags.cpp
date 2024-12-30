@@ -1,6 +1,6 @@
 #include "../include/flags.h"
 
-FlagParser::FlagParser(const std::string path, const std::vector<std::string>& flags) : path(path)
+FlagParser::FlagParser(const std::vector<std::string>& flags)
 {
     for (const std::string flag : flags)
     {

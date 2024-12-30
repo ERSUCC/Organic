@@ -13,7 +13,7 @@ namespace Parser
 {
     struct Parser
     {
-        Parser(const std::string path);
+        Parser(const std::filesystem::path& path);
 
         const Program* parse();
 
@@ -41,7 +41,7 @@ namespace Parser
 
         double getFrequency(const double note) const;
 
-        const std::string path;
+        const std::filesystem::path& path;
 
         std::string code;
 

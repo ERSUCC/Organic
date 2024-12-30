@@ -17,22 +17,22 @@ int processAudio(void* output, void* input, unsigned int frames, double streamTi
     return 0;
 }
 
-Organic::Organic(const std::string program, const std::vector<std::string>& flags)
+Organic::Organic(const std::filesystem::path& path, const std::vector<std::string>& flags)
 {
     utils = Utils::get();
 
-    options = (new FlagParser(program, flags))->getOptions();
+    options = (new FlagParser(flags))->getOptions();
 
-    const std::string bytecodePath = std::filesystem::path(program).replace_extension("obc").string();
+    const std::filesystem::path& bytecodePath = std::filesystem::weakly_canonical(path.parent_path() / (path.stem().string() + ".obc"));
 
     std::ofstream stream(bytecodePath, std::ios::binary);
 
     if (!stream.is_open())
     {
-        Utils::fileError("Error creating intermediate file \"" + bytecodePath + "\".");
+        Utils::fileError("Error creating intermediate file \"" + bytecodePath.string() + "\".");
     }
 
-    (new Parser::BytecodeTransformer(program, stream))->visit((new Parser::Parser(program))->parse());
+    (new Parser::BytecodeTransformer(path, stream))->visit((new Parser::Parser(path))->parse());
 
     stream.close();
 

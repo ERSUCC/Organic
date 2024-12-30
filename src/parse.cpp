@@ -2,13 +2,13 @@
 
 namespace Parser
 {
-    Parser::Parser(const std::string path) : path(path)
+    Parser::Parser(const std::filesystem::path& path) : path(path)
     {
         std::ifstream file(path);
 
         if (!file.is_open())
         {
-            Utils::fileError("Could not open \"" + path + "\".");
+            Utils::fileError("Could not open \"" + path.string() + "\".");
         }
 
         std::getline(file, code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
@@ -587,16 +587,16 @@ namespace Parser
 
             if (const String* file = dynamic_cast<const String*>(arguments[0]->value))
             {
-                const std::string sourcePath = std::filesystem::weakly_canonical(std::filesystem::path(path).parent_path() / file->str).string();
+                const std::filesystem::path& sourcePath = std::filesystem::weakly_canonical(path.parent_path() / file->str);
 
                 if (!std::filesystem::exists(sourcePath))
                 {
-                    Utils::includeError("Source file \"" + sourcePath + "\" does not exist.", str->location);
+                    Utils::includeError("Source file \"" + sourcePath.string() + "\" does not exist.", str->location);
                 }
 
                 if (!std::filesystem::is_regular_file(sourcePath))
                 {
-                    Utils::includeError("\"" + sourcePath + "\" is not a file.", str->location);
+                    Utils::includeError("\"" + sourcePath.string() + "\" is not a file.", str->location);
                 }
 
                 return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), (new Parser(sourcePath))->parse());

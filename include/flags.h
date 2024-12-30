@@ -19,14 +19,12 @@ struct ProgramOptions
 
 struct FlagParser
 {
-    FlagParser(const std::string path, const std::vector<std::string>& flags);
+    FlagParser(const std::vector<std::string>& flags);
 
     ProgramOptions getOptions();
 
 private:
     std::string nextOption(const std::string previous);
-
-    const std::string path;
 
     std::queue<std::string> flags;
 
