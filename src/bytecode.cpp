@@ -145,7 +145,6 @@ void CallNative::output(std::ofstream& stream) const
     else if (function == "saw") id = BytecodeConstants::SAW;
     else if (function == "noise") id = BytecodeConstants::NOISE;
     else if (function == "sample") id = BytecodeConstants::SAMPLE;
-    else if (function == "blend") id = BytecodeConstants::BLEND;
 
     else if (function == "hold") id = BytecodeConstants::HOLD;
     else if (function == "lfo") id = BytecodeConstants::LFO;

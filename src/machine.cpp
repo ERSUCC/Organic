@@ -370,11 +370,6 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
-                    case BytecodeConstants::BLEND:
-                        stack.push(new Blend(inputs[0], inputs[1]));
-
-                        break;
-
                     case BytecodeConstants::HOLD:
                         stack.push(new Hold(inputs[0], inputs[1]));
 

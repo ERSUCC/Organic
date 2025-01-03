@@ -458,8 +458,7 @@ namespace Parser
             name == "triangle" ||
             name == "saw" ||
             name == "noise" ||
-            name == "sample" ||
-            name == "blend")
+            name == "sample")
         {
             return new Type(BasicType::AudioSource);
         }
@@ -889,14 +888,6 @@ namespace Parser
             token->arguments->accept("volume", this, new Type(BasicType::Number));
         }
 
-        else if (token->name == "blend")
-        {
-            audioSource = true;
-
-            token->arguments->accept("position", this, new Type(BasicType::Number));
-            token->arguments->accept("sources", this, new Type(BasicType::List, new Type(BasicType::AudioSource)));
-        }
-
         else if (token->name == "hold")
         {
             token->arguments->accept("length", this, new Type(BasicType::Number));
@@ -1080,7 +1071,7 @@ namespace Parser
             token->name == "saw" ||
             token->name == "triangle" ||
             token->name == "noise" ||
-            token->name == "blend" ||
+            token->name == "sample" ||
             token->name == "hold" ||
             token->name == "lfo" ||
             token->name == "sweep" ||

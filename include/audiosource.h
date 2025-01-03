@@ -102,22 +102,3 @@ private:
     double index;
 
 };
-
-struct Blend : public AudioSource
-{
-    Blend(ValueObject* audioSources, ValueObject* position);
-    ~Blend();
-
-    void fillBuffer(double* buffer, const unsigned int bufferLength) override;
-
-protected:
-    void init() override;
-
-private:
-    ValueObject* audioSources;
-    ValueObject* position;
-
-    double* buffer1;
-    double* buffer2;
-
-};
