@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdlib>
+#include <vector>
+
 #include "utils.h"
 
 struct Sync
@@ -89,12 +92,14 @@ protected:
 
 struct Resource : public ValueObject
 {
-    Resource(const std::vector<double>& samples, const unsigned int sampleRate);
+    Resource(double* samples, const unsigned int length, const unsigned int sampleRate);
+    ~Resource();
 
     Resource* getResource() override;
 
-    const std::vector<double> samples;
+    double* samples;
 
+    const unsigned int length;
     const unsigned int sampleRate;
 };
 

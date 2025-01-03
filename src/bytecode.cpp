@@ -1,83 +1,48 @@
 #include "../include/bytecode.h"
 
-std::vector<unsigned char> unsignedIntToBytes(const unsigned int i)
+void writeUnsignedInt(std::ofstream& stream, const unsigned int i)
 {
     const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&i);
 
     if (Utils::get()->littleEndian)
     {
-        return std::vector<unsigned char>
-        {
-            bytes[0],
-            bytes[1],
-            bytes[2],
-            bytes[3]
-        };
+        stream << bytes[0] << bytes[1] << bytes[2] << bytes[3];
     }
 
-    return std::vector<unsigned char>
+    else
     {
-        bytes[3],
-        bytes[2],
-        bytes[1],
-        bytes[0]
-    };
+        stream << bytes[3] << bytes[2] << bytes[1] << bytes[0];
+    }
 }
 
-std::vector<unsigned char> intToBytes(const int i)
+void writeInt(std::ofstream& stream, const int i)
 {
     const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&i);
 
     if (Utils::get()->littleEndian)
     {
-        return std::vector<unsigned char>
-        {
-            bytes[0],
-            bytes[1],
-            bytes[2],
-            bytes[3]
-        };
+        stream << bytes[0] << bytes[1] << bytes[2] << bytes[3];
     }
 
-    return std::vector<unsigned char>
+    else
     {
-        bytes[3],
-        bytes[2],
-        bytes[1],
-        bytes[0]
-    };
+        stream << bytes[3] << bytes[2] << bytes[1] << bytes[0];
+    }
 }
 
-std::vector<unsigned char> doubleToBytes(const double d)
+void writeDouble(std::ofstream& stream, const double d)
 {
     const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&d);
 
     if (Utils::get()->littleEndian)
     {
-        return std::vector<unsigned char>
-        {
-            bytes[0],
-            bytes[1],
-            bytes[2],
-            bytes[3],
-            bytes[4],
-            bytes[5],
-            bytes[6],
-            bytes[7]
-        };
+        stream << bytes[0] << bytes[1] << bytes[2] << bytes[3] << bytes[4] << bytes[5] << bytes[6] << bytes[7];
     }
 
-    return std::vector<unsigned char>
+    else
     {
-        bytes[7],
-        bytes[6],
-        bytes[5],
-        bytes[4],
-        bytes[3],
-        bytes[2],
-        bytes[1],
-        bytes[0]
-    };
+        stream << bytes[7] << bytes[6] << bytes[5] << bytes[4] << bytes[3] << bytes[2] << bytes[1] << bytes[0];
+    }
 }
 
 BytecodeInstruction::BytecodeInstruction(const unsigned int size) :
@@ -106,10 +71,7 @@ void StackPushInt::output(std::ofstream& stream) const
 {
     stream << BytecodeConstants::STACK_PUSH_INT;
 
-    for (const unsigned char b : unsignedIntToBytes(value))
-    {
-        stream << b;
-    }
+    writeUnsignedInt(stream, value);
 }
 
 StackPushDouble::StackPushDouble(const double value) :
@@ -119,10 +81,7 @@ void StackPushDouble::output(std::ofstream& stream) const
 {
     stream << BytecodeConstants::STACK_PUSH_DOUBLE;
 
-    for (const unsigned char b : doubleToBytes(value))
-    {
-        stream << b;
-    }
+    writeDouble(stream, value);
 }
 
 StackPushAddress::StackPushAddress(const InstructionBlock* block) :
@@ -132,10 +91,7 @@ void StackPushAddress::output(std::ofstream& stream) const
 {
     stream << BytecodeConstants::STACK_PUSH_ADDRESS;
 
-    for (const unsigned char b : unsignedIntToBytes(block->offset))
-    {
-        stream << b;
-    }
+    writeUnsignedInt(stream, block->offset);
 }
 
 StackPushResource::StackPushResource(unsigned char resource) :
@@ -216,10 +172,7 @@ void CallUser::output(std::ofstream& stream) const
 {
     stream << BytecodeConstants::CALL_USER;
 
-    for (const unsigned char b : unsignedIntToBytes(function->offset))
-    {
-        stream << b;
-    }
+    writeUnsignedInt(stream, function->offset);
 
     stream << function->inputs;
 }
@@ -248,22 +201,12 @@ ResourceBlock::~ResourceBlock()
 
 void ResourceBlock::output(std::ofstream& stream) const
 {
-    for (const unsigned char b : unsignedIntToBytes(length))
-    {
-        stream << b;
-    }
-
-    for (const unsigned char b : unsignedIntToBytes(sampleRate))
-    {
-        stream << b;
-    }
+    writeUnsignedInt(stream, length);
+    writeUnsignedInt(stream, sampleRate);
 
     for (unsigned int i = 0; i < length; i++)
     {
-        for (const unsigned char b : intToBytes(samples[i]))
-        {
-            stream << b;
-        }
+        writeInt(stream, samples[i]);
     }
 }
 

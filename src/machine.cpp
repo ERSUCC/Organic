@@ -39,17 +39,17 @@ Machine::Machine(const std::filesystem::path& path)
 
         start += 8;
 
-        std::vector<double> samples;
+        double* samples = (double*)malloc(sizeof(double) * length);
 
         double max = 0;
 
         for (unsigned int j = 0; j < length; j++)
         {
-            samples.push_back((double)readInt(start) / INT_MAX);
+            samples[j] = (double)readInt(start) / INT_MAX;
 
-            if (fabs(samples.back()) > max)
+            if (fabs(samples[j]) > max)
             {
-                max = fabs(samples.back());
+                max = fabs(samples[j]);
             }
 
             start += 4;
@@ -60,7 +60,7 @@ Machine::Machine(const std::filesystem::path& path)
             samples[j] /= max;
         }
 
-        resources.push_back(new Resource(samples, sampleRate));
+        resources.push_back(new Resource(samples, length, sampleRate));
     }
 }
 

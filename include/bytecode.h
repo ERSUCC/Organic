@@ -12,9 +12,9 @@
 
 struct InstructionBlock;
 
-std::vector<unsigned char> unsignedIntToBytes(const unsigned int i);
-std::vector<unsigned char> intToBytes(const int i);
-std::vector<unsigned char> doubleToBytes(const double d);
+void writeUnsignedInt(std::ofstream& stream, const unsigned int i);
+void writeInt(std::ofstream& stream, const int i);
+void writeDouble(std::ofstream& stream, const double d);
 
 struct BytecodeInstruction
 {

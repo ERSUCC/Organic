@@ -57,7 +57,7 @@ Resource* ValueObject::getResource()
 }
 
 Default::Default() :
-    list(new List({})), resource(new Resource({}, utils->sampleRate)) {}
+    list(new List({})), resource(new Resource(nullptr, 0, utils->sampleRate)) {}
 
 Default* Default::get()
 {
@@ -127,8 +127,13 @@ void Variable::init()
     value->start(startTime);
 }
 
-Resource::Resource(const std::vector<double>& samples, const unsigned int sampleRate) :
-    samples(samples), sampleRate(sampleRate) {}
+Resource::Resource(double* samples, const unsigned int length, const unsigned int sampleRate) :
+    samples(samples), length(length), sampleRate(sampleRate) {}
+
+Resource::~Resource()
+{
+    free(samples);
+}
 
 Resource* Resource::getResource()
 {
