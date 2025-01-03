@@ -134,105 +134,45 @@ void Noise::prepareForEffects(const unsigned int bufferLength)
     }
 }
 
-Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, std::string path, unsigned int grains, bool looping) :
-    SingleAudioSource(volume, pan, effects), grains(grains, 0), looping(looping)
-{
-    AudioFile<double> file(path);
-
-    length = file.getNumSamplesPerChannel() * utils->channels;
-
-    data = (double*)malloc(sizeof(double) * length);
-
-    for (int i = 0; i < file.getNumSamplesPerChannel(); i++)
-    {
-        if (utils->channels == 1)
-        {
-            if (file.getNumChannels() == 1)
-            {
-                data[i] = file.samples[0][i];
-            }
-
-            else
-            {
-                data[i] = (file.samples[0][i] + file.samples[1][i]) / 2;
-            }
-        }
-
-        else
-        {
-            if (file.getNumChannels() == 1)
-            {
-                data[i * 2] = file.samples[0][i];
-                data[i * 2 + 1] = file.samples[0][i];
-            }
-
-            else
-            {
-                data[i * 2] = file.samples[0][i];
-                data[i * 2 + 1] = file.samples[1][i];
-            }
-        }
-    }
-}
-
-Sample::~Sample()
-{
-    free(data);
-}
+Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource) :
+    SingleAudioSource(volume, pan, effects), resource(resource) {}
 
 void Sample::init()
 {
-    std::fill(grains.begin(), grains.end(), 0);
+    volume->start(startTime);
+    pan->start(startTime);
+    resource->start(startTime);
 
     for (ValueObject* effect : effects->getList()->objects)
     {
         effect->start(startTime);
     }
+
+    index = 0;
 }
 
 void Sample::prepareForEffects(const unsigned int bufferLength)
 {
-    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
-    {
-        effectBuffer[i] = 0;
-    }
-
     const double volumeValue = volume->getValue();
     const double panValue = pan->getValue();
 
+    // improve resource/sample acquisition
     for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
-        for (unsigned int j = 0; j < grains.size(); j++)
+        const double value = volumeValue * resource->getResource()->samples[index];
+
+        if (utils->channels == 1)
         {
-            if (grains[j] >= length && looping)
-            {
-                grains[j] = 0;
-            }
-
-            if (grains[j] < length)
-            {
-                if (utils->channels == 1)
-                {
-                    effectBuffer[i] += volume->getValue() * data[grains[j]++];
-                }
-
-                else
-                {
-                    const double value = volumeValue * data[grains[j]++];
-                    const double value2 = volumeValue * data[grains[j]++];
-
-                    effectBuffer[i] += value * (1 - panValue) / 2;
-                    effectBuffer[i + 1] += value2 * (panValue + 1) / 2;
-                }
-            }
+            effectBuffer[i] = value;
         }
 
-        effectBuffer[i] /= grains.size();
-
-        if (utils->channels == 2)
+        else
         {
-            effectBuffer[i + 1] /= grains.size();
+            effectBuffer[i] = value * (1 - panValue) / 2;
+            effectBuffer[i + 1] = value * (panValue + 1) / 2;
         }
+
+        index = fmod(index + (double)resource->getResource()->sampleRate / utils->sampleRate, resource->getResource()->samples.size());
     }
 }
 

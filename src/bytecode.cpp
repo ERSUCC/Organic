@@ -1,6 +1,30 @@
 #include "../include/bytecode.h"
 
-std::vector<unsigned char> intToBytes(const unsigned int i)
+std::vector<unsigned char> unsignedIntToBytes(const unsigned int i)
+{
+    const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&i);
+
+    if (Utils::get()->littleEndian)
+    {
+        return std::vector<unsigned char>
+        {
+            bytes[0],
+            bytes[1],
+            bytes[2],
+            bytes[3]
+        };
+    }
+
+    return std::vector<unsigned char>
+    {
+        bytes[3],
+        bytes[2],
+        bytes[1],
+        bytes[0]
+    };
+}
+
+std::vector<unsigned char> intToBytes(const int i)
 {
     const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&i);
 
@@ -82,7 +106,7 @@ void StackPushInt::output(std::ofstream& stream) const
 {
     stream << BytecodeConstants::STACK_PUSH_INT;
 
-    for (const unsigned char b : intToBytes(value))
+    for (const unsigned char b : unsignedIntToBytes(value))
     {
         stream << b;
     }
@@ -101,17 +125,25 @@ void StackPushDouble::output(std::ofstream& stream) const
     }
 }
 
-StackPushAddress::StackPushAddress(const BytecodeBlock* block) :
+StackPushAddress::StackPushAddress(const InstructionBlock* block) :
     BytecodeInstruction(5), block(block) {}
 
 void StackPushAddress::output(std::ofstream& stream) const
 {
     stream << BytecodeConstants::STACK_PUSH_ADDRESS;
 
-    for (const unsigned char b : intToBytes(block->offset))
+    for (const unsigned char b : unsignedIntToBytes(block->offset))
     {
         stream << b;
     }
+}
+
+StackPushResource::StackPushResource(unsigned char resource) :
+    BytecodeInstruction(2), resource(resource) {}
+
+void StackPushResource::output(std::ofstream& stream) const
+{
+    stream << BytecodeConstants::STACK_PUSH_RESOURCE << resource;
 }
 
 SetVariable::SetVariable(const unsigned char variable) :
@@ -156,6 +188,7 @@ void CallNative::output(std::ofstream& stream) const
     else if (function == "triangle") id = BytecodeConstants::TRIANGLE;
     else if (function == "saw") id = BytecodeConstants::SAW;
     else if (function == "noise") id = BytecodeConstants::NOISE;
+    else if (function == "sample") id = BytecodeConstants::SAMPLE;
     else if (function == "blend") id = BytecodeConstants::BLEND;
 
     else if (function == "hold") id = BytecodeConstants::HOLD;
@@ -176,14 +209,14 @@ void CallNative::output(std::ofstream& stream) const
     stream << BytecodeConstants::CALL_NATIVE << id << inputs;
 }
 
-CallUser::CallUser(const BytecodeBlock* function) :
+CallUser::CallUser(const InstructionBlock* function) :
     BytecodeInstruction(6), function(function) {}
 
 void CallUser::output(std::ofstream& stream) const
 {
     stream << BytecodeConstants::CALL_USER;
 
-    for (const unsigned char b : intToBytes(function->offset))
+    for (const unsigned char b : unsignedIntToBytes(function->offset))
     {
         stream << b;
     }
@@ -191,17 +224,56 @@ void CallUser::output(std::ofstream& stream) const
     stream << function->inputs;
 }
 
-BytecodeBlock::BytecodeBlock(const unsigned char inputs) :
-    inputs(inputs) {}
-
-void BytecodeBlock::addInstruction(const BytecodeInstruction* instruction)
+ResourceBlock::ResourceBlock(const std::filesystem::path& path)
 {
-    instructions.push_back(instruction);
+    SndfileHandle* file = new SndfileHandle(path.string());
 
-    size += instruction->size;
+    length = file->frames() * file->channels();
+    sampleRate = file->samplerate();
+
+    samples = (int*)malloc(sizeof(int) * length);
+
+    if (file->read(samples, length) != length)
+    {
+        Utils::fileError("Could not read audio file \"" + path.string() + "\".");
+    }
+
+    size = length * 4 + 4;
 }
 
-void BytecodeBlock::output(std::ofstream& stream) const
+ResourceBlock::~ResourceBlock()
+{
+    free(samples);
+}
+
+void ResourceBlock::output(std::ofstream& stream) const
+{
+    for (const unsigned char b : unsignedIntToBytes(length))
+    {
+        stream << b;
+    }
+
+    for (const unsigned char b : unsignedIntToBytes(sampleRate))
+    {
+        stream << b;
+    }
+
+    for (unsigned int i = 0; i < length; i++)
+    {
+        for (const unsigned char b : intToBytes(samples[i]))
+        {
+            stream << b;
+        }
+    }
+}
+
+InstructionBlock::InstructionBlock(const unsigned char inputs) :
+    inputs(inputs)
+{
+    size = 1;
+}
+
+void InstructionBlock::output(std::ofstream& stream) const
 {
     for (const BytecodeInstruction* instruction : instructions)
     {
@@ -211,26 +283,48 @@ void BytecodeBlock::output(std::ofstream& stream) const
     stream << BytecodeConstants::RETURN;
 }
 
+void InstructionBlock::addInstruction(const BytecodeInstruction* instruction)
+{
+    instructions.push_back(instruction);
+
+    size += instruction->size;
+}
+
 void BytecodeResolver::output(std::ofstream& stream, const unsigned char variables)
 {
-    stream << BytecodeConstants::OBC_ID << variables;
+    stream << BytecodeConstants::OBC_ID << variables << (unsigned char)resourceBlocks.size();
 
     unsigned int offset = BytecodeConstants::HEADER_LENGTH;
 
-    for (BytecodeBlock* block : blocks)
+    for (ResourceBlock* block : resourceBlocks)
+    {
+        offset += block->size;
+    }
+
+    for (InstructionBlock* block : instructionBlocks)
     {
         block->offset = offset;
 
         offset += block->size;
     }
 
-    for (BytecodeBlock* block : blocks)
+    for (ResourceBlock* block : resourceBlocks)
+    {
+        block->output(stream);
+    }
+
+    for (InstructionBlock* block : instructionBlocks)
     {
         block->output(stream);
     }
 }
 
-void BytecodeResolver::addBlock(BytecodeBlock* block)
+void BytecodeResolver::addResourceBlock(ResourceBlock* block)
 {
-    blocks.push_back(block);
+    resourceBlocks.push_back(block);
+}
+
+void BytecodeResolver::addInstructionBlock(InstructionBlock* block)
+{
+    instructionBlocks.push_back(block);
 }

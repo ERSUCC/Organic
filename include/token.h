@@ -230,7 +230,8 @@ namespace Parser
 
         static ArgumentList* constructAlias(const std::vector<const Token*>& arguments, const std::string name);
 
-        void get(const std::string name, BytecodeTransformer* visitor, Type* expectedType = new Type(BasicType::Any));
+        const Token* get(const std::string name, BytecodeTransformer* visitor, Type* expectedType = new Type(BasicType::Any));
+        void accept(const std::string name, BytecodeTransformer* visitor, Type* expectedType = new Type(BasicType::Any));
 
         bool has(const std::string name) const;
 
@@ -364,7 +365,7 @@ namespace Parser
 
         const std::string currentFunction;
 
-        BytecodeBlock* block;
+        InstructionBlock* block;
 
         const std::vector<Input*> inputList;
 
@@ -426,6 +427,7 @@ namespace Parser
         std::ofstream& outputStream;
 
         std::unordered_set<std::filesystem::path> includedPaths;
+        std::unordered_map<std::filesystem::path, unsigned char> resources;
 
         BytecodeResolver* resolver = new BytecodeResolver();
 

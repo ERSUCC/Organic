@@ -27,6 +27,41 @@ Machine::Machine(const std::filesystem::path& path)
     variables = (Variable**)calloc(program[BytecodeConstants::OBC_ID_LENGTH], sizeof(Variable*));
 
     utils = Utils::get();
+
+    start = BytecodeConstants::OBC_ID_LENGTH + 2;
+
+    const unsigned int numResources = program[BytecodeConstants::OBC_ID_LENGTH + 1];
+
+    for (unsigned int i = 0; i < numResources; i++)
+    {
+        const unsigned int length = readUnsignedInt(start);
+        const unsigned int sampleRate = readUnsignedInt(start + 4);
+
+        start += 8;
+
+        std::vector<double> samples;
+
+        double max = 0;
+
+        for (unsigned int j = 0; j < length; j++)
+        {
+            samples.push_back((double)readInt(start) / INT_MAX);
+
+            if (fabs(samples.back()) > max)
+            {
+                max = fabs(samples.back());
+            }
+
+            start += 4;
+        }
+
+        for (unsigned int j = 0; j < length; j++)
+        {
+            samples[j] /= max;
+        }
+
+        resources.push_back(new Resource(samples, sampleRate));
+    }
 }
 
 Machine::~Machine()
@@ -36,7 +71,7 @@ Machine::~Machine()
 
 void Machine::run()
 {
-    execute(BytecodeConstants::HEADER_LENGTH, 0);
+    execute(start, 0);
 }
 
 void Machine::updateEvents()
@@ -67,7 +102,7 @@ void Machine::processAudioSources(double* buffer, const unsigned int bufferLengt
     }
 }
 
-unsigned int Machine::readInt(const unsigned int address) const
+unsigned int Machine::readUnsignedInt(const unsigned int address) const
 {
     unsigned char bytes[4];
 
@@ -88,6 +123,29 @@ unsigned int Machine::readInt(const unsigned int address) const
     }
 
     return *reinterpret_cast<unsigned int*>(bytes);
+}
+
+int Machine::readInt(const unsigned int address) const
+{
+    unsigned char bytes[4];
+
+    if (utils->littleEndian)
+    {
+        bytes[0] = program[address];
+        bytes[1] = program[address + 1];
+        bytes[2] = program[address + 2];
+        bytes[3] = program[address + 3];
+    }
+
+    else
+    {
+        bytes[0] = program[address + 3];
+        bytes[1] = program[address + 2];
+        bytes[2] = program[address + 1];
+        bytes[3] = program[address];
+    }
+
+    return *reinterpret_cast<int*>(bytes);
 }
 
 double Machine::readDouble(const unsigned int address) const
@@ -159,7 +217,7 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
 
             case BytecodeConstants::STACK_PUSH_INT:
-                stack.push(new Value(readInt(address + 1)));
+                stack.push(new Value(readUnsignedInt(address + 1)));
 
                 address += 5;
 
@@ -173,9 +231,16 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
 
             case BytecodeConstants::STACK_PUSH_ADDRESS:
-                stack.push(new Value(readInt(address + 1)));
+                stack.push(new Value(readUnsignedInt(address + 1)));
 
                 address += 5;
+
+                break;
+
+            case BytecodeConstants::STACK_PUSH_RESOURCE:
+                stack.push(resources[program[address + 1]]);
+
+                address += 2;
 
                 break;
 
@@ -300,6 +365,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
+                    case BytecodeConstants::SAMPLE:
+                        stack.push(new Sample(inputs[0], inputs[1], inputs[2], inputs[3]));
+
+                        break;
+
                     case BytecodeConstants::BLEND:
                         stack.push(new Blend(inputs[0], inputs[1]));
 
@@ -395,7 +465,7 @@ void Machine::execute(unsigned int address, const double startTime)
             }
 
             case BytecodeConstants::CALL_USER:
-                execute(readInt(address + 1), startTime);
+                execute(readUnsignedInt(address + 1), startTime);
 
                 address += 6;
 

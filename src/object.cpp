@@ -51,8 +51,13 @@ List* ValueObject::getList()
     return nullptr;
 }
 
+Resource* ValueObject::getResource()
+{
+    return nullptr;
+}
+
 Default::Default() :
-    list(new List({})) {}
+    list(new List({})), resource(new Resource({}, utils->sampleRate)) {}
 
 Default* Default::get()
 {
@@ -69,6 +74,11 @@ Default* Default::get()
 List* Default::getList()
 {
     return list;
+}
+
+Resource* Default::getResource()
+{
+    return resource;
 }
 
 List::List(const std::vector<ValueObject*> objects) :
@@ -107,9 +117,22 @@ List* Variable::getList()
     return value->getList();
 }
 
+Resource* Variable::getResource()
+{
+    return value->getResource();
+}
+
 void Variable::init()
 {
     value->start(startTime);
+}
+
+Resource::Resource(const std::vector<double>& samples, const unsigned int sampleRate) :
+    samples(samples), sampleRate(sampleRate) {}
+
+Resource* Resource::getResource()
+{
+    return this;
 }
 
 double Time::getValue()

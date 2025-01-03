@@ -325,7 +325,33 @@ namespace Parser
         return new ArgumentList(named, name);
     }
 
-    void ArgumentList::get(const std::string name, BytecodeTransformer* visitor, Type* expectedType)
+    // this method should be able to verify complex types like inputs without calling accept
+    const Token* ArgumentList::get(const std::string name, BytecodeTransformer* visitor, Type* expectedType)
+    {
+        count++;
+
+        for (unsigned int i = 0; i < arguments.size(); i++)
+        {
+            if (arguments[i]->name == name)
+            {
+                const Token* value = arguments[i]->value;
+                const Type* argumentType = value->type(visitor);
+
+                if (!argumentType->checkType(expectedType))
+                {
+                    Utils::parseError("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", value->location);
+                }
+
+                arguments.erase(arguments.begin() + i);
+
+                return value;
+            }
+        }
+
+        return nullptr;
+    }
+
+    void ArgumentList::accept(const std::string name, BytecodeTransformer* visitor, Type* expectedType)
     {
         count++;
 
@@ -432,6 +458,7 @@ namespace Parser
             name == "triangle" ||
             name == "saw" ||
             name == "noise" ||
+            name == "sample" ||
             name == "blend")
         {
             return new Type(BasicType::AudioSource);
@@ -525,7 +552,7 @@ namespace Parser
     Scope::Scope(BytecodeTransformer* visitor, Scope* parent, const std::string currentFunction, const std::vector<Input*> inputs) :
         visitor(visitor), parent(parent), currentFunction(currentFunction), inputList(inputs)
     {
-        block = new BytecodeBlock(inputs.size());
+        block = new InstructionBlock(inputs.size());
 
         for (Input* input : inputs)
         {
@@ -786,12 +813,12 @@ namespace Parser
             {
                 if (Type* type = input->type(this))
                 {
-                    token->arguments->get(input->str, this, type);
+                    token->arguments->accept(input->str, this, type);
                 }
 
                 else
                 {
-                    token->arguments->get(input->str, this);
+                    token->arguments->accept(input->str, this);
                 }
 
                 currentScope->block->addInstruction(new SetVariable(info->scope->getInput(input->str)->id));
@@ -815,94 +842,126 @@ namespace Parser
         {
             audioSource = true;
 
-            token->arguments->get("frequency", this, new Type(BasicType::Number));
-            token->arguments->get("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
-            token->arguments->get("pan", this, new Type(BasicType::Number));
-            token->arguments->get("volume", this, new Type(BasicType::Number));
+            token->arguments->accept("frequency", this, new Type(BasicType::Number));
+            token->arguments->accept("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
+            token->arguments->accept("pan", this, new Type(BasicType::Number));
+            token->arguments->accept("volume", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "noise")
         {
             audioSource = true;
 
-            token->arguments->get("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
-            token->arguments->get("pan", this, new Type(BasicType::Number));
-            token->arguments->get("volume", this, new Type(BasicType::Number));
+            token->arguments->accept("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
+            token->arguments->accept("pan", this, new Type(BasicType::Number));
+            token->arguments->accept("volume", this, new Type(BasicType::Number));
+        }
+
+        else if (token->name == "sample")
+        {
+            audioSource = true;
+
+            const String* str = dynamic_cast<const String*>(token->arguments->get("file", this, new Type(BasicType::String)));
+
+            const std::filesystem::path& path = std::filesystem::weakly_canonical(str->str);
+
+            if (!std::filesystem::exists(path))
+            {
+                Utils::includeError("Audio file \"" + path.string() + "\" does not exist.", str->location);
+            }
+
+            if (!std::filesystem::is_regular_file(path))
+            {
+                Utils::includeError("\"" + sourcePath.string() + "\" is not a file.", str->location);
+            }
+
+            if (!resources.count(path))
+            {
+                resources[path] = resources.size();
+
+                resolver->addResourceBlock(new ResourceBlock(path));
+            }
+
+            currentScope->block->addInstruction(new StackPushResource(resources[path]));
+
+            token->arguments->accept("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
+            token->arguments->accept("pan", this, new Type(BasicType::Number));
+            token->arguments->accept("volume", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "blend")
         {
             audioSource = true;
 
-            token->arguments->get("position", this, new Type(BasicType::Number));
-            token->arguments->get("sources", this, new Type(BasicType::List, new Type(BasicType::AudioSource)));
+            token->arguments->accept("position", this, new Type(BasicType::Number));
+            token->arguments->accept("sources", this, new Type(BasicType::List, new Type(BasicType::AudioSource)));
         }
 
         else if (token->name == "hold")
         {
-            token->arguments->get("length", this, new Type(BasicType::Number));
-            token->arguments->get("value", this, new Type(BasicType::Number));
+            token->arguments->accept("length", this, new Type(BasicType::Number));
+            token->arguments->accept("value", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "lfo")
         {
-            token->arguments->get("length", this, new Type(BasicType::Number));
-            token->arguments->get("to", this, new Type(BasicType::Number));
-            token->arguments->get("from", this, new Type(BasicType::Number));
+            token->arguments->accept("length", this, new Type(BasicType::Number));
+            token->arguments->accept("to", this, new Type(BasicType::Number));
+            token->arguments->accept("from", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "sweep")
         {
-            token->arguments->get("length", this, new Type(BasicType::Number));
-            token->arguments->get("to", this, new Type(BasicType::Number));
-            token->arguments->get("from", this, new Type(BasicType::Number));
+            token->arguments->accept("length", this, new Type(BasicType::Number));
+            token->arguments->accept("to", this, new Type(BasicType::Number));
+            token->arguments->accept("from", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "sequence")
         {
-            token->arguments->get("order", this, new Type(BasicType::SequenceOrder));
-            token->arguments->get("values", this, new Type(BasicType::List, new Type(BasicType::Number)));
+            token->arguments->accept("order", this, new Type(BasicType::SequenceOrder));
+            token->arguments->accept("values", this, new Type(BasicType::List, new Type(BasicType::Number)));
         }
 
         else if (token->name == "repeat")
         {
-            token->arguments->get("repeats", this, new Type(BasicType::Number));
-            token->arguments->get("value", this, new Type(BasicType::Number));
+            token->arguments->accept("repeats", this, new Type(BasicType::Number));
+            token->arguments->accept("value", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "random")
         {
-            token->arguments->get("type", this, new Type(BasicType::RandomType));
-            token->arguments->get("length", this, new Type(BasicType::Number));
-            token->arguments->get("to", this, new Type(BasicType::Number));
-            token->arguments->get("from", this, new Type(BasicType::Number));
+            token->arguments->accept("type", this, new Type(BasicType::RandomType));
+            token->arguments->accept("length", this, new Type(BasicType::Number));
+            token->arguments->accept("to", this, new Type(BasicType::Number));
+            token->arguments->accept("from", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "limit")
         {
-            token->arguments->get("max", this, new Type(BasicType::Number));
-            token->arguments->get("min", this, new Type(BasicType::Number));
-            token->arguments->get("value", this, new Type(BasicType::Number));
+            token->arguments->accept("max", this, new Type(BasicType::Number));
+            token->arguments->accept("min", this, new Type(BasicType::Number));
+            token->arguments->accept("value", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "trigger")
         {
-            token->arguments->get("value", this, new Type(BasicType::Number));
-            token->arguments->get("condition", this, new Type(BasicType::Boolean));
+            token->arguments->accept("value", this, new Type(BasicType::Number));
+            token->arguments->accept("condition", this, new Type(BasicType::Boolean));
         }
 
         else if (token->name == "if")
         {
-            token->arguments->get("false", this, new Type(BasicType::Number));
-            token->arguments->get("true", this, new Type(BasicType::Number));
-            token->arguments->get("condition", this, new Type(BasicType::Boolean));
+            token->arguments->accept("false", this, new Type(BasicType::Number));
+            token->arguments->accept("true", this, new Type(BasicType::Number));
+            token->arguments->accept("condition", this, new Type(BasicType::Boolean));
         }
 
         else if (token->name == "delay")
         {
-            token->arguments->get("feedback", this, new Type(BasicType::Number));
-            token->arguments->get("delay", this, new Type(BasicType::Number));
-            token->arguments->get("mix", this, new Type(BasicType::Number));
+            token->arguments->accept("feedback", this, new Type(BasicType::Number));
+            token->arguments->accept("delay", this, new Type(BasicType::Number));
+            token->arguments->accept("mix", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "perform")
@@ -912,17 +971,17 @@ namespace Parser
                 return Utils::parseWarning("This function call does nothing and will be ignored.", token->location);
             }
 
-            token->arguments->get("interval", this, new Type(BasicType::Number));
-            token->arguments->get("repeats", this, new Type(BasicType::Number));
-            token->arguments->get("delay", this, new Type(BasicType::Number));
+            token->arguments->accept("interval", this, new Type(BasicType::Number));
+            token->arguments->accept("repeats", this, new Type(BasicType::Number));
+            token->arguments->accept("delay", this, new Type(BasicType::Number));
 
             currentScope = new Scope(this, currentScope);
 
-            token->arguments->get("function", this);
+            token->arguments->accept("function", this);
 
-            BytecodeBlock* block = currentScope->block;
+            InstructionBlock* block = currentScope->block;
 
-            resolver->addBlock(block);
+            resolver->addInstructionBlock(block);
 
             currentScope = currentScope->parent;
 
@@ -953,62 +1012,62 @@ namespace Parser
     {
         if (token->name == "add")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "subtract")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "multiply")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "divide")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "power")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "equal")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "less")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "greater")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "lessequal")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         else if (token->name == "greaterequal")
         {
-            token->arguments->get("1", this, new Type(BasicType::Number));
-            token->arguments->get("0", this, new Type(BasicType::Number));
+            token->arguments->accept("1", this, new Type(BasicType::Number));
+            token->arguments->accept("0", this, new Type(BasicType::Number));
         }
 
         currentScope->block->addInstruction(new CallNative(token->name, token->arguments->count));
@@ -1054,9 +1113,9 @@ namespace Parser
 
         currentScope->checkUses();
 
-        BytecodeBlock* block = currentScope->block;
+        InstructionBlock* block = currentScope->block;
 
-        resolver->addBlock(block);
+        resolver->addInstructionBlock(block);
 
         currentScope->parent->addFunction(token->name, currentScope, token);
 
@@ -1086,7 +1145,7 @@ namespace Parser
     {
         includedPaths.insert(token->location.path);
 
-        resolver->addBlock(currentScope->block);
+        resolver->addInstructionBlock(currentScope->block);
 
         for (const Token* instruction : token->instructions)
         {

@@ -50,4 +50,8 @@ if (LINUX)
     target_link_libraries(rtaudio ${ALSA_LIBRARIES} Threads::Threads)
 endif()
 
-target_link_libraries(organic rtaudio)
+find_package(SndFile REQUIRED PATHS deps/libsndfile/cmake)
+
+target_include_directories(organic PRIVATE ${SNDFILE_INCLUDE_DIR})
+
+target_link_libraries(organic rtaudio ${SNDFILE_LIBRARIES})

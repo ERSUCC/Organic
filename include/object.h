@@ -26,6 +26,7 @@ protected:
 };
 
 struct List;
+struct Resource;
 
 struct ValueObject : public Sync
 {
@@ -34,6 +35,8 @@ struct ValueObject : public Sync
     virtual ValueObject* expandVariable();
 
     virtual List* getList();
+
+    virtual Resource* getResource();
 };
 
 struct Default : public ValueObject
@@ -42,12 +45,16 @@ struct Default : public ValueObject
 
     List* getList() override;
 
+    Resource* getResource() override;
+
 private:
     Default();
 
     static Default* instance;
 
     List* list;
+
+    Resource* resource;
 
 };
 
@@ -71,11 +78,24 @@ struct Variable : public ValueObject
 
     List* getList() override;
 
+    Resource* getResource() override;
+
     ValueObject* value;
 
 protected:
     void init() override;
 
+};
+
+struct Resource : public ValueObject
+{
+    Resource(const std::vector<double>& samples, const unsigned int sampleRate);
+
+    Resource* getResource() override;
+
+    const std::vector<double> samples;
+
+    const unsigned int sampleRate;
 };
 
 struct Time : public ValueObject

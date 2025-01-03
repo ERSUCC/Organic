@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "../deps/AudioFile.h"
-
 #include "effect.h"
 #include "object.h"
 
@@ -91,8 +89,7 @@ private:
 
 struct Sample : public SingleAudioSource
 {
-    Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, std::string path, unsigned int grains, bool looping);
-    ~Sample();
+    Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource);
 
 protected:
     void init() override;
@@ -100,13 +97,9 @@ protected:
     void prepareForEffects(const unsigned int bufferLength) override;
 
 private:
-    double* data;
+    ValueObject* resource;
 
-    unsigned int length;
-
-    std::vector<unsigned int> grains;
-
-    bool looping;
+    double index;
 
 };
 

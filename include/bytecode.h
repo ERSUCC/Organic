@@ -5,12 +5,15 @@
 #include <unordered_map>
 #include <vector>
 
+#include <sndfile.hh>
+
 #include "constants.h"
 #include "utils.h"
 
-struct BytecodeBlock;
+struct InstructionBlock;
 
-std::vector<unsigned char> intToBytes(const unsigned int i);
+std::vector<unsigned char> unsignedIntToBytes(const unsigned int i);
+std::vector<unsigned char> intToBytes(const int i);
 std::vector<unsigned char> doubleToBytes(const double d);
 
 struct BytecodeInstruction
@@ -64,12 +67,23 @@ private:
 
 struct StackPushAddress : public BytecodeInstruction
 {
-    StackPushAddress(const BytecodeBlock* block);
+    StackPushAddress(const InstructionBlock* block);
 
     void output(std::ofstream& stream) const override;
 
 private:
-    const BytecodeBlock* block;
+    const InstructionBlock* block;
+
+};
+
+struct StackPushResource : public BytecodeInstruction
+{
+    StackPushResource(const unsigned char resource);
+
+    void output(std::ofstream& stream) const override;
+
+private:
+    const unsigned char resource;
 
 };
 
@@ -110,27 +124,48 @@ private:
 
 struct CallUser : public BytecodeInstruction
 {
-    CallUser(const BytecodeBlock* function);
+    CallUser(const InstructionBlock* function);
 
     void output(std::ofstream& stream) const override;
 
 private:
-    const BytecodeBlock* function;
+    const InstructionBlock* function;
 
 };
 
 struct BytecodeBlock
 {
-    BytecodeBlock(const unsigned char inputs);
+    virtual void output(std::ofstream& stream) const = 0;
+
+    unsigned int size;
+};
+
+struct ResourceBlock : BytecodeBlock
+{
+    ResourceBlock(const std::filesystem::path& path);
+    ~ResourceBlock();
+
+    void output(std::ofstream& stream) const override;
+
+private:
+    int* samples;
+
+    unsigned int length;
+    unsigned int sampleRate;
+
+};
+
+struct InstructionBlock : BytecodeBlock
+{
+    InstructionBlock(const unsigned char inputs);
+
+    void output(std::ofstream& stream) const override;
 
     void addInstruction(const BytecodeInstruction* instruction);
-
-    void output(std::ofstream& stream) const;
 
     const unsigned char inputs;
 
     unsigned int offset;
-    unsigned int size = 1;
 
 private:
     std::vector<const BytecodeInstruction*> instructions;
@@ -141,9 +176,11 @@ struct BytecodeResolver
 {
     void output(std::ofstream& stream, const unsigned char variables);
 
-    void addBlock(BytecodeBlock* block);
+    void addResourceBlock(ResourceBlock* block);
+    void addInstructionBlock(InstructionBlock* block);
 
 private:
-    std::vector<BytecodeBlock*> blocks;
+    std::vector<ResourceBlock*> resourceBlocks;
+    std::vector<InstructionBlock*> instructionBlocks;
 
 };
