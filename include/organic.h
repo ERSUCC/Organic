@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <RtAudio.h>
 #include <sndfile.hh>
-#include "../deps/RtAudio.h"
 
 #include "flags.h"
 #include "machine.h"

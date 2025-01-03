@@ -20,7 +20,7 @@ add_executable(organic src/audiosource.cpp
                        src/token.cpp
                        src/utils.cpp)
 
-add_library(rtaudio STATIC deps/RtAudio.cpp)
+add_library(rtaudio STATIC deps/rtaudio/RtAudio.cpp)
 
 if (WIN32)
     target_compile_options(rtaudio PRIVATE -D__WINDOWS_WASAPI__)
@@ -52,6 +52,6 @@ endif()
 
 find_package(SndFile REQUIRED PATHS deps/libsndfile/cmake)
 
-target_include_directories(organic PRIVATE ${SNDFILE_INCLUDE_DIR})
+target_include_directories(organic PRIVATE deps/rtaudio ${SNDFILE_INCLUDE_DIR})
 
 target_link_libraries(organic rtaudio ${SNDFILE_LIBRARIES})
