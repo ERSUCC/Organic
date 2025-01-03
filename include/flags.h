@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <queue>
 #include <string>
 #include <vector>
@@ -9,7 +10,7 @@
 struct ProgramOptions
 {
     double time = 0;
-    std::string exportPath;
+    std::filesystem::path exportPath;
     bool mono = false;
 
     bool setTime = false;

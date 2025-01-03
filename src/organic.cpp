@@ -100,12 +100,9 @@ void Organic::startExport()
 {
     const unsigned int steps = (options.time / 1000) * utils->sampleRate;
 
-    AudioFile<double> file;
+    SndfileHandle* file = new SndfileHandle(options.exportPath.string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_32, utils->channels, utils->sampleRate);
 
-    file.setNumChannels(utils->channels);
-    file.setNumSamplesPerChannel(steps);
-
-    double* buffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
+    double* samples = (double*)malloc(sizeof(double) * steps * utils->channels);
 
     machine->run();
 
@@ -114,20 +111,22 @@ void Organic::startExport()
         utils->time = i * 1000.0 / utils->sampleRate;
 
         machine->updateEvents();
-        machine->processAudioSources(buffer, utils->bufferLength);
 
-        for (int j = 0; j < utils->bufferLength && i + j < steps; j++)
+        if (i + utils->bufferLength < steps)
         {
-            file.samples[0][i + j] = buffer[j * utils->channels];
+            machine->processAudioSources(samples + i * utils->channels, utils->bufferLength);
+        }
 
-            if (utils->channels == 2)
-            {
-                file.samples[1][i + j] = buffer[j * 2 + 1];
-            }
+        else
+        {
+            machine->processAudioSources(samples + i * utils->channels, steps - i);
         }
     }
 
-    file.save(options.exportPath);
+    if (file->write(samples, steps * utils->channels) != steps * utils->channels)
+    {
+        Utils::fileError("Could not write output file: " + std::string(file->strError()));
+    }
 }
 
 int Organic::processAudio(void* output, unsigned int frames)

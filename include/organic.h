@@ -1,12 +1,14 @@
 #pragma once
 
+#include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <filesystem>
 #include <functional>
 #include <string>
 #include <vector>
 
-#include "../deps/AudioFile.h"
+#include <sndfile.hh>
 #include "../deps/RtAudio.h"
 
 #include "flags.h"

@@ -52,7 +52,14 @@ ProgramOptions FlagParser::getOptions()
                 Utils::argumentError("The option \"export\" was already set.");
             }
 
-            options.exportPath = nextOption(flag);
+            const std::filesystem::path path = std::filesystem::weakly_canonical(nextOption(flag));
+
+            if (!std::filesystem::exists(path.parent_path()))
+            {
+                Utils::argumentError("Specified output file is in a non-existent directory.");
+            }
+
+            options.exportPath = path;
             options.setExport = true;
         }
 

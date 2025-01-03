@@ -187,7 +187,7 @@ ResourceBlock::ResourceBlock(const std::filesystem::path& path)
 
     if (file->read(samples, length) != length)
     {
-        Utils::fileError("Could not read audio file \"" + path.string() + "\".");
+        Utils::fileError("Could not read audio file \"" + path.string() + "\": " + std::string(file->strError()));
     }
 
     size = length * 4 + 4;
