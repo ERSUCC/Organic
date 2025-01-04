@@ -57,7 +57,7 @@ Resource* ValueObject::getResource()
 }
 
 Default::Default() :
-    list(new List({})), resource(new Resource(nullptr, 0, utils->sampleRate)) {}
+    list(new List({})), resource(new Resource(nullptr, 0, utils->sampleRate, utils->channels)) {}
 
 Default* Default::get()
 {
@@ -127,8 +127,8 @@ void Variable::init()
     value->start(startTime);
 }
 
-Resource::Resource(double* samples, const unsigned int length, const unsigned int sampleRate) :
-    samples(samples), length(length), sampleRate(sampleRate) {}
+Resource::Resource(double* samples, const unsigned int length, const unsigned int sampleRate, const unsigned int channels) :
+    samples(samples), length(length), sampleRate(sampleRate), channels(channels) {}
 
 Resource::~Resource()
 {

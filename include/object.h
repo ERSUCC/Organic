@@ -92,7 +92,7 @@ protected:
 
 struct Resource : public ValueObject
 {
-    Resource(double* samples, const unsigned int length, const unsigned int sampleRate);
+    Resource(double* samples, const unsigned int length, const unsigned int sampleRate, const unsigned int channels);
     ~Resource();
 
     Resource* getResource() override;
@@ -101,6 +101,7 @@ struct Resource : public ValueObject
 
     const unsigned int length;
     const unsigned int sampleRate;
+    const unsigned int channels;
 };
 
 struct Time : public ValueObject

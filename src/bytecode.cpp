@@ -182,6 +182,7 @@ ResourceBlock::ResourceBlock(const Path* path)
 
     length = file->frames() * file->channels();
     sampleRate = file->samplerate();
+    channels = file->channels();
 
     samples = (int*)malloc(sizeof(int) * length);
 
@@ -189,8 +190,6 @@ ResourceBlock::ResourceBlock(const Path* path)
     {
         Utils::fileError("Could not read audio file \"" + path->string() + "\": " + std::string(file->strError()));
     }
-
-    size = length * 4 + 4;
 }
 
 ResourceBlock::~ResourceBlock()
@@ -202,6 +201,7 @@ void ResourceBlock::output(std::ofstream& stream) const
 {
     writeUnsignedInt(stream, length);
     writeUnsignedInt(stream, sampleRate);
+    writeUnsignedInt(stream, channels);
 
     for (unsigned int i = 0; i < length; i++)
     {
@@ -210,10 +210,7 @@ void ResourceBlock::output(std::ofstream& stream) const
 }
 
 InstructionBlock::InstructionBlock(const unsigned char inputs) :
-    inputs(inputs)
-{
-    size = 1;
-}
+    inputs(inputs) {}
 
 void InstructionBlock::output(std::ofstream& stream) const
 {
