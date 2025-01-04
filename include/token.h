@@ -424,26 +424,9 @@ namespace Parser
         Type* expectedType = new Type(BasicType::Any);
 
     private:
-        struct PathHash
-        {
-            std::size_t operator()(const Path* path) const
-            {
-                return std::hash<std::string>()(path->string());
-            }
-        };
-
-        struct PathEquals
-        {
-            bool operator()(const Path* a, const Path* b) const
-            {
-                return a->string() == b->string();
-            }
-        };
-
         std::ofstream& outputStream;
 
-        std::unordered_set<const Path*, PathHash, PathEquals> includedPaths;
-        std::unordered_map<const Path*, unsigned char, PathHash, PathEquals> resources;
+        std::unordered_map<const Path*, unsigned char, Path::Hash, Path::Equals> resources;
 
         BytecodeResolver* resolver = new BytecodeResolver();
 

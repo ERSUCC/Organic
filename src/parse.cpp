@@ -2,7 +2,8 @@
 
 namespace Parser
 {
-    Parser::Parser(const Path* path) : path(path)
+    Parser::Parser(const Path* path, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
+        path(path), includedPaths(includedPaths)
     {
         std::ifstream file(path->string());
 
@@ -577,7 +578,7 @@ namespace Parser
             {
                 Utils::includeWarning("This include does not specify a source file, it will have no effect.", str->location);
 
-                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), new Program(SourceLocation(nullptr, 0, 0, 0, 0), {}));
+                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), nullptr);
             }
 
             if (arguments[0]->name != "file")
@@ -604,7 +605,16 @@ namespace Parser
                     Utils::includeError("\"" + sourcePath->string() + "\" is not a file.", str->location);
                 }
 
-                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), (new Parser(sourcePath))->parse());
+                if (includedPaths.count(sourcePath))
+                {
+                    Utils::includeWarning("Source file \"" + sourcePath->string() + "\" has already been included, this include will be ignored.", file->location);
+
+                    return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), nullptr);
+                }
+
+                includedPaths.insert(sourcePath);
+
+                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), (new Parser(sourcePath, includedPaths))->parse());
             }
 
             Utils::parseError("Expected \"string\".", arguments[0]->value->location);

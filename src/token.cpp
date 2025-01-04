@@ -1115,27 +1115,17 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Include* token)
     {
-        const Path* sourcePath = token->program->location.path;
-
-        if (includedPaths.count(sourcePath))
+        if (token->program)
         {
-            Utils::includeWarning("Source file \"" + sourcePath->string() + "\" has already been included, this include will be ignored.", token->location);
-
-            return;
-        }
-
-        includedPaths.insert(sourcePath);
-
-        for (const Token* instruction : token->program->instructions)
-        {
-            instruction->accept(this);
+            for (const Token* instruction : token->program->instructions)
+            {
+                instruction->accept(this);
+            }
         }
     }
 
     void BytecodeTransformer::visit(const Program* token)
     {
-        includedPaths.insert(token->location.path);
-
         resolver->addInstructionBlock(currentScope->block);
 
         for (const Token* instruction : token->instructions)

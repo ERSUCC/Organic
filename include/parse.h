@@ -13,7 +13,7 @@ namespace Parser
 {
     struct Parser
     {
-        Parser(const Path* path);
+        Parser(const Path* path, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
 
         const Program* parse();
 
@@ -42,6 +42,8 @@ namespace Parser
         double getFrequency(const double note) const;
 
         const Path* path;
+
+        std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths;
 
         std::string code;
 
