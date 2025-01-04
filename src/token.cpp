@@ -294,6 +294,9 @@ namespace Parser
         return new Type(BasicType::String);
     }
 
+    Ignore::Ignore(const SourceLocation location) :
+        Token(location) {}
+
     Argument::Argument(const SourceLocation location, const std::string name, const Token* value) :
         Token(location), name(name), value(value) {}
 
@@ -1115,12 +1118,9 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Include* token)
     {
-        if (token->program)
+        for (const Token* instruction : token->program->instructions)
         {
-            for (const Token* instruction : token->program->instructions)
-            {
-                instruction->accept(this);
-            }
+            instruction->accept(this);
         }
     }
 

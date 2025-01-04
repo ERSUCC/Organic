@@ -578,7 +578,7 @@ namespace Parser
             {
                 Utils::includeWarning("This include does not specify a source file, it will have no effect.", str->location);
 
-                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), nullptr);
+                return new Ignore(SourceLocation(path, str->location.line, str->location.character, start, pos + 1));
             }
 
             if (arguments[0]->name != "file")
@@ -609,7 +609,7 @@ namespace Parser
                 {
                     Utils::includeWarning("Source file \"" + sourcePath->string() + "\" has already been included, this include will be ignored.", file->location);
 
-                    return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), nullptr);
+                    return new Ignore(SourceLocation(path, str->location.line, str->location.character, start, pos + 1));
                 }
 
                 includedPaths.insert(sourcePath);

@@ -215,6 +215,11 @@ namespace Parser
         Type* type(const BytecodeTransformer* visitor) const override;
     };
 
+    struct Ignore : public Token
+    {
+        Ignore(const SourceLocation);
+    };
+
     struct Argument : public Token
     {
         Argument(const SourceLocation location, const std::string name, const Token* value);
