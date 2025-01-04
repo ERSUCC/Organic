@@ -460,7 +460,7 @@ namespace Parser
                 {
                     depth--;
                 }
-            } while (depth > 0);
+            } while (depth > 0 && pos < tokens.size());
 
             if (tokenIs<Equals>(pos + 1))
             {
