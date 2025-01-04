@@ -874,7 +874,6 @@ namespace Parser
                 Utils::includeError("\"" + path->string() + "\" is not a file.", str->location);
             }
 
-            // this will not properly check equality of paths, fix later
             if (!resources.count(path))
             {
                 resources[path] = resources.size();
@@ -1118,7 +1117,6 @@ namespace Parser
     {
         const Path* sourcePath = token->program->location.path;
 
-        // this will not properly check equality of paths, fix later
         if (includedPaths.count(sourcePath))
         {
             Utils::includeWarning("Source file \"" + sourcePath->string() + "\" has already been included, this include will be ignored.", token->location);
