@@ -1,6 +1,3 @@
-#include <string>
-#include <vector>
-
 #include "../include/organic.h"
 #include "../include/path.h"
 #include "../include/utils.h"
@@ -24,14 +21,7 @@ int main(int argc, char** argv)
         Utils::argumentError("Specified program is not a file.");
     }
 
-    std::vector<std::string> flags;
-
-    for (int i = 2; i < argc; i++)
-    {
-        flags.push_back(argv[i]);
-    }
-
-    (new Organic(path, flags))->start();
+    (new Organic(path, argv + 2, argc - 2))->start();
 
     return 0;
 }

@@ -19,7 +19,7 @@
 
 struct Organic
 {
-    Organic(const Path* path, const std::vector<std::string>& flags);
+    Organic(const Path* path, char** flags, const unsigned int length);
 
     void start();
 

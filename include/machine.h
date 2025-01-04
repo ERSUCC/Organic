@@ -37,11 +37,11 @@ private:
 
     Utils* utils;
 
-    std::vector<unsigned char> program;
+    unsigned char* program;
 
-    unsigned int start;
+    unsigned int programLength;
 
-    std::vector<ValueObject*> resources;
+    ValueObject** resources;
 
     std::stack<ValueObject*> stack;
 

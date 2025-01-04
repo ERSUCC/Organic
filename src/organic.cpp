@@ -1,10 +1,10 @@
 #include "../include/organic.h"
 
-Organic::Organic(const Path* path, const std::vector<std::string>& flags)
+Organic::Organic(const Path* path, char** flags, const unsigned int length)
 {
     utils = Utils::get();
 
-    options = (new FlagParser(flags))->getOptions();
+    options = (new FlagParser(flags, length))->getOptions();
 
     const Path* bytecodePath = Path::beside(path->stem() + ".obc", path);
 

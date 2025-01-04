@@ -236,12 +236,7 @@ void BytecodeResolver::output(std::ofstream& stream, const unsigned char variabl
 {
     stream << BytecodeConstants::OBC_ID << variables << (unsigned char)resourceBlocks.size();
 
-    unsigned int offset = BytecodeConstants::HEADER_LENGTH;
-
-    for (ResourceBlock* block : resourceBlocks)
-    {
-        offset += block->size;
-    }
+    unsigned int offset = 0;
 
     for (InstructionBlock* block : instructionBlocks)
     {

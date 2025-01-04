@@ -1,10 +1,10 @@
 #include "../include/flags.h"
 
-FlagParser::FlagParser(const std::vector<std::string>& flags)
+FlagParser::FlagParser(char** flags, const unsigned int length)
 {
-    for (const std::string flag : flags)
+    for (unsigned int i = 0; i < length; i++)
     {
-        this->flags.push(flag);
+        this->flags.push(flags[i]);
     }
 }
 

@@ -22,22 +22,22 @@ Machine::Machine(const Path* path)
         Utils::machineError("Invalid bytecode format.");
     }
 
-    program = std::vector<unsigned char>(str.begin(), str.end());
-
-    variables = (Variable**)calloc(program[BytecodeConstants::OBC_ID_LENGTH], sizeof(Variable*));
-
     utils = Utils::get();
 
-    start = BytecodeConstants::OBC_ID_LENGTH + 2;
+    variables = (Variable**)malloc(sizeof(Variable*) * str[BytecodeConstants::OBC_ID_LENGTH]);
 
-    const unsigned int numResources = program[BytecodeConstants::OBC_ID_LENGTH + 1];
+    const unsigned int numResources = str[BytecodeConstants::OBC_ID_LENGTH + 1];
+
+    resources = (ValueObject**)malloc(sizeof(ValueObject*) * numResources);
+
+    unsigned int offset = BytecodeConstants::OBC_ID_LENGTH + 2;
 
     for (unsigned int i = 0; i < numResources; i++)
     {
-        const unsigned int length = readUnsignedInt(start);
-        const unsigned int sampleRate = readUnsignedInt(start + 4);
+        const unsigned int length = readUnsignedInt(offset);
+        const unsigned int sampleRate = readUnsignedInt(offset + 4);
 
-        start += 8;
+        offset += 8;
 
         double* samples = (double*)malloc(sizeof(double) * length);
 
@@ -45,14 +45,14 @@ Machine::Machine(const Path* path)
 
         for (unsigned int j = 0; j < length; j++)
         {
-            samples[j] = (double)readInt(start) / INT_MAX;
+            samples[j] = (double)readInt(offset) / INT_MAX;
 
             if (fabs(samples[j]) > max)
             {
                 max = fabs(samples[j]);
             }
 
-            start += 4;
+            offset += 4;
         }
 
         for (unsigned int j = 0; j < length; j++)
@@ -60,18 +60,26 @@ Machine::Machine(const Path* path)
             samples[j] /= max;
         }
 
-        resources.push_back(new Resource(samples, length, sampleRate));
+        resources[i] = new Resource(samples, length, sampleRate);
     }
+
+    programLength = str.size() - offset;
+
+    program = (unsigned char*)malloc(sizeof(unsigned char) * programLength);
+
+    std::copy(str.begin() + offset, str.end(), program);
 }
 
 Machine::~Machine()
 {
+    free(program);
+    free(resources);
     free(variables);
 }
 
 void Machine::run()
 {
-    execute(start, 0);
+    execute(0, 0);
 }
 
 void Machine::updateEvents()
@@ -192,7 +200,7 @@ void Machine::execute(unsigned int address, const double startTime)
 {
     while (true)
     {
-        if (address >= program.size())
+        if (address >= programLength)
         {
             return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.");
         }

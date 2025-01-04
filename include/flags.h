@@ -20,7 +20,7 @@ struct ProgramOptions
 
 struct FlagParser
 {
-    FlagParser(const std::vector<std::string>& flags);
+    FlagParser(char** flags, const unsigned int length);
 
     ProgramOptions getOptions();
 
