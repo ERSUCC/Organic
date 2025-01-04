@@ -2,13 +2,13 @@
 
 namespace Parser
 {
-    Parser::Parser(const std::filesystem::path& path) : path(path)
+    Parser::Parser(const Path* path) : path(path)
     {
-        std::ifstream file(path);
+        std::ifstream file(path->string());
 
         if (!file.is_open())
         {
-            Utils::fileError("Could not open \"" + path.string() + "\".");
+            Utils::fileError("Could not open \"" + path->string() + "\".");
         }
 
         std::getline(file, code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
@@ -572,7 +572,7 @@ namespace Parser
             {
                 Utils::includeWarning("This include does not specify a source file, it will have no effect.", str->location);
 
-                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), new Program(SourceLocation("", 0, 0, 0, 0), {}));
+                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), new Program(SourceLocation(nullptr, 0, 0, 0, 0), {}));
             }
 
             if (arguments[0]->name != "file")
@@ -587,16 +587,16 @@ namespace Parser
 
             if (const String* file = dynamic_cast<const String*>(arguments[0]->value))
             {
-                const std::filesystem::path& sourcePath = std::filesystem::weakly_canonical(path.parent_path() / file->str);
+                const Path* sourcePath = Path::beside(file->str, path);
 
-                if (!std::filesystem::exists(sourcePath))
+                if (!sourcePath->exists())
                 {
-                    Utils::includeError("Source file \"" + sourcePath.string() + "\" does not exist.", str->location);
+                    Utils::includeError("Source file \"" + sourcePath->string() + "\" does not exist.", str->location);
                 }
 
-                if (!std::filesystem::is_regular_file(sourcePath))
+                if (!sourcePath->isFile())
                 {
-                    Utils::includeError("\"" + sourcePath.string() + "\" is not a file.", str->location);
+                    Utils::includeError("\"" + sourcePath->string() + "\" is not a file.", str->location);
                 }
 
                 return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), (new Parser(sourcePath))->parse());

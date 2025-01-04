@@ -1,8 +1,8 @@
-#include <filesystem>
 #include <string>
 #include <vector>
 
 #include "../include/organic.h"
+#include "../include/path.h"
 #include "../include/utils.h"
 
 int main(int argc, char** argv)
@@ -12,12 +12,14 @@ int main(int argc, char** argv)
         Utils::argumentError("Not enough arguments specified.");
     }
 
-    if (!std::filesystem::exists(argv[1]))
+    const Path* path = Path::relative(argv[1]);
+
+    if (!path->exists())
     {
         Utils::argumentError("Specified program file does not exist.");
     }
 
-    if (!std::filesystem::is_regular_file(argv[1]))
+    if (!path->isFile())
     {
         Utils::argumentError("Specified program is not a file.");
     }
@@ -29,7 +31,7 @@ int main(int argc, char** argv)
         flags.push_back(argv[i]);
     }
 
-    (new Organic(std::filesystem::canonical(argv[1]), flags))->start();
+    (new Organic(path, flags))->start();
 
     return 0;
 }

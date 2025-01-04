@@ -17,6 +17,7 @@ add_executable(organic src/audiosource.cpp
                        src/object.cpp
                        src/organic.cpp
                        src/parse.cpp
+                       src/path.cpp
                        src/token.cpp
                        src/utils.cpp)
 

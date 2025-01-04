@@ -1,11 +1,11 @@
 #pragma once
 
-#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
 
 #include "location.h"
+#include "path.h"
 #include "token.h"
 #include "utils.h"
 
@@ -13,7 +13,7 @@ namespace Parser
 {
     struct Parser
     {
-        Parser(const std::filesystem::path& path);
+        Parser(const Path* path);
 
         const Program* parse();
 
@@ -41,7 +41,7 @@ namespace Parser
 
         double getFrequency(const double note) const;
 
-        const std::filesystem::path& path;
+        const Path* path;
 
         std::string code;
 

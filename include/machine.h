@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <stack>
@@ -14,11 +13,12 @@
 #include "controller.h"
 #include "event.h"
 #include "object.h"
+#include "path.h"
 #include "utils.h"
 
 struct Machine
 {
-    Machine(const std::filesystem::path& path);
+    Machine(const Path* path);
     ~Machine();
 
     void run();

@@ -28,12 +28,12 @@ Utils* Utils::get()
 
 void Utils::parseWarning(const std::string message, const SourceLocation& location)
 {
-    warning("Parse warning in \"" + location.path.string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
+    warning("Parse warning in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
 }
 
 void Utils::includeWarning(const std::string message, const SourceLocation& location)
 {
-    warning("Include warning in \"" + location.path.string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
+    warning("Include warning in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
 }
 
 void Utils::argumentError(const std::string message)
@@ -43,17 +43,17 @@ void Utils::argumentError(const std::string message)
 
 void Utils::parseError(const std::string message, const SourceLocation& location)
 {
-    error("Parse error in \"" + location.path.string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
+    error("Parse error in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
 }
 
-void Utils::parseError(const std::string message, const std::filesystem::path& path, const unsigned int line, const unsigned int character)
+void Utils::parseError(const std::string message, const Path* path, const unsigned int line, const unsigned int character)
 {
-    error("Parse error in \"" + path.string() + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ":\n\t" + message);
+    error("Parse error in \"" + path->string() + "\" at line " + std::to_string(line) + " character " + std::to_string(character) + ":\n\t" + message);
 }
 
 void Utils::includeError(const std::string message, const SourceLocation& location)
 {
-    error("Include error in \"" + location.path.string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
+    error("Include error in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message);
 }
 
 void Utils::machineError(const std::string message)

@@ -1,12 +1,12 @@
 #include "../include/machine.h"
 
-Machine::Machine(const std::filesystem::path& path)
+Machine::Machine(const Path* path)
 {
-    std::ifstream file(path, std::ios::binary);
+    std::ifstream file(path->string(), std::ios::binary);
 
     if (!file.is_open())
     {
-        Utils::fileError("Could not open \"" + path.string() + "\".");
+        Utils::fileError("Could not open \"" + path->string() + "\".");
     }
 
     std::ostringstream stream(std::ios::binary);

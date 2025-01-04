@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
-#include <filesystem>
 #include <functional>
 #include <string>
 #include <vector>
@@ -14,12 +13,13 @@
 #include "flags.h"
 #include "machine.h"
 #include "parse.h"
+#include "path.h"
 #include "token.h"
 #include "utils.h"
 
 struct Organic
 {
-    Organic(const std::filesystem::path& path, const std::vector<std::string>& flags);
+    Organic(const Path* path, const std::vector<std::string>& flags);
 
     void start();
 

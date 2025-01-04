@@ -672,7 +672,7 @@ namespace Parser
     Program::Program(const SourceLocation location, const std::vector<const Token*> instructions) :
         Token(location, true), instructions(instructions) {}
 
-    BytecodeTransformer::BytecodeTransformer(const std::filesystem::path& sourcePath, std::ofstream& outputStream) :
+    BytecodeTransformer::BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream) :
         sourcePath(sourcePath), outputStream(outputStream)
     {
         utils = Utils::get();
@@ -862,18 +862,19 @@ namespace Parser
 
             const String* str = dynamic_cast<const String*>(token->arguments->get("file", this, new Type(BasicType::String)));
 
-            const std::filesystem::path& path = std::filesystem::weakly_canonical(str->str);
+            const Path* path = Path::beside(str->str, sourcePath);
 
-            if (!std::filesystem::exists(path))
+            if (!path->exists())
             {
-                Utils::includeError("Audio file \"" + path.string() + "\" does not exist.", str->location);
+                Utils::includeError("Audio file \"" + path->string() + "\" does not exist.", str->location);
             }
 
-            if (!std::filesystem::is_regular_file(path))
+            if (!path->isFile())
             {
-                Utils::includeError("\"" + sourcePath.string() + "\" is not a file.", str->location);
+                Utils::includeError("\"" + path->string() + "\" is not a file.", str->location);
             }
 
+            // this will not properly check equality of paths, fix later
             if (!resources.count(path))
             {
                 resources[path] = resources.size();
@@ -1115,11 +1116,12 @@ namespace Parser
 
     void BytecodeTransformer::visit(const Include* token)
     {
-        const std::filesystem::path& sourcePath = token->program->location.path;
+        const Path* sourcePath = token->program->location.path;
 
+        // this will not properly check equality of paths, fix later
         if (includedPaths.count(sourcePath))
         {
-            Utils::includeWarning("Source file \"" + sourcePath.string() + "\" has already been included, this include will be ignored.", token->location);
+            Utils::includeWarning("Source file \"" + sourcePath->string() + "\" has already been included, this include will be ignored.", token->location);
 
             return;
         }

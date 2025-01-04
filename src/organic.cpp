@@ -1,18 +1,18 @@
 #include "../include/organic.h"
 
-Organic::Organic(const std::filesystem::path& path, const std::vector<std::string>& flags)
+Organic::Organic(const Path* path, const std::vector<std::string>& flags)
 {
     utils = Utils::get();
 
     options = (new FlagParser(flags))->getOptions();
 
-    const std::filesystem::path& bytecodePath = std::filesystem::weakly_canonical(path.parent_path() / (path.stem().string() + ".obc"));
+    const Path* bytecodePath = Path::beside(path->stem() + ".obc", path);
 
-    std::ofstream stream(bytecodePath, std::ios::binary);
+    std::ofstream stream(bytecodePath->string(), std::ios::binary);
 
     if (!stream.is_open())
     {
-        Utils::fileError("Error creating intermediate file \"" + bytecodePath.string() + "\".");
+        Utils::fileError("Error creating intermediate file \"" + bytecodePath->string() + "\".");
     }
 
     (new Parser::BytecodeTransformer(path, stream))->visit((new Parser::Parser(path))->parse());
@@ -100,7 +100,7 @@ void Organic::startExport()
 {
     const unsigned int steps = (options.time / 1000) * utils->sampleRate;
 
-    SndfileHandle* file = new SndfileHandle(options.exportPath.string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_32, utils->channels, utils->sampleRate);
+    SndfileHandle* file = new SndfileHandle(options.exportPath->string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_32, utils->channels, utils->sampleRate);
 
     double* samples = (double*)malloc(sizeof(double) * steps * utils->channels);
 

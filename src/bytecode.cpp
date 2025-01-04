@@ -176,9 +176,9 @@ void CallUser::output(std::ofstream& stream) const
     stream << function->inputs;
 }
 
-ResourceBlock::ResourceBlock(const std::filesystem::path& path)
+ResourceBlock::ResourceBlock(const Path* path)
 {
-    SndfileHandle* file = new SndfileHandle(path.string());
+    SndfileHandle* file = new SndfileHandle(path->string());
 
     length = file->frames() * file->channels();
     sampleRate = file->samplerate();
@@ -187,7 +187,7 @@ ResourceBlock::ResourceBlock(const std::filesystem::path& path)
 
     if (file->read(samples, length) != length)
     {
-        Utils::fileError("Could not read audio file \"" + path.string() + "\": " + std::string(file->strError()));
+        Utils::fileError("Could not read audio file \"" + path->string() + "\": " + std::string(file->strError()));
     }
 
     size = length * 4 + 4;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <filesystem>
 #include <fstream>
 #include <string>
 #include <unordered_set>
@@ -10,6 +9,7 @@
 #include "bytecode.h"
 #include "controller.h"
 #include "location.h"
+#include "path.h"
 #include "utils.h"
 
 namespace Parser
@@ -401,7 +401,7 @@ namespace Parser
 
     struct BytecodeTransformer
     {
-        BytecodeTransformer(const std::filesystem::path& sourcePath, std::ofstream& outputStream);
+        BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream);
 
         void visit(const Value* token);
         void visit(const NamedConstant* token);
@@ -417,7 +417,7 @@ namespace Parser
 
         unsigned char newVariableId();
 
-        const std::filesystem::path& sourcePath;
+        const Path* sourcePath;
 
         Scope* currentScope;
 
@@ -426,8 +426,8 @@ namespace Parser
     private:
         std::ofstream& outputStream;
 
-        std::unordered_set<std::filesystem::path> includedPaths;
-        std::unordered_map<std::filesystem::path, unsigned char> resources;
+        std::unordered_set<const Path*> includedPaths;
+        std::unordered_map<const Path*, unsigned char> resources;
 
         BytecodeResolver* resolver = new BytecodeResolver();
 

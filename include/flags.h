@@ -1,16 +1,16 @@
 #pragma once
 
-#include <filesystem>
 #include <queue>
 #include <string>
 #include <vector>
 
+#include "path.h"
 #include "utils.h"
 
 struct ProgramOptions
 {
     double time = 0;
-    std::filesystem::path exportPath;
+    Path* exportPath;
     bool mono = false;
 
     bool setTime = false;

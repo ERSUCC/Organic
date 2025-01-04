@@ -8,6 +8,7 @@
 #include <sndfile.hh>
 
 #include "constants.h"
+#include "path.h"
 #include "utils.h"
 
 struct InstructionBlock;
@@ -142,7 +143,7 @@ struct BytecodeBlock
 
 struct ResourceBlock : BytecodeBlock
 {
-    ResourceBlock(const std::filesystem::path& path);
+    ResourceBlock(const Path* path);
     ~ResourceBlock();
 
     void output(std::ofstream& stream) const override;
