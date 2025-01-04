@@ -240,11 +240,16 @@ namespace Parser
 
                 std::string str;
 
-                while (code[current] != '"')
+                while (current < code.size() && code[current] != '"')
                 {
                     str += code[current];
 
                     nextCharacter();
+                }
+
+                if (code[current] != '"')
+                {
+                    Utils::parseError("Unexpected end of file.", path, line, character);
                 }
 
                 tokens.push_back(new String(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), str));
