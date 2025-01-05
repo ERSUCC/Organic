@@ -4,7 +4,7 @@ struct BytecodeConstants
 {
     static constexpr char OBC_ID[] = "BACH";
     static constexpr unsigned int OBC_ID_LENGTH = 4;
-    static constexpr unsigned int HEADER_LENGTH = 6;
+    static constexpr unsigned int HEADER_LENGTH = 10;
 
     static constexpr unsigned char RETURN = 0x0;
     static constexpr unsigned char STACK_PUSH_DEFAULT = 0x1;

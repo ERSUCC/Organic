@@ -137,6 +137,8 @@ private:
 struct BytecodeBlock
 {
     virtual void output(std::ofstream& stream) const = 0;
+
+    unsigned int size;
 };
 
 struct ResourceBlock : BytecodeBlock
@@ -166,7 +168,6 @@ struct InstructionBlock : BytecodeBlock
     const unsigned char inputs;
 
     unsigned int offset;
-    unsigned int size = 1;
 
 private:
     std::vector<const BytecodeInstruction*> instructions;

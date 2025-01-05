@@ -27,9 +27,9 @@ struct Machine
     void processAudioSources(double* buffer, const unsigned int bufferLength);
 
 private:
-    unsigned int readUnsignedInt(const unsigned char* buffer, const unsigned int address) const;
-    int readInt(const unsigned char* buffer, const unsigned int address) const;
-    double readDouble(const unsigned char* buffer, const unsigned int address) const;
+    unsigned int readUnsignedInt(const void* buffer) const;
+    int readInt(const void* buffer) const;
+    double readDouble(const void* buffer) const;
 
     ValueObject* popStack();
 

@@ -190,6 +190,8 @@ ResourceBlock::ResourceBlock(const Path* path)
     {
         Utils::fileError("Could not read audio file \"" + path->string() + "\": " + std::string(file->strError()));
     }
+
+    size = 12 + length * 4;
 }
 
 ResourceBlock::~ResourceBlock()
@@ -210,7 +212,10 @@ void ResourceBlock::output(std::ofstream& stream) const
 }
 
 InstructionBlock::InstructionBlock(const unsigned char inputs) :
-    inputs(inputs) {}
+    inputs(inputs)
+{
+    size = 1;
+}
 
 void InstructionBlock::output(std::ofstream& stream) const
 {
@@ -233,7 +238,16 @@ void BytecodeResolver::output(std::ofstream& stream, const unsigned char variabl
 {
     stream << BytecodeConstants::OBC_ID << variables << (unsigned char)resourceBlocks.size();
 
-    unsigned int offset = 0;
+    unsigned int offset = BytecodeConstants::HEADER_LENGTH;
+
+    for (ResourceBlock* block : resourceBlocks)
+    {
+        offset += block->size;
+    }
+
+    writeUnsignedInt(stream, offset);
+
+    offset = 0;
 
     for (InstructionBlock* block : instructionBlocks)
     {
