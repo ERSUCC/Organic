@@ -15,7 +15,7 @@ Organic::Organic(const Path* path, char** flags, const unsigned int length)
         Utils::fileError("Error creating intermediate file \"" + bytecodePath->string() + "\".");
     }
 
-    (new Parser::BytecodeTransformer(path, stream))->visit((new Parser::Parser(path, std::unordered_set<const Path*, Path::Hash, Path::Equals> { path }))->parse());
+    (new Parser::BytecodeTransformer(path, stream))->createBytecode((new Parser::Parser(path, std::unordered_set<const Path*, Path::Hash, Path::Equals> { path }))->parse());
 
     stream.close();
 

@@ -17,17 +17,17 @@ namespace Parser
         file.close();
     }
 
-    const Program* Parser::parse()
+    Program* Parser::parse()
     {
         tokenize();
 
         current = 0;
 
-        std::vector<const Token*> instructions;
+        std::vector<Token*> instructions;
 
         while (current < tokens.size())
         {
-            const Token* token = parseInstruction(current);
+            Token* token = parseInstruction(current);
 
             instructions.push_back(token);
 
@@ -397,7 +397,7 @@ namespace Parser
         }
     }
 
-    const BasicToken* Parser::getToken(const unsigned int pos) const
+    BasicToken* Parser::getToken(const unsigned int pos) const
     {
         if (pos >= tokens.size())
         {
@@ -409,9 +409,9 @@ namespace Parser
         return tokens[pos];
     }
 
-    template <typename T> const T* Parser::getToken(const unsigned int pos) const
+    template <typename T> T* Parser::getToken(const unsigned int pos) const
     {
-        return dynamic_cast<const T*>(getToken(pos));
+        return dynamic_cast<T*>(getToken(pos));
     }
 
     template <typename T> bool Parser::tokenIs(const unsigned int pos) const
@@ -421,7 +421,7 @@ namespace Parser
             return false;
         }
 
-        return dynamic_cast<const T*>(getToken(pos));
+        return dynamic_cast<T*>(getToken(pos));
     }
 
     void Parser::tokenError(const BasicToken* token, const std::string expected) const
@@ -429,7 +429,7 @@ namespace Parser
         Utils::parseError("Expected " + expected + ", received \"" + token->str + "\".", token->location);
     }
 
-    const Token* Parser::parseInstruction(unsigned int pos) const
+    Token* Parser::parseInstruction(unsigned int pos) const
     {
         if (!tokenIs<Identifier>(pos))
         {
@@ -480,7 +480,7 @@ namespace Parser
         return nullptr;
     }
 
-    const Define* Parser::parseDefine(unsigned int pos) const
+    Define* Parser::parseDefine(unsigned int pos) const
     {
         const BasicToken* name = getToken(pos);
 
@@ -516,11 +516,11 @@ namespace Parser
 
         const OpenCurlyBracket* open = getToken<OpenCurlyBracket>(pos++);
 
-        std::vector<const Token*> instructions;
+        std::vector<Token*> instructions;
 
         while (!tokenIs<CloseCurlyBracket>(pos))
         {
-            const Token* instruction = parseInstruction(pos);
+            Token* instruction = parseInstruction(pos);
 
             instructions.push_back(instruction);
 
@@ -530,15 +530,16 @@ namespace Parser
         return new Define(SourceLocation(path, name->location.line, name->location.character, name->location.start, pos + 1), name->str, inputs, instructions);
     }
 
-    const Assign* Parser::parseAssign(unsigned int pos) const
+    Assign* Parser::parseAssign(unsigned int pos) const
     {
         const BasicToken* name = getToken(pos);
-        const Token* value = parseExpression(pos + 2);
+
+        Token* value = parseExpression(pos + 2);
 
         return new Assign(SourceLocation(path, name->location.line, name->location.character, pos, value->location.end), name->str, value);
     }
 
-    const Token* Parser::parseCall(unsigned int pos, const bool topLevel) const
+    Token* Parser::parseCall(unsigned int pos, const bool topLevel) const
     {
         const unsigned int start = pos;
 
@@ -620,10 +621,104 @@ namespace Parser
             Utils::parseError("Expected \"string\".", arguments[0]->value->location);
         }
 
-        return new Call(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), str->str, new ArgumentList(arguments, str->str), topLevel);
+        const SourceLocation location(path, str->location.line, str->location.character, start, pos + 1);
+
+        ArgumentList* argumentList = new ArgumentList(arguments, str->str);
+
+        if (str->str == "time")
+        {
+            return new Time(location, argumentList, topLevel);
+        }
+
+        if (str->str == "hold")
+        {
+            return new Hold(location, argumentList, topLevel);
+        }
+
+        if (str->str == "lfo")
+        {
+            return new LFO(location, argumentList, topLevel);
+        }
+
+        if (str->str == "sweep")
+        {
+            return new Sweep(location, argumentList, topLevel);
+        }
+
+        if (str->str == "sequence")
+        {
+            return new Sequence(location, argumentList, topLevel);
+        }
+
+        if (str->str == "repeat")
+        {
+            return new Repeat(location, argumentList, topLevel);
+        }
+
+        if (str->str == "random")
+        {
+            return new Random(location, argumentList, topLevel);
+        }
+
+        if (str->str == "limit")
+        {
+            return new Limit(location, argumentList, topLevel);
+        }
+
+        if (str->str == "trigger")
+        {
+            return new Trigger(location, argumentList, topLevel);
+        }
+
+        if (str->str == "if")
+        {
+            return new If(location, argumentList, topLevel);
+        }
+
+        if (str->str == "sine")
+        {
+            return new Sine(location, argumentList, topLevel);
+        }
+
+        if (str->str == "square")
+        {
+            return new Square(location, argumentList, topLevel);
+        }
+
+        if (str->str == "triangle")
+        {
+            return new Triangle(location, argumentList, topLevel);
+        }
+
+        if (str->str == "saw")
+        {
+            return new Saw(location, argumentList, topLevel);
+        }
+
+        if (str->str == "noise")
+        {
+            return new Noise(location, argumentList, topLevel);
+        }
+
+        if (str->str == "sample")
+        {
+            return new Sample(location, argumentList, topLevel);
+        }
+
+        if (str->str == "delay")
+        {
+            return new Delay(location, argumentList, topLevel);
+        }
+
+        if (str->str == "perform")
+        {
+            return new Perform(location, argumentList, topLevel);
+        }
+
+        return new CallUser(location, str->str, argumentList, topLevel);
     }
 
-    const Argument* Parser::parseArgument(unsigned int pos) const
+    Argument* Parser::parseArgument(unsigned int pos) const
     {
         if (!tokenIs<Identifier>(pos))
         {
@@ -636,12 +731,13 @@ namespace Parser
         }
 
         const BasicToken* start = getToken(pos);
-        const Token* value = parseExpression(pos + 2);
+
+        Token* value = parseExpression(pos + 2);
 
         return new Argument(SourceLocation(path, start->location.line, start->location.character, pos, value->location.end), start->str, value);
     }
 
-    const Token* Parser::parseExpression(unsigned int pos) const
+    Token* Parser::parseExpression(unsigned int pos) const
     {
         if (tokenIs<OpenSquareBracket>(pos))
         {
@@ -651,7 +747,7 @@ namespace Parser
         return parseTerms(pos);
     }
 
-    const List* Parser::parseList(unsigned int pos) const
+    List* Parser::parseList(unsigned int pos) const
     {
         const unsigned int start = pos;
 
@@ -662,11 +758,11 @@ namespace Parser
             Utils::parseError("Empty lists are not allowed.", SourceLocation(path, startToken->location.line, startToken->location.character, start, pos + 1));
         }
 
-        std::vector<const Token*> items;
+        std::vector<Token*> items;
 
         do
         {
-            const Token* token = parseExpression(pos + 1);
+            Token* token = parseExpression(pos + 1);
 
             items.push_back(token);
 
@@ -681,11 +777,11 @@ namespace Parser
         return new List(SourceLocation(path, startToken->location.line, startToken->location.character, start, pos + 1), items);
     }
 
-    const Token* Parser::parseTerms(unsigned int pos) const
+    Token* Parser::parseTerms(unsigned int pos) const
     {
         const unsigned int start = pos;
 
-        std::vector<const Token*> terms;
+        std::vector<Token*> terms;
 
         while (true)
         {
@@ -693,7 +789,7 @@ namespace Parser
             {
                 const unsigned int pStart = pos;
 
-                const Token* token = parseTerms(pos + 1);
+                Token* token = parseTerms(pos + 1);
 
                 pos = token->location.end;
 
@@ -711,7 +807,7 @@ namespace Parser
 
             else
             {
-                const Token* token = parseTerm(pos);
+                Token* token = parseTerm(pos);
 
                 terms.push_back(token);
 
@@ -746,7 +842,7 @@ namespace Parser
 
                 comparison = true;
 
-                terms[i - 1] = new CallAlias(span, "equal", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new EqualAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -762,7 +858,7 @@ namespace Parser
 
                 comparison = true;
 
-                terms[i - 1] = new CallAlias(span, "less", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new LessAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -778,7 +874,7 @@ namespace Parser
 
                 comparison = true;
 
-                terms[i - 1] = new CallAlias(span, "greater", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new GreaterAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -794,7 +890,7 @@ namespace Parser
 
                 comparison = true;
 
-                terms[i - 1] = new CallAlias(span, "lessequal", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new LessEqualAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -810,7 +906,7 @@ namespace Parser
 
                 comparison = true;
 
-                terms[i - 1] = new CallAlias(span, "greaterequal", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new GreaterEqualAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + 1, terms.begin() + i + 2);
 
@@ -824,7 +920,7 @@ namespace Parser
 
             if (dynamic_cast<const Power*>(terms[i]))
             {
-                terms[i - 1] = new CallAlias(span, "power", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new PowerAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -838,7 +934,7 @@ namespace Parser
 
             if (dynamic_cast<const Multiply*>(terms[i]))
             {
-                terms[i - 1] = new CallAlias(span, "multiply", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new MultiplyAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -847,7 +943,7 @@ namespace Parser
 
             else if (dynamic_cast<const Divide*>(terms[i]))
             {
-                terms[i - 1] = new CallAlias(span, "divide", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new DivideAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -861,7 +957,7 @@ namespace Parser
 
             if (dynamic_cast<const Add*>(terms[i]))
             {
-                terms[i - 1] = new CallAlias(span, "add", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new AddAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -870,7 +966,7 @@ namespace Parser
 
             else if (dynamic_cast<const Subtract*>(terms[i]))
             {
-                terms[i - 1] = new CallAlias(span, "subtract", std::vector<const Token*> { terms[i - 1], terms[i + 1] });
+                terms[i - 1] = new SubtractAlias(span, terms[i - 1], terms[i + 1]);
 
                 terms.erase(terms.begin() + i, terms.begin() + i + 2);
 
@@ -886,7 +982,7 @@ namespace Parser
         return terms[0];
     }
 
-    const Token* Parser::parseTerm(unsigned int pos) const
+    Token* Parser::parseTerm(unsigned int pos) const
     {
         if (tokenIs<Value>(pos) || tokenIs<String>(pos))
         {

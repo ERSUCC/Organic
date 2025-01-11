@@ -118,50 +118,12 @@ void GetVariable::output(std::ofstream& stream) const
     stream << BytecodeConstants::GET_VARIABLE << variable;
 }
 
-CallNative::CallNative(const std::string function, const unsigned char inputs) :
+CallNative::CallNative(const unsigned char function, const unsigned char inputs) :
     BytecodeInstruction(3), function(function), inputs(inputs) {}
 
 void CallNative::output(std::ofstream& stream) const
 {
-    unsigned char id;
-
-    if (function == "list") id = BytecodeConstants::LIST;
-    else if (function == "time") id = BytecodeConstants::TIME;
-
-    else if (function == "add") id = BytecodeConstants::ADD;
-    else if (function == "subtract") id = BytecodeConstants::SUBTRACT;
-    else if (function == "multiply") id = BytecodeConstants::MULTIPLY;
-    else if (function == "divide") id = BytecodeConstants::DIVIDE;
-    else if (function == "power") id = BytecodeConstants::POWER;
-    else if (function == "equal") id = BytecodeConstants::EQUAL;
-    else if (function == "less") id = BytecodeConstants::LESS;
-    else if (function == "greater") id = BytecodeConstants::GREATER;
-    else if (function == "lessequal") id = BytecodeConstants::LESSEQUAL;
-    else if (function == "greaterequal") id = BytecodeConstants::GREATEREQUAL;
-
-    else if (function == "sine") id = BytecodeConstants::SINE;
-    else if (function == "square") id = BytecodeConstants::SQUARE;
-    else if (function == "triangle") id = BytecodeConstants::TRIANGLE;
-    else if (function == "saw") id = BytecodeConstants::SAW;
-    else if (function == "noise") id = BytecodeConstants::NOISE;
-    else if (function == "sample") id = BytecodeConstants::SAMPLE;
-
-    else if (function == "hold") id = BytecodeConstants::HOLD;
-    else if (function == "lfo") id = BytecodeConstants::LFO;
-    else if (function == "sweep") id = BytecodeConstants::SWEEP;
-    else if (function == "sequence") id = BytecodeConstants::SEQUENCE;
-    else if (function == "repeat") id = BytecodeConstants::REPEAT;
-    else if (function == "random") id = BytecodeConstants::RANDOM;
-    else if (function == "limit") id = BytecodeConstants::LIMIT;
-    else if (function == "trigger") id = BytecodeConstants::TRIGGER;
-    else if (function == "if") id = BytecodeConstants::IF;
-
-    else if (function == "delay") id = BytecodeConstants::DELAY;
-
-    else if (function == "play") id = BytecodeConstants::PLAY;
-    else if (function == "perform") id = BytecodeConstants::PERFORM;
-
-    stream << BytecodeConstants::CALL_NATIVE << id << inputs;
+    stream << BytecodeConstants::CALL_NATIVE << function << inputs;
 }
 
 CallUser::CallUser(const InstructionBlock* function) :

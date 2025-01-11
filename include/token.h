@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "bytecode.h"
+#include "constants.h"
 #include "controller.h"
 #include "location.h"
 #include "path.h"
@@ -47,15 +48,14 @@ namespace Parser
 
     struct Token
     {
-        Token(const SourceLocation location, const bool topLevel = false);
+        Token(const SourceLocation location);
 
-        virtual Type* type(const BytecodeTransformer* visitor) const;
-
-        virtual void accept(BytecodeTransformer* visitor) const;
+        virtual void resolveTypes(BytecodeTransformer* visitor);
+        virtual void transform(BytecodeTransformer* visitor) const;
 
         const SourceLocation location;
 
-        const bool topLevel;
+        Type* type = new Type(BasicType::Any);
     };
 
     struct BasicToken : public Token
@@ -174,9 +174,7 @@ namespace Parser
     {
         Value(const SourceLocation location, const std::string str, const double value);
 
-        Type* type(const BytecodeTransformer* visitor) const override;
-
-        void accept(BytecodeTransformer* visitor) const override;
+        void transform(BytecodeTransformer* visitor) const override;
 
         const double value;
     };
@@ -185,34 +183,25 @@ namespace Parser
     {
         NamedConstant(const SourceLocation location, const std::string constant);
 
-        Type* type(const BytecodeTransformer* visitor) const override;
-
-        void accept(BytecodeTransformer* visitor) const override;
+        void transform(BytecodeTransformer* visitor) const override;
     };
 
     struct Variable : public BasicToken
     {
         Variable(const SourceLocation location, const std::string variable);
 
-        Type* type(const BytecodeTransformer* visitor) const override;
-
-        void accept(BytecodeTransformer* visitor) const override;
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
     };
 
     struct Input : public BasicToken
     {
         Input(const SourceLocation location, const std::string name);
-
-        Type* type(const BytecodeTransformer* visitor) const override;
-
-        Type* assumedType = nullptr;
     };
 
     struct String : public BasicToken
     {
         String(const SourceLocation location, const std::string str);
-
-        Type* type(const BytecodeTransformer* visitor) const override;
     };
 
     struct Ignore : public Token
@@ -222,27 +211,25 @@ namespace Parser
 
     struct Argument : public Token
     {
-        Argument(const SourceLocation location, const std::string name, const Token* value);
+        Argument(const SourceLocation location, const std::string name, Token* value);
 
         const std::string name;
 
-        const Token* value;
+        Token* value;
     };
 
     struct ArgumentList
     {
         ArgumentList(const std::vector<const Argument*> arguments, const std::string name);
 
-        static ArgumentList* constructAlias(const std::vector<const Token*>& arguments, const std::string name);
+        static ArgumentList* constructAlias(const std::vector<Token*>& arguments, const std::string name);
 
-        const Token* get(const std::string name, BytecodeTransformer* visitor, Type* expectedType = new Type(BasicType::Any));
-        void accept(const std::string name, BytecodeTransformer* visitor, Type* expectedType = new Type(BasicType::Any));
+        void resolveTypes(const std::string name, BytecodeTransformer* visitor, Type* expectedType);
+        void transform(const std::string name, BytecodeTransformer* visitor);
 
-        bool has(const std::string name) const;
+        const Token* get(const std::string name, BytecodeTransformer* visitor);
 
         void confirmEmpty() const;
-
-        unsigned char count = 0;
 
     private:
         std::vector<const Argument*> arguments;
@@ -253,72 +240,291 @@ namespace Parser
 
     struct List : public Token
     {
-        List(const SourceLocation location, const std::vector<const Token*> values);
+        List(const SourceLocation location, const std::vector<Token*> values);
 
-        Type* type(const BytecodeTransformer* visitor) const override;
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
 
-        void accept(BytecodeTransformer* visitor) const override;
-
-        const std::vector<const Token*> values;
+        const std::vector<Token*> values;
     };
 
     struct ParenthesizedExpression : public Token
     {
-        ParenthesizedExpression(const SourceLocation, const Token* value);
+        ParenthesizedExpression(const SourceLocation, Token* value);
 
-        Type* type(const BytecodeTransformer* visitor) const override;
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
 
-        void accept(BytecodeTransformer* visitor) const override;
-
-        const Token* value;
+        Token* value;
     };
 
     struct Assign : public Token
     {
-        Assign(const SourceLocation location, const std::string variable, const Token* value);
+        Assign(const SourceLocation location, const std::string variable, Token* value);
 
-        void accept(BytecodeTransformer* visitor) const override;
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
 
         const std::string variable;
 
-        const Token* value;
+        Token* value;
     };
 
     struct Call : public Token
     {
-        Call(const SourceLocation location, const std::string name, ArgumentList* arguments, const bool topLevel);
-
-        Type* type(const BytecodeTransformer* visitor) const override;
-
-        void accept(BytecodeTransformer* visitor) const override;
-
-        const std::string name;
+        Call(const SourceLocation location, ArgumentList* arguments, const bool topLevel);
 
         ArgumentList* arguments;
+
+        const bool topLevel;
     };
 
-    struct CallAlias : public Call
+    struct Time : public Call
     {
-        CallAlias(const SourceLocation location, const std::string name, const std::vector<const Token*>& arguments);
+        Time(const SourceLocation, ArgumentList* arguments, const bool topLevel);
 
-        Type* type(const BytecodeTransformer* visitor) const override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
 
-        void accept(BytecodeTransformer* visitor) const override;
+    struct Hold : public Call
+    {
+        Hold(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct LFO : public Call
+    {
+        LFO(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Sweep : public Call
+    {
+        Sweep(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Sequence : public Call
+    {
+        Sequence(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Repeat : public Call
+    {
+        Repeat(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Random : public Call
+    {
+        Random(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Limit : public Call
+    {
+        Limit(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Trigger : public Call
+    {
+        Trigger(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct If : public Call
+    {
+        If(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Sine : public Call
+    {
+        Sine(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Square : public Call
+    {
+        Square(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Triangle : public Call
+    {
+        Triangle(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Saw : public Call
+    {
+        Saw(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Noise : public Call
+    {
+        Noise(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Sample : public Call
+    {
+        Sample(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Delay : public Call
+    {
+        Delay(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    // low pass filter goes here when it's ready
+
+    struct Perform : public Call
+    {
+        Perform(const SourceLocation, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct CallUser : public Call
+    {
+        CallUser(const SourceLocation, const std::string name, ArgumentList* arguments, const bool topLevel);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+
+        const std::string name;
+    };
+
+    struct CallAlias : public Token
+    {
+        CallAlias(const SourceLocation location, Token* a, Token* b);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+
+        Token* a;
+        Token* b;
+    };
+
+    struct AddAlias : public CallAlias
+    {
+        AddAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct SubtractAlias : public CallAlias
+    {
+        SubtractAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct MultiplyAlias : public CallAlias
+    {
+        MultiplyAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct DivideAlias : public CallAlias
+    {
+        DivideAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct PowerAlias : public CallAlias
+    {
+        PowerAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct EqualAlias : public CallAlias
+    {
+        EqualAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct LessAlias : public CallAlias
+    {
+        LessAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct GreaterAlias : public CallAlias
+    {
+        GreaterAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct LessEqualAlias : public CallAlias
+    {
+        LessEqualAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct GreaterEqualAlias : public CallAlias
+    {
+        GreaterEqualAlias(const SourceLocation location, Token* a, Token* b);
+
+        void transform(BytecodeTransformer* visitor) const override;
     };
 
     struct Define : public Token
     {
-        Define(const SourceLocation location, const std::string name, const std::vector<Input*> inputs, const std::vector<const Token*> instructions);
+        Define(const SourceLocation location, const std::string name, const std::vector<Input*> inputs, const std::vector<Token*> instructions);
 
-        Type* type(const BytecodeTransformer* visitor) const override;
-
-        void accept(BytecodeTransformer* visitor) const override;
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
 
         const std::string name;
 
         const std::vector<Input*> inputs;
-
-        const std::vector<const Token*> instructions;
+        const std::vector<Token*> instructions;
     };
 
     struct Scope;
@@ -390,35 +596,90 @@ namespace Parser
 
     struct Program : public Token
     {
-        Program(const SourceLocation location, const std::vector<const Token*> instructions);
+        Program(const SourceLocation location, const std::vector<Token*> instructions);
 
-        const std::vector<const Token*> instructions;
+        const std::vector<Token*> instructions;
     };
 
     struct Include : public Token
     {
-        Include(const SourceLocation location, const Program* program);
+        Include(const SourceLocation location, Program* program);
 
-        void accept(BytecodeTransformer* visitor) const override;
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
 
-        const Program* program;
+        Program* program;
     };
 
     struct BytecodeTransformer
     {
         BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream);
 
-        void visit(const Value* token);
-        void visit(const NamedConstant* token);
-        void visit(const Variable* token);
-        void visit(const List* token);
-        void visit(const ParenthesizedExpression* token);
-        void visit(const Assign* token);
-        void visit(const Call* token);
-        void visit(const CallAlias* token);
-        void visit(const Define* token);
-        void visit(const Include* token);
-        void visit(const Program* token);
+        void createBytecode(Program* program);
+
+        void resolveTypes(Variable* token);
+        void resolveTypes(List* token);
+        void resolveTypes(ParenthesizedExpression* token);
+        void resolveTypes(Assign* token);
+        void resolveTypes(Hold* token);
+        void resolveTypes(LFO* token);
+        void resolveTypes(Sweep* token);
+        void resolveTypes(Sequence* token);
+        void resolveTypes(Repeat* token);
+        void resolveTypes(Random* token);
+        void resolveTypes(Limit* token);
+        void resolveTypes(Trigger* token);
+        void resolveTypes(If* token);
+        void resolveTypes(Sine* token);
+        void resolveTypes(Square* token);
+        void resolveTypes(Triangle* token);
+        void resolveTypes(Saw* token);
+        void resolveTypes(Noise* token);
+        void resolveTypes(Sample* token);
+        void resolveTypes(Delay* token);
+        void resolveTypes(Perform* token);
+        void resolveTypes(CallUser* token);
+        void resolveTypes(CallAlias* token);
+        void resolveTypes(Define* token);
+        void resolveTypes(Include* token);
+
+        void transform(const Value* token);
+        void transform(const NamedConstant* token);
+        void transform(const Variable* token);
+        void transform(const List* token);
+        void transform(const ParenthesizedExpression* token);
+        void transform(const Assign* token);
+        void transform(const Time* token);
+        void transform(const Hold* token);
+        void transform(const LFO* token);
+        void transform(const Sweep* token);
+        void transform(const Sequence* token);
+        void transform(const Repeat* token);
+        void transform(const Random* token);
+        void transform(const Limit* token);
+        void transform(const Trigger* token);
+        void transform(const If* token);
+        void transform(const Sine* token);
+        void transform(const Square* token);
+        void transform(const Triangle* token);
+        void transform(const Saw* token);
+        void transform(const Noise* token);
+        void transform(const Sample* token);
+        void transform(const Delay* token);
+        void transform(const Perform* token);
+        void transform(const CallUser* token);
+        void transform(const AddAlias* token);
+        void transform(const SubtractAlias* token);
+        void transform(const MultiplyAlias* token);
+        void transform(const DivideAlias* token);
+        void transform(const PowerAlias* token);
+        void transform(const EqualAlias* token);
+        void transform(const LessAlias* token);
+        void transform(const GreaterAlias* token);
+        void transform(const LessEqualAlias* token);
+        void transform(const GreaterEqualAlias* token);
+        void transform(const Define* token);
+        void transform(const Include* token);
 
         unsigned char newVariableId();
 

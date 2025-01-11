@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include <sndfile.hh>
@@ -112,13 +111,12 @@ private:
 
 struct CallNative : public BytecodeInstruction
 {
-    CallNative(const std::string function, const unsigned char inputs);
+    CallNative(const unsigned char function, const unsigned char inputs);
 
     void output(std::ofstream& stream) const override;
 
 private:
-    const std::string function;
-
+    const unsigned char function;
     const unsigned char inputs;
 
 };

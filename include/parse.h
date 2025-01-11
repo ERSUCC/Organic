@@ -15,7 +15,7 @@ namespace Parser
     {
         Parser(const Path* path, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
 
-        const Program* parse();
+        Program* parse();
 
     private:
         void skipWhitespace();
@@ -23,21 +23,21 @@ namespace Parser
 
         void tokenize();
 
-        const BasicToken* getToken(const unsigned int pos) const;
-        template <typename T> const T* getToken(const unsigned int pos) const;
+        BasicToken* getToken(const unsigned int pos) const;
+        template <typename T> T* getToken(const unsigned int pos) const;
         template <typename T> bool tokenIs(const unsigned int pos) const;
 
         void tokenError(const BasicToken* token, const std::string message) const;
 
-        const Token* parseInstruction(unsigned int pos) const;
-        const Define* parseDefine(unsigned int pos) const;
-        const Assign* parseAssign(unsigned int pos) const;
-        const Token* parseCall(unsigned int pos, const bool topLevel) const;
-        const Argument* parseArgument(unsigned int pos) const;
-        const Token* parseExpression(unsigned int pos) const;
-        const List* parseList(unsigned int pos) const;
-        const Token* parseTerms(unsigned int pos) const;
-        const Token* parseTerm(unsigned int pos) const;
+        Token* parseInstruction(unsigned int pos) const;
+        Define* parseDefine(unsigned int pos) const;
+        Assign* parseAssign(unsigned int pos) const;
+        Token* parseCall(unsigned int pos, const bool topLevel) const;
+        Argument* parseArgument(unsigned int pos) const;
+        Token* parseExpression(unsigned int pos) const;
+        List* parseList(unsigned int pos) const;
+        Token* parseTerms(unsigned int pos) const;
+        Token* parseTerm(unsigned int pos) const;
 
         double getFrequency(const double note) const;
 
