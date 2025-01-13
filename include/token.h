@@ -55,7 +55,7 @@ namespace Parser
 
         const SourceLocation location;
 
-        Type* type = new Type(BasicType::Any);
+        Type* type = nullptr;
     };
 
     struct BasicToken : public Token

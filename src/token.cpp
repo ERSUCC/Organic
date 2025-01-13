@@ -1014,6 +1014,7 @@ namespace Parser
             if (!token->type)
             {
                 token->type = expectedType;
+                info->token->type = expectedType;
             }
         }
 
@@ -1214,8 +1215,6 @@ namespace Parser
                     token->arguments->resolveTypes(input->str, this, new Type(BasicType::Any));
                 }
             }
-
-            token->arguments->confirmEmpty();
         }
 
         else if (currentScope->checkRecursive(token->name))
@@ -1278,26 +1277,28 @@ namespace Parser
             Utils::parseError("Redefining a function in its own definition is not allowed.", token->location);
         }
 
+        currentScope = new Scope(this, currentScope, token->name, token->inputs);
+
+        for (Token* instruction : token->instructions)
+        {
+            instruction->resolveTypes(this);
+        }
+
+        currentScope->checkUses();
+
+        currentScope->parent->addFunction(token->name, currentScope, token);
+
+        currentScope = currentScope->parent;
+
         if (token->instructions.empty())
         {
+            // should this be a warning?
+
             token->type = new Type(BasicType::None);
         }
 
         else
         {
-            currentScope = new Scope(this, currentScope, token->name, token->inputs);
-
-            for (Token* instruction : token->instructions)
-            {
-                instruction->resolveTypes(this);
-            }
-
-            currentScope->checkUses();
-
-            currentScope->parent->addFunction(token->name, currentScope, token);
-
-            currentScope = currentScope->parent;
-
             token->type = token->instructions.back()->type;
         }
     }
@@ -1655,6 +1656,8 @@ namespace Parser
         for (const Input* input : info->scope->inputList)
         {
             token->arguments->transform(input->str, this);
+
+            currentScope->block->addInstruction(new SetVariable(info->scope->getInput(input->str)->id));
         }
 
         token->arguments->confirmEmpty();
