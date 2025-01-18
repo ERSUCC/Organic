@@ -271,97 +271,8 @@ namespace Parser
     Argument::Argument(const SourceLocation location, const std::string name, Token* value) :
         Token(location), name(name), value(value) {}
 
-    ArgumentList::ArgumentList(const std::vector<const Argument*> arguments, const std::string name) :
-        arguments(arguments), name(name)
-    {
-        std::unordered_set<std::string> defined;
-
-        for (const Argument* argument : arguments)
-        {
-            if (defined.count(argument->name))
-            {
-                Utils::parseError("Input \"" + argument->name + "\" specified more than once in function \"" + name + "\".", argument->location);
-            }
-
-            defined.insert(argument->name);
-        }
-    }
-
-    ArgumentList* ArgumentList::constructAlias(const std::vector<Token*>& arguments, const std::string name)
-    {
-        std::vector<const Argument*> named;
-
-        for (unsigned int i = 0; i < arguments.size(); i++)
-        {
-            named.push_back(new Argument(arguments[i]->location, std::to_string(i), arguments[i]));
-        }
-
-        return new ArgumentList(named, name);
-    }
-
-    void ArgumentList::resolveTypes(const std::string name, BytecodeTransformer* visitor, Type* expectedType)
-    {
-        for (unsigned int i = 0; i < arguments.size(); i++)
-        {
-            if (arguments[i]->name == name)
-            {
-                visitor->expectedType = expectedType;
-
-                arguments[i]->value->resolveTypes(visitor);
-
-                const Type* argumentType = arguments[i]->value->type;
-
-                if (!argumentType->checkType(expectedType))
-                {
-                    Utils::parseError("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", arguments[i]->value->location);
-                }
-
-                return;
-            }
-        }
-    }
-
-    void ArgumentList::transform(const std::string name, BytecodeTransformer* visitor)
-    {
-        for (unsigned int i = 0; i < arguments.size(); i++)
-        {
-            if (arguments[i]->name == name)
-            {
-                arguments[i]->value->transform(visitor);
-
-                arguments.erase(arguments.begin() + i);
-
-                return;
-            }
-        }
-
-        visitor->currentScope->block->addInstruction(new StackPushDefault());
-    }
-
-    const Token* ArgumentList::get(const std::string name, BytecodeTransformer* visitor)
-    {
-        for (unsigned int i = 0; i < arguments.size(); i++)
-        {
-            if (arguments[i]->name == name)
-            {
-                const Token* value = arguments[i]->value;
-
-                arguments.erase(arguments.begin() + i);
-
-                return value;
-            }
-        }
-
-        return nullptr;
-    }
-
-    void ArgumentList::confirmEmpty() const
-    {
-        if (!arguments.empty())
-        {
-            Utils::parseError("Invalid input name \"" + arguments[0]->name + "\" for function \"" + name + "\".", arguments[0]->location);
-        }
-    }
+    ArgumentList::ArgumentList(const std::vector<Argument*>& arguments, const std::string name) :
+        arguments(arguments), name(name) {}
 
     List::List(const SourceLocation location, const std::vector<Token*> values) :
         Token(location), values(values) {}
@@ -402,14 +313,12 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Call::Call(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Call::Call(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Token(location), arguments(arguments), topLevel(topLevel) {}
 
-    Time::Time(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Time::Time(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
-        arguments->confirmEmpty();
-
         type = new Type(BasicType::Number);
     }
 
@@ -418,7 +327,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Hold::Hold(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Hold::Hold(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Number);
@@ -434,7 +343,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    LFO::LFO(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    LFO::LFO(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Number);
@@ -450,7 +359,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Sweep::Sweep(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Sweep::Sweep(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Number);
@@ -466,7 +375,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Sequence::Sequence(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Sequence::Sequence(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Number);
@@ -482,7 +391,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Repeat::Repeat(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Repeat::Repeat(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Number);
@@ -498,7 +407,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Random::Random(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Random::Random(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Number);
@@ -514,7 +423,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Limit::Limit(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Limit::Limit(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Number);
@@ -530,7 +439,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Trigger::Trigger(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Trigger::Trigger(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Number);
@@ -546,7 +455,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    If::If(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    If::If(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Number);
@@ -562,7 +471,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Sine::Sine(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Sine::Sine(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::AudioSource);
@@ -578,7 +487,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Square::Square(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Square::Square(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::AudioSource);
@@ -594,7 +503,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Triangle::Triangle(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Triangle::Triangle(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::AudioSource);
@@ -610,7 +519,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Saw::Saw(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Saw::Saw(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::AudioSource);
@@ -626,7 +535,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Noise::Noise(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Noise::Noise(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::AudioSource);
@@ -642,7 +551,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Sample::Sample(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Sample::Sample(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::AudioSource);
@@ -658,7 +567,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Delay::Delay(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Delay::Delay(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::Effect);
@@ -674,7 +583,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Perform::Perform(const SourceLocation location, ArgumentList* arguments, const bool topLevel) :
+    Perform::Perform(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
         type = new Type(BasicType::None);
@@ -690,7 +599,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    CallUser::CallUser(const SourceLocation location, const std::string name, ArgumentList* arguments, const bool topLevel) :
+    CallUser::CallUser(const SourceLocation location, const std::string name, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel), name(name) {}
 
     void CallUser::resolveTypes(BytecodeTransformer* visitor)
@@ -844,7 +753,7 @@ namespace Parser
         id(id), token(token) {}
 
     Scope::Scope(BytecodeTransformer* visitor, Scope* parent, const std::string currentFunction, const std::vector<Input*> inputs) :
-        visitor(visitor), parent(parent), currentFunction(currentFunction), inputList(inputs)
+        visitor(visitor), parent(parent), currentFunction(currentFunction)
     {
         block = new InstructionBlock(inputs.size());
 
@@ -1079,140 +988,140 @@ namespace Parser
 
     void BytecodeTransformer::resolveTypes(Hold* token)
     {
-        token->arguments->resolveTypes("length", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("value", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(LFO* token)
     {
-        token->arguments->resolveTypes("length", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("to", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("from", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "to", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "from", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Sweep* token)
     {
-        token->arguments->resolveTypes("length", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("to", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("from", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "to", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "from", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Sequence* token)
     {
-        token->arguments->resolveTypes("order", this, new Type(BasicType::SequenceOrder));
-        token->arguments->resolveTypes("values", this, new Type(BasicType::List, new Type(BasicType::Number)));
+        resolveArgumentTypes(token->arguments, "order", new Type(BasicType::SequenceOrder));
+        resolveArgumentTypes(token->arguments, "values", new Type(BasicType::List, new Type(BasicType::Number)));
     }
 
     void BytecodeTransformer::resolveTypes(Repeat* token)
     {
-        token->arguments->resolveTypes("repeats", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("value", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "repeats", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Random* token)
     {
-        token->arguments->resolveTypes("type", this, new Type(BasicType::RandomType));
-        token->arguments->resolveTypes("length", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("to", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("from", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "type", new Type(BasicType::RandomType));
+        resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "to", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "from", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Limit* token)
     {
-        token->arguments->resolveTypes("max", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("min", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("value", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "max", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "min", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Trigger* token)
     {
-        token->arguments->resolveTypes("value", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("condition", this, new Type(BasicType::Boolean));
+        resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "condition", new Type(BasicType::Boolean));
     }
 
     void BytecodeTransformer::resolveTypes(If* token)
     {
-        token->arguments->resolveTypes("false", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("true", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("condition", this, new Type(BasicType::Boolean));
+        resolveArgumentTypes(token->arguments, "false", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "true", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "condition", new Type(BasicType::Boolean));
     }
 
     void BytecodeTransformer::resolveTypes(Sine* token)
     {
-        token->arguments->resolveTypes("frequency", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
-        token->arguments->resolveTypes("pan", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("volume", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
+        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Square* token)
     {
-        token->arguments->resolveTypes("frequency", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
-        token->arguments->resolveTypes("pan", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("volume", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
+        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Triangle* token)
     {
-        token->arguments->resolveTypes("frequency", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
-        token->arguments->resolveTypes("pan", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("volume", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
+        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Saw* token)
     {
-        token->arguments->resolveTypes("frequency", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
-        token->arguments->resolveTypes("pan", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("volume", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
+        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Noise* token)
     {
-        token->arguments->resolveTypes("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
-        token->arguments->resolveTypes("pan", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("volume", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
+        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Sample* token)
     {
-        token->arguments->resolveTypes("file", this, new Type(BasicType::String));
-        token->arguments->resolveTypes("effects", this, new Type(BasicType::List, new Type(BasicType::Effect)));
-        token->arguments->resolveTypes("pan", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("volume", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "file", new Type(BasicType::String));
+        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
+        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Delay* token)
     {
-        token->arguments->resolveTypes("feedback", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("delay", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("mix", this, new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "feedback", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "delay", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "mix", new Type(BasicType::Number));
     }
 
     void BytecodeTransformer::resolveTypes(Perform* token)
     {
-        token->arguments->resolveTypes("interval", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("repeats", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("delay", this, new Type(BasicType::Number));
-        token->arguments->resolveTypes("function", this, new Type(BasicType::Any));
+        resolveArgumentTypes(token->arguments, "interval", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "repeats", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "delay", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "function", new Type(BasicType::Any));
     }
 
     void BytecodeTransformer::resolveTypes(CallUser* token)
     {
         if (const FunctionInfo* info = currentScope->getFunction(token->name))
         {
-            for (const Input* input : info->scope->inputList)
+            for (const Input* input : info->token->inputs)
             {
                 if (Type* type = input->type)
                 {
-                    token->arguments->resolveTypes(input->str, this, type);
+                    resolveArgumentTypes(token->arguments, input->str, type);
                 }
 
                 else
                 {
-                    token->arguments->resolveTypes(input->str, this, new Type(BasicType::Any));
+                    resolveArgumentTypes(token->arguments, input->str, new Type(BasicType::Any));
                 }
             }
         }
@@ -1395,112 +1304,114 @@ namespace Parser
     void BytecodeTransformer::transform(const Time* token)
     {
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::TIME, 0));
+
+        checkArguments(token->arguments);
     }
 
     void BytecodeTransformer::transform(const Hold* token)
     {
-        token->arguments->transform("length", this);
-        token->arguments->transform("value", this);
+        transformArgument(token->arguments, "length");
+        transformArgument(token->arguments, "value");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::HOLD, 2));
     }
 
     void BytecodeTransformer::transform(const LFO* token)
     {
-        token->arguments->transform("length", this);
-        token->arguments->transform("to", this);
-        token->arguments->transform("from", this);
+        transformArgument(token->arguments, "length");
+        transformArgument(token->arguments, "to");
+        transformArgument(token->arguments, "from");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::LFO, 3));
     }
 
     void BytecodeTransformer::transform(const Sweep* token)
     {
-        token->arguments->transform("length", this);
-        token->arguments->transform("to", this);
-        token->arguments->transform("from", this);
+        transformArgument(token->arguments, "length");
+        transformArgument(token->arguments, "to");
+        transformArgument(token->arguments, "from");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::SWEEP, 3));
     }
 
     void BytecodeTransformer::transform(const Sequence* token)
     {
-        token->arguments->transform("order", this);
-        token->arguments->transform("values", this);
+        transformArgument(token->arguments, "order");
+        transformArgument(token->arguments, "values");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::SEQUENCE, 2));
     }
 
     void BytecodeTransformer::transform(const Repeat* token)
     {
-        token->arguments->transform("repeats", this);
-        token->arguments->transform("value", this);
+        transformArgument(token->arguments, "repeats");
+        transformArgument(token->arguments, "value");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::REPEAT, 2));
     }
 
     void BytecodeTransformer::transform(const Random* token)
     {
-        token->arguments->transform("type", this);
-        token->arguments->transform("length", this);
-        token->arguments->transform("to", this);
-        token->arguments->transform("from", this);
+        transformArgument(token->arguments, "type");
+        transformArgument(token->arguments, "length");
+        transformArgument(token->arguments, "to");
+        transformArgument(token->arguments, "from");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::RANDOM, 4));
     }
 
     void BytecodeTransformer::transform(const Limit* token)
     {
-        token->arguments->transform("max", this);
-        token->arguments->transform("min", this);
-        token->arguments->transform("value", this);
+        transformArgument(token->arguments, "max");
+        transformArgument(token->arguments, "min");
+        transformArgument(token->arguments, "value");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::LIMIT, 3));
     }
 
     void BytecodeTransformer::transform(const Trigger* token)
     {
-        token->arguments->transform("value", this);
-        token->arguments->transform("condition", this);
+        transformArgument(token->arguments, "value");
+        transformArgument(token->arguments, "condition");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::TRIGGER, 2));
     }
 
     void BytecodeTransformer::transform(const If* token)
     {
-        token->arguments->transform("false", this);
-        token->arguments->transform("true", this);
-        token->arguments->transform("condition", this);
+        transformArgument(token->arguments, "false");
+        transformArgument(token->arguments, "true");
+        transformArgument(token->arguments, "condition");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::IF, 3));
     }
 
     void BytecodeTransformer::transform(const Sine* token)
     {
-        token->arguments->transform("frequency", this);
-        token->arguments->transform("effects", this);
-        token->arguments->transform("pan", this);
-        token->arguments->transform("volume", this);
+        transformArgument(token->arguments, "frequency");
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "pan");
+        transformArgument(token->arguments, "volume");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::SINE, 4));
 
@@ -1512,12 +1423,12 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Square* token)
     {
-        token->arguments->transform("frequency", this);
-        token->arguments->transform("effects", this);
-        token->arguments->transform("pan", this);
-        token->arguments->transform("volume", this);
+        transformArgument(token->arguments, "frequency");
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "pan");
+        transformArgument(token->arguments, "volume");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::SQUARE, 4));
 
@@ -1529,12 +1440,12 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Triangle* token)
     {
-        token->arguments->transform("frequency", this);
-        token->arguments->transform("effects", this);
-        token->arguments->transform("pan", this);
-        token->arguments->transform("volume", this);
+        transformArgument(token->arguments, "frequency");
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "pan");
+        transformArgument(token->arguments, "volume");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::TRIANGLE, 4));
 
@@ -1546,12 +1457,12 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Saw* token)
     {
-        token->arguments->transform("frequency", this);
-        token->arguments->transform("effects", this);
-        token->arguments->transform("pan", this);
-        token->arguments->transform("volume", this);
+        transformArgument(token->arguments, "frequency");
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "pan");
+        transformArgument(token->arguments, "volume");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::SAW, 4));
 
@@ -1563,11 +1474,11 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Noise* token)
     {
-        token->arguments->transform("effects", this);
-        token->arguments->transform("pan", this);
-        token->arguments->transform("volume", this);
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "pan");
+        transformArgument(token->arguments, "volume");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::NOISE, 3));
 
@@ -1579,7 +1490,7 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Sample* token)
     {
-        const String* str = dynamic_cast<const String*>(token->arguments->get("file", this));
+        const String* str = dynamic_cast<const String*>(getArgument(token->arguments, "file"));
 
         const Path* path = Path::beside(str->str, sourcePath);
 
@@ -1602,11 +1513,11 @@ namespace Parser
 
         currentScope->block->addInstruction(new StackPushResource(resources[path]));
 
-        token->arguments->transform("effects", this);
-        token->arguments->transform("pan", this);
-        token->arguments->transform("volume", this);
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "pan");
+        transformArgument(token->arguments, "volume");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::SAMPLE, 4));
 
@@ -1618,24 +1529,24 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Delay* token)
     {
-        token->arguments->transform("feedback", this);
-        token->arguments->transform("delay", this);
-        token->arguments->transform("mix", this);
+        transformArgument(token->arguments, "feedback");
+        transformArgument(token->arguments, "delay");
+        transformArgument(token->arguments, "mix");
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::DELAY, 3));
     }
 
     void BytecodeTransformer::transform(const Perform* token)
     {
-        token->arguments->transform("interval", this);
-        token->arguments->transform("repeats", this);
-        token->arguments->transform("delay", this);
+        transformArgument(token->arguments, "interval");
+        transformArgument(token->arguments, "repeats");
+        transformArgument(token->arguments, "delay");
 
         currentScope = new Scope(this, currentScope);
 
-        token->arguments->transform("function", this);
+        transformArgument(token->arguments, "function");
 
         InstructionBlock* block = currentScope->block;
 
@@ -1643,7 +1554,7 @@ namespace Parser
 
         currentScope = currentScope->parent;
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new StackPushAddress(block));
         currentScope->block->addInstruction(new CallNative(BytecodeConstants::PERFORM, 4));
@@ -1653,14 +1564,14 @@ namespace Parser
     {
         const FunctionInfo* info = currentScope->getFunction(token->name);
 
-        for (const Input* input : info->scope->inputList)
+        for (const Input* input : info->token->inputs)
         {
-            token->arguments->transform(input->str, this);
+            transformArgument(token->arguments, input->str);
 
             currentScope->block->addInstruction(new SetVariable(info->scope->getInput(input->str)->id));
         }
 
-        token->arguments->confirmEmpty();
+        checkArguments(token->arguments);
 
         currentScope->block->addInstruction(new ::CallUser(info->scope->block));
     }
@@ -1772,5 +1683,75 @@ namespace Parser
     unsigned char BytecodeTransformer::newVariableId()
     {
         return nextVariable++;
+    }
+
+    void BytecodeTransformer::resolveArgumentTypes(const ArgumentList* arguments, const std::string name, Type* expectedType)
+    {
+        for (unsigned int i = 0; i < arguments->arguments.size(); i++)
+        {
+            Argument* argument = arguments->arguments[i];
+
+            if (argument->name == name)
+            {
+                if (argument->used)
+                {
+                    Utils::parseError("Input \"" + argument->name + "\" specified more than once for function \"" + arguments->name + "\".", argument->location);
+                }
+
+                argument->used = true;
+
+                this->expectedType = expectedType;
+
+                argument->value->resolveTypes(this);
+
+                const Type* argumentType = argument->value->type;
+
+                if (!argumentType->checkType(expectedType))
+                {
+                    Utils::parseError("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", argument->value->location);
+                }
+
+                return;
+            }
+        }
+    }
+
+    void BytecodeTransformer::transformArgument(const ArgumentList* arguments, const std::string name)
+    {
+        for (unsigned int i = 0; i < arguments->arguments.size(); i++)
+        {
+            if (arguments->arguments[i]->name == name)
+            {
+                arguments->arguments[i]->value->transform(this);
+
+                return;
+            }
+        }
+
+        currentScope->block->addInstruction(new StackPushDefault());
+    }
+
+    Token* BytecodeTransformer::getArgument(const ArgumentList* arguments, const std::string name) const
+    {
+        for (unsigned int i = 0; i < arguments->arguments.size(); i++)
+        {
+            if (arguments->arguments[i]->name == name)
+            {
+                return arguments->arguments[i]->value;
+            }
+        }
+
+        return nullptr;
+    }
+
+    void BytecodeTransformer::checkArguments(const ArgumentList* arguments) const
+    {
+        for (const Argument* argument : arguments->arguments)
+        {
+            if (!argument->used)
+            {
+                Utils::parseError("Invalid input name \"" + argument->name + "\" for function \"" + arguments->name + "\".", argument->location);
+            }
+        }
     }
 }
