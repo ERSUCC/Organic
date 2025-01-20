@@ -294,7 +294,7 @@ class RTAUDIO_DLL_PUBLIC RtAudio
     bool isDefaultOutput{false};         /*!< true if this is the default output device. */
     bool isDefaultInput{false};          /*!< true if this is the default input device. */
     std::vector<unsigned int> sampleRates; /*!< Supported sample rates (queried from list of standard rates). */
-    unsigned int currentSampleRate{};   /*!< Current sample rate, system sample rate as currently utilsured. */
+    unsigned int currentSampleRate{};   /*!< Current sample rate, system sample rate as currently configured. */
     unsigned int preferredSampleRate{}; /*!< Preferred sample rate, e.g. for WASAPI the system sample rate. */
     RtAudioFormat nativeFormats{};  /*!< Bit mask of supported data formats. */
   };
@@ -712,7 +712,7 @@ struct CallbackInfo {
 class S24 {
 
  protected:
-  unsigned char c3[3];
+  unsigned char c3[4];
 
  public:
   S24() {}
@@ -938,4 +938,3 @@ inline void RtAudio :: showWarnings( bool value ) { rtapi_->showWarnings( value 
 // End:
 //
 // vim: et sts=2 sw=2
-
