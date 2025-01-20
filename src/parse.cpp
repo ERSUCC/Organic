@@ -832,7 +832,7 @@ namespace Parser
 
         for (unsigned int i = 1; i < terms.size() - 1; i++)
         {
-            const SourceLocation span = SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
+            const SourceLocation span(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
 
             if (dynamic_cast<const DoubleEquals*>(terms[i]))
             {
@@ -917,7 +917,7 @@ namespace Parser
 
         for (unsigned int i = 1; i < terms.size() - 1; i++)
         {
-            const SourceLocation span = SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
+            const SourceLocation span(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
 
             if (dynamic_cast<const Power*>(terms[i]))
             {
@@ -931,7 +931,7 @@ namespace Parser
 
         for (unsigned int i = 1; i < terms.size() - 1; i++)
         {
-            const SourceLocation span = SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
+            const SourceLocation span(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
 
             if (dynamic_cast<const Multiply*>(terms[i]))
             {
@@ -954,7 +954,7 @@ namespace Parser
 
         for (unsigned int i = 1; i < terms.size() - 1; i++)
         {
-            const SourceLocation span = SourceLocation(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
+            const SourceLocation span(path, terms[i - 1]->location.line, terms[i - 1]->location.character, terms[i - 1]->location.start, terms[i + 1]->location.end);
 
             if (dynamic_cast<const Add*>(terms[i]))
             {
@@ -999,16 +999,46 @@ namespace Parser
 
             Identifier* token = getToken<Identifier>(pos);
 
-            if (token->str == "sequence-forwards" ||
-                token->str == "sequence-backwards" ||
-                token->str == "sequence-ping-pong" ||
-                token->str == "sequence-random" ||
-                token->str == "random-step" ||
-                token->str == "random-linear" ||
-                token->str == "pi" ||
-                token->str == "e")
+            const SourceLocation location(path, token->location.line, token->location.character, pos, pos + 1);
+
+            if (token->str == "sequence-forwards")
             {
-                return new NamedConstant(SourceLocation(path, token->location.line, token->location.character, pos, pos + 1), token->str);
+                return new SequenceForwards(location);
+            }
+
+            if (token->str == "sequence-backwards")
+            {
+                return new SequenceBackwards(location);
+            }
+
+            if (token->str == "sequence-ping-pong")
+            {
+                return new SequencePingPong(location);
+            }
+
+            if (token->str == "sequence-random")
+            {
+                return new SequenceRandom(location);
+            }
+
+            if (token->str == "random-step")
+            {
+                return new RandomStep(location);
+            }
+
+            if (token->str == "random-linear")
+            {
+                return new RandomLinear(location);
+            }
+
+            if (token->str == "pi")
+            {
+                return new Pi(location);
+            }
+
+            if (token->str == "e")
+            {
+                return new E(location);
             }
 
             return token;

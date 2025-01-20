@@ -182,9 +182,58 @@ namespace Parser
         const double value;
     };
 
-    struct NamedConstant : public BasicToken
+    struct SequenceForwards : public BasicToken
     {
-        NamedConstant(const SourceLocation location, const std::string constant);
+        SequenceForwards(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct SequenceBackwards : public BasicToken
+    {
+        SequenceBackwards(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct SequencePingPong : public BasicToken
+    {
+        SequencePingPong(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct SequenceRandom : public BasicToken
+    {
+        SequenceRandom(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct RandomStep : public BasicToken
+    {
+        RandomStep(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct RandomLinear : public BasicToken
+    {
+        RandomLinear(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Pi : public BasicToken
+    {
+        Pi(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct E : public BasicToken
+    {
+        E(const SourceLocation location);
 
         void transform(BytecodeTransformer* visitor) const override;
     };
@@ -614,7 +663,14 @@ namespace Parser
         void resolveTypes(Include* token);
 
         void transform(const Value* token);
-        void transform(const NamedConstant* token);
+        void transform(const SequenceForwards* token);
+        void transform(const SequenceBackwards* token);
+        void transform(const SequencePingPong* token);
+        void transform(const SequenceRandom* token);
+        void transform(const RandomStep* token);
+        void transform(const RandomLinear* token);
+        void transform(const Pi* token);
+        void transform(const E* token);
         void transform(const Identifier* token);
         void transform(const List* token);
         void transform(const ParenthesizedExpression* token);

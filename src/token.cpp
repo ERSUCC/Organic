@@ -229,26 +229,90 @@ namespace Parser
         visitor->transform(this);
     }
 
-    NamedConstant::NamedConstant(const SourceLocation location, const std::string constant) :
-        BasicToken(location, constant)
+    SequenceForwards::SequenceForwards(const SourceLocation location) :
+        BasicToken(location, "sequence-forwards")
     {
-        if (constant == "sequence-forwards" || constant == "sequence-backwards" || constant == "sequence-ping-pong" || constant == "sequence-random")
-        {
-            type = new Type(BasicType::SequenceOrder);
-        }
-
-        else if (constant == "random-step" || constant == "random-linear")
-        {
-            type = new Type(BasicType::RandomType);
-        }
-
-        else if (constant == "pi" || constant == "e")
-        {
-            type = new Type(BasicType::Number);
-        }
+        type = new Type(BasicType::SequenceOrder);
     }
 
-    void NamedConstant::transform(BytecodeTransformer* visitor) const
+    void SequenceForwards::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    SequenceBackwards::SequenceBackwards(const SourceLocation location) :
+        BasicToken(location, "sequence-backwards")
+    {
+        type = new Type(BasicType::SequenceOrder);
+    }
+
+    void SequenceBackwards::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    SequencePingPong::SequencePingPong(const SourceLocation location) :
+        BasicToken(location, "sequence-ping-pong")
+    {
+        type = new Type(BasicType::SequenceOrder);
+    }
+
+    void SequencePingPong::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    SequenceRandom::SequenceRandom(const SourceLocation location) :
+        BasicToken(location, "sequence-random")
+    {
+        type = new Type(BasicType::SequenceOrder);
+    }
+
+    void SequenceRandom::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    RandomStep::RandomStep(const SourceLocation location) :
+        BasicToken(location, "random-step")
+    {
+        type = new Type(BasicType::RandomType);
+    }
+
+    void RandomStep::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    RandomLinear::RandomLinear(const SourceLocation location) :
+        BasicToken(location, "random-linear")
+    {
+        type = new Type(BasicType::RandomType);
+    }
+
+    void RandomLinear::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    Pi::Pi(const SourceLocation location) :
+        BasicToken(location, "pi")
+    {
+        type = new Type(BasicType::Number);
+    }
+
+    void Pi::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    E::E(const SourceLocation location) :
+        BasicToken(location, "e")
+    {
+        type = new Type(BasicType::Number);
+    }
+
+    void E::transform(BytecodeTransformer* visitor) const
     {
         visitor->transform(this);
     }
@@ -1213,47 +1277,44 @@ namespace Parser
         currentScope->block->addInstruction(new StackPushDouble(token->value));
     }
 
-    void BytecodeTransformer::transform(const NamedConstant* token)
+    void BytecodeTransformer::transform(const SequenceForwards* token)
     {
-        if (token->str == "sequence-forwards")
-        {
-            currentScope->block->addInstruction(new StackPushByte(::Sequence::OrderEnum::Forwards));
-        }
+        currentScope->block->addInstruction(new StackPushByte(::Sequence::OrderEnum::Forwards));
+    }
 
-        else if (token->str == "sequence-backwards")
-        {
-            currentScope->block->addInstruction(new StackPushByte(::Sequence::OrderEnum::Backwards));
-        }
+    void BytecodeTransformer::transform(const SequenceBackwards* token)
+    {
+        currentScope->block->addInstruction(new StackPushByte(::Sequence::OrderEnum::Backwards));
+    }
 
-        else if (token->str == "sequence-ping-pong")
-        {
-            currentScope->block->addInstruction(new StackPushByte(::Sequence::OrderEnum::PingPong));
-        }
+    void BytecodeTransformer::transform(const SequencePingPong* token)
+    {
+        currentScope->block->addInstruction(new StackPushByte(::Sequence::OrderEnum::PingPong));
+    }
 
-        else if (token->str == "sequence-random")
-        {
-            currentScope->block->addInstruction(new StackPushByte(::Sequence::OrderEnum::Random));
-        }
+    void BytecodeTransformer::transform(const SequenceRandom* token)
+    {
+        currentScope->block->addInstruction(new StackPushByte(::Sequence::OrderEnum::Random));
+    }
 
-        else if (token->str == "random-step")
-        {
-            currentScope->block->addInstruction(new StackPushByte(::Random::TypeEnum::Step));
-        }
+    void BytecodeTransformer::transform(const RandomStep* token)
+    {
+        currentScope->block->addInstruction(new StackPushByte(::Random::TypeEnum::Step));
+    }
 
-        else if (token->str == "random-linear")
-        {
-            currentScope->block->addInstruction(new StackPushByte(::Random::TypeEnum::Linear));
-        }
+    void BytecodeTransformer::transform(const RandomLinear* token)
+    {
+        currentScope->block->addInstruction(new StackPushByte(::Random::TypeEnum::Linear));
+    }
 
-        else if (token->str == "pi")
-        {
-            currentScope->block->addInstruction(new StackPushDouble(utils->pi));
-        }
+    void BytecodeTransformer::transform(const Pi* token)
+    {
+        currentScope->block->addInstruction(new StackPushDouble(utils->pi));
+    }
 
-        else if (token->str == "e")
-        {
-            currentScope->block->addInstruction(new StackPushDouble(utils->e));
-        }
+    void BytecodeTransformer::transform(const E* token)
+    {
+        currentScope->block->addInstruction(new StackPushDouble(utils->e));
     }
 
     void BytecodeTransformer::transform(const Identifier* token)
