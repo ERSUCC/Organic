@@ -139,7 +139,7 @@ namespace Parser
     Token::Token(const SourceLocation location) :
         location(location) {}
 
-    void Token::resolveTypes(BytecodeTransformer* visitor) {}
+    void Token::resolveTypes(TypeResolver* visitor) {}
     void Token::transform(BytecodeTransformer* visitor) const {}
 
     BasicToken::BasicToken(const SourceLocation location, const std::string str) :
@@ -208,7 +208,7 @@ namespace Parser
     Identifier::Identifier(const SourceLocation location, const std::string str) :
         BasicToken(location, str) {}
 
-    void Identifier::resolveTypes(BytecodeTransformer* visitor)
+    void Identifier::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -335,7 +335,7 @@ namespace Parser
     List::List(const SourceLocation location, const std::vector<Token*> values) :
         Token(location), values(values) {}
 
-    void List::resolveTypes(BytecodeTransformer* visitor)
+    void List::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -348,7 +348,7 @@ namespace Parser
     ParenthesizedExpression::ParenthesizedExpression(const SourceLocation location, Token* value) :
         Token(location), value(value) {}
 
-    void ParenthesizedExpression::resolveTypes(BytecodeTransformer* visitor)
+    void ParenthesizedExpression::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -361,7 +361,7 @@ namespace Parser
     Assign::Assign(const SourceLocation location, Identifier* variable, Token* value) :
         Token(location), variable(variable), value(value) {}
 
-    void Assign::resolveTypes(BytecodeTransformer* visitor)
+    void Assign::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -391,7 +391,7 @@ namespace Parser
         type = new Type(BasicType::Number);
     }
 
-    void Hold::resolveTypes(BytecodeTransformer* visitor)
+    void Hold::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -407,7 +407,7 @@ namespace Parser
         type = new Type(BasicType::Number);
     }
 
-    void LFO::resolveTypes(BytecodeTransformer* visitor)
+    void LFO::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -423,7 +423,7 @@ namespace Parser
         type = new Type(BasicType::Number);
     }
 
-    void Sweep::resolveTypes(BytecodeTransformer* visitor)
+    void Sweep::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -439,7 +439,7 @@ namespace Parser
         type = new Type(BasicType::Number);
     }
 
-    void Sequence::resolveTypes(BytecodeTransformer* visitor)
+    void Sequence::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -455,7 +455,7 @@ namespace Parser
         type = new Type(BasicType::Number);
     }
 
-    void Repeat::resolveTypes(BytecodeTransformer* visitor)
+    void Repeat::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -471,7 +471,7 @@ namespace Parser
         type = new Type(BasicType::Number);
     }
 
-    void Random::resolveTypes(BytecodeTransformer* visitor)
+    void Random::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -487,7 +487,7 @@ namespace Parser
         type = new Type(BasicType::Number);
     }
 
-    void Limit::resolveTypes(BytecodeTransformer* visitor)
+    void Limit::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -503,7 +503,7 @@ namespace Parser
         type = new Type(BasicType::Number);
     }
 
-    void Trigger::resolveTypes(BytecodeTransformer* visitor)
+    void Trigger::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -519,7 +519,7 @@ namespace Parser
         type = new Type(BasicType::Number);
     }
 
-    void If::resolveTypes(BytecodeTransformer* visitor)
+    void If::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -535,7 +535,7 @@ namespace Parser
         type = new Type(BasicType::AudioSource);
     }
 
-    void Sine::resolveTypes(BytecodeTransformer* visitor)
+    void Sine::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -551,7 +551,7 @@ namespace Parser
         type = new Type(BasicType::AudioSource);
     }
 
-    void Square::resolveTypes(BytecodeTransformer* visitor)
+    void Square::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -567,7 +567,7 @@ namespace Parser
         type = new Type(BasicType::AudioSource);
     }
 
-    void Triangle::resolveTypes(BytecodeTransformer* visitor)
+    void Triangle::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -583,7 +583,7 @@ namespace Parser
         type = new Type(BasicType::AudioSource);
     }
 
-    void Saw::resolveTypes(BytecodeTransformer* visitor)
+    void Saw::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -599,7 +599,7 @@ namespace Parser
         type = new Type(BasicType::AudioSource);
     }
 
-    void Noise::resolveTypes(BytecodeTransformer* visitor)
+    void Noise::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -615,7 +615,7 @@ namespace Parser
         type = new Type(BasicType::AudioSource);
     }
 
-    void Sample::resolveTypes(BytecodeTransformer* visitor)
+    void Sample::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -631,7 +631,7 @@ namespace Parser
         type = new Type(BasicType::Effect);
     }
 
-    void Delay::resolveTypes(BytecodeTransformer* visitor)
+    void Delay::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -647,7 +647,7 @@ namespace Parser
         type = new Type(BasicType::None);
     }
 
-    void Perform::resolveTypes(BytecodeTransformer* visitor)
+    void Perform::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -660,7 +660,7 @@ namespace Parser
     CallUser::CallUser(const SourceLocation location, const std::string name, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel), name(name) {}
 
-    void CallUser::resolveTypes(BytecodeTransformer* visitor)
+    void CallUser::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -673,7 +673,7 @@ namespace Parser
     CallAlias::CallAlias(const SourceLocation location, Token* a, Token* b) :
         Token(location), a(a), b(b) {}
 
-    void CallAlias::resolveTypes(BytecodeTransformer* visitor)
+    void CallAlias::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -794,7 +794,7 @@ namespace Parser
         block = new InstructionBlock();
     }
 
-    void Define::resolveTypes(BytecodeTransformer* visitor)
+    void Define::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -819,7 +819,7 @@ namespace Parser
     Include::Include(const SourceLocation location, Program* program) :
         Token(location), program(program) {}
 
-    void Include::resolveTypes(BytecodeTransformer* visitor)
+    void Include::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
@@ -829,42 +829,10 @@ namespace Parser
         visitor->transform(this);
     }
 
-    BytecodeTransformer::BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream) :
-        sourcePath(sourcePath), outputStream(outputStream)
-    {
-        utils = Utils::get();
-    }
+    TypeResolver::TypeResolver(const Path* sourcePath) :
+        sourcePath(sourcePath) {}
 
-    void BytecodeTransformer::createBytecode(Program* program)
-    {
-        scopes.push_back(new Scope("", {}));
-
-        for (Token* instruction : program->instructions)
-        {
-            instruction->resolveTypes(this);
-        }
-
-        checkUses();
-
-        scopes.pop_back();
-
-        InstructionBlock* block = new InstructionBlock();
-
-        blocks.push(block);
-
-        resolver->addInstructionBlock(block);
-
-        for (const Token* instruction : program->instructions)
-        {
-            instruction->transform(this);
-        }
-
-        blocks.pop();
-
-        resolver->output(outputStream, nextIdentifierId);
-    }
-
-    void BytecodeTransformer::resolveTypes(Identifier* token)
+    void TypeResolver::resolveTypes(Identifier* token)
     {
         if (Identifier* input = getInput(token->str))
         {
@@ -889,7 +857,7 @@ namespace Parser
         }
     }
 
-    void BytecodeTransformer::resolveTypes(List* token)
+    void TypeResolver::resolveTypes(List* token)
     {
         Type* innerType = expectedType->subType;
 
@@ -908,14 +876,14 @@ namespace Parser
         token->type = new Type(BasicType::List, token->values[0]->type);
     }
 
-    void BytecodeTransformer::resolveTypes(ParenthesizedExpression* token)
+    void TypeResolver::resolveTypes(ParenthesizedExpression* token)
     {
         token->value->resolveTypes(this);
 
         token->type = token->value->type;
     }
 
-    void BytecodeTransformer::resolveTypes(Assign* token)
+    void TypeResolver::resolveTypes(Assign* token)
     {
         token->value->resolveTypes(this);
 
@@ -940,39 +908,39 @@ namespace Parser
         addVariable(token->variable);
     }
 
-    void BytecodeTransformer::resolveTypes(Hold* token)
+    void TypeResolver::resolveTypes(Hold* token)
     {
         resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(LFO* token)
+    void TypeResolver::resolveTypes(LFO* token)
     {
         resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "to", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "from", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Sweep* token)
+    void TypeResolver::resolveTypes(Sweep* token)
     {
         resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "to", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "from", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Sequence* token)
+    void TypeResolver::resolveTypes(Sequence* token)
     {
         resolveArgumentTypes(token->arguments, "order", new Type(BasicType::SequenceOrder));
         resolveArgumentTypes(token->arguments, "values", new Type(BasicType::List, new Type(BasicType::Number)));
     }
 
-    void BytecodeTransformer::resolveTypes(Repeat* token)
+    void TypeResolver::resolveTypes(Repeat* token)
     {
         resolveArgumentTypes(token->arguments, "repeats", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Random* token)
+    void TypeResolver::resolveTypes(Random* token)
     {
         resolveArgumentTypes(token->arguments, "type", new Type(BasicType::RandomType));
         resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
@@ -980,27 +948,27 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "from", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Limit* token)
+    void TypeResolver::resolveTypes(Limit* token)
     {
         resolveArgumentTypes(token->arguments, "max", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "min", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Trigger* token)
+    void TypeResolver::resolveTypes(Trigger* token)
     {
         resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "condition", new Type(BasicType::Boolean));
     }
 
-    void BytecodeTransformer::resolveTypes(If* token)
+    void TypeResolver::resolveTypes(If* token)
     {
         resolveArgumentTypes(token->arguments, "false", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "true", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "condition", new Type(BasicType::Boolean));
     }
 
-    void BytecodeTransformer::resolveTypes(Sine* token)
+    void TypeResolver::resolveTypes(Sine* token)
     {
         resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
@@ -1008,7 +976,7 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Square* token)
+    void TypeResolver::resolveTypes(Square* token)
     {
         resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
@@ -1016,7 +984,7 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Triangle* token)
+    void TypeResolver::resolveTypes(Triangle* token)
     {
         resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
@@ -1024,7 +992,7 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Saw* token)
+    void TypeResolver::resolveTypes(Saw* token)
     {
         resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
@@ -1032,14 +1000,14 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Noise* token)
+    void TypeResolver::resolveTypes(Noise* token)
     {
         resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
         resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Sample* token)
+    void TypeResolver::resolveTypes(Sample* token)
     {
         resolveArgumentTypes(token->arguments, "file", new Type(BasicType::String));
         resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
@@ -1047,14 +1015,14 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Delay* token)
+    void TypeResolver::resolveTypes(Delay* token)
     {
         resolveArgumentTypes(token->arguments, "feedback", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "delay", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "mix", new Type(BasicType::Number));
     }
 
-    void BytecodeTransformer::resolveTypes(Perform* token)
+    void TypeResolver::resolveTypes(Perform* token)
     {
         resolveArgumentTypes(token->arguments, "interval", new Type(BasicType::Number));
         resolveArgumentTypes(token->arguments, "repeats", new Type(BasicType::Number));
@@ -1062,7 +1030,7 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "function", new Type(BasicType::Any));
     }
 
-    void BytecodeTransformer::resolveTypes(CallUser* token)
+    void TypeResolver::resolveTypes(CallUser* token)
     {
         if (Define* function = getFunction(token->name))
         {
@@ -1093,7 +1061,7 @@ namespace Parser
         }
     }
 
-    void BytecodeTransformer::resolveTypes(CallAlias* token)
+    void TypeResolver::resolveTypes(CallAlias* token)
     {
         token->a->resolveTypes(this);
         token->b->resolveTypes(this);
@@ -1111,7 +1079,7 @@ namespace Parser
         }
     }
 
-    void BytecodeTransformer::resolveTypes(Define* token)
+    void TypeResolver::resolveTypes(Define* token)
     {
         if (getFunction(token->name))
         {
@@ -1154,12 +1122,158 @@ namespace Parser
         }
     }
 
-    void BytecodeTransformer::resolveTypes(Include* token)
+    void TypeResolver::resolveTypes(Program* token)
+    {
+        scopes.push_back(new Scope("", {}));
+
+        for (Token* instruction : token->instructions)
+        {
+            instruction->resolveTypes(this);
+        }
+
+        checkUses();
+
+        scopes.pop_back();
+    }
+
+    void TypeResolver::resolveTypes(Include* token)
     {
         for (Token* instruction : token->program->instructions)
         {
             instruction->resolveTypes(this);
         }
+    }
+
+    void TypeResolver::resolveArgumentTypes(const ArgumentList* arguments, const std::string name, Type* expectedType)
+    {
+        for (unsigned int i = 0; i < arguments->arguments.size(); i++)
+        {
+            Argument* argument = arguments->arguments[i];
+
+            if (argument->name == name)
+            {
+                if (argument->used)
+                {
+                    Utils::parseError("Input \"" + argument->name + "\" specified more than once for function \"" + arguments->name + "\".", argument->location);
+                }
+
+                argument->used = true;
+
+                this->expectedType = expectedType;
+
+                argument->value->resolveTypes(this);
+
+                const Type* argumentType = argument->value->type;
+
+                if (!argumentType->checkType(expectedType))
+                {
+                    Utils::parseError("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", argument->value->location);
+                }
+
+                return;
+            }
+        }
+    }
+
+    Identifier* TypeResolver::getVariable(const std::string variable)
+    {
+        for (int i = scopes.size() - 1; i >= 0; i--)
+        {
+            if (scopes[i]->variables.count(variable))
+            {
+                scopes[i]->variables[variable]->used = true;
+
+                return scopes[i]->variables[variable];
+            }
+        }
+
+        return nullptr;
+    }
+
+    void TypeResolver::addVariable(Identifier* variable)
+    {
+        scopes.back()->variables[variable->str] = variable;
+    }
+
+    Identifier* TypeResolver::getInput(const std::string input)
+    {
+        for (int i = scopes.size() - 1; i >= 0; i--)
+        {
+            if (scopes[i]->inputs.count(input))
+            {
+                scopes[i]->inputs[input]->used = true;
+
+                return scopes[i]->inputs[input];
+            }
+        }
+
+        return nullptr;
+    }
+
+    Define* TypeResolver::getFunction(const std::string function)
+    {
+        for (int i = scopes.size() - 1; i >= 0; i--)
+        {
+            if (scopes[i]->functions.count(function))
+            {
+                scopes[i]->functions[function]->used = true;
+
+                return scopes[i]->functions[function];
+            }
+        }
+
+        return nullptr;
+    }
+
+    void TypeResolver::addFunction(Define* function)
+    {
+        scopes.back()->functions[function->name] = function;
+    }
+
+    bool TypeResolver::checkRecursive(const std::string function) const
+    {
+        for (int i = scopes.size() - 1; i >= 0; i--)
+        {
+            if (scopes[i]->name == function)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void TypeResolver::checkUses() const
+    {
+        for (const std::pair<std::string, Identifier*>& pair : scopes.back()->variables)
+        {
+            if (!pair.second->used && pair.second->location.path == sourcePath)
+            {
+                Utils::parseWarning("Unused variable \"" + pair.first + "\".", pair.second->location);
+            }
+        }
+
+        for (const std::pair<std::string, Identifier*>& pair : scopes.back()->inputs)
+        {
+            if (!pair.second->used && pair.second->location.path == sourcePath)
+            {
+                Utils::parseWarning("Unused input \"" + pair.first + "\".", pair.second->location);
+            }
+        }
+
+        for (const std::pair<std::string, Define*>& pair : scopes.back()->functions)
+        {
+            if (!pair.second->used && pair.second->location.path == sourcePath)
+            {
+                Utils::parseWarning("Unused function \"" + pair.first + "\".", pair.second->location);
+            }
+        }
+    }
+
+    BytecodeTransformer::BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream) :
+        sourcePath(sourcePath), outputStream(outputStream)
+    {
+        utils = Utils::get();
     }
 
     void BytecodeTransformer::transform(const Value* token)
@@ -1209,6 +1323,11 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Identifier* token)
     {
+        if (token->id >= nextIdentifierId)
+        {
+            nextIdentifierId = token->id + 1;
+        }
+
         addInstruction(new GetVariable(token->id));
     }
 
@@ -1231,6 +1350,11 @@ namespace Parser
     void BytecodeTransformer::transform(const Assign* token)
     {
         token->value->transform(this);
+
+        if (token->variable->id >= nextIdentifierId)
+        {
+            nextIdentifierId = token->variable->id + 1;
+        }
 
         addInstruction(new SetVariable(token->variable->id));
     }
@@ -1500,6 +1624,11 @@ namespace Parser
         {
             transformArgument(token->arguments, input->str);
 
+            if (input->id >= nextIdentifierId)
+            {
+                nextIdentifierId = input->id + 1;
+            }
+
             addInstruction(new SetVariable(input->id));
         }
 
@@ -1602,42 +1731,29 @@ namespace Parser
         resolver->addInstructionBlock(token->block);
     }
 
+    void BytecodeTransformer::transform(const Program* token)
+    {
+        InstructionBlock* block = new InstructionBlock();
+
+        blocks.push(block);
+
+        resolver->addInstructionBlock(block);
+
+        for (const Token* instruction : token->instructions)
+        {
+            instruction->transform(this);
+        }
+
+        blocks.pop();
+
+        resolver->output(outputStream, nextIdentifierId);
+    }
+
     void BytecodeTransformer::transform(const Include* token)
     {
         for (const Token* instruction : token->program->instructions)
         {
             instruction->transform(this);
-        }
-    }
-
-    void BytecodeTransformer::resolveArgumentTypes(const ArgumentList* arguments, const std::string name, Type* expectedType)
-    {
-        for (unsigned int i = 0; i < arguments->arguments.size(); i++)
-        {
-            Argument* argument = arguments->arguments[i];
-
-            if (argument->name == name)
-            {
-                if (argument->used)
-                {
-                    Utils::parseError("Input \"" + argument->name + "\" specified more than once for function \"" + arguments->name + "\".", argument->location);
-                }
-
-                argument->used = true;
-
-                this->expectedType = expectedType;
-
-                argument->value->resolveTypes(this);
-
-                const Type* argumentType = argument->value->type;
-
-                if (!argumentType->checkType(expectedType))
-                {
-                    Utils::parseError("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", argument->value->location);
-                }
-
-                return;
-            }
         }
     }
 
@@ -1683,100 +1799,5 @@ namespace Parser
     void BytecodeTransformer::addInstruction(const BytecodeInstruction* instruction)
     {
         blocks.top()->addInstruction(instruction);
-    }
-
-    Identifier* BytecodeTransformer::getVariable(const std::string variable)
-    {
-        for (int i = scopes.size() - 1; i >= 0; i--)
-        {
-            if (scopes[i]->variables.count(variable))
-            {
-                scopes[i]->variables[variable]->used = true;
-
-                return scopes[i]->variables[variable];
-            }
-        }
-
-        return nullptr;
-    }
-
-    void BytecodeTransformer::addVariable(Identifier* variable)
-    {
-        scopes.back()->variables[variable->str] = variable;
-    }
-
-    Identifier* BytecodeTransformer::getInput(const std::string input)
-    {
-        for (int i = scopes.size() - 1; i >= 0; i--)
-        {
-            if (scopes[i]->inputs.count(input))
-            {
-                scopes[i]->inputs[input]->used = true;
-
-                return scopes[i]->inputs[input];
-            }
-        }
-
-        return nullptr;
-    }
-
-    Define* BytecodeTransformer::getFunction(const std::string function)
-    {
-        for (int i = scopes.size() - 1; i >= 0; i--)
-        {
-            if (scopes[i]->functions.count(function))
-            {
-                scopes[i]->functions[function]->used = true;
-
-                return scopes[i]->functions[function];
-            }
-        }
-
-        return nullptr;
-    }
-
-    void BytecodeTransformer::addFunction(Define* function)
-    {
-        scopes.back()->functions[function->name] = function;
-    }
-
-    bool BytecodeTransformer::checkRecursive(const std::string function) const
-    {
-        for (int i = scopes.size() - 1; i >= 0; i--)
-        {
-            if (scopes[i]->name == function)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    void BytecodeTransformer::checkUses() const
-    {
-        for (const std::pair<std::string, Identifier*>& pair : scopes.back()->variables)
-        {
-            if (!pair.second->used && pair.second->location.path == sourcePath)
-            {
-                Utils::parseWarning("Unused variable \"" + pair.first + "\".", pair.second->location);
-            }
-        }
-
-        for (const std::pair<std::string, Identifier*>& pair : scopes.back()->inputs)
-        {
-            if (!pair.second->used && pair.second->location.path == sourcePath)
-            {
-                Utils::parseWarning("Unused input \"" + pair.first + "\".", pair.second->location);
-            }
-        }
-
-        for (const std::pair<std::string, Define*>& pair : scopes.back()->functions)
-        {
-            if (!pair.second->used && pair.second->location.path == sourcePath)
-            {
-                Utils::parseWarning("Unused function \"" + pair.first + "\".", pair.second->location);
-            }
-        }
     }
 }
