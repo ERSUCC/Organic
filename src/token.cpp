@@ -791,7 +791,7 @@ namespace Parser
     Define::Define(const SourceLocation location, const std::string name, const std::vector<Identifier*> inputs, const std::vector<Token*> instructions) :
         Token(location), name(name), inputs(inputs), instructions(instructions)
     {
-        scope = new Scope(name, inputs);
+        block = new InstructionBlock();
     }
 
     void Define::resolveTypes(BytecodeTransformer* visitor)
@@ -804,10 +804,9 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Scope::Scope(const std::string name, const std::vector<Identifier*>& inputs)
+    Scope::Scope(const std::string name, const std::vector<Identifier*>& inputs) :
+        name(name)
     {
-        block = new InstructionBlock(name, inputs.size());
-
         for (Identifier* input : inputs)
         {
             this->inputs[input->str] = input;
@@ -834,12 +833,12 @@ namespace Parser
         sourcePath(sourcePath), outputStream(outputStream)
     {
         utils = Utils::get();
-
-        scopes.push_back(new Scope("", {}));
     }
 
     void BytecodeTransformer::createBytecode(Program* program)
     {
+        scopes.push_back(new Scope("", {}));
+
         for (Token* instruction : program->instructions)
         {
             instruction->resolveTypes(this);
@@ -847,12 +846,20 @@ namespace Parser
 
         checkUses();
 
-        resolver->addInstructionBlock(scopes.back()->block);
+        scopes.pop_back();
+
+        InstructionBlock* block = new InstructionBlock();
+
+        blocks.push(block);
+
+        resolver->addInstructionBlock(block);
 
         for (const Token* instruction : program->instructions)
         {
             instruction->transform(this);
         }
+
+        blocks.pop();
 
         resolver->output(outputStream, nextIdentifierId);
     }
@@ -1057,7 +1064,7 @@ namespace Parser
 
     void BytecodeTransformer::resolveTypes(CallUser* token)
     {
-        if (const Define* function = getFunction(token->name))
+        if (Define* function = getFunction(token->name))
         {
             for (const Identifier* input : function->inputs)
             {
@@ -1071,6 +1078,8 @@ namespace Parser
                     resolveArgumentTypes(token->arguments, input->str, new Type(BasicType::Any));
                 }
             }
+
+            token->function = function;
         }
 
         else if (checkRecursive(token->name))
@@ -1138,7 +1147,7 @@ namespace Parser
             input->id = nextIdentifierId++;
         }
 
-        scopes.push_back(token->scope);
+        scopes.push_back(new Scope(token->name, token->inputs));
 
         for (Token* instruction : token->instructions)
         {
@@ -1147,7 +1156,7 @@ namespace Parser
 
         checkUses();
 
-        scopes.erase(scopes.end() - 1);
+        scopes.pop_back();
 
         addFunction(token);
 
@@ -1166,7 +1175,10 @@ namespace Parser
 
     void BytecodeTransformer::resolveTypes(Include* token)
     {
-        token->program->resolveTypes(this);
+        for (Token* instruction : token->program->instructions)
+        {
+            instruction->resolveTypes(this);
+        }
     }
 
     void BytecodeTransformer::transform(const Value* token)
@@ -1191,12 +1203,12 @@ namespace Parser
 
     void BytecodeTransformer::transform(const SequenceRandom* token)
     {
-        scopes.back()->block->addInstruction(new StackPushByte(::Sequence::OrderEnum::Random));
+        addInstruction(new StackPushByte(::Sequence::OrderEnum::Random));
     }
 
     void BytecodeTransformer::transform(const RandomStep* token)
     {
-        scopes.back()->block->addInstruction(new StackPushByte(::Random::TypeEnum::Step));
+        addInstruction(new StackPushByte(::Random::TypeEnum::Step));
     }
 
     void BytecodeTransformer::transform(const RandomLinear* token)
@@ -1244,9 +1256,9 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Time* token)
     {
-        addInstruction(new CallNative(BytecodeConstants::TIME, 0));
-
         checkArguments(token->arguments);
+
+        addInstruction(new CallNative(BytecodeConstants::TIME, 0));
     }
 
     void BytecodeTransformer::transform(const Hold* token)
@@ -1485,17 +1497,17 @@ namespace Parser
         transformArgument(token->arguments, "repeats");
         transformArgument(token->arguments, "delay");
 
-        scopes.push_back(new Scope("", {}));
+        InstructionBlock* block = new InstructionBlock();
+
+        blocks.push(block);
 
         transformArgument(token->arguments, "function");
 
         checkArguments(token->arguments);
 
-        InstructionBlock* block = scopes.back()->block;
+        blocks.pop();
 
         resolver->addInstructionBlock(block);
-
-        scopes.erase(scopes.end() - 1);
 
         addInstruction(new StackPushAddress(block));
         addInstruction(new CallNative(BytecodeConstants::PERFORM, 4));
@@ -1503,9 +1515,7 @@ namespace Parser
 
     void BytecodeTransformer::transform(const CallUser* token)
     {
-        const Define* function = getFunction(token->name);
-
-        for (const Identifier* input : function->inputs)
+        for (const Identifier* input : token->function->inputs)
         {
             transformArgument(token->arguments, input->str);
 
@@ -1514,7 +1524,7 @@ namespace Parser
 
         checkArguments(token->arguments);
 
-        addInstruction(new ::CallUser(function->scope->block));
+        addInstruction(new ::CallUser(token->function->block, token->function->inputs.size()));
     }
 
     void BytecodeTransformer::transform(const AddAlias* token)
@@ -1599,16 +1609,16 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Define* token)
     {
-        scopes.push_back(token->scope);
+        blocks.push(token->block);
 
         for (const Token* instruction : token->instructions)
         {
             instruction->transform(this);
         }
 
-        resolver->addInstructionBlock(token->scope->block);
+        blocks.pop();
 
-        scopes.erase(scopes.end() - 1);
+        resolver->addInstructionBlock(token->block);
     }
 
     void BytecodeTransformer::transform(const Include* token)
@@ -1691,7 +1701,7 @@ namespace Parser
 
     void BytecodeTransformer::addInstruction(const BytecodeInstruction* instruction)
     {
-        scopes.back()->block->addInstruction(instruction);
+        blocks.top()->addInstruction(instruction);
     }
 
     Identifier* BytecodeTransformer::getVariable(const std::string variable)
@@ -1753,7 +1763,7 @@ namespace Parser
     {
         for (int i = scopes.size() - 1; i >= 0; i--)
         {
-            if (scopes[i]->block->name == function)
+            if (scopes[i]->name == function)
             {
                 return true;
             }

@@ -126,8 +126,8 @@ void CallNative::output(std::ofstream& stream) const
     stream << BytecodeConstants::CALL_NATIVE << function << inputs;
 }
 
-CallUser::CallUser(const InstructionBlock* function) :
-    BytecodeInstruction(6), function(function) {}
+CallUser::CallUser(const InstructionBlock* function, const unsigned char inputs) :
+    BytecodeInstruction(6), function(function), inputs(inputs) {}
 
 void CallUser::output(std::ofstream& stream) const
 {
@@ -135,7 +135,7 @@ void CallUser::output(std::ofstream& stream) const
 
     writeUnsignedInt(stream, function->offset);
 
-    stream << function->inputs;
+    stream << inputs;
 }
 
 ResourceBlock::ResourceBlock(const Path* path)
@@ -173,8 +173,7 @@ void ResourceBlock::output(std::ofstream& stream) const
     }
 }
 
-InstructionBlock::InstructionBlock(const std::string name, const unsigned char inputs) :
-    name(name), inputs(inputs)
+InstructionBlock::InstructionBlock()
 {
     size = 1;
 }

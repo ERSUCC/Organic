@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <stack>
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
@@ -456,6 +457,8 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
+    struct Define;
+
     struct CallUser : public Call
     {
         CallUser(const SourceLocation, const std::string name, const ArgumentList* arguments, const bool topLevel);
@@ -464,6 +467,8 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
 
         const std::string name;
+
+        Define* function;
     };
 
     struct CallAlias : public Token
@@ -546,8 +551,6 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct Scope;
-
     struct Define : public Token
     {
         Define(const SourceLocation location, const std::string name, const std::vector<Identifier*> inputs, const std::vector<Token*> instructions);
@@ -560,14 +563,14 @@ namespace Parser
         const std::vector<Identifier*> inputs;
         const std::vector<Token*> instructions;
 
-        Scope* scope;
+        InstructionBlock* block;
     };
 
     struct Scope
     {
         Scope(const std::string name, const std::vector<Identifier*>& inputs);
 
-        InstructionBlock* block;
+        const std::string name;
 
         std::unordered_map<std::string, Identifier*> variables;
         std::unordered_set<std::string> variablesUsed;
@@ -705,6 +708,8 @@ namespace Parser
         std::vector<Scope*> scopes;
 
         Type* expectedType = new Type(BasicType::Any);
+
+        std::stack<InstructionBlock*> blocks;
 
         unsigned char nextIdentifierId = 0;
 
