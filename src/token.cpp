@@ -1710,7 +1710,7 @@ namespace Parser
         {
             if (scopes[i]->variables.count(variable))
             {
-                scopes[i]->variablesUsed.insert(variable);
+                scopes[i]->variables[variable]->used = true;
 
                 return scopes[i]->variables[variable];
             }
@@ -1730,7 +1730,7 @@ namespace Parser
         {
             if (scopes[i]->inputs.count(input))
             {
-                scopes[i]->inputsUsed.insert(input);
+                scopes[i]->inputs[input]->used = true;
 
                 return scopes[i]->inputs[input];
             }
@@ -1745,7 +1745,7 @@ namespace Parser
         {
             if (scopes[i]->functions.count(function))
             {
-                scopes[i]->functionsUsed.insert(function);
+                scopes[i]->functions[function]->used = true;
 
                 return scopes[i]->functions[function];
             }
@@ -1776,7 +1776,7 @@ namespace Parser
     {
         for (const std::pair<std::string, Identifier*>& pair : scopes.back()->variables)
         {
-            if (!scopes.back()->variablesUsed.count(pair.first) && pair.second->location.path == sourcePath)
+            if (!pair.second->used && pair.second->location.path == sourcePath)
             {
                 Utils::parseWarning("Unused variable \"" + pair.first + "\".", pair.second->location);
             }
@@ -1784,7 +1784,7 @@ namespace Parser
 
         for (const std::pair<std::string, Identifier*>& pair : scopes.back()->inputs)
         {
-            if (!scopes.back()->inputsUsed.count(pair.first) && pair.second->location.path == sourcePath)
+            if (!pair.second->used && pair.second->location.path == sourcePath)
             {
                 Utils::parseWarning("Unused input \"" + pair.first + "\".", pair.second->location);
             }
@@ -1792,7 +1792,7 @@ namespace Parser
 
         for (const std::pair<std::string, Define*>& pair : scopes.back()->functions)
         {
-            if (!scopes.back()->functionsUsed.count(pair.first) && pair.second->location.path == sourcePath)
+            if (!pair.second->used && pair.second->location.path == sourcePath)
             {
                 Utils::parseWarning("Unused function \"" + pair.first + "\".", pair.second->location);
             }

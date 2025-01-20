@@ -3,7 +3,6 @@
 #include <fstream>
 #include <stack>
 #include <string>
-#include <unordered_set>
 #include <unordered_map>
 #include <vector>
 
@@ -174,6 +173,8 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
 
         unsigned char id;
+
+        bool used = false;
     };
 
     struct Value : public BasicToken
@@ -564,6 +565,8 @@ namespace Parser
         const std::vector<Token*> instructions;
 
         InstructionBlock* block;
+
+        bool used = false;
     };
 
     struct Scope
@@ -573,13 +576,8 @@ namespace Parser
         const std::string name;
 
         std::unordered_map<std::string, Identifier*> variables;
-        std::unordered_set<std::string> variablesUsed;
-
         std::unordered_map<std::string, Identifier*> inputs;
-        std::unordered_set<std::string> inputsUsed;
-
         std::unordered_map<std::string, Define*> functions;
-        std::unordered_set<std::string> functionsUsed;
     };
 
     struct Program : public Token
