@@ -157,11 +157,13 @@ private:
 
 struct InstructionBlock : BytecodeBlock
 {
-    InstructionBlock(const unsigned char inputs);
+    InstructionBlock(const std::string name, const unsigned char inputs);
 
     void output(std::ofstream& stream) const override;
 
     void addInstruction(const BytecodeInstruction* instruction);
+
+    const std::string name;
 
     const unsigned char inputs;
 

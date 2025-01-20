@@ -173,8 +173,8 @@ void ResourceBlock::output(std::ofstream& stream) const
     }
 }
 
-InstructionBlock::InstructionBlock(const unsigned char inputs) :
-    inputs(inputs)
+InstructionBlock::InstructionBlock(const std::string name, const unsigned char inputs) :
+    name(name), inputs(inputs)
 {
     size = 1;
 }

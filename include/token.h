@@ -546,6 +546,8 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
+    struct Scope;
+
     struct Define : public Token
     {
         Define(const SourceLocation location, const std::string name, const std::vector<Identifier*> inputs, const std::vector<Token*> instructions);
@@ -557,44 +559,15 @@ namespace Parser
 
         const std::vector<Identifier*> inputs;
         const std::vector<Token*> instructions;
-    };
-
-    struct Scope;
-
-    struct FunctionInfo
-    {
-        FunctionInfo(Scope* scope, const Define* token);
 
         Scope* scope;
-
-        const Define* token;
     };
 
     struct Scope
     {
-        Scope(BytecodeTransformer* visitor, Scope* parent = nullptr, const std::string currentFunction = "", const std::vector<Identifier*> inputs = {});
-
-        Identifier* getVariable(const std::string name);
-
-        void addVariable(Identifier* variable);
-
-        Identifier* getInput(const std::string name);
-
-        FunctionInfo* getFunction(const std::string name);
-        FunctionInfo* addFunction(const std::string name, Scope* scope, const Define* token);
-
-        bool checkRecursive(const std::string function) const;
-
-        void checkUses() const;
-
-        Scope* parent;
-
-        const std::string currentFunction;
+        Scope(const std::string name, const std::vector<Identifier*>& inputs);
 
         InstructionBlock* block;
-
-    private:
-        BytecodeTransformer* visitor;
 
         std::unordered_map<std::string, Identifier*> variables;
         std::unordered_set<std::string> variablesUsed;
@@ -602,9 +575,8 @@ namespace Parser
         std::unordered_map<std::string, Identifier*> inputs;
         std::unordered_set<std::string> inputsUsed;
 
-        std::unordered_map<std::string, FunctionInfo*> functions;
+        std::unordered_map<std::string, Define*> functions;
         std::unordered_set<std::string> functionsUsed;
-
     };
 
     struct Program : public Token
@@ -701,13 +673,26 @@ namespace Parser
         void transform(const Define* token);
         void transform(const Include* token);
 
-        const Path* sourcePath;
-
     private:
         void resolveArgumentTypes(const ArgumentList* arguments, const std::string name, Type* expectedType);
         void transformArgument(const ArgumentList* arguments, const std::string name);
         Token* getArgument(const ArgumentList* arguments, const std::string name) const;
         void checkArguments(const ArgumentList* arguments) const;
+
+        void addInstruction(const BytecodeInstruction* instruction);
+
+        Identifier* getVariable(const std::string variable);
+        void addVariable(Identifier* variable);
+
+        Identifier* getInput(const std::string input);
+
+        Define* getFunction(const std::string function);
+        void addFunction(Define* function);
+
+        bool checkRecursive(const std::string function) const;
+        void checkUses() const;
+
+        const Path* sourcePath;
 
         std::ofstream& outputStream;
 
@@ -717,7 +702,7 @@ namespace Parser
 
         Utils* utils;
 
-        Scope* currentScope;
+        std::vector<Scope*> scopes;
 
         Type* expectedType = new Type(BasicType::Any);
 
