@@ -1113,26 +1113,7 @@ namespace Parser
 
     void BytecodeTransformer::resolveTypes(Define* token)
     {
-        if (token->name == "sine" ||
-            token->name == "square" ||
-            token->name == "saw" ||
-            token->name == "triangle" ||
-            token->name == "noise" ||
-            token->name == "sample" ||
-            token->name == "hold" ||
-            token->name == "lfo" ||
-            token->name == "sweep" ||
-            token->name == "sequence" ||
-            token->name == "repeat" ||
-            token->name == "random" ||
-            token->name == "limit" ||
-            token->name == "trigger" ||
-            token->name == "if" ||
-            token->name == "delay" ||
-            token->name == "lowpass" ||
-            token->name == "play" ||
-            token->name == "perform" ||
-            getFunction(token->name))
+        if (getFunction(token->name))
         {
             Utils::parseError("A function already exists with the name \"" + token->name + "\".", token->location);
         }

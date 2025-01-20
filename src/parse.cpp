@@ -528,6 +528,28 @@ namespace Parser
             pos = instruction->location.end;
         }
 
+        if (name->str == "sine" ||
+            name->str == "square" ||
+            name->str == "triangle" ||
+            name->str == "saw" ||
+            name->str == "noise" ||
+            name->str == "sample" ||
+            name->str == "hold" ||
+            name->str == "lfo" ||
+            name->str == "sweep" ||
+            name->str == "sequence" ||
+            name->str == "repeat" ||
+            name->str == "random" ||
+            name->str == "limit" ||
+            name->str == "trigger" ||
+            name->str == "if" ||
+            name->str == "delay" ||
+            name->str == "play" ||
+            name->str == "perform")
+        {
+            Utils::parseError("A function already exists with the name \"" + name->str + "\".", name->location);
+        }
+
         return new Define(SourceLocation(path, name->location.line, name->location.character, name->location.start, pos + 1), name->str, inputs, instructions);
     }
 
