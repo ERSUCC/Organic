@@ -168,6 +168,9 @@ namespace Parser
     struct Identifier : public BasicToken
     {
         Identifier(const SourceLocation location, const std::string str);
+
+        void resolveTypes(BytecodeTransformer* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
     };
 
     struct Value : public BasicToken
@@ -184,19 +187,6 @@ namespace Parser
         NamedConstant(const SourceLocation location, const std::string constant);
 
         void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct Variable : public BasicToken
-    {
-        Variable(const SourceLocation location, const std::string variable);
-
-        void resolveTypes(BytecodeTransformer* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct Input : public BasicToken
-    {
-        Input(const SourceLocation location, const std::string name);
     };
 
     struct String : public BasicToken
@@ -507,27 +497,27 @@ namespace Parser
 
     struct Define : public Token
     {
-        Define(const SourceLocation location, const std::string name, const std::vector<Input*> inputs, const std::vector<Token*> instructions);
+        Define(const SourceLocation location, const std::string name, const std::vector<Identifier*> inputs, const std::vector<Token*> instructions);
 
         void resolveTypes(BytecodeTransformer* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
         const std::string name;
 
-        const std::vector<Input*> inputs;
+        const std::vector<Identifier*> inputs;
         const std::vector<Token*> instructions;
     };
 
-    struct Scope;
-
-    struct VariableInfo
+    struct IdentifierInfo
     {
-        VariableInfo(const unsigned char id, const Token* value);
+        IdentifierInfo(const unsigned char id, Token* token);
 
         const unsigned char id;
 
-        const Token* value;
+        Token* token;
     };
+
+    struct Scope;
 
     struct FunctionInfo
     {
@@ -538,26 +528,17 @@ namespace Parser
         const Define* token;
     };
 
-    struct InputInfo
-    {
-        InputInfo(const unsigned char id, Input* token);
-
-        const unsigned char id;
-
-        Input* token;
-    };
-
     struct Scope
     {
-        Scope(BytecodeTransformer* visitor, Scope* parent = nullptr, const std::string currentFunction = "", const std::vector<Input*> inputs = std::vector<Input*>());
+        Scope(BytecodeTransformer* visitor, Scope* parent = nullptr, const std::string currentFunction = "", const std::vector<Identifier*> inputs = {});
 
-        VariableInfo* getVariable(const std::string name);
-        VariableInfo* addVariable(const std::string name, const Token* value);
+        IdentifierInfo* getVariable(const std::string name);
+        IdentifierInfo* addVariable(const std::string name, Token* value);
+
+        IdentifierInfo* getInput(const std::string name);
 
         FunctionInfo* getFunction(const std::string name);
         FunctionInfo* addFunction(const std::string name, Scope* scope, const Define* token);
-
-        InputInfo* getInput(const std::string name);
 
         bool checkRecursive(const std::string function) const;
 
@@ -572,14 +553,14 @@ namespace Parser
     private:
         BytecodeTransformer* visitor;
 
-        std::unordered_map<std::string, VariableInfo*> variables;
+        std::unordered_map<std::string, IdentifierInfo*> variables;
         std::unordered_set<std::string> variablesUsed;
+
+        std::unordered_map<std::string, IdentifierInfo*> inputs;
+        std::unordered_set<std::string> inputsUsed;
 
         std::unordered_map<std::string, FunctionInfo*> functions;
         std::unordered_set<std::string> functionsUsed;
-
-        std::unordered_map<std::string, InputInfo*> inputs;
-        std::unordered_set<std::string> inputsUsed;
 
     };
 
@@ -606,7 +587,7 @@ namespace Parser
 
         void createBytecode(Program* program);
 
-        void resolveTypes(Variable* token);
+        void resolveTypes(Identifier* token);
         void resolveTypes(List* token);
         void resolveTypes(ParenthesizedExpression* token);
         void resolveTypes(Assign* token);
@@ -634,7 +615,7 @@ namespace Parser
 
         void transform(const Value* token);
         void transform(const NamedConstant* token);
-        void transform(const Variable* token);
+        void transform(const Identifier* token);
         void transform(const List* token);
         void transform(const ParenthesizedExpression* token);
         void transform(const Assign* token);
@@ -670,7 +651,7 @@ namespace Parser
         void transform(const Define* token);
         void transform(const Include* token);
 
-        unsigned char newVariableId();
+        unsigned char newIdentifierId();
 
         const Path* sourcePath;
 
@@ -692,7 +673,7 @@ namespace Parser
 
         Type* expectedType = new Type(BasicType::Any);
 
-        unsigned char nextVariable = 0;
+        unsigned char nextIdentifier = 0;
 
     };
 }

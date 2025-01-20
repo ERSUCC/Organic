@@ -486,7 +486,7 @@ namespace Parser
 
         pos += 2;
 
-        std::vector<Input*> inputs;
+        std::vector<Identifier*> inputs;
 
         if (!tokenIs<CloseParenthesis>(pos))
         {
@@ -494,14 +494,15 @@ namespace Parser
 
             do
             {
-                const Identifier* input = getToken<Identifier>(++pos);
+                if (Identifier* input = getToken<Identifier>(++pos))
+                {
+                    inputs.push_back(input);
+                }
 
-                if (!input)
+                else
                 {
                     tokenError(getToken(pos), "input name");
                 }
-
-                inputs.push_back(new Input(input->location, input->str));
 
                 pos++;
             } while (tokenIs<Comma>(pos));
@@ -996,21 +997,21 @@ namespace Parser
                 return parseCall(pos, false);
             }
 
-            const BasicToken* str = getToken(pos);
+            Identifier* token = getToken<Identifier>(pos);
 
-            if (str->str == "sequence-forwards" ||
-                str->str == "sequence-backwards" ||
-                str->str == "sequence-ping-pong" ||
-                str->str == "sequence-random" ||
-                str->str == "random-step" ||
-                str->str == "random-linear" ||
-                str->str == "pi" ||
-                str->str == "e")
+            if (token->str == "sequence-forwards" ||
+                token->str == "sequence-backwards" ||
+                token->str == "sequence-ping-pong" ||
+                token->str == "sequence-random" ||
+                token->str == "random-step" ||
+                token->str == "random-linear" ||
+                token->str == "pi" ||
+                token->str == "e")
             {
-                return new NamedConstant(SourceLocation(path, str->location.line, str->location.character, pos, pos + 1), str->str);
+                return new NamedConstant(SourceLocation(path, token->location.line, token->location.character, pos, pos + 1), token->str);
             }
 
-            return new Variable(SourceLocation(path, str->location.line, str->location.character, pos, pos + 1), str->str);
+            return token;
         }
 
         tokenError(getToken(pos), "expression term");
