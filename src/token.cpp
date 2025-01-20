@@ -358,7 +358,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Assign::Assign(const SourceLocation location, const std::string variable, Token* value) :
+    Assign::Assign(const SourceLocation location, Identifier* variable, Token* value) :
         Token(location), variable(variable), value(value) {}
 
     void Assign::resolveTypes(BytecodeTransformer* visitor)
@@ -801,9 +801,6 @@ namespace Parser
         visitor->transform(this);
     }
 
-    IdentifierInfo::IdentifierInfo(const unsigned char id, Token* token) :
-        id(id), token(token) {}
-
     FunctionInfo::FunctionInfo(Scope* scope, const Define* token) :
         scope(scope), token(token) {}
 
@@ -814,11 +811,13 @@ namespace Parser
 
         for (Identifier* input : inputs)
         {
-            this->inputs[input->str] = new IdentifierInfo(visitor->newIdentifierId(), input);
+            input->id = visitor->newIdentifierId();
+
+            this->inputs[input->str] = input;
         }
     }
 
-    IdentifierInfo* Scope::getVariable(const std::string name)
+    Identifier* Scope::getVariable(const std::string name)
     {
         if (variables.count(name))
         {
@@ -829,25 +828,23 @@ namespace Parser
 
         if (parent)
         {
-            if (IdentifierInfo* info = parent->getVariable(name))
+            if (Identifier* variable = parent->getVariable(name))
             {
-                return info;
+                return variable;
             }
         }
 
         return nullptr;
     }
 
-    IdentifierInfo* Scope::addVariable(const std::string name, Token* value)
+    void Scope::addVariable(Identifier* variable)
     {
-        IdentifierInfo* info = new IdentifierInfo(visitor->newIdentifierId(), value);
+        variable->id = visitor->newIdentifierId();
 
-        variables[name] = info;
-
-        return info;
+        variables[variable->str] = variable;
     }
 
-    IdentifierInfo* Scope::getInput(const std::string name)
+    Identifier* Scope::getInput(const std::string name)
     {
         if (inputs.count(name))
         {
@@ -858,9 +855,9 @@ namespace Parser
 
         if (parent)
         {
-            if (IdentifierInfo* info = parent->getInput(name))
+            if (Identifier* input = parent->getInput(name))
             {
-                return info;
+                return input;
             }
         }
 
@@ -903,19 +900,19 @@ namespace Parser
 
     void Scope::checkUses() const
     {
-        for (const std::pair<std::string, IdentifierInfo*>& pair : variables)
+        for (const std::pair<std::string, Identifier*>& pair : variables)
         {
-            if (!variablesUsed.count(pair.first) && pair.second->token->location.path == visitor->sourcePath)
+            if (!variablesUsed.count(pair.first) && pair.second->location.path == visitor->sourcePath)
             {
-                Utils::parseWarning("Unused variable \"" + pair.first + "\".", pair.second->token->location);
+                Utils::parseWarning("Unused variable \"" + pair.first + "\".", pair.second->location);
             }
         }
 
-        for (const std::pair<std::string, IdentifierInfo*>& pair : inputs)
+        for (const std::pair<std::string, Identifier*>& pair : inputs)
         {
-            if (!inputsUsed.count(pair.first) && pair.second->token->location.path == visitor->sourcePath)
+            if (!inputsUsed.count(pair.first) && pair.second->location.path == visitor->sourcePath)
             {
-                Utils::parseWarning("Warning: Unused input \"" + pair.first + "\".", pair.second->token->location);
+                Utils::parseWarning("Unused input \"" + pair.first + "\".", pair.second->location);
             }
         }
 
@@ -923,7 +920,7 @@ namespace Parser
         {
             if (!functionsUsed.count(pair.first) && pair.second->token->location.path == visitor->sourcePath)
             {
-                Utils::parseWarning("Warning: Unused function \"" + pair.first + "\".", pair.second->token->location);
+                Utils::parseWarning("Unused function \"" + pair.first + "\".", pair.second->token->location);
             }
         }
     }
@@ -973,18 +970,19 @@ namespace Parser
 
     void BytecodeTransformer::resolveTypes(Identifier* token)
     {
-        if (const IdentifierInfo* info = currentScope->getInput(token->str))
+        if (Identifier* input = currentScope->getInput(token->str))
         {
-            if (!token->type)
+            if (!input->type)
             {
-                token->type = expectedType;
-                info->token->type = expectedType;
+                input->type = expectedType;
             }
+
+            token->type = input->type;
         }
 
-        else if (const IdentifierInfo* info = currentScope->getVariable(token->str))
+        else if (const Identifier* variable = currentScope->getVariable(token->str))
         {
-            token->type = info->token->type;
+            token->type = variable->type;
         }
 
         else
@@ -1028,17 +1026,19 @@ namespace Parser
             Utils::parseError("Functions that return nothing cannot be assigned to a variable.", token->value->location);
         }
 
-        if (currentScope->getInput(token->variable))
+        if (currentScope->getInput(token->variable->str))
         {
             Utils::parseError("Function inputs cannot be redefined.", token->location);
         }
 
-        if (currentScope->getVariable(token->variable))
+        if (currentScope->getVariable(token->variable->str))
         {
             Utils::parseError("Variables cannot be redefined.", token->location);
         }
 
-        currentScope->addVariable(token->variable, token->value);
+        token->variable->type = token->value->type;
+
+        currentScope->addVariable(token->variable);
     }
 
     void BytecodeTransformer::resolveTypes(Hold* token)
@@ -1319,14 +1319,14 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Identifier* token)
     {
-        if (const IdentifierInfo* info = currentScope->getInput(token->str))
+        if (const Identifier* input = currentScope->getInput(token->str))
         {
-            currentScope->block->addInstruction(new GetVariable(info->id));
+            currentScope->block->addInstruction(new GetVariable(input->id));
         }
 
-        else if (const IdentifierInfo* info = currentScope->getVariable(token->str))
+        else if (const Identifier* variable = currentScope->getVariable(token->str))
         {
-            currentScope->block->addInstruction(new GetVariable(info->id));
+            currentScope->block->addInstruction(new GetVariable(variable->id));
         }
     }
 
@@ -1350,7 +1350,7 @@ namespace Parser
     {
         token->value->transform(this);
 
-        currentScope->block->addInstruction(new SetVariable(currentScope->getVariable(token->variable)->id));
+        currentScope->block->addInstruction(new SetVariable(token->variable->id));
     }
 
     void BytecodeTransformer::transform(const Time* token)

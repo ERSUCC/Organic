@@ -47,7 +47,7 @@ struct ValueMultiply : public ValueCombination
 
 protected:
     double getValueInternal() override;
-    
+
 };
 
 struct ValueDivide : public ValueCombination
@@ -56,7 +56,7 @@ struct ValueDivide : public ValueCombination
 
 protected:
     double getValueInternal() override;
-    
+
 };
 
 struct ValuePower : public ValueCombination
@@ -65,7 +65,7 @@ struct ValuePower : public ValueCombination
 
 protected:
     double getValueInternal() override;
-    
+
 };
 
 struct ValueEquals : public ValueCombination

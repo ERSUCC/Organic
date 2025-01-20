@@ -478,7 +478,7 @@ void Random::init()
     {
         current = next;
     }
-    
+
     next = udist(utils->rng);
 
     first = false;

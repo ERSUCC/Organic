@@ -171,6 +171,8 @@ namespace Parser
 
         void resolveTypes(BytecodeTransformer* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
+
+        unsigned char id;
     };
 
     struct Value : public BasicToken
@@ -290,12 +292,12 @@ namespace Parser
 
     struct Assign : public Token
     {
-        Assign(const SourceLocation location, const std::string variable, Token* value);
+        Assign(const SourceLocation location, Identifier* variable, Token* value);
 
         void resolveTypes(BytecodeTransformer* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
-        const std::string variable;
+        Identifier* variable;
 
         Token* value;
     };
@@ -557,15 +559,6 @@ namespace Parser
         const std::vector<Token*> instructions;
     };
 
-    struct IdentifierInfo
-    {
-        IdentifierInfo(const unsigned char id, Token* token);
-
-        const unsigned char id;
-
-        Token* token;
-    };
-
     struct Scope;
 
     struct FunctionInfo
@@ -581,10 +574,11 @@ namespace Parser
     {
         Scope(BytecodeTransformer* visitor, Scope* parent = nullptr, const std::string currentFunction = "", const std::vector<Identifier*> inputs = {});
 
-        IdentifierInfo* getVariable(const std::string name);
-        IdentifierInfo* addVariable(const std::string name, Token* value);
+        Identifier* getVariable(const std::string name);
 
-        IdentifierInfo* getInput(const std::string name);
+        void addVariable(Identifier* variable);
+
+        Identifier* getInput(const std::string name);
 
         FunctionInfo* getFunction(const std::string name);
         FunctionInfo* addFunction(const std::string name, Scope* scope, const Define* token);
@@ -602,10 +596,10 @@ namespace Parser
     private:
         BytecodeTransformer* visitor;
 
-        std::unordered_map<std::string, IdentifierInfo*> variables;
+        std::unordered_map<std::string, Identifier*> variables;
         std::unordered_set<std::string> variablesUsed;
 
-        std::unordered_map<std::string, IdentifierInfo*> inputs;
+        std::unordered_map<std::string, Identifier*> inputs;
         std::unordered_set<std::string> inputsUsed;
 
         std::unordered_map<std::string, FunctionInfo*> functions;

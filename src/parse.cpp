@@ -533,11 +533,11 @@ namespace Parser
 
     Assign* Parser::parseAssign(unsigned int pos) const
     {
-        const BasicToken* name = getToken(pos);
+        Identifier* variable = getToken<Identifier>(pos);
 
         Token* value = parseExpression(pos + 2);
 
-        return new Assign(SourceLocation(path, name->location.line, name->location.character, pos, value->location.end), name->str, value);
+        return new Assign(SourceLocation(path, variable->location.line, variable->location.character, pos, value->location.end), variable, value);
     }
 
     Token* Parser::parseCall(unsigned int pos, const bool topLevel) const
