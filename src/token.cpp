@@ -811,8 +811,6 @@ namespace Parser
 
         for (Identifier* input : inputs)
         {
-            input->id = visitor->newIdentifierId();
-
             this->inputs[input->str] = input;
         }
     }
@@ -839,8 +837,6 @@ namespace Parser
 
     void Scope::addVariable(Identifier* variable)
     {
-        variable->id = visitor->newIdentifierId();
-
         variables[variable->str] = variable;
     }
 
@@ -965,7 +961,7 @@ namespace Parser
             instruction->transform(this);
         }
 
-        resolver->output(outputStream, nextIdentifier);
+        resolver->output(outputStream, nextIdentifierId);
     }
 
     void BytecodeTransformer::resolveTypes(Identifier* token)
@@ -978,11 +974,13 @@ namespace Parser
             }
 
             token->type = input->type;
+            token->id = input->id;
         }
 
         else if (const Identifier* variable = currentScope->getVariable(token->str))
         {
             token->type = variable->type;
+            token->id = variable->id;
         }
 
         else
@@ -1037,6 +1035,7 @@ namespace Parser
         }
 
         token->variable->type = token->value->type;
+        token->variable->id = nextIdentifierId++;
 
         currentScope->addVariable(token->variable);
     }
@@ -1241,6 +1240,11 @@ namespace Parser
             Utils::parseError("Redefining a function in its own definition is not allowed.", token->location);
         }
 
+        for (Identifier* input : token->inputs)
+        {
+            input->id = nextIdentifierId++;
+        }
+
         currentScope = new Scope(this, currentScope, token->name, token->inputs);
 
         for (Token* instruction : token->instructions)
@@ -1319,15 +1323,7 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Identifier* token)
     {
-        if (const Identifier* input = currentScope->getInput(token->str))
-        {
-            currentScope->block->addInstruction(new GetVariable(input->id));
-        }
-
-        else if (const Identifier* variable = currentScope->getVariable(token->str))
-        {
-            currentScope->block->addInstruction(new GetVariable(variable->id));
-        }
+        currentScope->block->addInstruction(new GetVariable(token->id));
     }
 
     void BytecodeTransformer::transform(const List* token)
@@ -1620,7 +1616,7 @@ namespace Parser
         {
             transformArgument(token->arguments, input->str);
 
-            currentScope->block->addInstruction(new SetVariable(info->scope->getInput(input->str)->id));
+            currentScope->block->addInstruction(new SetVariable(input->id));
         }
 
         checkArguments(token->arguments);
@@ -1730,11 +1726,6 @@ namespace Parser
         {
             instruction->transform(this);
         }
-    }
-
-    unsigned char BytecodeTransformer::newIdentifierId()
-    {
-        return nextIdentifier++;
     }
 
     void BytecodeTransformer::resolveArgumentTypes(const ArgumentList* arguments, const std::string name, Type* expectedType)

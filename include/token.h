@@ -701,8 +701,6 @@ namespace Parser
         void transform(const Define* token);
         void transform(const Include* token);
 
-        unsigned char newIdentifierId();
-
         const Path* sourcePath;
 
     private:
@@ -723,7 +721,7 @@ namespace Parser
 
         Type* expectedType = new Type(BasicType::Any);
 
-        unsigned char nextIdentifier = 0;
+        unsigned char nextIdentifierId = 0;
 
     };
 }
