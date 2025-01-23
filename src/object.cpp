@@ -30,7 +30,7 @@ void Sync::stop()
 
 double Sync::syncLength() const
 {
-    return 0;
+    return utils->infinity;
 }
 
 void Sync::init() {}

@@ -295,7 +295,6 @@ struct If : public ValueObject
 {
     If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue);
 
-    double syncLength() const override;
     double getValue() override;
 
 protected:

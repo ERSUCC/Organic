@@ -314,6 +314,11 @@ Repeat::Repeat(ValueObject* value, ValueObject* repeats) :
 
 double Repeat::syncLength() const
 {
+    if (repeats->getValue() == 0)
+    {
+        return utils->infinity;
+    }
+
     return value->syncLength() * repeats->getValue();
 }
 
@@ -560,11 +565,6 @@ void Trigger::init()
 
 If::If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue) :
     condition(condition), trueValue(trueValue), falseValue(falseValue) {}
-
-double If::syncLength() const
-{
-    return utils->infinity;
-}
 
 double If::getValue()
 {
