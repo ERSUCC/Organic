@@ -19,7 +19,7 @@
 
 struct Organic
 {
-    Organic(const Path* path, char** flags, const unsigned int length);
+    Organic(const Path* path, const ProgramOptions options);
 
     void start();
 
@@ -29,9 +29,9 @@ private:
 
     int processAudio(void* output, unsigned int frames);
 
-    Utils* utils;
+    const ProgramOptions options;
 
-    ProgramOptions options;
+    Utils* utils;
 
     Machine* machine;
 

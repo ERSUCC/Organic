@@ -1,3 +1,4 @@
+#include "../include/flags.h"
 #include "../include/organic.h"
 #include "../include/path.h"
 #include "../include/utils.h"
@@ -21,7 +22,7 @@ int main(int argc, char** argv)
         Utils::argumentError("Specified program is not a file.");
     }
 
-    (new Organic(path, argv + 2, argc - 2))->start();
+    (new Organic(path, (new FlagParser(argv + 2, argc - 2))->getOptions()))->start();
 
     return 0;
 }

@@ -5,21 +5,26 @@ project(organic)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_executable(organic src/audiosource.cpp
-                       src/bytecode.cpp
-                       src/controller.cpp
-                       src/effect.cpp
-                       src/event.cpp
-                       src/flags.cpp
-                       src/location.cpp
-                       src/machine.cpp
-                       src/main.cpp
-                       src/object.cpp
-                       src/organic.cpp
-                       src/parse.cpp
-                       src/path.cpp
-                       src/token.cpp
-                       src/utils.cpp)
+# build main API as static library so it can be linked with the command line program and the test suite
+
+add_library(organic_lib STATIC src/audiosource.cpp
+                               src/bytecode.cpp
+                               src/controller.cpp
+                               src/effect.cpp
+                               src/event.cpp
+                               src/flags.cpp
+                               src/location.cpp
+                               src/machine.cpp
+                               src/object.cpp
+                               src/organic.cpp
+                               src/parse.cpp
+                               src/path.cpp
+                               src/token.cpp
+                               src/utils.cpp)
+
+find_package(SndFile REQUIRED PATHS deps/libsndfile/cmake)
+
+target_include_directories(organic_lib PRIVATE deps/rtaudio ${SNDFILE_INCLUDE_DIR})
 
 add_library(rtaudio STATIC deps/rtaudio/RtAudio.cpp)
 
@@ -51,8 +56,12 @@ if (LINUX)
     target_link_libraries(rtaudio ${ALSA_LIBRARIES} Threads::Threads)
 endif()
 
-find_package(SndFile REQUIRED PATHS deps/libsndfile/cmake)
+target_link_libraries(organic_lib rtaudio ${SNDFILE_LIBRARIES})
+
+# build command line entry point
+
+add_executable(organic src/main.cpp)
 
 target_include_directories(organic PRIVATE deps/rtaudio ${SNDFILE_INCLUDE_DIR})
 
-target_link_libraries(organic rtaudio ${SNDFILE_LIBRARIES})
+target_link_libraries(organic organic_lib)
