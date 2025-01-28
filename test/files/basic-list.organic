@@ -1,0 +1,4 @@
+sine(volume: 1, frequency: sequence(values: [
+    hold(value: 110, length: 1000),
+    hold(value: 220, length: 1000)
+]))

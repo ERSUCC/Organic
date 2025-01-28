@@ -18,8 +18,8 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
 
     Parser::Program* program = (new Parser::Parser(path, includes))->parse();
 
-    (new Parser::TypeResolver(path))->resolveTypes(program);
-    (new Parser::BytecodeTransformer(path, stream))->transform(program);
+    program->resolveTypes(new Parser::TypeResolver(path));
+    program->transform(new Parser::BytecodeTransformer(path, stream));
 
     stream.close();
 

@@ -36,7 +36,7 @@ namespace Parser
 
         if (instructions.empty())
         {
-            return new Program(SourceLocation(path, 0, 0, 0, 0), instructions);
+            return new Program(SourceLocation(path, 1, 1, 0, 0), instructions);
         }
 
         return new Program(SourceLocation(path, instructions[0]->location.line, instructions[0]->location.character, instructions[0]->location.start, instructions.back()->location.end), instructions);

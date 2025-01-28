@@ -1,0 +1,1 @@
+sine(volume: 1, frequency: sweep(from: 110, to: 220, length: 1000))

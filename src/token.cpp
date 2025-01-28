@@ -791,6 +791,8 @@ namespace Parser
     Define::Define(const SourceLocation location, const std::string name, const std::vector<Identifier*> inputs, const std::vector<Token*> instructions) :
         Token(location), name(name), inputs(inputs), instructions(instructions)
     {
+        type = new Type(BasicType::None);
+
         block = new InstructionBlock();
     }
 
@@ -814,10 +816,26 @@ namespace Parser
     }
 
     Program::Program(const SourceLocation location, const std::vector<Token*> instructions) :
-        Token(location), instructions(instructions) {}
+        Token(location), instructions(instructions)
+    {
+        type = new Type(BasicType::None);
+    }
+
+    void Program::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Program::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
 
     Include::Include(const SourceLocation location, Program* program) :
-        Token(location), program(program) {}
+        Token(location), program(program)
+    {
+        type = new Type(BasicType::None);
+    }
 
     void Include::resolveTypes(TypeResolver* visitor)
     {

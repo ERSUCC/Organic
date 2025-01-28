@@ -21,6 +21,7 @@ struct Path
         }
     };
 
+    static Path* relative(const std::filesystem::path& path, const std::filesystem::path& base);
     static Path* relative(const std::filesystem::path& path);
     static Path* beside(const std::filesystem::path&, const Path* other);
 

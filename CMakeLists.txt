@@ -65,3 +65,14 @@ add_executable(organic src/main.cpp)
 target_include_directories(organic PRIVATE deps/rtaudio ${SNDFILE_INCLUDE_DIR})
 
 target_link_libraries(organic organic_lib)
+
+# build test suite
+
+add_executable(organic_test test/src/main.cpp
+                            test/src/test.cpp)
+
+target_compile_definitions(organic_test PRIVATE ORGANIC_TEST_DIR="${CMAKE_SOURCE_DIR}/test/files")
+
+target_include_directories(organic_test PRIVATE include)
+
+target_link_libraries(organic_test organic_lib)

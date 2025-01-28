@@ -1,5 +1,10 @@
 #include "../include/path.h"
 
+Path* Path::relative(const std::filesystem::path& path, const std::filesystem::path& base)
+{
+    return new Path(base / path);
+}
+
 Path* Path::relative(const std::filesystem::path& path)
 {
     return new Path(path);

@@ -585,6 +585,9 @@ namespace Parser
     {
         Program(const SourceLocation location, const std::vector<Token*> instructions);
 
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+
         const std::vector<Token*> instructions;
     };
 
