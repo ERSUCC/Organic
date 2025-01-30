@@ -738,7 +738,7 @@ namespace Parser
             return new Perform(location, argumentList, topLevel);
         }
 
-        return new CallUser(location, str->str, argumentList, topLevel);
+        return new CallUser(location, argumentList, topLevel);
     }
 
     Argument* Parser::parseArgument(unsigned int pos) const

@@ -463,12 +463,10 @@ namespace Parser
 
     struct CallUser : public Call
     {
-        CallUser(const SourceLocation, const std::string name, const ArgumentList* arguments, const bool topLevel);
+        CallUser(const SourceLocation, const ArgumentList* arguments, const bool topLevel);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
-
-        const std::string name;
 
         Define* function;
     };

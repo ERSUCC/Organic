@@ -156,16 +156,69 @@ bool Test::semanticEquals(const Parser::Token* expected, const Parser::Token* ac
         }
     }
 
-    else if (const Parser::Call* call = dynamic_cast<const Parser::Call*>(expected))
+    else if (const Parser::Include* include = dynamic_cast<const Parser::Include*>(expected))
     {
-        if (const Parser::Call* other = dynamic_cast<const Parser::Call*>(actual))
+        if (const Parser::Include* other = dynamic_cast<const Parser::Include*>(actual))
         {
-            if (call->topLevel != other->topLevel)
+            return semanticEquals(include->program, other->program);
+        }
+    }
+
+    else if (const Parser::Define* define = dynamic_cast<const Parser::Define*>(expected))
+    {
+        if (const Parser::Define* other = dynamic_cast<const Parser::Define*>(actual))
+        {
+            if (define->name != other->name || define->inputs.size() != other->inputs.size() || define->instructions.size() != other->instructions.size())
             {
                 return false;
             }
 
-            if (call->arguments->arguments.size() != other->arguments->arguments.size())
+            for (unsigned int i = 0; i < define->inputs.size(); i++)
+            {
+                if (!semanticEquals(define->inputs[i], other->inputs[i]))
+                {
+                    return false;
+                }
+            }
+
+            for (unsigned int i = 0; i < define->instructions.size(); i++)
+            {
+                if (!semanticEquals(define->instructions[i], other->instructions[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    else if (const Parser::CallUser* call = dynamic_cast<const Parser::CallUser*>(expected))
+    {
+        if (const Parser::CallUser* other = dynamic_cast<const Parser::CallUser*>(actual))
+        {
+            if (call->arguments->name != other->arguments->name || call->topLevel != other->topLevel || call->arguments->arguments.size() != other->arguments->arguments.size())
+            {
+                return false;
+            }
+
+            for (unsigned int i = 0; i < call->arguments->arguments.size(); i++)
+            {
+                if (!semanticEquals(call->arguments->arguments[i], other->arguments->arguments[i]))
+                {
+                    return false;
+                }
+            }
+
+            return semanticEquals(call->function, other->function);
+        }
+    }
+
+    else if (const Parser::Call* call = dynamic_cast<const Parser::Call*>(expected))
+    {
+        if (const Parser::Call* other = dynamic_cast<const Parser::Call*>(actual))
+        {
+            if (call->arguments->name != other->arguments->name || call->topLevel != other->topLevel || call->arguments->arguments.size() != other->arguments->arguments.size())
             {
                 return false;
             }
@@ -182,11 +235,27 @@ bool Test::semanticEquals(const Parser::Token* expected, const Parser::Token* ac
         }
     }
 
-    else if (const Parser::Argument* argument = dynamic_cast<const Parser::Argument*>(expected))
+    else if (const Parser::CallAlias* call = dynamic_cast<const Parser::CallAlias*>(expected))
     {
-        if (const Parser::Argument* other = dynamic_cast<const Parser::Argument*>(actual))
+        if (const Parser::CallAlias* other = dynamic_cast<const Parser::CallAlias*>(actual))
         {
-            return argument->name == other->name && semanticEquals(argument->value, other->value);
+            return semanticEquals(call->a, other->a) && semanticEquals(call->b, other->b);
+        }
+    }
+
+    else if (const Parser::Assign* assign = dynamic_cast<const Parser::Assign*>(expected))
+    {
+        if (const Parser::Assign* other = dynamic_cast<const Parser::Assign*>(actual))
+        {
+            return semanticEquals(assign->variable, other->variable) && semanticEquals(assign->value, other->value);
+        }
+    }
+
+    else if (const Parser::ParenthesizedExpression* exp = dynamic_cast<const Parser::ParenthesizedExpression*>(expected))
+    {
+        if (const Parser::ParenthesizedExpression* other = dynamic_cast<const Parser::ParenthesizedExpression*>(actual))
+        {
+            return semanticEquals(exp->value, other->value);
         }
     }
 
@@ -211,11 +280,72 @@ bool Test::semanticEquals(const Parser::Token* expected, const Parser::Token* ac
         }
     }
 
+    else if (const Parser::Argument* argument = dynamic_cast<const Parser::Argument*>(expected))
+    {
+        if (const Parser::Argument* other = dynamic_cast<const Parser::Argument*>(actual))
+        {
+            return argument->name == other->name && semanticEquals(argument->value, other->value);
+        }
+    }
+
+    else if (dynamic_cast<const Parser::Ignore*>(expected))
+    {
+        return dynamic_cast<const Parser::Ignore*>(actual);
+    }
+
+    else if (const Parser::String* str = dynamic_cast<const Parser::String*>(expected))
+    {
+        if (const Parser::String* other = dynamic_cast<const Parser::String*>(actual))
+        {
+            return str->str == other->str;
+        }
+    }
+
+    else if (dynamic_cast<const Parser::SequenceForwards*>(expected))
+    {
+        return dynamic_cast<const Parser::SequenceForwards*>(actual);
+    }
+
+    else if (dynamic_cast<const Parser::SequenceBackwards*>(expected))
+    {
+        return dynamic_cast<const Parser::SequenceBackwards*>(actual);
+    }
+
+    else if (dynamic_cast<const Parser::SequencePingPong*>(expected))
+    {
+        return dynamic_cast<const Parser::SequencePingPong*>(actual);
+    }
+
+    else if (dynamic_cast<const Parser::SequenceRandom*>(expected))
+    {
+        return dynamic_cast<const Parser::SequenceRandom*>(actual);
+    }
+
+    else if (dynamic_cast<const Parser::RandomStep*>(expected))
+    {
+        return dynamic_cast<const Parser::RandomStep*>(actual);
+    }
+
+    else if (dynamic_cast<const Parser::RandomLinear*>(expected))
+    {
+        return dynamic_cast<const Parser::RandomLinear*>(actual);
+    }
+
+    else if (dynamic_cast<const Parser::Pi*>(expected))
+    {
+        return dynamic_cast<const Parser::Pi*>(actual);
+    }
+
+    else if (dynamic_cast<const Parser::E*>(expected))
+    {
+        return dynamic_cast<const Parser::E*>(actual);
+    }
+
     else if (const Parser::Value* value = dynamic_cast<const Parser::Value*>(expected))
     {
         if (const Parser::Value* other = dynamic_cast<const Parser::Value*>(actual))
         {
-            return value->str == other->str && value->value == other->value;
+            return value->value == other->value;
         }
     }
 

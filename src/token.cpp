@@ -657,8 +657,8 @@ namespace Parser
         visitor->transform(this);
     }
 
-    CallUser::CallUser(const SourceLocation location, const std::string name, const ArgumentList* arguments, const bool topLevel) :
-        Call(location, arguments, topLevel), name(name) {}
+    CallUser::CallUser(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
+        Call(location, arguments, topLevel) {}
 
     void CallUser::resolveTypes(TypeResolver* visitor)
     {
@@ -1050,7 +1050,7 @@ namespace Parser
 
     void TypeResolver::resolveTypes(CallUser* token)
     {
-        if (Define* function = getFunction(token->name))
+        if (Define* function = getFunction(token->arguments->name))
         {
             for (const Identifier* input : function->inputs)
             {
@@ -1068,14 +1068,14 @@ namespace Parser
             token->function = function;
         }
 
-        else if (checkRecursive(token->name))
+        else if (checkRecursive(token->arguments->name))
         {
             Utils::parseError("Calling a function in its own definition is not allowed.", token->location);
         }
 
         else
         {
-            Utils::parseError("Unknown function name \"" + token->name + "\".", token->location);
+            Utils::parseError("Unknown function name \"" + token->arguments->name + "\".", token->location);
         }
     }
 
