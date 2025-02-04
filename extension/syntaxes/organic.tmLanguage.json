@@ -80,7 +80,7 @@
 				},
 				{
 					"name": "constant.language.value.organic",
-					"match": "\b(pi|e)\\b"
+					"match": "\\b(pi|e)\\b"
 				}
 			]
 		},
