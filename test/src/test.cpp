@@ -2,10 +2,84 @@
 
 void Test::testAll()
 {
-    testParser();
+    (new ParserTest())->test();
 }
 
-void Test::testParser()
+const Path* Test::sourcePath(const std::string file) const
+{
+    return Path::relative(file, ORGANIC_TEST_DIR);
+}
+
+const Parser::Program* Test::parseSource(const Path* path) const
+{
+    return (new Parser::Parser(path, std::unordered_set<const Path*, Path::Hash, Path::Equals> { path }))->parse();
+}
+
+void Test::print(const std::string text)
+{
+    for (unsigned int i = 0; i < indents; i++)
+    {
+        std::cout << '\t';
+    }
+
+    std::cout << text << "\n";
+}
+
+void Test::beginSection(const std::string name)
+{
+    print("[ " + name + " ]");
+
+    indents++;
+}
+
+void Test::endSection()
+{
+    indents--;
+}
+
+void Test::beginTest(const std::string name)
+{
+    print(name);
+
+    indents++;
+
+    failures = 0;
+}
+
+void Test::endTest()
+{
+    indents--;
+
+    if (failures == 0)
+    {
+        print("Test passed");
+    }
+
+    else
+    {
+        if (failures == 1)
+        {
+            print("Test failed with " + std::to_string(failures) + " incorrect assertion");
+        }
+
+        else
+        {
+            print("Test failed with " + std::to_string(failures) + " incorrect assertions");
+        }
+    }
+}
+
+void Test::assert(const std::string name, const bool result)
+{
+    if (!result)
+    {
+        print("Failed assertion: \"" + name + "\"");
+
+        failures++;
+    }
+}
+
+void ParserTest::test()
 {
     beginSection("Test parser");
 
@@ -118,17 +192,7 @@ void Test::testParser()
     endSection();
 }
 
-const Path* Test::sourcePath(const std::string file) const
-{
-    return Path::relative(file, ORGANIC_TEST_DIR);
-}
-
-const Parser::Program* Test::parseSource(const Path* path) const
-{
-    return (new Parser::Parser(path, std::unordered_set<const Path*, Path::Hash, Path::Equals> { path }))->parse();
-}
-
-bool Test::semanticEquals(const Parser::Token* expected, const Parser::Token* actual) const
+bool ParserTest::semanticEquals(const Parser::Token* expected, const Parser::Token* actual) const
 {
     if (expected->location != actual->location)
     {
@@ -350,68 +414,4 @@ bool Test::semanticEquals(const Parser::Token* expected, const Parser::Token* ac
     }
 
     return false;
-}
-
-void Test::print(const std::string text)
-{
-    for (unsigned int i = 0; i < indents; i++)
-    {
-        std::cout << '\t';
-    }
-
-    std::cout << text << "\n";
-}
-
-void Test::beginSection(const std::string name)
-{
-    print("[ " + name + " ]");
-
-    indents++;
-}
-
-void Test::endSection()
-{
-    indents--;
-}
-
-void Test::beginTest(const std::string name)
-{
-    print(name);
-
-    indents++;
-
-    failures = 0;
-}
-
-void Test::endTest()
-{
-    indents--;
-
-    if (failures == 0)
-    {
-        print("Test passed");
-    }
-
-    else
-    {
-        if (failures == 1)
-        {
-            print("Test failed with " + std::to_string(failures) + " incorrect assertion");
-        }
-
-        else
-        {
-            print("Test failed with " + std::to_string(failures) + " incorrect assertions");
-        }
-    }
-}
-
-void Test::assert(const std::string name, const bool result)
-{
-    if (!result)
-    {
-        print("Failed assertion: \"" + name + "\"");
-
-        failures++;
-    }
 }
