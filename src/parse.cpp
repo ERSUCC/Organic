@@ -627,7 +627,7 @@ namespace Parser
                 {
                     Utils::includeWarning("Source file \"" + sourcePath->string() + "\" has already been included, this include will be ignored.", file->location);
 
-                    return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), nullptr);
+                    return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), new Program(SourceLocation(sourcePath, 0, 0, 0, 0), {}));
                 }
 
                 includedPaths.insert(sourcePath);

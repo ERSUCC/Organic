@@ -944,6 +944,16 @@ namespace Parser
         visitor->transform(this);
     }
 
+    std::string Include::string() const
+    {
+        if (program)
+        {
+            return "include(" + program->location.path->string() + ')';
+        }
+
+        return "include()";
+    }
+
     TypeResolver::TypeResolver(const Path* sourcePath) :
         sourcePath(sourcePath) {}
 
