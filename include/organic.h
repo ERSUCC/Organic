@@ -29,6 +29,8 @@ private:
 
     int processAudio(void* output, unsigned int frames);
 
+    void audioError(const std::string message) const;
+
     const ProgramOptions options;
 
     Utils* utils;

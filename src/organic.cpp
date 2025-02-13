@@ -11,7 +11,7 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
 
     if (!stream.is_open())
     {
-        Utils::fileError("Error creating intermediate file \"" + bytecodePath->string() + "\".");
+        throw OrganicFileException("Error creating intermediate file \"" + bytecodePath->string() + "\".");
     }
 
     std::unordered_set<const Path*, Path::Hash, Path::Equals> includes = { path };
@@ -46,13 +46,13 @@ void Organic::start()
 
 void Organic::startPlayback()
 {
-    RtAudio audio(RtAudio::Api::UNSPECIFIED, std::bind(&Utils::audioError, std::placeholders::_2));
+    RtAudio audio(RtAudio::Api::UNSPECIFIED, std::bind(&Organic::audioError, this, std::placeholders::_2));
 
     const std::vector<unsigned int>& ids = audio.getDeviceIds();
 
     if (ids.size() < 1)
     {
-        Utils::audioError("No available audio devices detected.");
+        throw OrganicAudioException("No available audio devices detected.");
     }
 
     RtAudio::StreamParameters parameters;
@@ -64,7 +64,7 @@ void Organic::startPlayback()
 
     if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, std::bind(&Organic::processAudio, this, std::placeholders::_1, std::placeholders::_3), nullptr))
     {
-        Utils::audioError(audio.getErrorText());
+        throw OrganicAudioException(audio.getErrorText());
     }
 
     if (audio.startStream())
@@ -74,7 +74,7 @@ void Organic::startPlayback()
             audio.closeStream();
         }
 
-        Utils::audioError(audio.getErrorText());
+        throw OrganicAudioException(audio.getErrorText());
     }
 
     machine->run();
@@ -129,7 +129,7 @@ void Organic::startExport()
 
     if (file->write(samples, steps * utils->channels) != steps * utils->channels)
     {
-        Utils::fileError("Could not write output file: " + std::string(file->strError()));
+        throw OrganicFileException("Could not write output file: " + std::string(file->strError()));
     }
 }
 
@@ -141,4 +141,9 @@ int Organic::processAudio(void* output, unsigned int frames)
     machine->processAudioSources((double*)output, frames);
 
     return 0;
+}
+
+void Organic::audioError(const std::string message) const
+{
+    throw OrganicAudioException(message);
 }

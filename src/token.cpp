@@ -971,7 +971,7 @@ namespace Parser
 
         else
         {
-            Utils::parseError("Unrecognized variable name \"" + token->str + "\".", token->location);
+            throw OrganicParseException("Unrecognized variable name \"" + token->str + "\".", token->location);
         }
     }
 
@@ -987,7 +987,7 @@ namespace Parser
 
             if (!value->type->checkType(token->values[0]->type))
             {
-                Utils::parseError("All elements in a list must have the same type.", value->location);
+                throw OrganicParseException("All elements in a list must have the same type.", value->location);
             }
         }
 
@@ -1007,17 +1007,17 @@ namespace Parser
 
         if (token->value->type->checkType(new Type(BasicType::None)))
         {
-            Utils::parseError("Functions that return nothing cannot be assigned to a variable.", token->value->location);
+            throw OrganicParseException("Functions that return nothing cannot be assigned to a variable.", token->value->location);
         }
 
         if (getInput(token->variable->str))
         {
-            Utils::parseError("Function inputs cannot be redefined.", token->location);
+            throw OrganicParseException("Function inputs cannot be redefined.", token->location);
         }
 
         if (getVariable(token->variable->str))
         {
-            Utils::parseError("Variables cannot be redefined.", token->location);
+            throw OrganicParseException("Variables cannot be redefined.", token->location);
         }
 
         token->variable->type = token->value->type;
@@ -1170,12 +1170,12 @@ namespace Parser
 
         else if (checkRecursive(token->arguments->name))
         {
-            Utils::parseError("Calling a function in its own definition is not allowed.", token->location);
+            throw OrganicParseException("Calling a function in its own definition is not allowed.", token->location);
         }
 
         else
         {
-            Utils::parseError("Unknown function name \"" + token->arguments->name + "\".", token->location);
+            throw OrganicParseException("Unknown function name \"" + token->arguments->name + "\".", token->location);
         }
     }
 
@@ -1188,12 +1188,12 @@ namespace Parser
 
         if (!token->a->type->checkType(number))
         {
-            Utils::parseError("Expected \"" + number->name() + "\", received \"" + token->a->type->name() + "\".", token->a->location);
+            throw OrganicParseException("Expected \"" + number->name() + "\", received \"" + token->a->type->name() + "\".", token->a->location);
         }
 
         if (!token->b->type->checkType(number))
         {
-            Utils::parseError("Expected \"" + number->name() + "\", received \"" + token->b->type->name() + "\".", token->b->location);
+            throw OrganicParseException("Expected \"" + number->name() + "\", received \"" + token->b->type->name() + "\".", token->b->location);
         }
     }
 
@@ -1201,12 +1201,12 @@ namespace Parser
     {
         if (getFunction(token->name))
         {
-            Utils::parseError("A function already exists with the name \"" + token->name + "\".", token->location);
+            throw OrganicParseException("A function already exists with the name \"" + token->name + "\".", token->location);
         }
 
         if (checkRecursive(token->name))
         {
-            Utils::parseError("Redefining a function in its own definition is not allowed.", token->location);
+            throw OrganicParseException("Redefining a function in its own definition is not allowed.", token->location);
         }
 
         for (Identifier* input : token->inputs)
@@ -1272,7 +1272,7 @@ namespace Parser
             {
                 if (argument->used)
                 {
-                    Utils::parseError("Input \"" + argument->name + "\" specified more than once for function \"" + arguments->name + "\".", argument->location);
+                    throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + arguments->name + "\".", argument->location);
                 }
 
                 argument->used = true;
@@ -1285,7 +1285,7 @@ namespace Parser
 
                 if (!argumentType->checkType(expectedType))
                 {
-                    Utils::parseError("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", argument->value->location);
+                    throw OrganicParseException("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", argument->value->location);
                 }
 
                 return;
@@ -1672,12 +1672,12 @@ namespace Parser
 
         if (!path->exists())
         {
-            Utils::includeError("Audio file \"" + path->string() + "\" does not exist.", str->location);
+            throw OrganicIncludeException("Audio file \"" + path->string() + "\" does not exist.", str->location);
         }
 
         if (!path->isFile())
         {
-            Utils::includeError("\"" + path->string() + "\" is not a file.", str->location);
+            throw OrganicIncludeException("\"" + path->string() + "\" is not a file.", str->location);
         }
 
         if (!resources.count(path))
@@ -1909,7 +1909,7 @@ namespace Parser
         {
             if (!argument->used)
             {
-                Utils::parseError("Invalid input name \"" + argument->name + "\" for function \"" + arguments->name + "\".", argument->location);
+                throw OrganicParseException("Invalid input name \"" + argument->name + "\" for function \"" + arguments->name + "\".", argument->location);
             }
         }
     }

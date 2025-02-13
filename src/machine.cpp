@@ -6,12 +6,12 @@ Machine::Machine(const Path* path)
 
     if (!path->readToStringBinary(str))
     {
-        Utils::fileError("Could not open \"" + path->string() + "\".");
+        throw OrganicFileException("Could not open \"" + path->string() + "\".");
     }
 
     if (str.size() <= BytecodeConstants::HEADER_LENGTH || str.compare(0, BytecodeConstants::OBC_ID_LENGTH, BytecodeConstants::OBC_ID))
     {
-        Utils::machineError("Invalid bytecode format.");
+        throw OrganicMachineException("Invalid bytecode format.");
     }
 
     utils = Utils::get();
@@ -181,7 +181,7 @@ void Machine::execute(unsigned int address, const double startTime)
     {
         if (address >= programLength)
         {
-            return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.");
+            return throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
         }
 
         switch (program[address])
@@ -437,7 +437,7 @@ void Machine::execute(unsigned int address, const double startTime)
                     }
 
                     default:
-                        return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.");
+                        return throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
 
                 }
 
@@ -454,7 +454,7 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
 
             default:
-                return Utils::machineError("Intermediate file is invalid or corrupted, unable to continue execution.");
+                return throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
 
         }
     }

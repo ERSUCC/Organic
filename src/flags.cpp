@@ -20,7 +20,7 @@ ProgramOptions FlagParser::getOptions()
         {
             if (options.setTime)
             {
-                Utils::argumentError("The option \"time\" was already set.");
+                throw OrganicArgumentException("The option \"time\" was already set.");
             }
 
             std::string next = nextOption(flag);
@@ -34,12 +34,12 @@ ProgramOptions FlagParser::getOptions()
 
             catch (const std::invalid_argument& error)
             {
-                Utils::argumentError("Expected number, received \"" + next + "\".");
+                throw OrganicArgumentException("Expected number, received \"" + next + "\".");
             }
 
             if (end < next.size())
             {
-                Utils::argumentError("Expected number, received \"" + next + "\".");
+                throw OrganicArgumentException("Expected number, received \"" + next + "\".");
             }
 
             options.setTime = true;
@@ -49,14 +49,14 @@ ProgramOptions FlagParser::getOptions()
         {
             if (options.setExport)
             {
-                Utils::argumentError("The option \"export\" was already set.");
+                throw OrganicArgumentException("The option \"export\" was already set.");
             }
 
             Path* path = Path::relative(nextOption(flag));
 
             if (path->parent()->exists())
             {
-                Utils::argumentError("Specified output file is in a non-existent directory.");
+                throw OrganicArgumentException("Specified output file is in a non-existent directory.");
             }
 
             options.exportPath = path;
@@ -67,7 +67,7 @@ ProgramOptions FlagParser::getOptions()
         {
             if (options.setMono)
             {
-                Utils::argumentError("The option \"mono\" was already set.");
+                throw OrganicArgumentException("The option \"mono\" was already set.");
             }
 
             options.mono = true;
@@ -76,13 +76,13 @@ ProgramOptions FlagParser::getOptions()
 
         else
         {
-            Utils::argumentError("Unknown option \"" + flag + "\".");
+            throw OrganicArgumentException("Unknown option \"" + flag + "\".");
         }
     }
 
     if (options.setExport && !options.setTime)
     {
-        Utils::argumentError("Cannot export without a time limit.");
+        throw OrganicArgumentException("Cannot export without a time limit.");
     }
 
     return options;
@@ -92,7 +92,7 @@ std::string FlagParser::nextOption(const std::string previous)
 {
     if (flags.empty())
     {
-        Utils::argumentError("Value must be provided for option \"" + previous + "\".");
+        throw OrganicArgumentException("Value must be provided for option \"" + previous + "\".");
     }
 
     std::string flag = flags.front();

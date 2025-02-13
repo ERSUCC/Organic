@@ -9,6 +9,7 @@
 #endif
 
 #include <chrono>
+#include <exception>
 #include <iostream>
 #include <limits>
 #include <random>
@@ -23,14 +24,6 @@ struct Utils
 
     static void parseWarning(const std::string message, const SourceLocation& location);
     static void includeWarning(const std::string message, const SourceLocation& location);
-
-    static void argumentError(const std::string message);
-    static void parseError(const std::string message, const SourceLocation& location);
-    static void parseError(const std::string message, const Path* path, const unsigned int line, const unsigned int character);
-    static void includeError(const std::string message, const SourceLocation& location);
-    static void machineError(const std::string message);
-    static void fileError(const std::string message);
-    static void audioError(const std::string message);
 
     bool littleEndian = false;
 
@@ -52,9 +45,51 @@ struct Utils
 private:
     Utils();
 
-    static void warning(const std::string message);
-    static void error(const std::string message);
-
     static Utils* instance;
 
+};
+
+struct OrganicException : public std::exception
+{
+    OrganicException(const std::string message);
+
+    const char* what() const override;
+
+private:
+    const std::string message;
+
+};
+
+struct OrganicArgumentException : public OrganicException
+{
+    OrganicArgumentException(const std::string message);
+};
+
+struct OrganicFileException : public OrganicException
+{
+    OrganicFileException(const std::string message);
+};
+
+struct OrganicParseException : public OrganicException
+{
+    OrganicParseException(const std::string message, const SourceLocation& location);
+
+    const SourceLocation location;
+};
+
+struct OrganicIncludeException : public OrganicException
+{
+    OrganicIncludeException(const std::string message, const SourceLocation& location);
+
+    const SourceLocation location;
+};
+
+struct OrganicMachineException : public OrganicException
+{
+    OrganicMachineException(const std::string message);
+};
+
+struct OrganicAudioException : public OrganicException
+{
+    OrganicAudioException(const std::string message);
 };

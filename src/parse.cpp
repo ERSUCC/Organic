@@ -7,7 +7,7 @@ namespace Parser
     {
         if (!path->readToString(code))
         {
-            Utils::fileError("Could not open \"" + path->string() + "\".");
+            throw OrganicFileException("Could not open \"" + path->string() + "\".");
         }
     }
 
@@ -244,7 +244,7 @@ namespace Parser
 
                 if (code[current] != '"')
                 {
-                    Utils::parseError("Unexpected end of file.", path, line, character);
+                    throw OrganicParseException("Unexpected end of file.", SourceLocation(path, line, character, 0, 0));
                 }
 
                 tokens.push_back(new String(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), str));
@@ -264,7 +264,7 @@ namespace Parser
                     {
                         if (period)
                         {
-                            Utils::parseError("Constants cannot contain more than one decimal point.", path, startLine, startCharacter);
+                            throw OrganicParseException("Constants cannot contain more than one decimal point.", SourceLocation(path, startLine, startCharacter, 0, 0));
                         }
 
                         period = true;
@@ -383,7 +383,7 @@ namespace Parser
 
                 else
                 {
-                    Utils::parseError("Unrecognized symbol \"" + std::string(1, code[current]) + "\".", path, line, character);
+                    throw OrganicParseException("Unrecognized symbol \"" + std::string(1, code[current]) + "\".", SourceLocation(path, line, character, 0, 0));
                 }
             }
 
@@ -395,7 +395,7 @@ namespace Parser
     {
         if (pos >= tokens.size())
         {
-            Utils::parseError("Unexpected end of file.", path, line, character);
+            throw OrganicParseException("Unexpected end of file.", SourceLocation(path, line, character, 0, 0));
 
             return nullptr;
         }
@@ -420,7 +420,7 @@ namespace Parser
 
     void Parser::tokenError(const BasicToken* token, const std::string expected) const
     {
-        Utils::parseError("Expected " + expected + ", received \"" + token->str + "\".", token->location);
+        throw OrganicParseException("Expected " + expected + ", received \"" + token->str + "\".", token->location);
     }
 
     Token* Parser::parseInstruction(unsigned int pos) const
@@ -541,7 +541,7 @@ namespace Parser
             name->str == "play" ||
             name->str == "perform")
         {
-            Utils::parseError("A function already exists with the name \"" + name->str + "\".", name->location);
+            throw OrganicParseException("A function already exists with the name \"" + name->str + "\".", name->location);
         }
 
         return new Define(SourceLocation(path, name->location.line, name->location.character, name->location.start, pos + 1), name->str, inputs, instructions);
@@ -589,7 +589,7 @@ namespace Parser
         {
             if (!topLevel)
             {
-                Utils::parseError("Cannot call function \"include\" here.", str->location);
+                throw OrganicParseException("Cannot call function \"include\" here.", str->location);
             }
 
             if (arguments.empty())
@@ -601,12 +601,12 @@ namespace Parser
 
             if (arguments[0]->name != "file")
             {
-                Utils::parseError("Invalid input name \"" + arguments[0]->name + "\" for function \"include\".", arguments[0]->location);
+                throw OrganicParseException("Invalid input name \"" + arguments[0]->name + "\" for function \"include\".", arguments[0]->location);
             }
 
             if (arguments.size() > 1)
             {
-                Utils::parseError("Invalid input name \"" + arguments[1]->name + "\" for function \"include\".", arguments[1]->location);
+                throw OrganicParseException("Invalid input name \"" + arguments[1]->name + "\" for function \"include\".", arguments[1]->location);
             }
 
             if (const String* file = dynamic_cast<const String*>(arguments[0]->value))
@@ -615,12 +615,12 @@ namespace Parser
 
                 if (!sourcePath->exists())
                 {
-                    Utils::includeError("Source file \"" + sourcePath->string() + "\" does not exist.", str->location);
+                    throw OrganicIncludeException("Source file \"" + sourcePath->string() + "\" does not exist.", str->location);
                 }
 
                 if (!sourcePath->isFile())
                 {
-                    Utils::includeError("\"" + sourcePath->string() + "\" is not a file.", str->location);
+                    throw OrganicIncludeException("\"" + sourcePath->string() + "\" is not a file.", str->location);
                 }
 
                 if (includedPaths.count(sourcePath))
@@ -635,7 +635,7 @@ namespace Parser
                 return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), (new Parser(sourcePath, includedPaths))->parse());
             }
 
-            Utils::parseError("Expected \"string\".", arguments[0]->value->location);
+            throw OrganicParseException("Expected \"string\".", arguments[0]->value->location);
         }
 
         const SourceLocation location(path, str->location.line, str->location.character, start, pos + 1);
@@ -772,7 +772,7 @@ namespace Parser
 
         if (tokenIs<CloseSquareBracket>(pos + 1))
         {
-            Utils::parseError("Empty lists are not allowed.", SourceLocation(path, startToken->location.line, startToken->location.character, start, pos + 1));
+            throw OrganicParseException("Empty lists are not allowed.", SourceLocation(path, startToken->location.line, startToken->location.character, start, pos + 1));
         }
 
         std::vector<Token*> items;
@@ -854,7 +854,7 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
+                    throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
@@ -870,7 +870,7 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
+                    throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
@@ -886,7 +886,7 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
+                    throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
@@ -902,7 +902,7 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
+                    throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
@@ -918,7 +918,7 @@ namespace Parser
             {
                 if (comparison)
                 {
-                    Utils::parseError("Chaining comparison operators is not allowed.", terms[i]->location);
+                    throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
                 }
 
                 comparison = true;
@@ -993,7 +993,7 @@ namespace Parser
 
         if (terms.size() != 1)
         {
-            Utils::parseError("Invalid expression.", getToken(start)->location);
+            throw OrganicParseException("Invalid expression.", getToken(start)->location);
         }
 
         return terms[0];
