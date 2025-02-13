@@ -88,12 +88,16 @@ void Test::fail(const std::string message)
 
 void ParserTest::test()
 {
-    beginSection("Test parser");
+    beginSection("Parser round trip");
 
     roundTrip("Empty file", sourcePath("empty.organic"));
     roundTrip("Empty file with comments", sourcePath("empty-with-comments.organic"));
     roundTrip("Hello world", sourcePath("hello-world.organic"));
+    roundTrip("Terrible whitespace", sourcePath("terrible-whitespace.organic"));
+    roundTrip("Constants", sourcePath("constants.organic"));
+    roundTrip("Simple variable reference", sourcePath("simple-variable.organic"));
     roundTrip("Single nest", sourcePath("single-nest.organic"));
+    roundTrip("Multiple nests", sourcePath("multi-nest.organic"));
     roundTrip("Basic list", sourcePath("basic-list.organic"));
 
     endSection();
@@ -122,7 +126,7 @@ void ParserTest::roundTrip(const std::string name, const Path* path)
 
 std::string ParserTest::formatSource(const std::string text) const
 {
-    const std::string untrimmed = std::regex_replace(text, std::regex("(//[^\n]*)|(/\\*[\\w\\W]*\\*/)|(\\s+)"), " ");
+    const std::string untrimmed = std::regex_replace(text, std::regex("(//[^\n]*)|(/\\*[\\w\\W]*\\*/)|(\\s+)"), "");
 
     const size_t first = untrimmed.find_first_not_of(' ');
     const size_t last = untrimmed.find_last_not_of(' ');
@@ -132,5 +136,5 @@ std::string ParserTest::formatSource(const std::string text) const
         return "";
     }
 
-    return untrimmed.substr(first, last - first);
+    return untrimmed.substr(first, last - first + 1);
 }

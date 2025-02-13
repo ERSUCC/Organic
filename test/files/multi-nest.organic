@@ -1,0 +1,1 @@
+sine(volume: 1, frequency: sweep(from: 110, to: lfo(from: 220, to: 330, length: random(from: 50, to: 10000, length: 1000, type: random-linear)), length: 1000))

@@ -1,0 +1,8 @@
+test = sequence-forwards
+test = sequence-backwards
+test = sequence-ping-pong
+test = sequence-random
+test = random-step
+test = random-linear
+test = pi
+test = e
