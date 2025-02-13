@@ -252,11 +252,6 @@ namespace Parser
         String(const SourceLocation location, const std::string str);
     };
 
-    struct Ignore : public Token
-    {
-        Ignore(const SourceLocation);
-    };
-
     struct Argument : public Token
     {
         Argument(const SourceLocation location, const std::string name, Token* value);

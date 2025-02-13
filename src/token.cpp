@@ -333,9 +333,6 @@ namespace Parser
         type = new Type(BasicType::String);
     }
 
-    Ignore::Ignore(const SourceLocation location) :
-        Token(location) {}
-
     Argument::Argument(const SourceLocation location, const std::string name, Token* value) :
         Token(location), name(name), value(value) {}
 
@@ -1256,9 +1253,12 @@ namespace Parser
 
     void TypeResolver::resolveTypes(Include* token)
     {
-        for (Token* instruction : token->program->instructions)
+        if (token->program)
         {
-            instruction->resolveTypes(this);
+            for (Token* instruction : token->program->instructions)
+            {
+                instruction->resolveTypes(this);
+            }
         }
     }
 
@@ -1869,9 +1869,12 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Include* token)
     {
-        for (const Token* instruction : token->program->instructions)
+        if (token->program)
         {
-            instruction->transform(this);
+            for (const Token* instruction : token->program->instructions)
+            {
+                instruction->transform(this);
+            }
         }
     }
 
