@@ -1,6 +1,8 @@
 #pragma once
 
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <string>
 
 struct Path
@@ -33,6 +35,9 @@ struct Path
     std::string string() const;
 
     std::string stem() const;
+
+    bool readToString(std::string& dest) const;
+    bool readToStringBinary(std::string& dest) const;
 
 private:
     Path(const std::filesystem::path& path);

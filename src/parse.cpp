@@ -5,16 +5,10 @@ namespace Parser
     Parser::Parser(const Path* path, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
         path(path), includedPaths(includedPaths)
     {
-        std::ifstream file(path->string());
-
-        if (!file.is_open())
+        if (!path->readToString(code))
         {
             Utils::fileError("Could not open \"" + path->string() + "\".");
         }
-
-        std::getline(file, code, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
-
-        file.close();
     }
 
     Program* Parser::parse()

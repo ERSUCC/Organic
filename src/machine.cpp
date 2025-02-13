@@ -2,20 +2,12 @@
 
 Machine::Machine(const Path* path)
 {
-    std::ifstream file(path->string(), std::ios::binary);
+    std::string str;
 
-    if (!file.is_open())
+    if (!path->readToStringBinary(str))
     {
         Utils::fileError("Could not open \"" + path->string() + "\".");
     }
-
-    std::ostringstream stream(std::ios::binary);
-
-    stream << file.rdbuf();
-
-    file.close();
-
-    const std::string& str = stream.str();
 
     if (str.size() <= BytecodeConstants::HEADER_LENGTH || str.compare(0, BytecodeConstants::OBC_ID_LENGTH, BytecodeConstants::OBC_ID))
     {

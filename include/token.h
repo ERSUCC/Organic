@@ -54,6 +54,8 @@ namespace Parser
         virtual void resolveTypes(TypeResolver* visitor);
         virtual void transform(BytecodeTransformer* visitor) const;
 
+        virtual std::string string() const;
+
         const SourceLocation location;
 
         Type* type = nullptr;
@@ -62,6 +64,8 @@ namespace Parser
     struct BasicToken : public Token
     {
         BasicToken(const SourceLocation location, const std::string str);
+
+        std::string string() const override;
 
         const std::string str;
     };
@@ -257,6 +261,8 @@ namespace Parser
     {
         Argument(const SourceLocation location, const std::string name, Token* value);
 
+        std::string string() const override;
+
         const std::string name;
 
         Token* value;
@@ -280,6 +286,8 @@ namespace Parser
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
+        std::string string() const override;
+
         const std::vector<Token*> values;
     };
 
@@ -289,6 +297,8 @@ namespace Parser
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
+
+        std::string string() const override;
 
         Token* value;
     };
@@ -300,6 +310,8 @@ namespace Parser
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
+        std::string string() const override;
+
         Identifier* variable;
 
         Token* value;
@@ -308,6 +320,8 @@ namespace Parser
     struct Call : public Token
     {
         Call(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+
+        std::string string() const override;
 
         const ArgumentList* arguments;
 
@@ -473,12 +487,16 @@ namespace Parser
 
     struct CallAlias : public Token
     {
-        CallAlias(const SourceLocation location, Token* a, Token* b);
+        CallAlias(const SourceLocation location, Token* a, Token* b, const std::string op);
 
         void resolveTypes(TypeResolver* visitor) override;
 
+        std::string string() const override;
+
         Token* a;
         Token* b;
+
+        const std::string op;
     };
 
     struct AddAlias : public CallAlias
@@ -558,6 +576,8 @@ namespace Parser
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
+        std::string string() const override;
+
         const std::string name;
 
         const std::vector<Identifier*> inputs;
@@ -585,6 +605,8 @@ namespace Parser
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
+
+        std::string string() const override;
 
         const std::vector<Token*> instructions;
     };

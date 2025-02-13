@@ -45,5 +45,45 @@ std::string Path::stem() const
     return path.stem().string();
 }
 
+bool Path::readToString(std::string& dest) const
+{
+    std::ifstream file(string());
+
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    std::getline(file, dest, std::string::traits_type::to_char_type(std::string::traits_type::eof()));
+
+    const bool done = file.eof();
+
+    file.close();
+
+    return done;
+}
+
+bool Path::readToStringBinary(std::string& dest) const
+{
+    std::ifstream file(string(), std::ios::binary);
+
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    std::ostringstream stream(std::ios::binary);
+
+    stream << file.rdbuf();
+
+    const bool done = file.good();
+
+    file.close();
+
+    dest = stream.str();
+
+    return done;
+}
+
 Path::Path(const std::filesystem::path& path) :
     path(std::filesystem::weakly_canonical(path)) {}

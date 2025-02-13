@@ -1,6 +1,8 @@
 #pragma once
 
+#include <fstream>
 #include <iostream>
+#include <regex>
 #include <string>
 #include <unordered_set>
 
@@ -26,6 +28,7 @@ protected:
     void endTest();
 
     void assert(const std::string name, const bool result);
+    void fail(const std::string message);
 
     unsigned int indents = 0;
     unsigned int failures;
@@ -39,6 +42,8 @@ public:
     void test();
 
 private:
-    bool semanticEquals(const Parser::Token* expected, const Parser::Token* actual) const;
+    void roundTrip(const std::string name, const Path* path);
+
+    std::string formatSource(const std::string text) const;
 
 };

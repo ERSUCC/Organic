@@ -142,8 +142,18 @@ namespace Parser
     void Token::resolveTypes(TypeResolver* visitor) {}
     void Token::transform(BytecodeTransformer* visitor) const {}
 
+    std::string Token::string() const
+    {
+        return "";
+    }
+
     BasicToken::BasicToken(const SourceLocation location, const std::string str) :
         Token(location), str(str) {}
+
+    std::string BasicToken::string() const
+    {
+        return str;
+    }
 
     OpenParenthesis::OpenParenthesis(const SourceLocation location) :
         BasicToken(location, "(") {}
@@ -329,6 +339,11 @@ namespace Parser
     Argument::Argument(const SourceLocation location, const std::string name, Token* value) :
         Token(location), name(name), value(value) {}
 
+    std::string Argument::string() const
+    {
+        return name + ": " + value->string();
+    }
+
     ArgumentList::ArgumentList(const std::vector<Argument*>& arguments, const std::string name) :
         arguments(arguments), name(name) {}
 
@@ -345,6 +360,18 @@ namespace Parser
         visitor->transform(this);
     }
 
+    std::string List::string() const
+    {
+        std::string result = "[ " + values[0]->string();
+
+        for (unsigned int i = 1; i < values.size(); i++)
+        {
+            result += ", " + values[i]->string();
+        }
+
+        return result + " ]";
+    }
+
     ParenthesizedExpression::ParenthesizedExpression(const SourceLocation location, Token* value) :
         Token(location), value(value) {}
 
@@ -356,6 +383,11 @@ namespace Parser
     void ParenthesizedExpression::transform(BytecodeTransformer* visitor) const
     {
         visitor->transform(this);
+    }
+
+    std::string ParenthesizedExpression::string() const
+    {
+        return "(" + value->string() + ")";
     }
 
     Assign::Assign(const SourceLocation location, Identifier* variable, Token* value) :
@@ -371,8 +403,30 @@ namespace Parser
         visitor->transform(this);
     }
 
+    std::string Assign::string() const
+    {
+        return variable->string() + " = " + value->string();
+    }
+
     Call::Call(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Token(location), arguments(arguments), topLevel(topLevel) {}
+
+    std::string Call::string() const
+    {
+        std::string result = arguments->name + '(';
+
+        if (!arguments->arguments.empty())
+        {
+            result += arguments->arguments[0]->string();
+
+            for (unsigned int i = 1; i < arguments->arguments.size(); i++)
+            {
+                result += ", " + arguments->arguments[i]->string();
+            }
+        }
+
+        return result + ')';
+    }
 
     Time::Time(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
@@ -670,16 +724,21 @@ namespace Parser
         visitor->transform(this);
     }
 
-    CallAlias::CallAlias(const SourceLocation location, Token* a, Token* b) :
-        Token(location), a(a), b(b) {}
+    CallAlias::CallAlias(const SourceLocation location, Token* a, Token* b, const std::string op) :
+        Token(location), a(a), b(b), op(op) {}
 
     void CallAlias::resolveTypes(TypeResolver* visitor)
     {
         visitor->resolveTypes(this);
     }
 
+    std::string CallAlias::string() const
+    {
+        return a->string() + " " + op + " " + b->string();
+    }
+
     AddAlias::AddAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, "+")
     {
         type = new Type(BasicType::Number);
     }
@@ -690,7 +749,7 @@ namespace Parser
     }
 
     SubtractAlias::SubtractAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, "-")
     {
         type = new Type(BasicType::Number);
     }
@@ -701,7 +760,7 @@ namespace Parser
     }
 
     MultiplyAlias::MultiplyAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, "*")
     {
         type = new Type(BasicType::Number);
     }
@@ -712,7 +771,7 @@ namespace Parser
     }
 
     DivideAlias::DivideAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, "/")
     {
         type = new Type(BasicType::Number);
     }
@@ -723,7 +782,7 @@ namespace Parser
     }
 
     PowerAlias::PowerAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, "^")
     {
         type = new Type(BasicType::Number);
     }
@@ -734,7 +793,7 @@ namespace Parser
     }
 
     EqualAlias::EqualAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, "==")
     {
         type = new Type(BasicType::Boolean);
     }
@@ -745,7 +804,7 @@ namespace Parser
     }
 
     LessAlias::LessAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, "<")
     {
         type = new Type(BasicType::Boolean);
     }
@@ -756,7 +815,7 @@ namespace Parser
     }
 
     GreaterAlias::GreaterAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, ">")
     {
         type = new Type(BasicType::Boolean);
     }
@@ -767,7 +826,7 @@ namespace Parser
     }
 
     LessEqualAlias::LessEqualAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, "<=")
     {
         type = new Type(BasicType::Boolean);
     }
@@ -778,7 +837,7 @@ namespace Parser
     }
 
     GreaterEqualAlias::GreaterEqualAlias(const SourceLocation location, Token* a, Token* b) :
-        CallAlias(location, a, b)
+        CallAlias(location, a, b, ">=")
     {
         type = new Type(BasicType::Boolean);
     }
@@ -806,6 +865,35 @@ namespace Parser
         visitor->transform(this);
     }
 
+    std::string Define::string() const
+    {
+        std::string result = name + '(';
+
+        if (!inputs.empty())
+        {
+            result += inputs[0]->string();
+
+            for (unsigned int i = 1; i < inputs.size(); i++)
+            {
+                result += ", " + inputs[i]->string();
+            }
+        }
+
+        result += ") = {";
+
+        if (!instructions.empty())
+        {
+            result += '\n' + instructions[0]->string();
+
+            for (unsigned int i = 1; i < instructions.size(); i++)
+            {
+                result += '\n' + instructions[i]->string();
+            }
+        }
+
+        return result + "\n}";
+    }
+
     Scope::Scope(const std::string name, const std::vector<Identifier*>& inputs) :
         name(name)
     {
@@ -829,6 +917,18 @@ namespace Parser
     void Program::transform(BytecodeTransformer* visitor) const
     {
         visitor->transform(this);
+    }
+
+    std::string Program::string() const
+    {
+        std::string result;
+
+        for (const Token* instruction : instructions)
+        {
+            result += instruction->string() + '\n';
+        }
+
+        return result;
     }
 
     Include::Include(const SourceLocation location, Program* program) :
