@@ -178,6 +178,6 @@ void Sample::prepareForEffects(const unsigned int bufferLength)
             effectBuffer[i + 1] = value2 * (panValue + 1) / 2;
         }
 
-        index = fmod(index + resource->getResource()->channels * (double)resource->getResource()->sampleRate / utils->sampleRate, resource->getResource()->length);
+        index = fmod(index + (double)resource->getResource()->sampleRate / utils->sampleRate, resource->getResource()->length);
     }
 }
