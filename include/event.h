@@ -20,7 +20,7 @@ protected:
     ValueObject* repeats;
     ValueObject* interval;
 
-    double delayTime;
+    double next;
 
     unsigned int times;
 

@@ -181,7 +181,7 @@ void Machine::execute(unsigned int address, const double startTime)
     {
         if (address >= programLength)
         {
-            return throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
+            throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
         }
 
         switch (program[address])
@@ -437,7 +437,7 @@ void Machine::execute(unsigned int address, const double startTime)
                     }
 
                     default:
-                        return throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
+                        throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
 
                 }
 
@@ -454,7 +454,7 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
 
             default:
-                return throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
+                throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
 
         }
     }

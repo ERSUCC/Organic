@@ -5,8 +5,6 @@ Event::Event(const std::function<void(double)> action, ValueObject* delay, Value
 
 void Event::update()
 {
-    const double next = repeatTime + delayTime + interval->getValue();
-
     if (utils->time >= next)
     {
         action(next);
@@ -29,12 +27,12 @@ void Event::init()
     repeats->start(startTime);
     interval->start(startTime);
 
-    delayTime = delay->getValue();
+    next = repeatTime + delay->getValue();
 
     times = 0;
 }
 
 void Event::reinit()
 {
-    delayTime = 0;
+    next = repeatTime + interval->getValue();
 }

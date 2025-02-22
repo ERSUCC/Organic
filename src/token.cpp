@@ -1173,6 +1173,7 @@ namespace Parser
             }
 
             token->function = function;
+            token->type = function->type;
         }
 
         else if (checkRecursive(token->arguments->name))
