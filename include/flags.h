@@ -1,6 +1,8 @@
 #pragma once
 
+#include <exception>
 #include <queue>
+#include <optional>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -10,9 +12,10 @@
 
 struct ProgramOptions
 {
-    double time = 0;
-    Path* exportPath = nullptr;
-    bool mono = false;
+    std::optional<double> time;
+    std::optional<Path*> exportPath;
+    std::optional<bool> mono;
+    std::optional<unsigned int> seed;
 };
 
 struct FlagParser
@@ -25,7 +28,5 @@ private:
     std::string nextOption(const std::string previous);
 
     std::queue<std::string> flags;
-
-    std::unordered_set<std::string> setFlags;
 
 };

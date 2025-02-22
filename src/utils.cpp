@@ -1,19 +1,5 @@
 #include "../include/utils.h"
 
-Utils::Utils()
-{
-    const unsigned int i = 1;
-
-    if (*reinterpret_cast<const unsigned char*>(&i) == 1)
-    {
-        littleEndian = true;
-    }
-
-    e = exp(1);
-
-    rng = std::mt19937(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-}
-
 Utils* Utils::get()
 {
     static Utils* instance;
@@ -34,6 +20,25 @@ void Utils::parseWarning(const std::string message, const SourceLocation& locati
 void Utils::includeWarning(const std::string message, const SourceLocation& location)
 {
     std::cout << "Include warning in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
+}
+
+void Utils::setSeed(unsigned int seed)
+{
+    rng = std::mt19937(seed);
+}
+
+Utils::Utils()
+{
+    const unsigned int i = 1;
+
+    if (*reinterpret_cast<const unsigned char*>(&i) == 1)
+    {
+        littleEndian = true;
+    }
+
+    e = exp(1);
+
+    rng = std::mt19937(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 }
 
 OrganicException::OrganicException(const std::string message) :

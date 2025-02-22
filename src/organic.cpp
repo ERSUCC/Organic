@@ -5,6 +5,11 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
 {
     utils = Utils::get();
 
+    if (options.seed)
+    {
+        utils->setSeed(options.seed.value());
+    }
+
     const Path* bytecodePath = Path::beside(path->stem() + ".obc", path);
 
     std::ofstream stream(bytecodePath->string(), std::ios::binary);
@@ -84,7 +89,7 @@ void Organic::startPlayback()
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
 
-    while (utils->time < options.time)
+    while (!options.time || utils->time < options.time.value())
     {
         utils->time = (clock.now() - start).count() / 1000000.0;
     }
@@ -102,9 +107,9 @@ void Organic::startPlayback()
 
 void Organic::startExport()
 {
-    const unsigned int steps = (options.time / 1000) * utils->sampleRate;
+    const unsigned int steps = (options.time.value() / 1000) * utils->sampleRate;
 
-    SndfileHandle* file = new SndfileHandle(options.exportPath->string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_32, utils->channels, utils->sampleRate);
+    SndfileHandle* file = new SndfileHandle(options.exportPath.value()->string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_32, utils->channels, utils->sampleRate);
 
     double* samples = (double*)malloc(sizeof(double) * steps * utils->channels);
 

@@ -25,6 +25,8 @@ struct Utils
     static void parseWarning(const std::string message, const SourceLocation& location);
     static void includeWarning(const std::string message, const SourceLocation& location);
 
+    void setSeed(unsigned int seed);
+
     bool littleEndian = false;
 
     unsigned int sampleRate = 44100;

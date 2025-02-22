@@ -12,22 +12,18 @@ ProgramOptions FlagParser::getOptions()
 {
     ProgramOptions options;
 
-    Utils* utils = Utils::get();
-
-    options.time = utils->infinity;
-
     while (!flags.empty())
     {
         std::string flag = nextOption("");
 
-        if (setFlags.count(flag))
-        {
-            throw OrganicArgumentException("The option \"time\" was already set.");
-        }
-
         if (flag == "--time")
         {
-            std::string next = nextOption(flag);
+            if (options.time)
+            {
+                throw OrganicArgumentException("The option \"time\" was already set.");
+            }
+
+            const std::string next = nextOption(flag);
 
             size_t end = 0;
 
@@ -51,6 +47,11 @@ ProgramOptions FlagParser::getOptions()
 
         else if (flag == "--export")
         {
+            if (options.exportPath)
+            {
+                throw OrganicArgumentException("The option \"export\" was already set.");
+            }
+
             Path* path = Path::relative(nextOption(flag));
 
             if (path->parent()->exists())
@@ -63,7 +64,49 @@ ProgramOptions FlagParser::getOptions()
 
         else if (flag == "--mono")
         {
+            if (options.mono)
+            {
+                throw OrganicArgumentException("The option \"mono\" was already set.");
+            }
+
             options.mono = true;
+        }
+
+        else if (flag == "--seed")
+        {
+            if (options.seed)
+            {
+                if (options.seed)
+                {
+                    throw OrganicArgumentException("The option \"seed\" was already set.");
+                }
+            }
+
+            const std::string next = nextOption(flag);
+
+            if (next[0] == '-')
+            {
+                throw OrganicArgumentException("Random seed must be greater than or equal to zero.");
+            }
+
+            size_t end = 0;
+
+            try
+            {
+                options.seed = std::stoul(next, &end);
+            }
+
+            catch (const std::out_of_range& error)
+            {
+                throw OrganicArgumentException("Random seed must be in the range of a 32-bit unsigned integer.");
+            }
+
+            catch (const std::invalid_argument& error) {}
+
+            if (end < next.size())
+            {
+                throw OrganicArgumentException("Expected unsigned integer, received \"" + next + "\".");
+            }
         }
 
         else
@@ -72,7 +115,7 @@ ProgramOptions FlagParser::getOptions()
         }
     }
 
-    if (options.exportPath && options.time == utils->infinity)
+    if (options.exportPath && !options.time)
     {
         throw OrganicArgumentException("Cannot export without a time limit.");
     }
