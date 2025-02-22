@@ -327,6 +327,21 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
+                    case BytecodeConstants::ALL:
+                        stack.push(new All(inputs[0]));
+
+                        break;
+
+                    case BytecodeConstants::ANY:
+                        stack.push(new Any(inputs[0]));
+
+                        break;
+
+                    case BytecodeConstants::NONE:
+                        stack.push(new None(inputs[0]));
+
+                        break;
+
                     case BytecodeConstants::SINE:
                         stack.push(new Sine(inputs[0], inputs[1], inputs[2], inputs[3]));
 

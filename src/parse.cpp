@@ -692,6 +692,21 @@ namespace Parser
             return new If(location, argumentList, topLevel);
         }
 
+        if (str->str == "all")
+        {
+            return new All(location, argumentList, topLevel);
+        }
+
+        if (str->str == "any")
+        {
+            return new Any(location, argumentList, topLevel);
+        }
+
+        if (str->str == "none")
+        {
+            return new None(location, argumentList, topLevel);
+        }
+
         if (str->str == "sine")
         {
             return new Sine(location, argumentList, topLevel);

@@ -31,6 +31,9 @@ struct BytecodeConstants
     static constexpr unsigned char GREATER = 0x17;
     static constexpr unsigned char LESSEQUAL = 0x18;
     static constexpr unsigned char GREATEREQUAL = 0x19;
+    static constexpr unsigned char ALL = 0x1a;
+    static constexpr unsigned char ANY = 0x1b;
+    static constexpr unsigned char NONE = 0x1c;
 
     static constexpr unsigned char SINE = 0x30;
     static constexpr unsigned char SQUARE = 0x31;

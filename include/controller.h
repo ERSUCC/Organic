@@ -113,6 +113,48 @@ protected:
 
 };
 
+struct All : public ValueObject
+{
+    All(ValueObject* values);
+
+    double getValue() override;
+
+protected:
+    void init();
+
+private:
+    ValueObject* values;
+
+};
+
+struct Any : public ValueObject
+{
+    Any(ValueObject* values);
+
+    double getValue() override;
+
+protected:
+    void init();
+
+private:
+    ValueObject* values;
+
+};
+
+struct None : public ValueObject
+{
+    None(ValueObject* values);
+
+    double getValue() override;
+
+protected:
+    void init();
+
+private:
+    ValueObject* values;
+
+};
+
 struct Sequence : public ValueObject
 {
     enum OrderEnum

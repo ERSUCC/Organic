@@ -129,6 +129,69 @@ double ValueGreaterEqual::getValueInternal()
     return 0;
 }
 
+All::All(ValueObject* values) :
+    values(values) {}
+
+double All::getValue()
+{
+    for (ValueObject* object : values->getList()->objects)
+    {
+        if (object->getValue() == 0)
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+void All::init()
+{
+    values->start(startTime);
+}
+
+Any::Any(ValueObject* values) :
+    values(values) {}
+
+double Any::getValue()
+{
+    for (ValueObject* object : values->getList()->objects)
+    {
+        if (object->getValue() != 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+void Any::init()
+{
+    values->start(startTime);
+}
+
+None::None(ValueObject* values) :
+    values(values) {}
+
+double None::getValue()
+{
+    for (ValueObject* object : values->getList()->objects)
+    {
+        if (object->getValue() != 0)
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+void None::init()
+{
+    values->start(startTime);
+}
+
 Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
     controllers(controllers), order(order) {}
 

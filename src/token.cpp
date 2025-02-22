@@ -580,6 +580,54 @@ namespace Parser
         visitor->transform(this);
     }
 
+    All::All(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
+        Call(location, arguments, topLevel)
+    {
+        type = new Type(BasicType::Boolean);
+    }
+
+    void All::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void All::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    Any::Any(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
+        Call(location, arguments, topLevel)
+    {
+        type = new Type(BasicType::Boolean);
+    }
+
+    void Any::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Any::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    None::None(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
+        Call(location, arguments, topLevel)
+    {
+        type = new Type(BasicType::Boolean);
+    }
+
+    void None::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void None::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
     Sine::Sine(const SourceLocation location, const ArgumentList* arguments, const bool topLevel) :
         Call(location, arguments, topLevel)
     {
@@ -1093,6 +1141,21 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "condition", new Type(BasicType::Boolean));
     }
 
+    void TypeResolver::resolveTypes(All* token)
+    {
+        resolveArgumentTypes(token->arguments, "values", new Type(BasicType::List, new Type(BasicType::Boolean)));
+    }
+
+    void TypeResolver::resolveTypes(Any* token)
+    {
+        resolveArgumentTypes(token->arguments, "values", new Type(BasicType::List, new Type(BasicType::Boolean)));
+    }
+
+    void TypeResolver::resolveTypes(None* token)
+    {
+        resolveArgumentTypes(token->arguments, "values", new Type(BasicType::List, new Type(BasicType::Boolean)));
+    }
+
     void TypeResolver::resolveTypes(Sine* token)
     {
         resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
@@ -1589,6 +1652,33 @@ namespace Parser
         checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::IF, 3));
+    }
+
+    void BytecodeTransformer::transform(const All* token)
+    {
+        transformArgument(token->arguments, "values");
+
+        checkArguments(token->arguments);
+
+        addInstruction(new CallNative(BytecodeConstants::ALL, 1));
+    }
+
+    void BytecodeTransformer::transform(const Any* token)
+    {
+        transformArgument(token->arguments, "values");
+
+        checkArguments(token->arguments);
+
+        addInstruction(new CallNative(BytecodeConstants::ANY, 1));
+    }
+
+    void BytecodeTransformer::transform(const None* token)
+    {
+        transformArgument(token->arguments, "values");
+
+        checkArguments(token->arguments);
+
+        addInstruction(new CallNative(BytecodeConstants::NONE, 1));
     }
 
     void BytecodeTransformer::transform(const Sine* token)
