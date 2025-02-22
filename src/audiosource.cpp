@@ -159,12 +159,12 @@ void Sample::prepareForEffects(const unsigned int bufferLength)
     // improve resource/sample acquisition
     for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
-        const double value1 = volumeValue * resource->getResource()->samples[(unsigned int)floor(index) * resource->getResource()->channels];
+        const double value1 = volumeValue * resource->getResource()->samples[(unsigned int)floor(index)];
         double value2 = value1;
 
         if (resource->getResource()->channels == 2)
         {
-            value2 = volumeValue * resource->getResource()->samples[(unsigned int)floor(index) * resource->getResource()->channels + 1];
+            value2 = volumeValue * resource->getResource()->samples[(unsigned int)floor(index) + 1];
         }
 
         if (utils->channels == 1)
@@ -178,6 +178,11 @@ void Sample::prepareForEffects(const unsigned int bufferLength)
             effectBuffer[i + 1] = value2 * (panValue + 1) / 2;
         }
 
-        index = fmod(index + (double)resource->getResource()->sampleRate / utils->sampleRate, resource->getResource()->length);
+        index += resource->getResource()->channels * (double)resource->getResource()->sampleRate / utils->sampleRate;
+
+        if (index >= resource->getResource()->length)
+        {
+            index = fmod(index, resource->getResource()->length);
+        }
     }
 }
