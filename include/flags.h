@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "path.h"
@@ -10,12 +11,8 @@
 struct ProgramOptions
 {
     double time = 0;
-    Path* exportPath;
+    Path* exportPath = nullptr;
     bool mono = false;
-
-    bool setTime = false;
-    bool setExport = false;
-    bool setMono = false;
 };
 
 struct FlagParser
@@ -28,5 +25,7 @@ private:
     std::string nextOption(const std::string previous);
 
     std::queue<std::string> flags;
+
+    std::unordered_set<std::string> setFlags;
 
 };

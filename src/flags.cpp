@@ -12,46 +12,45 @@ ProgramOptions FlagParser::getOptions()
 {
     ProgramOptions options;
 
+    Utils* utils = Utils::get();
+
+    options.time = utils->infinity;
+
     while (!flags.empty())
     {
         std::string flag = nextOption("");
 
+        if (setFlags.count(flag))
+        {
+            throw OrganicArgumentException("The option \"time\" was already set.");
+        }
+
         if (flag == "--time")
         {
-            if (options.setTime)
-            {
-                throw OrganicArgumentException("The option \"time\" was already set.");
-            }
-
             std::string next = nextOption(flag);
 
-            size_t end;
+            size_t end = 0;
 
             try
             {
                 options.time = std::stod(next, &end);
             }
 
-            catch (const std::invalid_argument& error)
-            {
-                throw OrganicArgumentException("Expected number, received \"" + next + "\".");
-            }
+            catch (const std::invalid_argument& error) {}
 
             if (end < next.size())
             {
                 throw OrganicArgumentException("Expected number, received \"" + next + "\".");
             }
 
-            options.setTime = true;
+            if (options.time <= 0)
+            {
+                throw OrganicArgumentException("Time limit must be greater than zero.");
+            }
         }
 
         else if (flag == "--export")
         {
-            if (options.setExport)
-            {
-                throw OrganicArgumentException("The option \"export\" was already set.");
-            }
-
             Path* path = Path::relative(nextOption(flag));
 
             if (path->parent()->exists())
@@ -60,18 +59,11 @@ ProgramOptions FlagParser::getOptions()
             }
 
             options.exportPath = path;
-            options.setExport = true;
         }
 
         else if (flag == "--mono")
         {
-            if (options.setMono)
-            {
-                throw OrganicArgumentException("The option \"mono\" was already set.");
-            }
-
             options.mono = true;
-            options.setMono = true;
         }
 
         else
@@ -80,7 +72,7 @@ ProgramOptions FlagParser::getOptions()
         }
     }
 
-    if (options.setExport && !options.setTime)
+    if (options.exportPath && options.time == utils->infinity)
     {
         throw OrganicArgumentException("Cannot export without a time limit.");
     }

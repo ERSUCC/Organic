@@ -33,7 +33,7 @@ void Organic::start()
         utils->channels = 1;
     }
 
-    if (options.setExport)
+    if (options.exportPath)
     {
         startExport();
     }
@@ -84,7 +84,7 @@ void Organic::startPlayback()
     std::chrono::high_resolution_clock clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
 
-    while (!options.setTime || utils->time < options.time)
+    while (utils->time < options.time)
     {
         utils->time = (clock.now() - start).count() / 1000000.0;
     }
