@@ -1300,7 +1300,7 @@ namespace Parser
 
         if (token->instructions.empty())
         {
-            // should this be a warning?
+            Utils::parseWarning("This function contains no instructions.", token->location);
 
             token->type = new Type(BasicType::None);
         }
