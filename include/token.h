@@ -272,6 +272,8 @@ namespace Parser
 
         Token* get(const std::string name) const;
 
+        void check() const;
+
         const std::vector<Argument*> arguments;
 
         const std::string name;
@@ -782,7 +784,6 @@ namespace Parser
 
     private:
         void transformArgument(const ArgumentList* arguments, const std::string name);
-        void checkArguments(const ArgumentList* arguments) const;
 
         void addInstruction(const BytecodeInstruction* instruction);
 

@@ -357,6 +357,17 @@ namespace Parser
         return nullptr;
     }
 
+    void ArgumentList::check() const
+    {
+        for (const Argument* argument : arguments)
+        {
+            if (!argument->used)
+            {
+                throw OrganicParseException("Invalid input name \"" + argument->name + "\" for function \"" + name + "\".", argument->location);
+            }
+        }
+    }
+
     List::List(const SourceLocation location, const std::vector<Token*> values) :
         Token(location), values(values) {}
 
@@ -1599,195 +1610,197 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Time* token)
     {
-        checkArguments(token->arguments);
+        token->arguments->check();
 
         addInstruction(new CallNative(BytecodeConstants::TIME, 0));
     }
 
     void BytecodeTransformer::transform(const Hold* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "length");
         transformArgument(token->arguments, "value");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::HOLD, 2));
     }
 
     void BytecodeTransformer::transform(const LFO* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "length");
         transformArgument(token->arguments, "to");
         transformArgument(token->arguments, "from");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::LFO, 3));
     }
 
     void BytecodeTransformer::transform(const Sweep* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "length");
         transformArgument(token->arguments, "to");
         transformArgument(token->arguments, "from");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::SWEEP, 3));
     }
 
     void BytecodeTransformer::transform(const Sequence* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "order");
         transformArgument(token->arguments, "values");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::SEQUENCE, 2));
     }
 
     void BytecodeTransformer::transform(const Repeat* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "repeats");
         transformArgument(token->arguments, "value");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::REPEAT, 2));
     }
 
     void BytecodeTransformer::transform(const Random* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "type");
         transformArgument(token->arguments, "length");
         transformArgument(token->arguments, "to");
         transformArgument(token->arguments, "from");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::RANDOM, 4));
     }
 
     void BytecodeTransformer::transform(const Limit* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "max");
         transformArgument(token->arguments, "min");
         transformArgument(token->arguments, "value");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::LIMIT, 3));
     }
 
     void BytecodeTransformer::transform(const Trigger* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "value");
         transformArgument(token->arguments, "condition");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::TRIGGER, 2));
     }
 
     void BytecodeTransformer::transform(const If* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "false");
         transformArgument(token->arguments, "true");
         transformArgument(token->arguments, "condition");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::IF, 3));
     }
 
     void BytecodeTransformer::transform(const All* token)
     {
-        transformArgument(token->arguments, "values");
+        token->arguments->check();
 
-        checkArguments(token->arguments);
+        transformArgument(token->arguments, "values");
 
         addInstruction(new CallNative(BytecodeConstants::ALL, 1));
     }
 
     void BytecodeTransformer::transform(const Any* token)
     {
-        transformArgument(token->arguments, "values");
+        token->arguments->check();
 
-        checkArguments(token->arguments);
+        transformArgument(token->arguments, "values");
 
         addInstruction(new CallNative(BytecodeConstants::ANY, 1));
     }
 
     void BytecodeTransformer::transform(const None* token)
     {
-        transformArgument(token->arguments, "values");
+        token->arguments->check();
 
-        checkArguments(token->arguments);
+        transformArgument(token->arguments, "values");
 
         addInstruction(new CallNative(BytecodeConstants::NONE, 1));
     }
 
     void BytecodeTransformer::transform(const Sine* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "frequency");
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
         transformArgument(token->arguments, "volume");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::SINE, 4));
     }
 
     void BytecodeTransformer::transform(const Square* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "frequency");
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
         transformArgument(token->arguments, "volume");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::SQUARE, 4));
     }
 
     void BytecodeTransformer::transform(const Triangle* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "frequency");
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
         transformArgument(token->arguments, "volume");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::TRIANGLE, 4));
     }
 
     void BytecodeTransformer::transform(const Saw* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "frequency");
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
         transformArgument(token->arguments, "volume");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::SAW, 4));
     }
 
     void BytecodeTransformer::transform(const Noise* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
         transformArgument(token->arguments, "volume");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::NOISE, 3));
     }
 
     void BytecodeTransformer::transform(const Sample* token)
     {
+        token->arguments->check();
+
         const String* str = dynamic_cast<const String*>(token->arguments->get("file"));
 
         const Path* path = Path::beside(str->str, sourcePath);
@@ -1815,8 +1828,6 @@ namespace Parser
         transformArgument(token->arguments, "pan");
         transformArgument(token->arguments, "volume");
 
-        checkArguments(token->arguments);
-
         addInstruction(new CallNative(BytecodeConstants::SAMPLE, 4));
     }
 
@@ -1829,17 +1840,19 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Delay* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "feedback");
         transformArgument(token->arguments, "delay");
         transformArgument(token->arguments, "mix");
-
-        checkArguments(token->arguments);
 
         addInstruction(new CallNative(BytecodeConstants::DELAY, 3));
     }
 
     void BytecodeTransformer::transform(const Perform* token)
     {
+        token->arguments->check();
+
         transformArgument(token->arguments, "interval");
         transformArgument(token->arguments, "repeats");
         transformArgument(token->arguments, "delay");
@@ -1849,8 +1862,6 @@ namespace Parser
         blocks.push(block);
 
         transformArgument(token->arguments, "function");
-
-        checkArguments(token->arguments);
 
         blocks.pop();
 
@@ -1862,7 +1873,7 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Include* token)
     {
-        checkArguments(token->arguments);
+        token->arguments->check();
 
         if (token->program)
         {
@@ -1875,6 +1886,8 @@ namespace Parser
 
     void BytecodeTransformer::transform(const CallUser* token)
     {
+        token->arguments->check();
+
         for (const Identifier* input : token->function->inputs)
         {
             transformArgument(token->arguments, input->str);
@@ -1886,8 +1899,6 @@ namespace Parser
 
             addInstruction(new SetVariable(input->id));
         }
-
-        checkArguments(token->arguments);
 
         addInstruction(new ::CallUser(token->function->block, token->function->inputs.size()));
     }
@@ -2017,17 +2028,6 @@ namespace Parser
         }
 
         addInstruction(new StackPushDefault());
-    }
-
-    void BytecodeTransformer::checkArguments(const ArgumentList* arguments) const
-    {
-        for (const Argument* argument : arguments->arguments)
-        {
-            if (!argument->used)
-            {
-                throw OrganicParseException("Invalid input name \"" + argument->name + "\" for function \"" + arguments->name + "\".", argument->location);
-            }
-        }
     }
 
     void BytecodeTransformer::addInstruction(const BytecodeInstruction* instruction)
