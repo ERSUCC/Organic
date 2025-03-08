@@ -12,7 +12,7 @@ namespace Parser
 {
     struct Parser
     {
-        Parser(const Path* path, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
+        Parser(const Path* path);
 
         Program* parse();
 
@@ -31,7 +31,7 @@ namespace Parser
         Token* parseInstruction(unsigned int pos) const;
         Define* parseDefine(unsigned int pos) const;
         Assign* parseAssign(unsigned int pos) const;
-        Token* parseCall(unsigned int pos, const bool topLevel) const;
+        Token* parseCall(unsigned int pos, const bool top) const;
         Argument* parseArgument(unsigned int pos) const;
         Token* parseExpression(unsigned int pos) const;
         List* parseList(unsigned int pos) const;
@@ -42,8 +42,6 @@ namespace Parser
 
         const Path* path;
 
-        std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths;
-
         std::string code;
 
         std::vector<BasicToken*> tokens;
@@ -52,5 +50,10 @@ namespace Parser
         unsigned int line = 1;
         unsigned int character = 1;
 
+    };
+
+    struct ParserCreator : public ParserInterface
+    {
+        Program* parse(const Path* path) override;
     };
 }

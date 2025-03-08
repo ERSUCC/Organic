@@ -10,6 +10,10 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
         utils->setSeed(options.seed.value());
     }
 
+    Parser::Program* program = (new Parser::Parser(path))->parse();
+
+    program->resolveTypes(new Parser::TypeResolver(path, new Parser::ParserCreator()));
+
     const Path* bytecodePath = Path::beside(path->stem() + ".obc", path);
 
     std::ofstream stream(bytecodePath->string(), std::ios::binary);
@@ -19,11 +23,6 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
         throw OrganicFileException("Error creating intermediate file \"" + bytecodePath->string() + "\".");
     }
 
-    std::unordered_set<const Path*, Path::Hash, Path::Equals> includes = { path };
-
-    Parser::Program* program = (new Parser::Parser(path, includes))->parse();
-
-    program->resolveTypes(new Parser::TypeResolver(path));
     program->transform(new Parser::BytecodeTransformer(path, stream));
 
     stream.close();

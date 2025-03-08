@@ -2,8 +2,8 @@
 
 namespace Parser
 {
-    Parser::Parser(const Path* path, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
-        path(path), includedPaths(includedPaths)
+    Parser::Parser(const Path* path) :
+        path(path)
     {
         if (!path->readToString(code))
         {
@@ -18,6 +18,15 @@ namespace Parser
         current = 0;
 
         std::vector<Token*> instructions;
+
+        while (tokenIs<Identifier>(current) && tokenIs<OpenParenthesis>(current + 1) && getToken(current)->str == "include")
+        {
+            Token* token = parseCall(current, true);
+
+            instructions.push_back(token);
+
+            current = token->location.end;
+        }
 
         while (current < tokens.size())
         {
@@ -425,11 +434,6 @@ namespace Parser
 
     Token* Parser::parseInstruction(unsigned int pos) const
     {
-        if (!tokenIs<Identifier>(pos))
-        {
-            tokenError(getToken(pos), "variable or function name");
-        }
-
         if (tokenIs<Equals>(pos + 1))
         {
             return parseAssign(pos);
@@ -437,41 +441,43 @@ namespace Parser
 
         if (tokenIs<OpenParenthesis>(pos + 1))
         {
-            unsigned int start = pos;
-
+            unsigned int current = pos;
             unsigned int depth = 0;
 
             do
             {
-                pos++;
+                current++;
 
-                if (tokenIs<OpenParenthesis>(pos))
+                if (tokenIs<OpenParenthesis>(current))
                 {
                     depth++;
                 }
 
-                else if (tokenIs<CloseParenthesis>(pos))
+                else if (tokenIs<CloseParenthesis>(current))
                 {
                     depth--;
                 }
-            } while (depth > 0 && pos < tokens.size());
+            } while (depth > 0 && current < tokens.size());
 
-            if (tokenIs<Equals>(pos + 1))
+            if (tokenIs<Equals>(current + 1))
             {
-                if (tokenIs<OpenCurlyBracket>(pos + 2))
+                if (tokenIs<OpenCurlyBracket>(current + 2))
                 {
-                    return parseDefine(start);
+                    return parseDefine(pos);
                 }
 
-                tokenError(getToken(pos + 2), "\"{\"");
+                tokenError(getToken(current + 2), "\"{\"");
             }
-
-            return parseCall(start, true);
         }
 
-        tokenError(getToken(pos + 1), "\"=\" or \"(\"");
+        Token* expression = parseExpression(pos);
 
-        return nullptr;
+        if (AudioSource* audioSource = dynamic_cast<AudioSource*>(expression))
+        {
+            return new Play(audioSource->location, audioSource);
+        }
+
+        return expression;
     }
 
     Define* Parser::parseDefine(unsigned int pos) const
@@ -522,12 +528,7 @@ namespace Parser
             pos = instruction->location.end;
         }
 
-        if (name->str == "sine" ||
-            name->str == "square" ||
-            name->str == "triangle" ||
-            name->str == "saw" ||
-            name->str == "noise" ||
-            name->str == "sample" ||
+        if (name->str == "time" ||
             name->str == "hold" ||
             name->str == "lfo" ||
             name->str == "sweep" ||
@@ -537,9 +538,18 @@ namespace Parser
             name->str == "limit" ||
             name->str == "trigger" ||
             name->str == "if" ||
+            name->str == "all" ||
+            name->str == "any" ||
+            name->str == "none" ||
+            name->str == "sine" ||
+            name->str == "square" ||
+            name->str == "triangle" ||
+            name->str == "saw" ||
+            name->str == "noise" ||
+            name->str == "sample" ||
             name->str == "delay" ||
-            name->str == "play" ||
-            name->str == "perform")
+            name->str == "perform" ||
+            name->str == "include")
         {
             throw OrganicParseException("A function already exists with the name \"" + name->str + "\".", name->location);
         }
@@ -549,6 +559,11 @@ namespace Parser
 
     Assign* Parser::parseAssign(unsigned int pos) const
     {
+        if (!tokenIs<Identifier>(pos))
+        {
+            tokenError(getToken(pos), "variable name");
+        }
+
         Identifier* variable = getToken<Identifier>(pos);
 
         Token* value = parseExpression(pos + 2);
@@ -556,7 +571,7 @@ namespace Parser
         return new Assign(SourceLocation(path, variable->location.line, variable->location.character, pos, value->location.end), variable, value);
     }
 
-    Token* Parser::parseCall(unsigned int pos, const bool topLevel) const
+    Token* Parser::parseCall(unsigned int pos, const bool top) const
     {
         const unsigned int start = pos;
 
@@ -585,169 +600,126 @@ namespace Parser
 
         const BasicToken* str = getToken(start);
 
-        if (str->str == "include")
-        {
-            if (!topLevel)
-            {
-                throw OrganicParseException("Cannot call function \"include\" here.", str->location);
-            }
-
-            if (arguments.empty())
-            {
-                Utils::includeWarning("This include does not specify a source file, it will have no effect.", str->location);
-
-                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), nullptr);
-            }
-
-            if (arguments[0]->name != "file")
-            {
-                throw OrganicParseException("Invalid input name \"" + arguments[0]->name + "\" for function \"include\".", arguments[0]->location);
-            }
-
-            if (arguments.size() > 1)
-            {
-                throw OrganicParseException("Invalid input name \"" + arguments[1]->name + "\" for function \"include\".", arguments[1]->location);
-            }
-
-            if (const String* file = dynamic_cast<const String*>(arguments[0]->value))
-            {
-                const Path* sourcePath = Path::beside(file->str, path);
-
-                if (!sourcePath->exists())
-                {
-                    throw OrganicIncludeException("Source file \"" + sourcePath->string() + "\" does not exist.", str->location);
-                }
-
-                if (!sourcePath->isFile())
-                {
-                    throw OrganicIncludeException("\"" + sourcePath->string() + "\" is not a file.", str->location);
-                }
-
-                if (includedPaths.count(sourcePath))
-                {
-                    Utils::includeWarning("Source file \"" + sourcePath->string() + "\" has already been included, this include will be ignored.", file->location);
-
-                    return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), new Program(SourceLocation(sourcePath, 0, 0, 0, 0), {}));
-                }
-
-                includedPaths.insert(sourcePath);
-
-                return new Include(SourceLocation(path, str->location.line, str->location.character, start, pos + 1), (new Parser(sourcePath, includedPaths))->parse());
-            }
-
-            throw OrganicParseException("Expected \"string\".", arguments[0]->value->location);
-        }
-
         const SourceLocation location(path, str->location.line, str->location.character, start, pos + 1);
 
         const ArgumentList* argumentList = new ArgumentList(arguments, str->str);
 
         if (str->str == "time")
         {
-            return new Time(location, argumentList, topLevel);
+            return new Time(location, argumentList);
         }
 
         if (str->str == "hold")
         {
-            return new Hold(location, argumentList, topLevel);
+            return new Hold(location, argumentList);
         }
 
         if (str->str == "lfo")
         {
-            return new LFO(location, argumentList, topLevel);
+            return new LFO(location, argumentList);
         }
 
         if (str->str == "sweep")
         {
-            return new Sweep(location, argumentList, topLevel);
+            return new Sweep(location, argumentList);
         }
 
         if (str->str == "sequence")
         {
-            return new Sequence(location, argumentList, topLevel);
+            return new Sequence(location, argumentList);
         }
 
         if (str->str == "repeat")
         {
-            return new Repeat(location, argumentList, topLevel);
+            return new Repeat(location, argumentList);
         }
 
         if (str->str == "random")
         {
-            return new Random(location, argumentList, topLevel);
+            return new Random(location, argumentList);
         }
 
         if (str->str == "limit")
         {
-            return new Limit(location, argumentList, topLevel);
+            return new Limit(location, argumentList);
         }
 
         if (str->str == "trigger")
         {
-            return new Trigger(location, argumentList, topLevel);
+            return new Trigger(location, argumentList);
         }
 
         if (str->str == "if")
         {
-            return new If(location, argumentList, topLevel);
+            return new If(location, argumentList);
         }
 
         if (str->str == "all")
         {
-            return new All(location, argumentList, topLevel);
+            return new All(location, argumentList);
         }
 
         if (str->str == "any")
         {
-            return new Any(location, argumentList, topLevel);
+            return new Any(location, argumentList);
         }
 
         if (str->str == "none")
         {
-            return new None(location, argumentList, topLevel);
+            return new None(location, argumentList);
         }
 
         if (str->str == "sine")
         {
-            return new Sine(location, argumentList, topLevel);
+            return new Sine(location, argumentList);
         }
 
         if (str->str == "square")
         {
-            return new Square(location, argumentList, topLevel);
+            return new Square(location, argumentList);
         }
 
         if (str->str == "triangle")
         {
-            return new Triangle(location, argumentList, topLevel);
+            return new Triangle(location, argumentList);
         }
 
         if (str->str == "saw")
         {
-            return new Saw(location, argumentList, topLevel);
+            return new Saw(location, argumentList);
         }
 
         if (str->str == "noise")
         {
-            return new Noise(location, argumentList, topLevel);
+            return new Noise(location, argumentList);
         }
 
         if (str->str == "sample")
         {
-            return new Sample(location, argumentList, topLevel);
+            return new Sample(location, argumentList);
         }
 
         if (str->str == "delay")
         {
-            return new Delay(location, argumentList, topLevel);
+            return new Delay(location, argumentList);
         }
 
         if (str->str == "perform")
         {
-            return new Perform(location, argumentList, topLevel);
+            return new Perform(location, argumentList);
         }
 
-        return new CallUser(location, argumentList, topLevel);
+        if (str->str == "include")
+        {
+            if (top)
+            {
+                return new Include(location, argumentList);
+            }
+
+            throw OrganicIncludeException("Includes must come before all other instructions.", location);
+        }
+
+        return new CallUser(location, argumentList);
     }
 
     Argument* Parser::parseArgument(unsigned int pos) const
@@ -1083,5 +1055,10 @@ namespace Parser
     double Parser::getFrequency(const double note) const
     {
         return 440 * pow(2, (note - 57) / 12);
+    }
+
+    Program* ParserCreator::parse(const Path* path)
+    {
+        return (new Parser(path))->parse();
     }
 }

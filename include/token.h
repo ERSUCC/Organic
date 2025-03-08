@@ -4,6 +4,7 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "bytecode.h"
@@ -269,6 +270,8 @@ namespace Parser
     {
         ArgumentList(const std::vector<Argument*>& arguments, const std::string name);
 
+        Token* get(const std::string name) const;
+
         const std::vector<Argument*> arguments;
 
         const std::string name;
@@ -314,25 +317,23 @@ namespace Parser
 
     struct Call : public Token
     {
-        Call(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Call(const SourceLocation location, const ArgumentList* arguments);
 
         std::string string() const override;
 
         const ArgumentList* arguments;
-
-        const bool topLevel;
     };
 
     struct Time : public Call
     {
-        Time(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Time(const SourceLocation location, const ArgumentList* arguments);
 
         void transform(BytecodeTransformer* visitor) const override;
     };
 
     struct Hold : public Call
     {
-        Hold(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Hold(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -340,7 +341,7 @@ namespace Parser
 
     struct LFO : public Call
     {
-        LFO(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        LFO(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -348,7 +349,7 @@ namespace Parser
 
     struct Sweep : public Call
     {
-        Sweep(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Sweep(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -356,7 +357,7 @@ namespace Parser
 
     struct Sequence : public Call
     {
-        Sequence(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Sequence(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -364,7 +365,7 @@ namespace Parser
 
     struct Repeat : public Call
     {
-        Repeat(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Repeat(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -372,7 +373,7 @@ namespace Parser
 
     struct Random : public Call
     {
-        Random(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Random(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -380,7 +381,7 @@ namespace Parser
 
     struct Limit : public Call
     {
-        Limit(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Limit(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -388,7 +389,7 @@ namespace Parser
 
     struct Trigger : public Call
     {
-        Trigger(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Trigger(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -396,7 +397,7 @@ namespace Parser
 
     struct If : public Call
     {
-        If(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        If(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -404,7 +405,7 @@ namespace Parser
 
     struct All : public Call
     {
-        All(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        All(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -412,7 +413,7 @@ namespace Parser
 
     struct Any : public Call
     {
-        Any(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Any(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -420,63 +421,78 @@ namespace Parser
 
     struct None : public Call
     {
-        None(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        None(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct Sine : public Call
+    struct AudioSource : public Call
     {
-        Sine(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        AudioSource(const SourceLocation location, const ArgumentList* arguments);
+    };
+
+    struct Sine : public AudioSource
+    {
+        Sine(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct Square : public Call
+    struct Square : public AudioSource
     {
-        Square(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Square(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct Triangle : public Call
+    struct Triangle : public AudioSource
     {
-        Triangle(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Triangle(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct Saw : public Call
+    struct Saw : public AudioSource
     {
-        Saw(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Saw(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct Noise : public Call
+    struct Noise : public AudioSource
     {
-        Noise(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Noise(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct Sample : public Call
+    struct Sample : public AudioSource
     {
-        Sample(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Sample(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Play : public Token
+    {
+        Play(const SourceLocation location, AudioSource* audioSource);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+
+        AudioSource* audioSource;
     };
 
     struct Delay : public Call
     {
-        Delay(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Delay(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -486,17 +502,29 @@ namespace Parser
 
     struct Perform : public Call
     {
-        Perform(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        Perform(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Program;
+
+    struct Include : public Call
+    {
+        Include(const SourceLocation location, const ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+
+        Program* program;
     };
 
     struct Define;
 
     struct CallUser : public Call
     {
-        CallUser(const SourceLocation location, const ArgumentList* arguments, const bool topLevel);
+        CallUser(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -616,6 +644,8 @@ namespace Parser
         std::unordered_map<std::string, Identifier*> variables;
         std::unordered_map<std::string, Identifier*> inputs;
         std::unordered_map<std::string, Define*> functions;
+
+        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths;
     };
 
     struct Program : public Token
@@ -630,21 +660,14 @@ namespace Parser
         const std::vector<Token*> instructions;
     };
 
-    struct Include : public Token
+    struct ParserInterface
     {
-        Include(const SourceLocation location, Program* program);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-
-        std::string string() const override;
-
-        Program* program;
+        virtual Program* parse(const Path* path) = 0;
     };
 
     struct TypeResolver
     {
-        TypeResolver(const Path* sourcePath);
+        TypeResolver(const Path* sourcePath, ParserInterface* parser);
 
         void resolveTypes(Identifier* token);
         void resolveTypes(List* token);
@@ -668,13 +691,14 @@ namespace Parser
         void resolveTypes(Saw* token);
         void resolveTypes(Noise* token);
         void resolveTypes(Sample* token);
+        void resolveTypes(Play* token);
         void resolveTypes(Delay* token);
         void resolveTypes(Perform* token);
+        void resolveTypes(Include* token);
         void resolveTypes(CallUser* token);
         void resolveTypes(CallAlias* token);
         void resolveTypes(Define* token);
         void resolveTypes(Program* token);
-        void resolveTypes(Include* token);
 
     private:
         void resolveArgumentTypes(const ArgumentList* arguments, const std::string name, Type* expectedType);
@@ -691,6 +715,8 @@ namespace Parser
         void checkUses() const;
 
         const Path* sourcePath;
+
+        ParserInterface* parser;
 
         std::vector<Scope*> scopes;
 
@@ -736,8 +762,10 @@ namespace Parser
         void transform(const Saw* token);
         void transform(const Noise* token);
         void transform(const Sample* token);
+        void transform(const Play* token);
         void transform(const Delay* token);
         void transform(const Perform* token);
+        void transform(const Include* token);
         void transform(const CallUser* token);
         void transform(const AddAlias* token);
         void transform(const SubtractAlias* token);
@@ -751,11 +779,9 @@ namespace Parser
         void transform(const GreaterEqualAlias* token);
         void transform(const Define* token);
         void transform(const Program* token);
-        void transform(const Include* token);
 
     private:
         void transformArgument(const ArgumentList* arguments, const std::string name);
-        Token* getArgument(const ArgumentList* arguments, const std::string name) const;
         void checkArguments(const ArgumentList* arguments) const;
 
         void addInstruction(const BytecodeInstruction* instruction);
