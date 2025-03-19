@@ -17,9 +17,11 @@ struct BytecodeConstants
     static constexpr unsigned char GET_VARIABLE = 0x8;
     static constexpr unsigned char CALL_NATIVE = 0x9;
     static constexpr unsigned char CALL_USER = 0xa;
+    static constexpr unsigned char CLEAR_STACK = 0xb;
 
     static constexpr unsigned char LIST = 0x0;
-    static constexpr unsigned char TIME = 0x1;
+    static constexpr unsigned char LAMBDA = 0x1;
+    static constexpr unsigned char TIME = 0x2;
 
     static constexpr unsigned char ADD = 0x10;
     static constexpr unsigned char SUBTRACT = 0x11;
@@ -41,6 +43,7 @@ struct BytecodeConstants
     static constexpr unsigned char SAW = 0x33;
     static constexpr unsigned char NOISE = 0x34;
     static constexpr unsigned char SAMPLE = 0x35;
+    static constexpr unsigned char OSCILLATOR = 0x36;
 
     static constexpr unsigned char HOLD = 0x50;
     static constexpr unsigned char LFO = 0x51;

@@ -18,6 +18,11 @@ Machine::Machine(const Path* path)
 
     variables = (Variable**)malloc(sizeof(Variable*) * str[BytecodeConstants::OBC_ID_LENGTH]);
 
+    for (unsigned int i = 0; i < str[BytecodeConstants::OBC_ID_LENGTH]; i++)
+    {
+        variables[i] = new Variable(Default::get());
+    }
+
     const unsigned int numResources = str[BytecodeConstants::OBC_ID_LENGTH + 1];
 
     resources = (ValueObject**)malloc(sizeof(ValueObject*) * numResources);
@@ -272,6 +277,24 @@ void Machine::execute(unsigned int address, const double startTime)
                         break;
                     }
 
+                    case BytecodeConstants::LAMBDA:
+                    {
+                        const unsigned int size = inputs[0]->getValue();
+
+                        std::vector<Variable*> placeholders;
+
+                        for (unsigned int i = 0; i < size; i++)
+                        {
+                            placeholders.push_back(static_cast<Variable*>(popStack()));
+                        }
+
+                        execute(inputs[1]->getValue(), startTime);
+
+                        stack.push(new Lambda(placeholders, popStack()));
+
+                        break;
+                    }
+
                     case BytecodeConstants::TIME:
                         stack.push(new Time());
 
@@ -372,6 +395,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
+                    case BytecodeConstants::OSCILLATOR:
+                        stack.push(new CustomOscillator(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4]));
+
+                        break;
+
                     case BytecodeConstants::HOLD:
                         stack.push(new Hold(inputs[0], inputs[1]));
 
@@ -465,6 +493,16 @@ void Machine::execute(unsigned int address, const double startTime)
                 execute(readUnsignedInt(program + address + 1), startTime);
 
                 address += 6;
+
+                break;
+
+            case BytecodeConstants::CLEAR_STACK:
+                while (!stack.empty())
+                {
+                    stack.pop();
+                }
+
+                address++;
 
                 break;
 

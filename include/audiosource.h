@@ -31,12 +31,26 @@ protected:
 
 };
 
+struct Phase : public ValueObject
+{
+    double getValue() override;
+
+    void setDelta(double delta);
+
+    void incrementPhase();
+
+protected:
+    void init() override;
+
+private:
+    double phase = 0;
+    double delta = 0;
+
+};
+
 struct Oscillator : public SingleAudioSource
 {
     Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
-
-    double phase = 0;
-    double phaseDelta;
 
 protected:
     void init() override;
@@ -44,6 +58,8 @@ protected:
     void prepareForEffects(const unsigned int bufferLength) override;
 
     ValueObject* frequency;
+
+    Phase* phase;
 
 };
 
@@ -73,6 +89,20 @@ struct Triangle : public Oscillator
     Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
 
     double getValue() override;
+};
+
+struct CustomOscillator : public Oscillator
+{
+    CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, ValueObject* waveform);
+
+    double getValue() override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* waveform;
+
 };
 
 struct Noise : public SingleAudioSource

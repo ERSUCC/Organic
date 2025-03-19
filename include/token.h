@@ -1,10 +1,13 @@
 #pragma once
 
+#include <algorithm>
 #include <fstream>
+#include <functional>
 #include <stack>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "bytecode.h"
@@ -16,37 +19,152 @@
 
 namespace Parser
 {
-    struct TypeResolver;
-    struct BytecodeTransformer;
-
-    enum class BasicType
-    {
-        None,
-        Any,
-        SequenceOrder,
-        RandomType,
-        Number,
-        Boolean,
-        String,
-        List,
-        AudioSource,
-        Effect
-    };
+    struct NoneType;
+    struct AnyType;
+    struct SequenceOrderType;
+    struct RandomTypeType;
+    struct NumberType;
+    struct BooleanType;
+    struct StringType;
+    struct AudioSourceType;
+    struct EffectType;
+    struct ListType;
+    struct LambdaType;
 
     struct Type
     {
-        Type(const BasicType primaryType, Type* subType = nullptr);
+        Type(const std::string str);
 
         std::string name() const;
 
-        bool checkType(const Type* expected) const;
+        virtual bool checkType(const Type* actual) const = 0;
 
-        Type* subType;
+        virtual bool checkSpecifiedType(const NoneType* expected) const;
+        virtual bool checkSpecifiedType(const AnyType* expected) const;
+        virtual bool checkSpecifiedType(const SequenceOrderType* expected) const;
+        virtual bool checkSpecifiedType(const RandomTypeType* expected) const;
+        virtual bool checkSpecifiedType(const NumberType* expected) const;
+        virtual bool checkSpecifiedType(const BooleanType* expected) const;
+        virtual bool checkSpecifiedType(const StringType* expected) const;
+        virtual bool checkSpecifiedType(const AudioSourceType* expected) const;
+        virtual bool checkSpecifiedType(const EffectType* expected) const;
+        virtual bool checkSpecifiedType(const ListType* expected) const;
+        virtual bool checkSpecifiedType(const LambdaType* expected) const;
 
     private:
-        const BasicType primaryType;
+        const std::string str;
 
     };
+
+    struct NoneType : public Type
+    {
+        NoneType();
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const NoneType* expected) const override;
+    };
+
+    struct AnyType : public Type
+    {
+        AnyType();
+
+        bool checkType(const Type* actual) const override;
+    };
+
+    struct SequenceOrderType : public Type
+    {
+        SequenceOrderType();
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const SequenceOrderType* expected) const override;
+    };
+
+    struct RandomTypeType : public Type
+    {
+        RandomTypeType();
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const RandomTypeType* expected) const override;
+    };
+
+    struct NumberType : public Type
+    {
+        NumberType();
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const NumberType* expected) const override;
+    };
+
+    struct BooleanType : public Type
+    {
+        BooleanType();
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const BooleanType* expected) const override;
+    };
+
+    struct StringType : public Type
+    {
+        StringType();
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const StringType* expected) const override;
+    };
+
+    struct AudioSourceType : public Type
+    {
+        AudioSourceType();
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const AudioSourceType* expected) const override;
+    };
+
+    struct EffectType : public Type
+    {
+        EffectType();
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const EffectType* expected) const override;
+    };
+
+    struct ListType : public Type
+    {
+        ListType(Type* subType);
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const ListType* expected) const override;
+
+        Type* subType;
+    };
+
+    struct LambdaType : public Type
+    {
+        LambdaType(const std::unordered_map<std::string, const Type*> inputTypes, const Type* returnType);
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const LambdaType* expected) const override;
+
+    private:
+        std::string inputString(const std::unordered_map<std::string, const Type*>& inputTypes) const;
+
+        const std::unordered_map<std::string, const Type*> inputTypes;
+
+        const Type* returnType;
+
+    };
+
+    struct TypeResolver;
+    struct BytecodeTransformer;
 
     struct Token
     {
@@ -466,6 +584,14 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
+    struct Oscillator : public AudioSource
+    {
+        Oscillator(const SourceLocation, const ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
     struct Noise : public AudioSource
     {
         Noise(const SourceLocation location, const ArgumentList* arguments);
@@ -634,6 +760,8 @@ namespace Parser
 
         InstructionBlock* block;
 
+        unsigned char id;
+
         bool used = false;
     };
 
@@ -691,6 +819,7 @@ namespace Parser
         void resolveTypes(Square* token);
         void resolveTypes(Triangle* token);
         void resolveTypes(Saw* token);
+        void resolveTypes(Oscillator* token);
         void resolveTypes(Noise* token);
         void resolveTypes(Sample* token);
         void resolveTypes(Play* token);
@@ -722,7 +851,7 @@ namespace Parser
 
         std::vector<Scope*> scopes;
 
-        Type* expectedType = new Type(BasicType::Any);
+        Type* expectedType = new AnyType();
 
         unsigned char nextIdentifierId = 0;
 
@@ -762,6 +891,7 @@ namespace Parser
         void transform(const Square* token);
         void transform(const Triangle* token);
         void transform(const Saw* token);
+        void transform(const Oscillator* token);
         void transform(const Noise* token);
         void transform(const Sample* token);
         void transform(const Play* token);

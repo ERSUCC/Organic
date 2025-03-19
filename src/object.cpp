@@ -51,13 +51,18 @@ List* ValueObject::getList()
     return nullptr;
 }
 
+Lambda* ValueObject::getLambda()
+{
+    return nullptr;
+}
+
 Resource* ValueObject::getResource()
 {
     return nullptr;
 }
 
 Default::Default() :
-    list(new List({})), resource(new Resource(nullptr, 0, utils->sampleRate, utils->channels)) {}
+    list(new List({})), lambda(new Lambda({}, this)), resource(new Resource(nullptr, 0, utils->sampleRate, utils->channels)) {}
 
 Default* Default::get()
 {
@@ -74,6 +79,11 @@ Default* Default::get()
 List* Default::getList()
 {
     return list;
+}
+
+Lambda* Default::getLambda()
+{
+    return lambda;
 }
 
 Resource* Default::getResource()
@@ -117,6 +127,11 @@ List* Variable::getList()
     return value->getList();
 }
 
+Lambda* Variable::getLambda()
+{
+    return value->getLambda();
+}
+
 Resource* Variable::getResource()
 {
     return value->getResource();
@@ -124,6 +139,37 @@ Resource* Variable::getResource()
 
 void Variable::init()
 {
+    value->start(startTime);
+}
+
+Lambda::Lambda(const std::vector<Variable*> inputs, ValueObject* value) :
+    inputs(inputs), value(value) {}
+
+double Lambda::getValue()
+{
+    return value->getValue();
+}
+
+Lambda* Lambda::getLambda()
+{
+    return this;
+}
+
+void Lambda::setInputs(const std::vector<ValueObject*>& values)
+{
+    for (unsigned int i = 0; i < inputs.size(); i++)
+    {
+        inputs[i]->value = values[i];
+    }
+}
+
+void Lambda::init()
+{
+    for (Variable* input : inputs)
+    {
+        input->start(startTime);
+    }
+
     value->start(startTime);
 }
 

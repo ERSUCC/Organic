@@ -138,6 +138,14 @@ void CallUser::output(std::ofstream& stream) const
     stream << inputs;
 }
 
+ClearStack::ClearStack() :
+    BytecodeInstruction(1) {}
+
+void ClearStack::output(std::ofstream& stream) const
+{
+    stream << BytecodeConstants::CLEAR_STACK;
+}
+
 ResourceBlock::ResourceBlock(const Path* path)
 {
     SndfileHandle* file = new SndfileHandle(path->string());

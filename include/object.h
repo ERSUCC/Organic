@@ -29,6 +29,7 @@ protected:
 };
 
 struct List;
+struct Lambda;
 struct Resource;
 
 struct ValueObject : public Sync
@@ -39,6 +40,8 @@ struct ValueObject : public Sync
 
     virtual List* getList();
 
+    virtual Lambda* getLambda();
+
     virtual Resource* getResource();
 };
 
@@ -48,6 +51,8 @@ struct Default : public ValueObject
 
     List* getList() override;
 
+    Lambda* getLambda() override;
+
     Resource* getResource() override;
 
 private:
@@ -56,6 +61,8 @@ private:
     static Default* instance;
 
     List* list;
+
+    Lambda* lambda;
 
     Resource* resource;
 
@@ -81,12 +88,34 @@ struct Variable : public ValueObject
 
     List* getList() override;
 
+    Lambda* getLambda() override;
+
     Resource* getResource() override;
 
     ValueObject* value;
 
 protected:
     void init() override;
+
+};
+
+struct Lambda : public ValueObject
+{
+    Lambda(const std::vector<Variable*> inputs, ValueObject* value);
+
+    double getValue() override;
+
+    Lambda* getLambda() override;
+
+    void setInputs(const std::vector<ValueObject*>& values);
+
+protected:
+    void init() override;
+
+private:
+    std::vector<Variable*> inputs;
+
+    ValueObject* value;
 
 };
 

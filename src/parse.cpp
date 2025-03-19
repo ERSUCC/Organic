@@ -699,6 +699,11 @@ namespace Parser
             return new Sample(location, argumentList);
         }
 
+        if (str->str == "oscillator")
+        {
+            return new Oscillator(location, argumentList);
+        }
+
         if (str->str == "delay")
         {
             return new Delay(location, argumentList);

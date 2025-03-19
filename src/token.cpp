@@ -2,138 +2,257 @@
 
 namespace Parser
 {
-    Type::Type(const BasicType primaryType, Type* subType) :
-        primaryType(primaryType), subType(subType) {}
+    Type::Type(const std::string str) :
+        str(str) {}
 
     std::string Type::name() const
     {
-        switch (primaryType)
-        {
-            case BasicType::None:
-                return "nothing";
-
-            case BasicType::Any:
-                return "anything";
-
-            case BasicType::SequenceOrder:
-                return "sequence order constant";
-
-            case BasicType::RandomType:
-                return "random type constant";
-
-            case BasicType::Number:
-                return "number";
-
-            case BasicType::Boolean:
-                return "boolean";
-
-            case BasicType::String:
-                return "string";
-
-            case BasicType::List:
-                return "list of " + subType->name();
-
-            case BasicType::AudioSource:
-                return "audio source";
-
-            case BasicType::Effect:
-                return "effect";
-        }
-
-        return "";
+        return str;
     }
 
-    bool Type::checkType(const Type* expected) const
+    bool Type::checkSpecifiedType(const NoneType* expected) const
     {
-        if (!expected)
+        return false;
+    }
+
+    bool Type::checkSpecifiedType(const AnyType* expected) const
+    {
+        return true;
+    }
+
+    bool Type::checkSpecifiedType(const SequenceOrderType* expected) const
+    {
+        return false;
+    }
+
+    bool Type::checkSpecifiedType(const RandomTypeType* expected) const
+    {
+        return false;
+    }
+
+    bool Type::checkSpecifiedType(const NumberType* expected) const
+    {
+        return false;
+    }
+
+    bool Type::checkSpecifiedType(const BooleanType* expected) const
+    {
+        return false;
+    }
+
+    bool Type::checkSpecifiedType(const StringType* expected) const
+    {
+        return false;
+    }
+
+    bool Type::checkSpecifiedType(const ListType* expected) const
+    {
+        return false;
+    }
+
+    bool Type::checkSpecifiedType(const AudioSourceType* expected) const
+    {
+        return false;
+    }
+
+    bool Type::checkSpecifiedType(const EffectType* expected) const
+    {
+        return false;
+    }
+
+    bool Type::checkSpecifiedType(const LambdaType* expected) const
+    {
+        return false;
+    }
+
+    NoneType::NoneType() :
+        Type("nothing") {}
+
+    bool NoneType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool NoneType::checkSpecifiedType(const NoneType* expected) const
+    {
+        return true;
+    }
+
+    AnyType::AnyType() :
+        Type("anything") {}
+
+    bool AnyType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    SequenceOrderType::SequenceOrderType() :
+        Type("sequence order constant") {}
+
+    bool SequenceOrderType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool SequenceOrderType::checkSpecifiedType(const SequenceOrderType* expected) const
+    {
+        return true;
+    }
+
+    RandomTypeType::RandomTypeType() :
+        Type("random type constant") {}
+
+    bool RandomTypeType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool RandomTypeType::checkSpecifiedType(const RandomTypeType* expected) const
+    {
+        return true;
+    }
+
+    NumberType::NumberType() :
+        Type("number") {}
+
+    bool NumberType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool NumberType::checkSpecifiedType(const NumberType* expected) const
+    {
+        return true;
+    }
+
+    BooleanType::BooleanType() :
+        Type("boolean") {}
+
+    bool BooleanType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool BooleanType::checkSpecifiedType(const BooleanType* expected) const
+    {
+        return true;
+    }
+
+    StringType::StringType() :
+        Type("string") {}
+
+    bool StringType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool StringType::checkSpecifiedType(const StringType* expected) const
+    {
+        return true;
+    }
+
+    AudioSourceType::AudioSourceType() :
+        Type("audio source") {}
+
+    bool AudioSourceType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool AudioSourceType::checkSpecifiedType(const AudioSourceType* expected) const
+    {
+        return true;
+    }
+
+    EffectType::EffectType() :
+        Type("effect") {}
+
+    bool EffectType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool EffectType::checkSpecifiedType(const EffectType* expected) const
+    {
+        return true;
+    }
+
+    ListType::ListType(Type* subType) :
+        Type("list of " + subType->name()), subType(subType) {}
+
+    bool ListType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool ListType::checkSpecifiedType(const ListType* expected) const
+    {
+        return expected->subType->checkType(subType);
+    }
+
+    LambdaType::LambdaType(const std::unordered_map<std::string, const Type*> inputTypes, const Type* returnType) :
+        Type("function " + inputString(inputTypes) + "returning " + returnType->name()), inputTypes(inputTypes), returnType(returnType) {}
+
+    bool LambdaType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool LambdaType::checkSpecifiedType(const LambdaType* expected) const
+    {
+        if (!expected->returnType->checkType(returnType))
         {
             return false;
         }
 
-        switch (expected->primaryType)
+        for (const std::pair<std::string, const Type*>& input : expected->inputTypes)
         {
-            case BasicType::None:
-                if (primaryType != BasicType::None)
-                {
-                    return false;
-                }
-
-                break;
-
-            case BasicType::Any:
-                break;
-
-            case BasicType::SequenceOrder:
-                if (primaryType != BasicType::SequenceOrder)
-                {
-                    return false;
-                }
-
-                break;
-
-            case BasicType::RandomType:
-                if (primaryType != BasicType::RandomType)
-                {
-                    return false;
-                }
-
-                break;
-
-            case BasicType::Number:
-                if (primaryType != BasicType::Number)
-                {
-                    return false;
-                }
-
-                break;
-
-            case BasicType::Boolean:
-                if (primaryType != BasicType::Boolean)
-                {
-                    return false;
-                }
-
-                break;
-
-            case BasicType::String:
-                if (primaryType != BasicType::String)
-                {
-                    return false;
-                }
-
-                break;
-
-            case BasicType::List:
-                if (primaryType != BasicType::List)
-                {
-                    return false;
-                }
-
-                break;
-
-            case BasicType::AudioSource:
-                if (primaryType != BasicType::AudioSource)
-                {
-                    return false;
-                }
-
-                break;
-
-            case BasicType::Effect:
-                if (primaryType != BasicType::Effect)
-                {
-                    return false;
-                }
-
-                break;
+            if (!inputTypes.count(input.first) || !input.second->checkType(inputTypes.at(input.first)))
+            {
+                return false;
+            }
         }
 
-        if (subType)
+        return true;
+    }
+
+    std::string LambdaType::inputString(const std::unordered_map<std::string, const Type*>& inputTypes) const
+    {
+        if (inputTypes.empty())
         {
-            return subType->checkType(expected->subType);
+            return "with no inputs ";
         }
 
-        return !expected->subType;
+        std::string str;
+
+        if (inputTypes.size() == 1)
+        {
+            str += "with input (";
+        }
+
+        else
+        {
+            str += "with inputs (";
+        }
+
+        bool first = true;
+
+        for (const std::pair<std::string, const Type*>& input : inputTypes)
+        {
+            if (first)
+            {
+                str += input.first + ": " + input.second->name();
+            }
+
+            else
+            {
+                str += ", " + input.first + ": " + input.second->name();
+            }
+
+            first = false;
+        }
+
+        return str + ") ";
     }
 
     Token::Token(const SourceLocation location) :
@@ -231,7 +350,7 @@ namespace Parser
     Value::Value(const SourceLocation location, const std::string str, const double value) :
         BasicToken(location, str), value(value)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Value::transform(BytecodeTransformer* visitor) const
@@ -242,7 +361,7 @@ namespace Parser
     SequenceForwards::SequenceForwards(const SourceLocation location) :
         BasicToken(location, "sequence-forwards")
     {
-        type = new Type(BasicType::SequenceOrder);
+        type = new SequenceOrderType();
     }
 
     void SequenceForwards::transform(BytecodeTransformer* visitor) const
@@ -253,7 +372,7 @@ namespace Parser
     SequenceBackwards::SequenceBackwards(const SourceLocation location) :
         BasicToken(location, "sequence-backwards")
     {
-        type = new Type(BasicType::SequenceOrder);
+        type = new SequenceOrderType();
     }
 
     void SequenceBackwards::transform(BytecodeTransformer* visitor) const
@@ -264,7 +383,7 @@ namespace Parser
     SequencePingPong::SequencePingPong(const SourceLocation location) :
         BasicToken(location, "sequence-ping-pong")
     {
-        type = new Type(BasicType::SequenceOrder);
+        type = new SequenceOrderType();
     }
 
     void SequencePingPong::transform(BytecodeTransformer* visitor) const
@@ -275,7 +394,7 @@ namespace Parser
     SequenceRandom::SequenceRandom(const SourceLocation location) :
         BasicToken(location, "sequence-random")
     {
-        type = new Type(BasicType::SequenceOrder);
+        type = new SequenceOrderType();
     }
 
     void SequenceRandom::transform(BytecodeTransformer* visitor) const
@@ -286,7 +405,7 @@ namespace Parser
     RandomStep::RandomStep(const SourceLocation location) :
         BasicToken(location, "random-step")
     {
-        type = new Type(BasicType::RandomType);
+        type = new RandomTypeType();
     }
 
     void RandomStep::transform(BytecodeTransformer* visitor) const
@@ -297,7 +416,7 @@ namespace Parser
     RandomLinear::RandomLinear(const SourceLocation location) :
         BasicToken(location, "random-linear")
     {
-        type = new Type(BasicType::RandomType);
+        type = new RandomTypeType();
     }
 
     void RandomLinear::transform(BytecodeTransformer* visitor) const
@@ -308,7 +427,7 @@ namespace Parser
     Pi::Pi(const SourceLocation location) :
         BasicToken(location, "pi")
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Pi::transform(BytecodeTransformer* visitor) const
@@ -319,7 +438,7 @@ namespace Parser
     E::E(const SourceLocation location) :
         BasicToken(location, "e")
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void E::transform(BytecodeTransformer* visitor) const
@@ -330,7 +449,7 @@ namespace Parser
     String::String(const SourceLocation location, const std::string str) :
         BasicToken(location, str)
     {
-        type = new Type(BasicType::String);
+        type = new StringType();
     }
 
     Argument::Argument(const SourceLocation location, const std::string name, Token* value) :
@@ -452,7 +571,7 @@ namespace Parser
     Time::Time(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Time::transform(BytecodeTransformer* visitor) const
@@ -463,7 +582,7 @@ namespace Parser
     Hold::Hold(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Hold::resolveTypes(TypeResolver* visitor)
@@ -479,7 +598,7 @@ namespace Parser
     LFO::LFO(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void LFO::resolveTypes(TypeResolver* visitor)
@@ -495,7 +614,7 @@ namespace Parser
     Sweep::Sweep(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Sweep::resolveTypes(TypeResolver* visitor)
@@ -511,7 +630,7 @@ namespace Parser
     Sequence::Sequence(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Sequence::resolveTypes(TypeResolver* visitor)
@@ -527,7 +646,7 @@ namespace Parser
     Repeat::Repeat(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Repeat::resolveTypes(TypeResolver* visitor)
@@ -543,7 +662,7 @@ namespace Parser
     Random::Random(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Random::resolveTypes(TypeResolver* visitor)
@@ -559,7 +678,7 @@ namespace Parser
     Limit::Limit(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Limit::resolveTypes(TypeResolver* visitor)
@@ -575,7 +694,7 @@ namespace Parser
     Trigger::Trigger(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void Trigger::resolveTypes(TypeResolver* visitor)
@@ -591,7 +710,7 @@ namespace Parser
     If::If(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void If::resolveTypes(TypeResolver* visitor)
@@ -607,7 +726,7 @@ namespace Parser
     All::All(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Boolean);
+        type = new BooleanType();
     }
 
     void All::resolveTypes(TypeResolver* visitor)
@@ -623,7 +742,7 @@ namespace Parser
     Any::Any(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Boolean);
+        type = new BooleanType();
     }
 
     void Any::resolveTypes(TypeResolver* visitor)
@@ -639,7 +758,7 @@ namespace Parser
     None::None(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Boolean);
+        type = new BooleanType();
     }
 
     void None::resolveTypes(TypeResolver* visitor)
@@ -655,7 +774,7 @@ namespace Parser
     AudioSource::AudioSource(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::AudioSource);
+        type = new AudioSourceType();
     }
 
     Sine::Sine(const SourceLocation location, const ArgumentList* arguments) :
@@ -710,6 +829,19 @@ namespace Parser
         visitor->transform(this);
     }
 
+    Oscillator::Oscillator(const SourceLocation location, const ArgumentList* arguments) :
+        AudioSource(location, arguments) {}
+
+    void Oscillator::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Oscillator::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
     Noise::Noise(const SourceLocation location, const ArgumentList* arguments) :
         AudioSource(location, arguments) {}
 
@@ -739,7 +871,7 @@ namespace Parser
     Play::Play(const SourceLocation location, AudioSource* audioSource) :
         Token(location), audioSource(audioSource)
     {
-        type = new Type(BasicType::AudioSource);
+        type = new AudioSourceType();
     }
 
     void Play::resolveTypes(TypeResolver* visitor)
@@ -755,7 +887,7 @@ namespace Parser
     Delay::Delay(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::Effect);
+        type = new EffectType();
     }
 
     void Delay::resolveTypes(TypeResolver* visitor)
@@ -771,7 +903,7 @@ namespace Parser
     Perform::Perform(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::None);
+        type = new NoneType();
     }
 
     void Perform::resolveTypes(TypeResolver* visitor)
@@ -787,7 +919,7 @@ namespace Parser
     Include::Include(const SourceLocation location, const ArgumentList* arguments) :
         Call(location, arguments)
     {
-        type = new Type(BasicType::None);
+        type = new NoneType();
     }
 
     void Include::resolveTypes(TypeResolver* visitor)
@@ -829,7 +961,7 @@ namespace Parser
     AddAlias::AddAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, "+")
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void AddAlias::transform(BytecodeTransformer* visitor) const
@@ -840,7 +972,7 @@ namespace Parser
     SubtractAlias::SubtractAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, "-")
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void SubtractAlias::transform(BytecodeTransformer* visitor) const
@@ -851,7 +983,7 @@ namespace Parser
     MultiplyAlias::MultiplyAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, "*")
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void MultiplyAlias::transform(BytecodeTransformer* visitor) const
@@ -862,7 +994,7 @@ namespace Parser
     DivideAlias::DivideAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, "/")
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void DivideAlias::transform(BytecodeTransformer* visitor) const
@@ -873,7 +1005,7 @@ namespace Parser
     PowerAlias::PowerAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, "^")
     {
-        type = new Type(BasicType::Number);
+        type = new NumberType();
     }
 
     void PowerAlias::transform(BytecodeTransformer* visitor) const
@@ -884,7 +1016,7 @@ namespace Parser
     EqualAlias::EqualAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, "==")
     {
-        type = new Type(BasicType::Boolean);
+        type = new BooleanType();
     }
 
     void EqualAlias::transform(BytecodeTransformer* visitor) const
@@ -895,7 +1027,7 @@ namespace Parser
     LessAlias::LessAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, "<")
     {
-        type = new Type(BasicType::Boolean);
+        type = new BooleanType();
     }
 
     void LessAlias::transform(BytecodeTransformer* visitor) const
@@ -906,7 +1038,7 @@ namespace Parser
     GreaterAlias::GreaterAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, ">")
     {
-        type = new Type(BasicType::Boolean);
+        type = new BooleanType();
     }
 
     void GreaterAlias::transform(BytecodeTransformer* visitor) const
@@ -917,7 +1049,7 @@ namespace Parser
     LessEqualAlias::LessEqualAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, "<=")
     {
-        type = new Type(BasicType::Boolean);
+        type = new BooleanType();
     }
 
     void LessEqualAlias::transform(BytecodeTransformer* visitor) const
@@ -928,7 +1060,7 @@ namespace Parser
     GreaterEqualAlias::GreaterEqualAlias(const SourceLocation location, Token* a, Token* b) :
         CallAlias(location, a, b, ">=")
     {
-        type = new Type(BasicType::Boolean);
+        type = new BooleanType();
     }
 
     void GreaterEqualAlias::transform(BytecodeTransformer* visitor) const
@@ -939,7 +1071,7 @@ namespace Parser
     Define::Define(const SourceLocation location, const std::string name, const std::vector<Identifier*> inputs, const std::vector<Token*> instructions) :
         Token(location), name(name), inputs(inputs), instructions(instructions)
     {
-        type = new Type(BasicType::None);
+        type = new NoneType();
 
         block = new InstructionBlock();
     }
@@ -995,7 +1127,7 @@ namespace Parser
     Program::Program(const SourceLocation location, const std::vector<Token*> instructions) :
         Token(location), instructions(instructions)
     {
-        type = new Type(BasicType::None);
+        type = new NoneType();
     }
 
     void Program::resolveTypes(TypeResolver* visitor)
@@ -1042,6 +1174,27 @@ namespace Parser
             token->id = variable->id;
         }
 
+        else if (const Define* function = getFunction(token->str))
+        {
+            std::unordered_map<std::string, const Type*> inputTypes;
+
+            for (const Identifier* input : function->inputs)
+            {
+                if (input->type)
+                {
+                    inputTypes[input->str] = input->type;
+                }
+
+                else
+                {
+                    inputTypes[input->str] = new AnyType();
+                }
+            }
+
+            token->type = new LambdaType(inputTypes, function->type);
+            token->id = function->id;
+        }
+
         else
         {
             throw OrganicParseException("Unrecognized variable name \"" + token->str + "\".", token->location);
@@ -1050,7 +1203,12 @@ namespace Parser
 
     void TypeResolver::resolveTypes(List* token)
     {
-        Type* innerType = expectedType->subType;
+        if (!expectedType->checkSpecifiedType(new ListType(new AnyType())))
+        {
+            return;
+        }
+
+        Type* innerType = static_cast<ListType*>(expectedType)->subType;
 
         for (Token* value : token->values)
         {
@@ -1058,13 +1216,13 @@ namespace Parser
 
             value->resolveTypes(this);
 
-            if (!value->type->checkType(token->values[0]->type))
+            if (!token->values[0]->type->checkType(value->type))
             {
                 throw OrganicParseException("All elements in a list must have the same type.", value->location);
             }
         }
 
-        token->type = new Type(BasicType::List, token->values[0]->type);
+        token->type = new ListType(token->values[0]->type);
     }
 
     void TypeResolver::resolveTypes(ParenthesizedExpression* token)
@@ -1078,7 +1236,7 @@ namespace Parser
     {
         token->value->resolveTypes(this);
 
-        if (token->value->type->checkType(new Type(BasicType::None)))
+        if (token->value->type->checkSpecifiedType(new NoneType()))
         {
             throw OrganicParseException("Functions that return nothing cannot be assigned to a variable.", token->value->location);
         }
@@ -1093,6 +1251,11 @@ namespace Parser
             throw OrganicParseException("Variables cannot be redefined.", token->location);
         }
 
+        if (getFunction(token->variable->str))
+        {
+            throw OrganicParseException("A function already exists with the name \"" + token->variable->str + "\".", token->location);
+        }
+
         token->variable->type = token->value->type;
         token->variable->id = nextIdentifierId++;
 
@@ -1101,124 +1264,133 @@ namespace Parser
 
     void TypeResolver::resolveTypes(Hold* token)
     {
-        resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "length", new NumberType());
+        resolveArgumentTypes(token->arguments, "value", new NumberType());
     }
 
     void TypeResolver::resolveTypes(LFO* token)
     {
-        resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "to", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "from", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "length", new NumberType());
+        resolveArgumentTypes(token->arguments, "to", new NumberType());
+        resolveArgumentTypes(token->arguments, "from", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Sweep* token)
     {
-        resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "to", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "from", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "length", new NumberType());
+        resolveArgumentTypes(token->arguments, "to", new NumberType());
+        resolveArgumentTypes(token->arguments, "from", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Sequence* token)
     {
-        resolveArgumentTypes(token->arguments, "order", new Type(BasicType::SequenceOrder));
-        resolveArgumentTypes(token->arguments, "values", new Type(BasicType::List, new Type(BasicType::Number)));
+        resolveArgumentTypes(token->arguments, "order", new SequenceOrderType());
+        resolveArgumentTypes(token->arguments, "values", new ListType(new NumberType()));
     }
 
     void TypeResolver::resolveTypes(Repeat* token)
     {
-        resolveArgumentTypes(token->arguments, "repeats", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "repeats", new NumberType());
+        resolveArgumentTypes(token->arguments, "value", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Random* token)
     {
-        resolveArgumentTypes(token->arguments, "type", new Type(BasicType::RandomType));
-        resolveArgumentTypes(token->arguments, "length", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "to", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "from", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "type", new RandomTypeType());
+        resolveArgumentTypes(token->arguments, "length", new NumberType());
+        resolveArgumentTypes(token->arguments, "to", new NumberType());
+        resolveArgumentTypes(token->arguments, "from", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Limit* token)
     {
-        resolveArgumentTypes(token->arguments, "max", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "min", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "max", new NumberType());
+        resolveArgumentTypes(token->arguments, "min", new NumberType());
+        resolveArgumentTypes(token->arguments, "value", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Trigger* token)
     {
-        resolveArgumentTypes(token->arguments, "value", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "condition", new Type(BasicType::Boolean));
+        resolveArgumentTypes(token->arguments, "value", new NumberType());
+        resolveArgumentTypes(token->arguments, "condition", new BooleanType());
     }
 
     void TypeResolver::resolveTypes(If* token)
     {
-        resolveArgumentTypes(token->arguments, "false", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "true", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "condition", new Type(BasicType::Boolean));
+        resolveArgumentTypes(token->arguments, "false", new NumberType());
+        resolveArgumentTypes(token->arguments, "true", new NumberType());
+        resolveArgumentTypes(token->arguments, "condition", new BooleanType());
     }
 
     void TypeResolver::resolveTypes(All* token)
     {
-        resolveArgumentTypes(token->arguments, "values", new Type(BasicType::List, new Type(BasicType::Boolean)));
+        resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
     }
 
     void TypeResolver::resolveTypes(Any* token)
     {
-        resolveArgumentTypes(token->arguments, "values", new Type(BasicType::List, new Type(BasicType::Boolean)));
+        resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
     }
 
     void TypeResolver::resolveTypes(None* token)
     {
-        resolveArgumentTypes(token->arguments, "values", new Type(BasicType::List, new Type(BasicType::Boolean)));
+        resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
     }
 
     void TypeResolver::resolveTypes(Sine* token)
     {
-        resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
-        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "pan", new NumberType());
+        resolveArgumentTypes(token->arguments, "volume", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Square* token)
     {
-        resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
-        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "pan", new NumberType());
+        resolveArgumentTypes(token->arguments, "volume", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Triangle* token)
     {
-        resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
-        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "pan", new NumberType());
+        resolveArgumentTypes(token->arguments, "volume", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Saw* token)
     {
-        resolveArgumentTypes(token->arguments, "frequency", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
-        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "pan", new NumberType());
+        resolveArgumentTypes(token->arguments, "volume", new NumberType());
+    }
+
+    void TypeResolver::resolveTypes(Oscillator* token)
+    {
+        resolveArgumentTypes(token->arguments, "waveform", new LambdaType({ { "phase", new NumberType() } }, new NumberType()));
+        resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "pan", new NumberType());
+        resolveArgumentTypes(token->arguments, "volume", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Noise* token)
     {
-        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
-        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "pan", new NumberType());
+        resolveArgumentTypes(token->arguments, "volume", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Sample* token)
     {
-        resolveArgumentTypes(token->arguments, "file", new Type(BasicType::String));
-        resolveArgumentTypes(token->arguments, "effects", new Type(BasicType::List, new Type(BasicType::Effect)));
-        resolveArgumentTypes(token->arguments, "pan", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "volume", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "file", new StringType());
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "pan", new NumberType());
+        resolveArgumentTypes(token->arguments, "volume", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Play* token)
@@ -1228,22 +1400,22 @@ namespace Parser
 
     void TypeResolver::resolveTypes(Delay* token)
     {
-        resolveArgumentTypes(token->arguments, "feedback", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "delay", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "mix", new Type(BasicType::Number));
+        resolveArgumentTypes(token->arguments, "feedback", new NumberType());
+        resolveArgumentTypes(token->arguments, "delay", new NumberType());
+        resolveArgumentTypes(token->arguments, "mix", new NumberType());
     }
 
     void TypeResolver::resolveTypes(Perform* token)
     {
-        resolveArgumentTypes(token->arguments, "interval", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "repeats", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "delay", new Type(BasicType::Number));
-        resolveArgumentTypes(token->arguments, "function", new Type(BasicType::Any));
+        resolveArgumentTypes(token->arguments, "interval", new NumberType());
+        resolveArgumentTypes(token->arguments, "repeats", new NumberType());
+        resolveArgumentTypes(token->arguments, "delay", new NumberType());
+        resolveArgumentTypes(token->arguments, "function", new AnyType());
     }
 
     void TypeResolver::resolveTypes(Include* token)
     {
-        resolveArgumentTypes(token->arguments, "file", new Type(BasicType::String));
+        resolveArgumentTypes(token->arguments, "file", new StringType());
 
         const String* str = dynamic_cast<const String*>(token->arguments->get("file"));
 
@@ -1297,7 +1469,7 @@ namespace Parser
 
                 else
                 {
-                    resolveArgumentTypes(token->arguments, input->str, new Type(BasicType::Any));
+                    resolveArgumentTypes(token->arguments, input->str, new AnyType());
                 }
             }
 
@@ -1318,17 +1490,22 @@ namespace Parser
 
     void TypeResolver::resolveTypes(CallAlias* token)
     {
+        NumberType* number = new NumberType();
+
+        expectedType = number;
+
         token->a->resolveTypes(this);
+
+        expectedType = number;
+
         token->b->resolveTypes(this);
 
-        const Type* number = new Type(BasicType::Number);
-
-        if (!token->a->type->checkType(number))
+        if (!token->a->type->checkSpecifiedType(number))
         {
             throw OrganicParseException("Expected \"" + number->name() + "\", received \"" + token->a->type->name() + "\".", token->a->location);
         }
 
-        if (!token->b->type->checkType(number))
+        if (!token->b->type->checkSpecifiedType(number))
         {
             throw OrganicParseException("Expected \"" + number->name() + "\", received \"" + token->b->type->name() + "\".", token->b->location);
         }
@@ -1336,6 +1513,16 @@ namespace Parser
 
     void TypeResolver::resolveTypes(Define* token)
     {
+        if (getInput(token->name))
+        {
+            throw OrganicParseException("An input already exists with the name \"" + token->name + "\".", token->location);
+        }
+
+        if (getVariable(token->name))
+        {
+            throw OrganicParseException("A variable already exists with the name \"" + token->name + "\".", token->location);
+        }
+
         if (getFunction(token->name))
         {
             throw OrganicParseException("A function already exists with the name \"" + token->name + "\".", token->location);
@@ -1368,13 +1555,15 @@ namespace Parser
         {
             Utils::parseWarning("This function contains no instructions.", token->location);
 
-            token->type = new Type(BasicType::None);
+            token->type = new NoneType();
         }
 
         else
         {
             token->type = token->instructions.back()->type;
         }
+
+        token->id = nextIdentifierId++;
     }
 
     void TypeResolver::resolveTypes(Program* token)
@@ -1414,7 +1603,7 @@ namespace Parser
 
                 const Type* argumentType = argument->value->type;
 
-                if (!argumentType->checkType(expectedType))
+                if (!expectedType->checkType(argumentType))
                 {
                     throw OrganicParseException("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", argument->value->location);
                 }
@@ -1786,6 +1975,19 @@ namespace Parser
         addInstruction(new CallNative(BytecodeConstants::SAW, 4));
     }
 
+    void BytecodeTransformer::transform(const Oscillator* token)
+    {
+        token->arguments->check();
+
+        transformArgument(token->arguments, "waveform");
+        transformArgument(token->arguments, "frequency");
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "pan");
+        transformArgument(token->arguments, "volume");
+
+        addInstruction(new CallNative(BytecodeConstants::OSCILLATOR, 5));
+    }
+
     void BytecodeTransformer::transform(const Noise* token)
     {
         token->arguments->check();
@@ -1879,6 +2081,8 @@ namespace Parser
         {
             for (const Token* instruction : token->program->instructions)
             {
+                addInstruction(new ClearStack());
+
                 instruction->transform(this);
             }
         }
@@ -1989,12 +2193,33 @@ namespace Parser
 
         for (const Token* instruction : token->instructions)
         {
+            addInstruction(new ClearStack());
+
             instruction->transform(this);
         }
 
         blocks.pop();
 
         resolver->addInstructionBlock(token->block);
+
+        std::vector<std::pair<std::string, unsigned char>> inputs;
+
+        for (const Identifier* input : token->inputs)
+        {
+            inputs.push_back(std::make_pair(input->str, input->id));
+        }
+
+        std::sort(inputs.begin(), inputs.end(), std::greater());
+
+        for (const std::pair<std::string, unsigned char>& input : inputs)
+        {
+            addInstruction(new GetVariable(input.second));
+        }
+
+        addInstruction(new StackPushAddress(token->block));
+        addInstruction(new StackPushInt(token->inputs.size()));
+        addInstruction(new CallNative(BytecodeConstants::LAMBDA, 2));
+        addInstruction(new SetVariable(token->id));
     }
 
     void BytecodeTransformer::transform(const Program* token)
@@ -2007,6 +2232,8 @@ namespace Parser
 
         for (const Token* instruction : token->instructions)
         {
+            addInstruction(new ClearStack());
+
             instruction->transform(this);
         }
 

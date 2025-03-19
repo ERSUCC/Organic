@@ -26,8 +26,33 @@ void SingleAudioSource::fillBuffer(double* buffer, const unsigned int bufferLeng
     }
 }
 
+double Phase::getValue()
+{
+    return phase;
+}
+
+void Phase::setDelta(double delta)
+{
+    this->delta = delta;
+}
+
+void Phase::incrementPhase()
+{
+    phase += delta;
+
+    if (phase > utils->twoPi)
+    {
+        phase -= utils->twoPi;
+    }
+}
+
+void Phase::init()
+{
+    phase = 0;
+}
+
 Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
-    SingleAudioSource(volume, pan, effects), frequency(frequency) {}
+    SingleAudioSource(volume, pan, effects), frequency(frequency), phase(new Phase()) {}
 
 void Oscillator::init()
 {
@@ -39,11 +64,13 @@ void Oscillator::init()
     {
         effect->start(startTime);
     }
+
+    phase->start(startTime);
 }
 
 void Oscillator::prepareForEffects(const unsigned int bufferLength)
 {
-    phaseDelta = utils->twoPi * frequency->getValue() / utils->sampleRate;
+    phase->setDelta(utils->twoPi * frequency->getValue() / utils->sampleRate);
 
     const double volumeValue = volume->getValue();
     const double panValue = pan->getValue();
@@ -63,12 +90,7 @@ void Oscillator::prepareForEffects(const unsigned int bufferLength)
             effectBuffer[i + 1] = value * (panValue + 1) / 2;
         }
 
-        phase += phaseDelta;
-    }
-
-    if (phase > utils->twoPi)
-    {
-        phase -= utils->twoPi;
+        phase->incrementPhase();
     }
 }
 
@@ -77,7 +99,7 @@ Sine::Sine(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObj
 
 double Sine::getValue()
 {
-    return sin(phase);
+    return sin(phase->getValue());
 }
 
 Square::Square(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
@@ -85,7 +107,7 @@ Square::Square(ValueObject* volume, ValueObject* pan, ValueObject* effects, Valu
 
 double Square::getValue()
 {
-    if (sin(phase) > 0)
+    if (sin(phase->getValue()) > 0)
     {
         return -1;
     }
@@ -98,7 +120,7 @@ Saw::Saw(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObjec
 
 double Saw::getValue()
 {
-    return fmod(phase, utils->twoPi) / utils->pi - 1;
+    return phase->getValue() / utils->pi - 1;
 }
 
 Triangle::Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
@@ -106,7 +128,33 @@ Triangle::Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, 
 
 double Triangle::getValue()
 {
-    return 2 * fabs(fmod(phase, utils->twoPi) - utils->pi) / utils->pi - 1;
+    return 2 * fabs(phase->getValue() - utils->pi) / utils->pi - 1;
+}
+
+CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, ValueObject* waveform) :
+    Oscillator(volume, pan, effects, frequency), waveform(waveform)
+{
+    waveform->getLambda()->setInputs({ phase });
+}
+
+double CustomOscillator::getValue()
+{
+    return waveform->getValue();
+}
+
+void CustomOscillator::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    frequency->start(startTime);
+    waveform->start(startTime);
+
+    for (ValueObject* effect : effects->getList()->objects)
+    {
+        effect->start(startTime);
+    }
+
+    phase->start(startTime);
 }
 
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
