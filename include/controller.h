@@ -155,6 +155,58 @@ private:
 
 };
 
+struct Min : public ValueObject
+{
+    Min(ValueObject* values);
+
+    double getValue() override;
+
+protected:
+    void init();
+
+private:
+    ValueObject* values;
+
+};
+
+struct Max : public ValueObject
+{
+    Max(ValueObject* values);
+
+    double getValue() override;
+
+protected:
+    void init();
+
+private:
+    ValueObject* values;
+
+};
+
+struct Round : public ValueObject
+{
+    enum DirectionEnum
+    {
+        Nearest,
+        Up,
+        Down
+    };
+
+    Round(ValueObject* value, ValueObject* step, ValueObject* direction);
+
+    double syncLength() const override;
+    double getValue() override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* value;
+    ValueObject* step;
+    ValueObject* direction;
+
+};
+
 struct Sequence : public ValueObject
 {
     enum OrderEnum

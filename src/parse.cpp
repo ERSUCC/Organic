@@ -669,6 +669,21 @@ namespace Parser
             return new None(location, argumentList);
         }
 
+        if (str->str == "min")
+        {
+            return new Min(location, argumentList);
+        }
+
+        if (str->str == "max")
+        {
+            return new Max(location, argumentList);
+        }
+
+        if (str->str == "round")
+        {
+            return new Round(location, argumentList);
+        }
+
         if (str->str == "sine")
         {
             return new Sine(location, argumentList);
@@ -1037,6 +1052,21 @@ namespace Parser
             if (token->str == "random-linear")
             {
                 return new RandomLinear(location);
+            }
+
+            if (token->str == "round-nearest")
+            {
+                return new RoundNearest(location);
+            }
+
+            if (token->str == "round-up")
+            {
+                return new RoundUp(location);
+            }
+
+            if (token->str == "round-down")
+            {
+                return new RoundDown(location);
             }
 
             if (token->str == "pi")

@@ -147,7 +147,10 @@ double All::getValue()
 
 void All::init()
 {
-    values->start(startTime);
+    for (ValueObject* object : values->getList()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 Any::Any(ValueObject* values) :
@@ -168,7 +171,10 @@ double Any::getValue()
 
 void Any::init()
 {
-    values->start(startTime);
+    for (ValueObject* object : values->getList()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 None::None(ValueObject* values) :
@@ -189,7 +195,131 @@ double None::getValue()
 
 void None::init()
 {
-    values->start(startTime);
+    for (ValueObject* object : values->getList()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+Min::Min(ValueObject* values) :
+    values(values) {}
+
+double Min::getValue()
+{
+    const List* list = values->getList();
+
+    if (list->objects.empty())
+    {
+        return 0;
+    }
+
+    double min = utils->infinity;
+
+    for (ValueObject* object : list->objects)
+    {
+        const double value = object->getValue();
+
+        if (value < min)
+        {
+            min = value;
+        }
+    }
+
+    return min;
+}
+
+void Min::init()
+{
+    for (ValueObject* object : values->getList()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+Max::Max(ValueObject* values) :
+    values(values) {}
+
+double Max::getValue()
+{
+    const List* list = values->getList();
+
+    if (list->objects.empty())
+    {
+        return 0;
+    }
+
+    double max = -utils->infinity;
+
+    for (ValueObject* object : list->objects)
+    {
+        double value = object->getValue();
+
+        if (value > max)
+        {
+            max = value;
+        }
+    }
+
+    return max;
+}
+
+void Max::init()
+{
+    for (ValueObject* object : values->getList()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+Round::Round(ValueObject* value, ValueObject* step, ValueObject* direction) :
+    value(value), step(step), direction(direction) {}
+
+double Round::syncLength() const
+{
+    return value->syncLength();
+}
+
+double Round::getValue()
+{
+    if (utils->time - startTime >= syncLength())
+    {
+        stop();
+    }
+
+    const double val = value->getValue();
+    double st = step->getValue();
+
+    if (st == 0)
+    {
+        st = 1;
+    }
+
+    switch ((unsigned int)direction->getValue())
+    {
+        case DirectionEnum::Nearest:
+            return round(val / st) * st;
+
+            break;
+
+        case DirectionEnum::Up:
+            return ceil(val / st) * st;
+
+            break;
+
+        case DirectionEnum::Down:
+            return floor(val / st) * st;
+
+            break;
+    }
+
+    return 0;
+}
+
+void Round::init()
+{
+    value->start(startTime);
+    step->start(startTime);
+    direction->start(startTime);
 }
 
 Sequence::Sequence(ValueObject* controllers, ValueObject* order) :

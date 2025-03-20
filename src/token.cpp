@@ -30,6 +30,11 @@ namespace Parser
         return false;
     }
 
+    bool Type::checkSpecifiedType(const RoundDirectionType* expected) const
+    {
+        return false;
+    }
+
     bool Type::checkSpecifiedType(const NumberType* expected) const
     {
         return false;
@@ -108,6 +113,19 @@ namespace Parser
     }
 
     bool RandomTypeType::checkSpecifiedType(const RandomTypeType* expected) const
+    {
+        return true;
+    }
+
+    RoundDirectionType::RoundDirectionType() :
+        Type("round direction constant") {}
+
+    bool RoundDirectionType::checkType(const Type* actual) const
+    {
+        return actual->checkSpecifiedType(this);
+    }
+
+    bool RoundDirectionType::checkSpecifiedType(const RoundDirectionType* expected) const
     {
         return true;
     }
@@ -420,6 +438,39 @@ namespace Parser
     }
 
     void RandomLinear::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    RoundNearest::RoundNearest(const SourceLocation location) :
+        BasicToken(location, "random-linear")
+    {
+        type = new RoundDirectionType();
+    }
+
+    void RoundNearest::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    RoundUp::RoundUp(const SourceLocation location) :
+        BasicToken(location, "random-linear")
+    {
+        type = new RoundDirectionType();
+    }
+
+    void RoundUp::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    RoundDown::RoundDown(const SourceLocation location) :
+        BasicToken(location, "random-linear")
+    {
+        type = new RoundDirectionType();
+    }
+
+    void RoundDown::transform(BytecodeTransformer* visitor) const
     {
         visitor->transform(this);
     }
@@ -767,6 +818,54 @@ namespace Parser
     }
 
     void None::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    Min::Min(const SourceLocation location, const ArgumentList* arguments) :
+        Call(location, arguments)
+    {
+        type = new NumberType();
+    }
+
+    void Min::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Min::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    Max::Max(const SourceLocation location, const ArgumentList* arguments) :
+        Call(location, arguments)
+    {
+        type = new NumberType();
+    }
+
+    void Max::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Max::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    Round::Round(const SourceLocation location, const ArgumentList* arguments) :
+        Call(location, arguments)
+    {
+        type = new NumberType();
+    }
+
+    void Round::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Round::transform(BytecodeTransformer* visitor) const
     {
         visitor->transform(this);
     }
@@ -1337,6 +1436,23 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
     }
 
+    void TypeResolver::resolveTypes(Min* token)
+    {
+        resolveArgumentTypes(token->arguments, "values", new ListType(new NumberType()));
+    }
+
+    void TypeResolver::resolveTypes(Max* token)
+    {
+        resolveArgumentTypes(token->arguments, "values", new ListType(new NumberType()));
+    }
+
+    void TypeResolver::resolveTypes(Round* token)
+    {
+        resolveArgumentTypes(token->arguments, "direction", new RoundDirectionType());
+        resolveArgumentTypes(token->arguments, "step", new NumberType());
+        resolveArgumentTypes(token->arguments, "value", new NumberType());
+    }
+
     void TypeResolver::resolveTypes(Sine* token)
     {
         resolveArgumentTypes(token->arguments, "frequency", new NumberType());
@@ -1749,6 +1865,21 @@ namespace Parser
         addInstruction(new StackPushByte(::Random::TypeEnum::Linear));
     }
 
+    void BytecodeTransformer::transform(const RoundNearest* token)
+    {
+        addInstruction(new StackPushByte(::Round::DirectionEnum::Nearest));
+    }
+
+    void BytecodeTransformer::transform(const RoundUp* token)
+    {
+        addInstruction(new StackPushByte(::Round::DirectionEnum::Up));
+    }
+
+    void BytecodeTransformer::transform(const RoundDown* token)
+    {
+        addInstruction(new StackPushByte(::Round::DirectionEnum::Down));
+    }
+
     void BytecodeTransformer::transform(const Pi* token)
     {
         addInstruction(new StackPushDouble(utils->pi));
@@ -1925,6 +2056,35 @@ namespace Parser
         transformArgument(token->arguments, "values");
 
         addInstruction(new CallNative(BytecodeConstants::NONE, 1));
+    }
+
+    void BytecodeTransformer::transform(const Min* token)
+    {
+        token->arguments->check();
+
+        transformArgument(token->arguments, "values");
+
+        addInstruction(new CallNative(BytecodeConstants::MIN, 1));
+    }
+
+    void BytecodeTransformer::transform(const Max* token)
+    {
+        token->arguments->check();
+
+        transformArgument(token->arguments, "values");
+
+        addInstruction(new CallNative(BytecodeConstants::MAX, 1));
+    }
+
+    void BytecodeTransformer::transform(const Round* token)
+    {
+        token->arguments->check();
+
+        transformArgument(token->arguments, "direction");
+        transformArgument(token->arguments, "step");
+        transformArgument(token->arguments, "value");
+
+        addInstruction(new CallNative(BytecodeConstants::ROUND, 3));
     }
 
     void BytecodeTransformer::transform(const Sine* token)

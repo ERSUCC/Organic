@@ -75,6 +75,10 @@
 					"match": "\\b(random-step|random-linear)\\b"
 				},
 				{
+					"name": "constant.language.round.organic",
+					"match": "\\b(round-nearest|round-up|round-down)\\b"
+				},
+				{
 					"name": "constant.language.note.organic",
 					"match": "\\b([a-g][sf]?[0-9])\\b"
 				},

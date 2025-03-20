@@ -36,6 +36,9 @@ struct BytecodeConstants
     static constexpr unsigned char ALL = 0x1a;
     static constexpr unsigned char ANY = 0x1b;
     static constexpr unsigned char NONE = 0x1c;
+    static constexpr unsigned char MIN = 0x1d;
+    static constexpr unsigned char MAX = 0x1e;
+    static constexpr unsigned char ROUND = 0x1f;
 
     static constexpr unsigned char SINE = 0x30;
     static constexpr unsigned char SQUARE = 0x31;

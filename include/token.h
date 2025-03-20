@@ -23,6 +23,7 @@ namespace Parser
     struct AnyType;
     struct SequenceOrderType;
     struct RandomTypeType;
+    struct RoundDirectionType;
     struct NumberType;
     struct BooleanType;
     struct StringType;
@@ -43,6 +44,7 @@ namespace Parser
         virtual bool checkSpecifiedType(const AnyType* expected) const;
         virtual bool checkSpecifiedType(const SequenceOrderType* expected) const;
         virtual bool checkSpecifiedType(const RandomTypeType* expected) const;
+        virtual bool checkSpecifiedType(const RoundDirectionType* expected) const;
         virtual bool checkSpecifiedType(const NumberType* expected) const;
         virtual bool checkSpecifiedType(const BooleanType* expected) const;
         virtual bool checkSpecifiedType(const StringType* expected) const;
@@ -88,6 +90,15 @@ namespace Parser
         bool checkType(const Type* actual) const override;
 
         bool checkSpecifiedType(const RandomTypeType* expected) const override;
+    };
+
+    struct RoundDirectionType : public Type
+    {
+        RoundDirectionType();
+
+        bool checkType(const Type* actual) const override;
+
+        bool checkSpecifiedType(const RoundDirectionType* expected) const override;
     };
 
     struct NumberType : public Type
@@ -352,6 +363,27 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
+    struct RoundNearest : public BasicToken
+    {
+        RoundNearest(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct RoundUp : public BasicToken
+    {
+        RoundUp(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct RoundDown : public BasicToken
+    {
+        RoundDown(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
     struct Pi : public BasicToken
     {
         Pi(const SourceLocation location);
@@ -542,6 +574,30 @@ namespace Parser
     struct None : public Call
     {
         None(const SourceLocation location, const ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Min : public Call
+    {
+        Min(const SourceLocation location, const ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Max : public Call
+    {
+        Max(const SourceLocation location, const ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct Round : public Call
+    {
+        Round(const SourceLocation location, const ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -815,6 +871,9 @@ namespace Parser
         void resolveTypes(All* token);
         void resolveTypes(Any* token);
         void resolveTypes(None* token);
+        void resolveTypes(Min* token);
+        void resolveTypes(Max* token);
+        void resolveTypes(Round* token);
         void resolveTypes(Sine* token);
         void resolveTypes(Square* token);
         void resolveTypes(Triangle* token);
@@ -868,6 +927,9 @@ namespace Parser
         void transform(const SequenceRandom* token);
         void transform(const RandomStep* token);
         void transform(const RandomLinear* token);
+        void transform(const RoundNearest* token);
+        void transform(const RoundUp* token);
+        void transform(const RoundDown* token);
         void transform(const Pi* token);
         void transform(const E* token);
         void transform(const Identifier* token);
@@ -887,6 +949,9 @@ namespace Parser
         void transform(const All* token);
         void transform(const Any* token);
         void transform(const None* token);
+        void transform(const Min* token);
+        void transform(const Max* token);
+        void transform(const Round* token);
         void transform(const Sine* token);
         void transform(const Square* token);
         void transform(const Triangle* token);

@@ -365,6 +365,21 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
+                    case BytecodeConstants::MIN:
+                        stack.push(new Min(inputs[0]));
+
+                        break;
+
+                    case BytecodeConstants::MAX:
+                        stack.push(new Max(inputs[0]));
+
+                        break;
+
+                    case BytecodeConstants::ROUND:
+                        stack.push(new Round(inputs[0], inputs[1], inputs[2]));
+
+                        break;
+
                     case BytecodeConstants::SINE:
                         stack.push(new Sine(inputs[0], inputs[1], inputs[2], inputs[3]));
 
