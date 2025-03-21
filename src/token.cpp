@@ -1302,12 +1302,17 @@ namespace Parser
 
     void TypeResolver::resolveTypes(List* token)
     {
-        if (!expectedType->checkSpecifiedType(new ListType(new AnyType())))
+        Type* innerType;
+
+        if (const ListType* listType = dynamic_cast<ListType*>(expectedType))
         {
-            return;
+            innerType = listType->subType;
         }
 
-        Type* innerType = static_cast<ListType*>(expectedType)->subType;
+        else
+        {
+            innerType = new AnyType();
+        }
 
         for (Token* value : token->values)
         {
