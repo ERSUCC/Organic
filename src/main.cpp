@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
     catch (const OrganicException& e)
     {
-        std::cout << e.what();
+        std::cout << e.what() << "\n";
 
         return 1;
     }

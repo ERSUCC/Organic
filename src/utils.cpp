@@ -44,7 +44,7 @@ Utils::Utils()
 OrganicException::OrganicException(const std::string message) :
     message(message) {}
 
-const char* OrganicException::what() const
+const char* OrganicException::what() const noexcept
 {
     return message.c_str();
 }

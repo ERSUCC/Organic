@@ -120,7 +120,7 @@ struct All : public ValueObject
     double getValue() override;
 
 protected:
-    void init();
+    void init() override;
 
 private:
     ValueObject* values;
@@ -134,7 +134,7 @@ struct Any : public ValueObject
     double getValue() override;
 
 protected:
-    void init();
+    void init() override;
 
 private:
     ValueObject* values;
@@ -148,7 +148,7 @@ struct None : public ValueObject
     double getValue() override;
 
 protected:
-    void init();
+    void init() override;
 
 private:
     ValueObject* values;
@@ -162,7 +162,7 @@ struct Min : public ValueObject
     double getValue() override;
 
 protected:
-    void init();
+    void init() override;
 
 private:
     ValueObject* values;
@@ -176,7 +176,7 @@ struct Max : public ValueObject
     double getValue() override;
 
 protected:
-    void init();
+    void init() override;
 
 private:
     ValueObject* values;
