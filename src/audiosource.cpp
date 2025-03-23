@@ -15,9 +15,9 @@ void SingleAudioSource::fillBuffer(double* buffer, const unsigned int bufferLeng
 {
     prepareForEffects(bufferLength);
 
-    for (ValueObject* effect : effects->getList()->objects)
+    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
     {
-        dynamic_cast<Effect*>(effect->expandVariable())->apply(effectBuffer, bufferLength);
+        effect->getLeafAs<Effect>()->apply(effectBuffer, bufferLength);
     }
 
     for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
@@ -60,7 +60,7 @@ void Oscillator::init()
     pan->start(startTime);
     frequency->start(startTime);
 
-    for (ValueObject* effect : effects->getList()->objects)
+    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
     {
         effect->start(startTime);
     }
@@ -134,7 +134,7 @@ double Triangle::getValue()
 CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, ValueObject* waveform) :
     Oscillator(volume, pan, effects, frequency), waveform(waveform)
 {
-    waveform->getLambda()->setInputs({ phase });
+    waveform->getLeafAs<Lambda>()->setInputs({ phase });
 }
 
 double CustomOscillator::getValue()
@@ -149,7 +149,7 @@ void CustomOscillator::init()
     frequency->start(startTime);
     waveform->start(startTime);
 
-    for (ValueObject* effect : effects->getList()->objects)
+    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
     {
         effect->start(startTime);
     }
@@ -191,7 +191,7 @@ void Sample::init()
     pan->start(startTime);
     resource->start(startTime);
 
-    for (ValueObject* effect : effects->getList()->objects)
+    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
     {
         effect->start(startTime);
     }
@@ -204,15 +204,16 @@ void Sample::prepareForEffects(const unsigned int bufferLength)
     const double volumeValue = volume->getValue();
     const double panValue = pan->getValue();
 
-    // improve resource/sample acquisition
+    const Resource* resourceLeaf = resource->getLeafAs<Resource>();
+
     for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
     {
-        const double value1 = volumeValue * resource->getResource()->samples[(unsigned int)floor(index)];
+        const double value1 = volumeValue * resourceLeaf->samples[(unsigned int)floor(index)];
         double value2 = value1;
 
-        if (resource->getResource()->channels == 2)
+        if (resourceLeaf->channels == 2)
         {
-            value2 = volumeValue * resource->getResource()->samples[(unsigned int)floor(index) + 1];
+            value2 = volumeValue * resourceLeaf->samples[(unsigned int)floor(index) + 1];
         }
 
         if (utils->channels == 1)
@@ -226,11 +227,11 @@ void Sample::prepareForEffects(const unsigned int bufferLength)
             effectBuffer[i + 1] = value2 * (panValue + 1) / 2;
         }
 
-        index += resource->getResource()->channels * (double)resource->getResource()->sampleRate / utils->sampleRate;
+        index += resourceLeaf->channels * (double)resourceLeaf->sampleRate / utils->sampleRate;
 
-        if (index >= resource->getResource()->length)
+        if (index >= resourceLeaf->length)
         {
-            index = fmod(index, resource->getResource()->length);
+            index = fmod(index, resourceLeaf->length);
         }
     }
 }

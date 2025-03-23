@@ -41,63 +41,13 @@ double ValueObject::getValue()
     return 0;
 }
 
-ValueObject* ValueObject::expandVariable()
+ValueObject* ValueObject::getLeaf()
 {
     return this;
-}
-
-List* ValueObject::getList()
-{
-    return nullptr;
-}
-
-Lambda* ValueObject::getLambda()
-{
-    return nullptr;
-}
-
-Resource* ValueObject::getResource()
-{
-    return nullptr;
-}
-
-Default::Default() :
-    list(new List({})), lambda(new Lambda({}, this)), resource(new Resource(nullptr, 0, utils->sampleRate, utils->channels)) {}
-
-Default* Default::get()
-{
-    static Default* instance;
-
-    if (!instance)
-    {
-        instance = new Default();
-    }
-
-    return instance;
-}
-
-List* Default::getList()
-{
-    return list;
-}
-
-Lambda* Default::getLambda()
-{
-    return lambda;
-}
-
-Resource* Default::getResource()
-{
-    return resource;
 }
 
 List::List(const std::vector<ValueObject*> objects) :
     objects(objects) {}
-
-List* List::getList()
-{
-    return this;
-}
 
 Variable::Variable(ValueObject* value) :
     value(value) {}
@@ -117,24 +67,9 @@ double Variable::getValue()
     return value->getValue();
 }
 
-ValueObject* Variable::expandVariable()
+ValueObject* Variable::getLeaf()
 {
-    return value->expandVariable();
-}
-
-List* Variable::getList()
-{
-    return value->getList();
-}
-
-Lambda* Variable::getLambda()
-{
-    return value->getLambda();
-}
-
-Resource* Variable::getResource()
-{
-    return value->getResource();
+    return value->getLeaf();
 }
 
 void Variable::init()
@@ -148,11 +83,6 @@ Lambda::Lambda(const std::vector<Variable*> inputs, ValueObject* value) :
 double Lambda::getValue()
 {
     return value->getValue();
-}
-
-Lambda* Lambda::getLambda()
-{
-    return this;
 }
 
 void Lambda::setInputs(const std::vector<ValueObject*>& values)
@@ -181,9 +111,34 @@ Resource::~Resource()
     free(samples);
 }
 
-Resource* Resource::getResource()
+Default::Default() :
+    list(new List({})), lambda(new Lambda({}, this)), resource(new Resource(nullptr, 0, utils->sampleRate, utils->channels)) {}
+
+Default* Default::get()
 {
-    return this;
+    static Default* instance;
+
+    if (!instance)
+    {
+        instance = new Default();
+    }
+
+    return instance;
+}
+
+Default::operator List*() const
+{
+    return list;
+}
+
+Default::operator Lambda*() const
+{
+    return lambda;
+}
+
+Default::operator Resource*() const
+{
+    return resource;
 }
 
 double Time::getValue()

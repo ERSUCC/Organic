@@ -134,7 +134,7 @@ All::All(ValueObject* values) :
 
 double All::getValue()
 {
-    for (ValueObject* object : values->getList()->objects)
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
         if (object->getValue() == 0)
         {
@@ -147,7 +147,7 @@ double All::getValue()
 
 void All::init()
 {
-    for (ValueObject* object : values->getList()->objects)
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
         object->start(startTime);
     }
@@ -158,7 +158,7 @@ Any::Any(ValueObject* values) :
 
 double Any::getValue()
 {
-    for (ValueObject* object : values->getList()->objects)
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
         if (object->getValue() != 0)
         {
@@ -171,7 +171,7 @@ double Any::getValue()
 
 void Any::init()
 {
-    for (ValueObject* object : values->getList()->objects)
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
         object->start(startTime);
     }
@@ -182,7 +182,7 @@ None::None(ValueObject* values) :
 
 double None::getValue()
 {
-    for (ValueObject* object : values->getList()->objects)
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
         if (object->getValue() != 0)
         {
@@ -195,7 +195,7 @@ double None::getValue()
 
 void None::init()
 {
-    for (ValueObject* object : values->getList()->objects)
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
         object->start(startTime);
     }
@@ -206,16 +206,16 @@ Min::Min(ValueObject* values) :
 
 double Min::getValue()
 {
-    const List* list = values->getList();
+    const std::vector<ValueObject*>& objects = values->getLeafAs<List>()->objects;
 
-    if (list->objects.empty())
+    if (objects.empty())
     {
         return 0;
     }
 
     double min = utils->infinity;
 
-    for (ValueObject* object : list->objects)
+    for (ValueObject* object : objects)
     {
         const double value = object->getValue();
 
@@ -230,7 +230,7 @@ double Min::getValue()
 
 void Min::init()
 {
-    for (ValueObject* object : values->getList()->objects)
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
         object->start(startTime);
     }
@@ -241,16 +241,16 @@ Max::Max(ValueObject* values) :
 
 double Max::getValue()
 {
-    const List* list = values->getList();
+    const std::vector<ValueObject*>& objects = values->getLeafAs<List>()->objects;
 
-    if (list->objects.empty())
+    if (objects.empty())
     {
         return 0;
     }
 
     double max = -utils->infinity;
 
-    for (ValueObject* object : list->objects)
+    for (ValueObject* object : objects)
     {
         double value = object->getValue();
 
@@ -265,7 +265,7 @@ double Max::getValue()
 
 void Max::init()
 {
-    for (ValueObject* object : values->getList()->objects)
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
         object->start(startTime);
     }
@@ -327,7 +327,7 @@ Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
 
 double Sequence::syncLength() const
 {
-    const std::vector<ValueObject*>& objects = controllers->getList()->objects;
+    const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
 
     if (objects.empty())
     {
@@ -364,7 +364,7 @@ double Sequence::syncLength() const
 
 double Sequence::getValue()
 {
-    const std::vector<ValueObject*>& objects = controllers->getList()->objects;
+    const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
 
     if (objects.empty())
     {
@@ -391,7 +391,7 @@ double Sequence::getValue()
 
 void Sequence::init()
 {
-    const std::vector<ValueObject*>& objects = controllers->getList()->objects;
+    const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
 
     if (objects.empty())
     {
@@ -443,7 +443,7 @@ void Sequence::init()
 
 void Sequence::reinit()
 {
-    const std::vector<ValueObject*>& objects = controllers->getList()->objects;
+    const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
 
     if (objects.empty())
     {

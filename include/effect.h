@@ -33,7 +33,7 @@ private:
 struct LowPassFilter : public Effect
 {
     LowPassFilter(ValueObject* mix, ValueObject* cutoff);
-    
+
     void apply(double* buffer, const unsigned int bufferLength) override;
 
     ValueObject* cutoff;
