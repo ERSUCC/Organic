@@ -1,5 +1,7 @@
 #include "../include/audiosource.h"
 
+void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength) {}
+
 SingleAudioSource::SingleAudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     volume(volume), pan(pan), effects(effects)
 {

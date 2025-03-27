@@ -602,7 +602,7 @@ namespace Parser
 
         const SourceLocation location(path, str->location.line, str->location.character, start, pos + 1);
 
-        const ArgumentList* argumentList = new ArgumentList(arguments, str->str);
+        ArgumentList* argumentList = new ArgumentList(SourceLocation(path, str->location.line, str->location.character + 1, start + 1, pos), arguments, str->str);
 
         if (str->str == "time")
         {

@@ -111,36 +111,6 @@ Resource::~Resource()
     free(samples);
 }
 
-Default::Default() :
-    list(new List({})), lambda(new Lambda({}, this)), resource(new Resource(nullptr, 0, utils->sampleRate, utils->channels)) {}
-
-Default* Default::get()
-{
-    static Default* instance;
-
-    if (!instance)
-    {
-        instance = new Default();
-    }
-
-    return instance;
-}
-
-Default::operator List*() const
-{
-    return list;
-}
-
-Default::operator Lambda*() const
-{
-    return lambda;
-}
-
-Default::operator Resource*() const
-{
-    return resource;
-}
-
 double Time::getValue()
 {
     return utils->time;

@@ -1,5 +1,11 @@
 #include "../include/controller.h"
 
+ValueByte::ValueByte(const unsigned char value) :
+    value(value) {}
+
+ValueInt::ValueInt(const unsigned int value) :
+    value(value) {}
+
 ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
     value1(value1), value2(value2) {}
 
@@ -294,7 +300,7 @@ double Round::getValue()
         st = 1;
     }
 
-    switch ((unsigned int)direction->getValue())
+    switch (direction->getLeafAs<ValueByte>()->value)
     {
         case DirectionEnum::Nearest:
             return round(val / st) * st;
@@ -336,7 +342,7 @@ double Sequence::syncLength() const
 
     double length = 0;
 
-    if (order->getValue() == OrderEnum::PingPong)
+    if (order->getLeafAs<ValueByte>()->value == OrderEnum::PingPong)
     {
         length += objects[0]->syncLength();
 
@@ -404,7 +410,7 @@ void Sequence::init()
 
     udist = std::uniform_int_distribution<>(0, objects.size() - 1);
 
-    const unsigned int orderNum = (unsigned int)order->getValue();
+    const unsigned char orderNum = order->getLeafAs<ValueByte>()->value;
 
     if (orderNum == OrderEnum::PingPong)
     {
@@ -450,7 +456,7 @@ void Sequence::reinit()
         return;
     }
 
-    switch ((unsigned int)order->getValue())
+    switch (order->getLeafAs<ValueByte>()->value)
     {
         case OrderEnum::Forwards:
             current = (current + 1) % objects.size();
@@ -647,7 +653,7 @@ double Random::getValue()
         stop();
     }
 
-    switch ((unsigned int)type->getValue())
+    switch (type->getLeafAs<ValueByte>()->value)
     {
         case TypeEnum::Step:
             return current;

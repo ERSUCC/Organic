@@ -18,9 +18,11 @@ Machine::Machine(const Path* path)
 
     variables = (Variable**)malloc(sizeof(Variable*) * str[BytecodeConstants::OBC_ID_LENGTH]);
 
-    for (unsigned int i = 0; i < str[BytecodeConstants::OBC_ID_LENGTH]; i++)
+    variables[0] = new Variable(new Lambda({}, new Value(0)));
+
+    for (unsigned int i = 1; i < str[BytecodeConstants::OBC_ID_LENGTH]; i++)
     {
-        variables[i] = new Variable(Default::get());
+        variables[i] = new Variable(new Value(0));
     }
 
     const unsigned int numResources = str[BytecodeConstants::OBC_ID_LENGTH + 1];
@@ -194,22 +196,15 @@ void Machine::execute(unsigned int address, const double startTime)
             case BytecodeConstants::RETURN:
                 return;
 
-            case BytecodeConstants::STACK_PUSH_DEFAULT:
-                stack.push(Default::get());
-
-                address++;
-
-                break;
-
             case BytecodeConstants::STACK_PUSH_BYTE:
-                stack.push(new Value(program[address + 1]));
+                stack.push(new ValueByte(program[address + 1]));
 
                 address += 2;
 
                 break;
 
             case BytecodeConstants::STACK_PUSH_INT:
-                stack.push(new Value(readUnsignedInt(program + address + 1)));
+                stack.push(new ValueInt(readUnsignedInt(program + address + 1)));
 
                 address += 5;
 
@@ -223,7 +218,7 @@ void Machine::execute(unsigned int address, const double startTime)
                 break;
 
             case BytecodeConstants::STACK_PUSH_ADDRESS:
-                stack.push(new Value(readUnsignedInt(program + address + 1)));
+                stack.push(new ValueInt(readUnsignedInt(program + address + 1)));
 
                 address += 5;
 
@@ -263,7 +258,7 @@ void Machine::execute(unsigned int address, const double startTime)
                 {
                     case BytecodeConstants::LIST:
                     {
-                        const unsigned int size = inputs[0]->getValue();
+                        const unsigned int size = static_cast<ValueInt*>(inputs[0])->value;
 
                         std::vector<ValueObject*> values;
 
@@ -279,7 +274,7 @@ void Machine::execute(unsigned int address, const double startTime)
 
                     case BytecodeConstants::LAMBDA:
                     {
-                        const unsigned int size = inputs[0]->getValue();
+                        const unsigned int size = static_cast<ValueInt*>(inputs[0])->value;
 
                         std::vector<Variable*> placeholders;
 
@@ -288,7 +283,7 @@ void Machine::execute(unsigned int address, const double startTime)
                             placeholders.push_back(static_cast<Variable*>(popStack()));
                         }
 
-                        execute(inputs[1]->getValue(), startTime);
+                        execute(static_cast<ValueInt*>(inputs[1])->value, startTime);
 
                         stack.push(new Lambda(placeholders, popStack()));
 
@@ -340,12 +335,12 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
-                    case BytecodeConstants::LESSEQUAL:
+                    case BytecodeConstants::LESS_EQUAL:
                         stack.push(new ValueLessEqual(inputs[0], inputs[1]));
 
                         break;
 
-                    case BytecodeConstants::GREATEREQUAL:
+                    case BytecodeConstants::GREATER_EQUAL:
                         stack.push(new ValueGreaterEqual(inputs[0], inputs[1]));
 
                         break;
@@ -377,6 +372,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                     case BytecodeConstants::ROUND:
                         stack.push(new Round(inputs[0], inputs[1], inputs[2]));
+
+                        break;
+
+                    case BytecodeConstants::EMPTY_AUDIO_SOURCE:
+                        stack.push(new AudioSource());
 
                         break;
 
@@ -460,6 +460,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
+                    case BytecodeConstants::EMPTY_EFFECT:
+                        stack.push(new Effect());
+
+                        break;
+
                     case BytecodeConstants::DELAY:
                         stack.push(new Delay(inputs[0], inputs[1], inputs[2]));
 
@@ -467,7 +472,7 @@ void Machine::execute(unsigned int address, const double startTime)
 
                     case BytecodeConstants::PLAY:
                     {
-                        AudioSource* audioSource = dynamic_cast<AudioSource*>(inputs[0]);
+                        AudioSource* audioSource = static_cast<AudioSource*>(inputs[0]);
 
                         audioSources.push_back(audioSource);
 
@@ -480,7 +485,9 @@ void Machine::execute(unsigned int address, const double startTime)
 
                     case BytecodeConstants::PERFORM:
                     {
-                        const unsigned int exec = inputs[0]->getValue();
+                        const unsigned int exec = static_cast<ValueInt*>(inputs[0])->value;
+
+                        // WHY IT SO LOUD???
 
                         Event* event = new Event([=](double startTime)
                         {

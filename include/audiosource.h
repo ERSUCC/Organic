@@ -10,7 +10,7 @@
 
 struct AudioSource : public ValueObject
 {
-    virtual void fillBuffer(double* buffer, const unsigned int bufferLength) = 0;
+    virtual void fillBuffer(double* buffer, const unsigned int bufferLength);
 };
 
 struct SingleAudioSource : public AudioSource

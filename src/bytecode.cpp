@@ -48,14 +48,6 @@ void writeDouble(std::ofstream& stream, const double d)
 BytecodeInstruction::BytecodeInstruction(const unsigned int size) :
     size(size) {}
 
-StackPushDefault::StackPushDefault() :
-    BytecodeInstruction(1) {}
-
-void StackPushDefault::output(std::ofstream& stream) const
-{
-    stream << BytecodeConstants::STACK_PUSH_DEFAULT;
-}
-
 StackPushByte::StackPushByte(const unsigned char value) :
     BytecodeInstruction(2), value(value) {}
 

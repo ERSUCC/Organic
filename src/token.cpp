@@ -70,6 +70,11 @@ namespace Parser
         return false;
     }
 
+    Token* Type::getDefault(const SourceLocation location)
+    {
+        return new Value(location, "0", 0);
+    }
+
     NoneType::NoneType() :
         Type("nothing") {}
 
@@ -104,6 +109,11 @@ namespace Parser
         return true;
     }
 
+    Token* SequenceOrderType::getDefault(const SourceLocation location)
+    {
+        return new SequenceForwards(location);
+    }
+
     RandomTypeType::RandomTypeType() :
         Type("random type constant") {}
 
@@ -117,6 +127,11 @@ namespace Parser
         return true;
     }
 
+    Token* RandomTypeType::getDefault(const SourceLocation location)
+    {
+        return new RandomStep(location);
+    }
+
     RoundDirectionType::RoundDirectionType() :
         Type("round direction constant") {}
 
@@ -128,6 +143,11 @@ namespace Parser
     bool RoundDirectionType::checkSpecifiedType(const RoundDirectionType* expected) const
     {
         return true;
+    }
+
+    Token* RoundDirectionType::getDefault(const SourceLocation location)
+    {
+        return new RoundNearest(location);
     }
 
     NumberType::NumberType() :
@@ -182,6 +202,11 @@ namespace Parser
         return true;
     }
 
+    Token* AudioSourceType::getDefault(const SourceLocation location)
+    {
+        return new EmptyAudioSource(location);
+    }
+
     EffectType::EffectType() :
         Type("effect") {}
 
@@ -195,6 +220,11 @@ namespace Parser
         return true;
     }
 
+    Token* EffectType::getDefault(const SourceLocation location)
+    {
+        return new EmptyEffect(location);
+    }
+
     ListType::ListType(Type* subType) :
         Type("list of " + subType->name()), subType(subType) {}
 
@@ -206,6 +236,11 @@ namespace Parser
     bool ListType::checkSpecifiedType(const ListType* expected) const
     {
         return expected->subType->checkType(subType);
+    }
+
+    Token* ListType::getDefault(const SourceLocation location)
+    {
+        return new List(location, {});
     }
 
     LambdaType::LambdaType(const std::unordered_map<std::string, const Type*> inputTypes, const Type* returnType) :
@@ -232,6 +267,16 @@ namespace Parser
         }
 
         return true;
+    }
+
+    Token* LambdaType::getDefault(const SourceLocation location)
+    {
+        Identifier* identifier = new Identifier(location, "");
+
+        identifier->id = 0;
+        identifier->type = this;
+
+        return identifier;
     }
 
     std::string LambdaType::inputString(const std::unordered_map<std::string, const Type*>& inputTypes) const
@@ -511,8 +556,25 @@ namespace Parser
         return name + ": " + value->string();
     }
 
-    ArgumentList::ArgumentList(const std::vector<Argument*>& arguments, const std::string name) :
-        arguments(arguments), name(name) {}
+    ArgumentList::ArgumentList(const SourceLocation location, const std::vector<Argument*>& arguments, const std::string name) :
+        Token(location), arguments(arguments), name(name) {}
+
+    std::string ArgumentList::string() const
+    {
+        if (arguments.empty())
+        {
+            return "";
+        }
+
+        std::string result = arguments[0]->string();
+
+        for (unsigned int i = 1; i < arguments.size(); i++)
+        {
+            result += ", " + arguments[i]->string();
+        }
+
+        return result;
+    }
 
     Token* ArgumentList::get(const std::string name) const
     {
@@ -525,6 +587,15 @@ namespace Parser
         }
 
         return nullptr;
+    }
+
+    void ArgumentList::addDefault(const std::string name, Type* type)
+    {
+        Argument* argument = new Argument(location, name, type->getDefault(location));
+
+        argument->used = true;
+
+        arguments.push_back(argument);
     }
 
     void ArgumentList::check() const
@@ -599,27 +670,15 @@ namespace Parser
         return variable->string() + " = " + value->string();
     }
 
-    Call::Call(const SourceLocation location, const ArgumentList* arguments) :
+    Call::Call(const SourceLocation location, ArgumentList* arguments) :
         Token(location), arguments(arguments) {}
 
     std::string Call::string() const
     {
-        std::string result = arguments->name + '(';
-
-        if (!arguments->arguments.empty())
-        {
-            result += arguments->arguments[0]->string();
-
-            for (unsigned int i = 1; i < arguments->arguments.size(); i++)
-            {
-                result += ", " + arguments->arguments[i]->string();
-            }
-        }
-
-        return result + ')';
+        return arguments->name + '(' + arguments->string() + ')';
     }
 
-    Time::Time(const SourceLocation location, const ArgumentList* arguments) :
+    Time::Time(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -630,7 +689,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Hold::Hold(const SourceLocation location, const ArgumentList* arguments) :
+    Hold::Hold(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -646,7 +705,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    LFO::LFO(const SourceLocation location, const ArgumentList* arguments) :
+    LFO::LFO(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -662,7 +721,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Sweep::Sweep(const SourceLocation location, const ArgumentList* arguments) :
+    Sweep::Sweep(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -678,7 +737,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Sequence::Sequence(const SourceLocation location, const ArgumentList* arguments) :
+    Sequence::Sequence(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -694,7 +753,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Repeat::Repeat(const SourceLocation location, const ArgumentList* arguments) :
+    Repeat::Repeat(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -710,7 +769,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Random::Random(const SourceLocation location, const ArgumentList* arguments) :
+    Random::Random(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -726,7 +785,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Limit::Limit(const SourceLocation location, const ArgumentList* arguments) :
+    Limit::Limit(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -742,7 +801,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Trigger::Trigger(const SourceLocation location, const ArgumentList* arguments) :
+    Trigger::Trigger(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -758,7 +817,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    If::If(const SourceLocation location, const ArgumentList* arguments) :
+    If::If(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -774,7 +833,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    All::All(const SourceLocation location, const ArgumentList* arguments) :
+    All::All(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new BooleanType();
@@ -790,7 +849,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Any::Any(const SourceLocation location, const ArgumentList* arguments) :
+    Any::Any(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new BooleanType();
@@ -806,7 +865,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    None::None(const SourceLocation location, const ArgumentList* arguments) :
+    None::None(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new BooleanType();
@@ -822,7 +881,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Min::Min(const SourceLocation location, const ArgumentList* arguments) :
+    Min::Min(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -838,7 +897,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Max::Max(const SourceLocation location, const ArgumentList* arguments) :
+    Max::Max(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -854,7 +913,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Round::Round(const SourceLocation location, const ArgumentList* arguments) :
+    Round::Round(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NumberType();
@@ -870,13 +929,21 @@ namespace Parser
         visitor->transform(this);
     }
 
-    AudioSource::AudioSource(const SourceLocation location, const ArgumentList* arguments) :
+    AudioSource::AudioSource(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new AudioSourceType();
     }
 
-    Sine::Sine(const SourceLocation location, const ArgumentList* arguments) :
+    EmptyAudioSource::EmptyAudioSource(const SourceLocation location) :
+        AudioSource(location, {}) {}
+
+    void EmptyAudioSource::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    Sine::Sine(const SourceLocation location, ArgumentList* arguments) :
         AudioSource(location, arguments) {}
 
     void Sine::resolveTypes(TypeResolver* visitor)
@@ -889,7 +956,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Square::Square(const SourceLocation location, const ArgumentList* arguments) :
+    Square::Square(const SourceLocation location, ArgumentList* arguments) :
         AudioSource(location, arguments) {}
 
     void Square::resolveTypes(TypeResolver* visitor)
@@ -902,7 +969,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Triangle::Triangle(const SourceLocation location, const ArgumentList* arguments) :
+    Triangle::Triangle(const SourceLocation location, ArgumentList* arguments) :
         AudioSource(location, arguments) {}
 
     void Triangle::resolveTypes(TypeResolver* visitor)
@@ -915,7 +982,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Saw::Saw(const SourceLocation location, const ArgumentList* arguments) :
+    Saw::Saw(const SourceLocation location, ArgumentList* arguments) :
         AudioSource(location, arguments) {}
 
     void Saw::resolveTypes(TypeResolver* visitor)
@@ -928,7 +995,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Oscillator::Oscillator(const SourceLocation location, const ArgumentList* arguments) :
+    Oscillator::Oscillator(const SourceLocation location, ArgumentList* arguments) :
         AudioSource(location, arguments) {}
 
     void Oscillator::resolveTypes(TypeResolver* visitor)
@@ -941,7 +1008,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Noise::Noise(const SourceLocation location, const ArgumentList* arguments) :
+    Noise::Noise(const SourceLocation location, ArgumentList* arguments) :
         AudioSource(location, arguments) {}
 
     void Noise::resolveTypes(TypeResolver* visitor)
@@ -954,7 +1021,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Sample::Sample(const SourceLocation location, const ArgumentList* arguments) :
+    Sample::Sample(const SourceLocation location, ArgumentList* arguments) :
         AudioSource(location, arguments) {}
 
     void Sample::resolveTypes(TypeResolver* visitor)
@@ -983,11 +1050,22 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Delay::Delay(const SourceLocation location, const ArgumentList* arguments) :
+    Effect::Effect(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new EffectType();
     }
+
+    EmptyEffect::EmptyEffect(const SourceLocation location) :
+        Effect(location, {}) {}
+
+    void EmptyEffect::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    Delay::Delay(const SourceLocation location, ArgumentList* arguments) :
+        Effect(location, arguments) {}
 
     void Delay::resolveTypes(TypeResolver* visitor)
     {
@@ -999,7 +1077,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Perform::Perform(const SourceLocation location, const ArgumentList* arguments) :
+    Perform::Perform(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NoneType();
@@ -1015,7 +1093,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Include::Include(const SourceLocation location, const ArgumentList* arguments) :
+    Include::Include(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
         type = new NoneType();
@@ -1031,7 +1109,7 @@ namespace Parser
         visitor->transform(this);
     }
 
-    CallUser::CallUser(const SourceLocation location, const ArgumentList* arguments) :
+    CallUser::CallUser(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments) {}
 
     void CallUser::resolveTypes(TypeResolver* visitor)
@@ -1703,7 +1781,7 @@ namespace Parser
         scopes.pop_back();
     }
 
-    void TypeResolver::resolveArgumentTypes(const ArgumentList* arguments, const std::string name, Type* expectedType)
+    void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType)
     {
         for (unsigned int i = 0; i < arguments->arguments.size(); i++)
         {
@@ -1732,6 +1810,8 @@ namespace Parser
                 return;
             }
         }
+
+        arguments->addDefault(name, expectedType);
     }
 
     Identifier* TypeResolver::getVariable(const std::string variable)
@@ -2092,6 +2172,11 @@ namespace Parser
         addInstruction(new CallNative(BytecodeConstants::ROUND, 3));
     }
 
+    void BytecodeTransformer::transform(const EmptyAudioSource* token)
+    {
+        addInstruction(new CallNative(BytecodeConstants::EMPTY_AUDIO_SOURCE, 0));
+    }
+
     void BytecodeTransformer::transform(const Sine* token)
     {
         token->arguments->check();
@@ -2203,6 +2288,11 @@ namespace Parser
         token->audioSource->transform(this);
 
         addInstruction(new CallNative(BytecodeConstants::PLAY, 1));
+    }
+
+    void BytecodeTransformer::transform(const EmptyEffect* token)
+    {
+        addInstruction(new CallNative(BytecodeConstants::EMPTY_EFFECT, 0));
     }
 
     void BytecodeTransformer::transform(const Delay* token)
@@ -2341,7 +2431,7 @@ namespace Parser
         token->b->transform(this);
         token->a->transform(this);
 
-        addInstruction(new CallNative(BytecodeConstants::LESSEQUAL, 2));
+        addInstruction(new CallNative(BytecodeConstants::LESS_EQUAL, 2));
     }
 
     void BytecodeTransformer::transform(const GreaterEqualAlias* token)
@@ -2349,7 +2439,7 @@ namespace Parser
         token->b->transform(this);
         token->a->transform(this);
 
-        addInstruction(new CallNative(BytecodeConstants::GREATEREQUAL, 2));
+        addInstruction(new CallNative(BytecodeConstants::GREATER_EQUAL, 2));
     }
 
     void BytecodeTransformer::transform(const Define* token)
@@ -2418,8 +2508,6 @@ namespace Parser
                 return;
             }
         }
-
-        addInstruction(new StackPushDefault());
     }
 
     void BytecodeTransformer::addInstruction(const BytecodeInstruction* instruction)

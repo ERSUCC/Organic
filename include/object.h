@@ -33,7 +33,7 @@ struct ValueObject : public Sync
 
     virtual ValueObject* getLeaf();
 
-    template <typename T> T* getLeafAs()
+    template <typename T> inline T* getLeafAs()
     {
         return static_cast<T*>(getLeaf());
     }
@@ -90,27 +90,6 @@ struct Resource : public ValueObject
     const unsigned int length;
     const unsigned int sampleRate;
     const unsigned int channels;
-};
-
-struct Default : public ValueObject
-{
-    static Default* get();
-
-    explicit operator List*() const;
-    explicit operator Lambda*() const;
-    explicit operator Resource*() const;
-
-private:
-    Default();
-
-    static Default* instance;
-
-    List* list;
-
-    Lambda* lambda;
-
-    Resource* resource;
-
 };
 
 struct Time : public ValueObject

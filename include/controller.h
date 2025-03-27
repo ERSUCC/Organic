@@ -6,6 +6,20 @@
 
 #include "object.h"
 
+struct ValueByte : public ValueObject
+{
+    ValueByte(const unsigned char value);
+
+    const unsigned char value;
+};
+
+struct ValueInt : public ValueObject
+{
+    ValueInt(const unsigned int value);
+
+    const unsigned int value;
+};
+
 struct ValueCombination : public ValueObject
 {
     ValueCombination(ValueObject* value1, ValueObject* value2);
