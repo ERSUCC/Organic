@@ -18,11 +18,9 @@ Machine::Machine(const Path* path)
 
     variables = (Variable**)malloc(sizeof(Variable*) * str[BytecodeConstants::OBC_ID_LENGTH]);
 
-    variables[0] = new Variable(new Lambda({}, new Value(0)));
-
-    for (unsigned int i = 1; i < str[BytecodeConstants::OBC_ID_LENGTH]; i++)
+    for (unsigned int i = 0; i < str[BytecodeConstants::OBC_ID_LENGTH]; i++)
     {
-        variables[i] = new Variable(new Value(0));
+        variables[i] = new Variable(nullptr);
     }
 
     const unsigned int numResources = str[BytecodeConstants::OBC_ID_LENGTH + 1];
@@ -289,6 +287,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
                     }
+
+                    case BytecodeConstants::EMPTY_LAMBDA:
+                        stack.push(new Lambda({}, new Value(0)));
+
+                        break;
 
                     case BytecodeConstants::TIME:
                         stack.push(new Time());

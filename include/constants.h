@@ -20,7 +20,8 @@ struct BytecodeConstants
 
     static constexpr unsigned char LIST = 0x0;
     static constexpr unsigned char LAMBDA = 0x1;
-    static constexpr unsigned char TIME = 0x2;
+    static constexpr unsigned char EMPTY_LAMBDA = 0x2;
+    static constexpr unsigned char TIME = 0x3;
 
     static constexpr unsigned char ADD = 0x10;
     static constexpr unsigned char SUBTRACT = 0x11;

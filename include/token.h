@@ -330,6 +330,13 @@ namespace Parser
         bool used = false;
     };
 
+    struct EmptyLambda : public Token
+    {
+        EmptyLambda(const SourceLocation location);
+
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
     struct Value : public BasicToken
     {
         Value(const SourceLocation location, const std::string str, const double value);
@@ -953,7 +960,7 @@ namespace Parser
 
         Type* expectedType = new AnyType();
 
-        unsigned char nextIdentifierId = 1;
+        unsigned char nextIdentifierId = 0;
 
     };
 
@@ -974,6 +981,7 @@ namespace Parser
         void transform(const Pi* token);
         void transform(const E* token);
         void transform(const Identifier* token);
+        void transform(const EmptyLambda* token);
         void transform(const List* token);
         void transform(const ParenthesizedExpression* token);
         void transform(const Assign* token);
@@ -1037,7 +1045,7 @@ namespace Parser
 
         std::stack<InstructionBlock*> blocks;
 
-        unsigned char nextIdentifierId = 1;
+        unsigned char nextIdentifierId = 0;
 
     };
 }

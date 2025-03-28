@@ -271,12 +271,7 @@ namespace Parser
 
     Token* LambdaType::getDefault(const SourceLocation location)
     {
-        Identifier* identifier = new Identifier(location, "");
-
-        identifier->id = 0;
-        identifier->type = this;
-
-        return identifier;
+        return new EmptyLambda(location);
     }
 
     std::string LambdaType::inputString(const std::unordered_map<std::string, const Type*>& inputTypes) const
@@ -406,6 +401,14 @@ namespace Parser
     }
 
     void Identifier::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    EmptyLambda::EmptyLambda(const SourceLocation location) :
+        Token(location) {}
+
+    void EmptyLambda::transform(BytecodeTransformer* visitor) const
     {
         visitor->transform(this);
     }
@@ -1983,6 +1986,11 @@ namespace Parser
         }
 
         addInstruction(new GetVariable(token->id));
+    }
+
+    void BytecodeTransformer::transform(const EmptyLambda* token)
+    {
+        addInstruction(new CallNative(BytecodeConstants::EMPTY_LAMBDA, 0));
     }
 
     void BytecodeTransformer::transform(const List* token)
