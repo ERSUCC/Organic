@@ -54,7 +54,7 @@ ProgramOptions FlagParser::getOptions()
 
             Path* path = Path::relative(nextOption(flag));
 
-            if (path->parent()->exists())
+            if (!path->parent()->exists())
             {
                 throw OrganicArgumentException("Specified output file is in a non-existent directory.");
             }
