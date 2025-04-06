@@ -29,6 +29,7 @@ struct Path
 
     bool exists() const;
     bool isFile() const;
+    bool isDirectory() const;
 
     const Path* parent() const;
 

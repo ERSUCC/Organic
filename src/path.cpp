@@ -30,6 +30,11 @@ bool Path::isFile() const
     return std::filesystem::is_regular_file(path);
 }
 
+bool Path::isDirectory() const
+{
+    return std::filesystem::is_directory(path);
+}
+
 const Path* Path::parent() const
 {
     return new Path(path.parent_path());

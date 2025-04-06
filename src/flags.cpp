@@ -59,6 +59,11 @@ ProgramOptions FlagParser::getOptions()
                 throw OrganicArgumentException("Specified output file is in a non-existent directory.");
             }
 
+            if (path->isDirectory())
+            {
+                throw OrganicArgumentException("Specified output path is a directory, it must be a file.");
+            }
+
             options.exportPath = path;
         }
 
