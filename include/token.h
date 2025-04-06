@@ -707,6 +707,8 @@ namespace Parser
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
+        std::string string() const override;
+
         AudioSource* audioSource;
     };
 

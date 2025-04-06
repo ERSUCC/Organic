@@ -1053,6 +1053,11 @@ namespace Parser
         visitor->transform(this);
     }
 
+    std::string Play::string() const
+    {
+        return audioSource->string();
+    }
+
     Effect::Effect(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
