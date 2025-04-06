@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_library(rtaudio SHARED RtAudio.cpp)
 
+target_compile_definitions(rtaudio PRIVATE -DRTAUDIO_EXPORT)
+
 if (WIN32)
     target_compile_options(rtaudio PRIVATE -D__WINDOWS_WASAPI__)
 
