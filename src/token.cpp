@@ -1746,6 +1746,11 @@ namespace Parser
             token->type = token->instructions.back()->type;
         }
 
+        if (!token->type)
+        {
+            throw OrganicParseException("This function has an ambiguous return type.", token->location);
+        }
+
         token->id = nextIdentifierId++;
     }
 

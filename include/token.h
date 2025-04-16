@@ -951,7 +951,7 @@ namespace Parser
 
         std::vector<Scope*> scopes;
 
-        Type* expectedType = new AnyType();
+        Type* expectedType = nullptr;
 
         unsigned char nextIdentifierId = 0;
 
