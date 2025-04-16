@@ -16,7 +16,6 @@ struct BytecodeConstants
     static constexpr unsigned char GET_VARIABLE = 0x7;
     static constexpr unsigned char CALL_NATIVE = 0x8;
     static constexpr unsigned char CALL_USER = 0x9;
-    static constexpr unsigned char CLEAR_STACK = 0xa;
 
     static constexpr unsigned char LIST = 0x0;
     static constexpr unsigned char LAMBDA = 0x1;

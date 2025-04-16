@@ -127,13 +127,6 @@ private:
 
 };
 
-struct ClearStack : public BytecodeInstruction
-{
-    ClearStack();
-
-    void output(std::ofstream& stream) const override;
-};
-
 struct BytecodeBlock
 {
     virtual void output(std::ofstream& stream) const = 0;

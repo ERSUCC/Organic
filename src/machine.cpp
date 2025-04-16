@@ -521,16 +521,6 @@ void Machine::execute(unsigned int address, const double startTime)
 
                 break;
 
-            case BytecodeConstants::CLEAR_STACK:
-                while (!stack.empty())
-                {
-                    stack.pop();
-                }
-
-                address++;
-
-                break;
-
             default:
                 throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");
 

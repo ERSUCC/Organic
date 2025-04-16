@@ -2349,8 +2349,6 @@ namespace Parser
         {
             for (const Token* instruction : token->program->instructions)
             {
-                addInstruction(new ClearStack());
-
                 instruction->transform(this);
             }
         }
@@ -2461,8 +2459,6 @@ namespace Parser
 
         for (const Token* instruction : token->instructions)
         {
-            addInstruction(new ClearStack());
-
             instruction->transform(this);
         }
 
@@ -2500,8 +2496,6 @@ namespace Parser
 
         for (const Token* instruction : token->instructions)
         {
-            addInstruction(new ClearStack());
-
             instruction->transform(this);
         }
 
