@@ -2425,24 +2425,27 @@ namespace Parser
 
         resolver->addInstructionBlock(token->block);
 
-        std::vector<std::pair<std::string, unsigned char>> inputs;
-
-        for (const Identifier* input : token->inputs)
+        if (!token->instructions.empty())
         {
-            inputs.push_back(std::make_pair(input->str, input->id));
+            std::vector<std::pair<std::string, unsigned char>> inputs;
+
+            for (const Identifier* input : token->inputs)
+            {
+                inputs.push_back(std::make_pair(input->str, input->id));
+            }
+
+            std::sort(inputs.begin(), inputs.end(), std::greater());
+
+            for (const std::pair<std::string, unsigned char>& input : inputs)
+            {
+                addInstruction(new GetVariable(input.second));
+            }
+
+            addInstruction(new StackPushAddress(token->block));
+            addInstruction(new StackPushInt(token->inputs.size()));
+            addInstruction(new CallNative(BytecodeConstants::LAMBDA, 2));
+            addInstruction(new SetVariable(token->id));
         }
-
-        std::sort(inputs.begin(), inputs.end(), std::greater());
-
-        for (const std::pair<std::string, unsigned char>& input : inputs)
-        {
-            addInstruction(new GetVariable(input.second));
-        }
-
-        addInstruction(new StackPushAddress(token->block));
-        addInstruction(new StackPushInt(token->inputs.size()));
-        addInstruction(new CallNative(BytecodeConstants::LAMBDA, 2));
-        addInstruction(new SetVariable(token->id));
     }
 
     void BytecodeTransformer::transform(const Program* token)
