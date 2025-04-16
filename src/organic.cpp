@@ -118,8 +118,6 @@ void Organic::startExport()
     {
         utils->time = i * 1000.0 / utils->sampleRate;
 
-        machine->updateEvents();
-
         if (i + utils->bufferLength < steps)
         {
             machine->processAudioSources(samples + i * utils->channels, utils->bufferLength);
@@ -141,7 +139,6 @@ int Organic::processAudio(void* output, unsigned int frames)
 {
     callbackActive = true;
 
-    machine->updateEvents();
     machine->processAudioSources((double*)output, frames);
 
     return 0;

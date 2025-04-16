@@ -6,20 +6,19 @@ doom = sequence(values: [
     sweep(from: 1, to: 0, length: 10000)
 ])
 
-add-overtone(overtone) = {
-    triangle(volume: 0.5, frequency: (base * overtone) * doom)
+add-overtone(overtone, delay) = {
+    triangle(volume: trigger(value: 0.5, condition: time() >= delay), frequency: (base * overtone) * doom)
 }
 
-add-overtone(overtone: 1)
-
-perform(function: add-overtone(overtone: 2), delay: time, repeats: 1)
-perform(function: add-overtone(overtone: 3), delay: time * 2, repeats: 1)
-perform(function: add-overtone(overtone: 4), delay: time * 3, repeats: 1)
-perform(function: add-overtone(overtone: 5), delay: time * 4, repeats: 1)
-perform(function: add-overtone(overtone: 6), delay: time * 5, repeats: 1)
-perform(function: add-overtone(overtone: 7), delay: time * 6, repeats: 1)
-perform(function: add-overtone(overtone: 8), delay: time * 7, repeats: 1)
-perform(function: add-overtone(overtone: 9), delay: time * 8, repeats: 1)
-perform(function: add-overtone(overtone: 10), delay: time * 9, repeats: 1)
-perform(function: add-overtone(overtone: 11), delay: time * 10, repeats: 1)
-perform(function: add-overtone(overtone: 12), delay: time * 11, repeats: 1)
+add-overtone(overtone: 1, delay: 0)
+add-overtone(overtone: 2, delay: time)
+add-overtone(overtone: 3, delay: time * 2)
+add-overtone(overtone: 4, delay: time * 3)
+add-overtone(overtone: 5, delay: time * 4)
+add-overtone(overtone: 6, delay: time * 5)
+add-overtone(overtone: 7, delay: time * 6)
+add-overtone(overtone: 8, delay: time * 7)
+add-overtone(overtone: 9, delay: time * 8)
+add-overtone(overtone: 10, delay: time * 9)
+add-overtone(overtone: 11, delay: time * 10)
+add-overtone(overtone: 12, delay: time * 11)

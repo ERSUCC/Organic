@@ -11,7 +11,6 @@ add_library(organic_lib STATIC src/audiosource.cpp
                                src/bytecode.cpp
                                src/controller.cpp
                                src/effect.cpp
-                               src/event.cpp
                                src/flags.cpp
                                src/location.cpp
                                src/machine.cpp

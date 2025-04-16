@@ -62,5 +62,4 @@ struct BytecodeConstants
     static constexpr unsigned char DELAY = 0x71;
 
     static constexpr unsigned char PLAY = 0x90;
-    static constexpr unsigned char PERFORM = 0x91;
 };

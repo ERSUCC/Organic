@@ -1085,22 +1085,6 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Perform::Perform(const SourceLocation location, ArgumentList* arguments) :
-        Call(location, arguments)
-    {
-        type = new NoneType();
-    }
-
-    void Perform::resolveTypes(TypeResolver* visitor)
-    {
-        visitor->resolveTypes(this);
-    }
-
-    void Perform::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
-    }
-
     Include::Include(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
@@ -1610,14 +1594,6 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "feedback", new NumberType());
         resolveArgumentTypes(token->arguments, "delay", new NumberType());
         resolveArgumentTypes(token->arguments, "mix", new NumberType());
-    }
-
-    void TypeResolver::resolveTypes(Perform* token)
-    {
-        resolveArgumentTypes(token->arguments, "interval", new NumberType());
-        resolveArgumentTypes(token->arguments, "repeats", new NumberType());
-        resolveArgumentTypes(token->arguments, "delay", new NumberType());
-        resolveArgumentTypes(token->arguments, "function", new AnyType());
     }
 
     void TypeResolver::resolveTypes(Include* token)
@@ -2317,28 +2293,6 @@ namespace Parser
         transformArgument(token->arguments, "mix");
 
         addInstruction(new CallNative(BytecodeConstants::DELAY, 3));
-    }
-
-    void BytecodeTransformer::transform(const Perform* token)
-    {
-        token->arguments->check();
-
-        transformArgument(token->arguments, "interval");
-        transformArgument(token->arguments, "repeats");
-        transformArgument(token->arguments, "delay");
-
-        InstructionBlock* block = new InstructionBlock();
-
-        blocks.push(block);
-
-        transformArgument(token->arguments, "function");
-
-        blocks.pop();
-
-        resolver->addInstructionBlock(block);
-
-        addInstruction(new StackPushAddress(block));
-        addInstruction(new CallNative(BytecodeConstants::PERFORM, 4));
     }
 
     void BytecodeTransformer::transform(const Include* token)

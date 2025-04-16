@@ -9,7 +9,6 @@
 #include "audiosource.h"
 #include "constants.h"
 #include "controller.h"
-#include "event.h"
 #include "object.h"
 #include "path.h"
 #include "utils.h"
@@ -21,7 +20,6 @@ struct Machine
 
     void run();
 
-    void updateEvents();
     void processAudioSources(double* buffer, const unsigned int bufferLength);
 
 private:
@@ -46,6 +44,5 @@ private:
     Variable** variables;
 
     std::vector<AudioSource*> audioSources;
-    std::vector<Event*> events;
 
 };

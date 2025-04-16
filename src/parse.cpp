@@ -548,7 +548,6 @@ namespace Parser
             name->str == "noise" ||
             name->str == "sample" ||
             name->str == "delay" ||
-            name->str == "perform" ||
             name->str == "include")
         {
             throw OrganicParseException("A function already exists with the name \"" + name->str + "\".", name->location);
@@ -722,11 +721,6 @@ namespace Parser
         if (str->str == "delay")
         {
             return new Delay(location, argumentList);
-        }
-
-        if (str->str == "perform")
-        {
-            return new Perform(location, argumentList);
         }
 
         if (str->str == "include")

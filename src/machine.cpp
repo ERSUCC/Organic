@@ -20,7 +20,7 @@ Machine::Machine(const Path* path)
 
     for (unsigned int i = 0; i < str[BytecodeConstants::OBC_ID_LENGTH]; i++)
     {
-        variables[i] = new Variable(nullptr);
+        variables[i] = new Variable(new Value(0));
     }
 
     const unsigned int numResources = str[BytecodeConstants::OBC_ID_LENGTH + 1];
@@ -80,19 +80,6 @@ Machine::~Machine()
 void Machine::run()
 {
     execute(0, 0);
-}
-
-void Machine::updateEvents()
-{
-    for (unsigned int i = 0; i < events.size(); i++)
-    {
-        events[i]->update();
-
-        if (!events[i]->enabled)
-        {
-            events.erase(events.begin() + i--);
-        }
-    }
 }
 
 void Machine::processAudioSources(double* buffer, const unsigned int bufferLength)
@@ -482,24 +469,6 @@ void Machine::execute(unsigned int address, const double startTime)
                         audioSource->start(startTime);
 
                         stack.push(audioSource);
-
-                        break;
-                    }
-
-                    case BytecodeConstants::PERFORM:
-                    {
-                        const unsigned int exec = static_cast<ValueInt*>(inputs[0])->value;
-
-                        // WHY IT SO LOUD???
-
-                        Event* event = new Event([=](double startTime)
-                        {
-                            execute(exec, startTime);
-                        }, inputs[1], inputs[2], inputs[3]);
-
-                        events.push_back(event);
-
-                        event->start(startTime);
 
                         break;
                     }
