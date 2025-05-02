@@ -1699,7 +1699,14 @@ namespace Parser
             throw OrganicParseException("This function has an ambiguous return type.", token->location);
         }
 
-        token->function->type = token->type;
+        std::unordered_map<std::string, const Type*> inputTypes;
+
+        for (const InputDef* input : token->function->inputs)
+        {
+            inputTypes[input->str] = input->type;
+        }
+
+        token->function->type = new LambdaType(inputTypes, token->type);
     }
 
     void TypeResolver::resolveTypes(Program* token)
