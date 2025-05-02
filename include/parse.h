@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "location.h"
@@ -10,9 +11,33 @@
 
 namespace Parser
 {
+    struct ParserContext
+    {
+        ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs);
+
+        VariableDef* addVariable(const Identifier* token);
+        FunctionDef* addFunction(const Identifier* token, const std::vector<InputDef*>& inputs);
+
+        Identifier* findIdentifier(const Identifier* token);
+        FunctionRef* findFunction(const Identifier* token);
+
+        ParserContext* parent;
+
+    private:
+        void checkNameConflicts(const Identifier* token) const;
+        bool checkRecursive(const Identifier* token) const;
+
+        const std::string name;
+
+        std::unordered_map<std::string, InputDef*> inputs;
+        std::unordered_map<std::string, VariableDef*> variables;
+        std::unordered_map<std::string, FunctionDef*> functions;
+
+    };
+
     struct Parser
     {
-        Parser(const Path* path);
+        Parser(const Path* path, ParserContext* context);
 
         Program* parse();
 
@@ -28,8 +53,8 @@ namespace Parser
 
         void tokenError(const BasicToken* token, const std::string message) const;
 
-        Token* parseInstruction(unsigned int pos) const;
-        Define* parseDefine(unsigned int pos) const;
+        Token* parseInstruction(unsigned int pos);
+        Define* parseDefine(unsigned int pos);
         Assign* parseAssign(unsigned int pos) const;
         Token* parseCall(unsigned int pos, const bool top) const;
         Argument* parseArgument(unsigned int pos) const;
@@ -41,6 +66,8 @@ namespace Parser
         double getFrequency(const double note) const;
 
         const Path* path;
+
+        ParserContext* context;
 
         std::string code;
 

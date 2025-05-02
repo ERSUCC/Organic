@@ -2,8 +2,118 @@
 
 namespace Parser
 {
-    Parser::Parser(const Path* path) :
-        path(path)
+    ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs) :
+        parent(parent), name(name)
+    {
+        for (InputDef* input : inputs)
+        {
+            this->inputs[input->str] = input;
+        }
+    }
+
+    VariableDef* ParserContext::addVariable(const Identifier* token)
+    {
+        checkNameConflicts(token);
+
+        VariableDef* variable = new VariableDef(token->location, token->str);
+
+        variables[token->str] = variable;
+
+        return variable;
+    }
+
+    FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vector<InputDef*>& inputs)
+    {
+        if (checkRecursive(token))
+        {
+            throw OrganicParseException("Redefining a function in its own definition is not allowed.", token->location);
+        }
+
+        checkNameConflicts(token);
+
+        FunctionDef* lambda = new FunctionDef(token->location, token->str, inputs);
+
+        functions[token->str] = lambda;
+
+        return lambda;
+    }
+
+    Identifier* ParserContext::findIdentifier(const Identifier* token)
+    {
+        if (inputs.count(token->str))
+        {
+            return new InputRef(token->location, inputs[token->str]);
+        }
+
+        if (variables.count(token->str))
+        {
+            return new VariableRef(token->location, variables[token->str]);
+        }
+
+        if (functions.count(token->str))
+        {
+            return new FunctionRef(token->location, functions[token->str]);
+        }
+
+        if (parent)
+        {
+            if (Identifier* identifier = parent->findIdentifier(token))
+            {
+                return identifier;
+            }
+        }
+
+        throw OrganicParseException("No variable, input, or function exists with the name \"" + token->str + "\".", token->location);
+    }
+
+    FunctionRef* ParserContext::findFunction(const Identifier* token)
+    {
+        if (checkRecursive(token))
+        {
+            throw OrganicParseException("Calling a function in its own definition is not allowed.", token->location);
+        }
+
+        if (functions.count(token->str))
+        {
+            return new FunctionRef(token->location, functions[token->str]);
+        }
+
+        if (parent)
+        {
+            if (FunctionRef* function = parent->findFunction(token))
+            {
+                return function;
+            }
+        }
+
+        throw OrganicParseException("No function exists with the name \"" + token->str + "\".", token->location);
+    }
+
+    void ParserContext::checkNameConflicts(const Identifier* token) const
+    {
+        if (inputs.count(token->str))
+        {
+            throw OrganicParseException("An input already exists with the name \"" + token->str + "\".", token->location);
+        }
+
+        if (variables.count(token->str))
+        {
+            throw OrganicParseException("A variable already exists with the name \"" + token->str + "\".", token->location);
+        }
+
+        if (functions.count(token->str))
+        {
+            throw OrganicParseException("A function already exists with the name \"" + token->str + "\".", token->location);
+        }
+    }
+
+    bool ParserContext::checkRecursive(const Identifier* token) const
+    {
+        return name == token->str || (parent && parent->checkRecursive(token));
+    }
+
+    Parser::Parser(const Path* path, ParserContext* context) :
+        path(path), context(context)
     {
         if (!path->readToString(code))
         {
@@ -432,7 +542,7 @@ namespace Parser
         throw OrganicParseException("Expected " + expected + ", received \"" + token->str + "\".", token->location);
     }
 
-    Token* Parser::parseInstruction(unsigned int pos) const
+    Token* Parser::parseInstruction(unsigned int pos)
     {
         if (tokenIs<Equals>(pos + 1))
         {
@@ -480,13 +590,13 @@ namespace Parser
         return expression;
     }
 
-    Define* Parser::parseDefine(unsigned int pos) const
+    Define* Parser::parseDefine(unsigned int pos)
     {
-        const BasicToken* name = getToken(pos);
+        const unsigned int start = pos;
 
         pos += 2;
 
-        std::vector<Identifier*> inputs;
+        std::vector<InputDef*> inputs;
 
         if (!tokenIs<CloseParenthesis>(pos))
         {
@@ -494,9 +604,9 @@ namespace Parser
 
             do
             {
-                if (Identifier* input = getToken<Identifier>(++pos))
+                if (const Identifier* input = getToken<Identifier>(++pos))
                 {
-                    inputs.push_back(input);
+                    inputs.push_back(new InputDef(input->location, input->str));
                 }
 
                 else
@@ -513,6 +623,35 @@ namespace Parser
             }
         }
 
+        FunctionDef* function = context->addFunction(getToken<Identifier>(start), inputs);
+
+        if (function->str == "time" ||
+            function->str == "hold" ||
+            function->str == "lfo" ||
+            function->str == "sweep" ||
+            function->str == "sequence" ||
+            function->str == "repeat" ||
+            function->str == "random" ||
+            function->str == "limit" ||
+            function->str == "trigger" ||
+            function->str == "if" ||
+            function->str == "all" ||
+            function->str == "any" ||
+            function->str == "none" ||
+            function->str == "sine" ||
+            function->str == "square" ||
+            function->str == "triangle" ||
+            function->str == "saw" ||
+            function->str == "noise" ||
+            function->str == "sample" ||
+            function->str == "delay" ||
+            function->str == "include")
+        {
+            throw OrganicParseException("A function already exists with the name \"" + function->str + "\".", function->location);
+        }
+
+        context = new ParserContext(context, function->str, inputs);
+
         pos += 2;
 
         const OpenCurlyBracket* open = getToken<OpenCurlyBracket>(pos++);
@@ -528,32 +667,9 @@ namespace Parser
             pos = instruction->location.end;
         }
 
-        if (name->str == "time" ||
-            name->str == "hold" ||
-            name->str == "lfo" ||
-            name->str == "sweep" ||
-            name->str == "sequence" ||
-            name->str == "repeat" ||
-            name->str == "random" ||
-            name->str == "limit" ||
-            name->str == "trigger" ||
-            name->str == "if" ||
-            name->str == "all" ||
-            name->str == "any" ||
-            name->str == "none" ||
-            name->str == "sine" ||
-            name->str == "square" ||
-            name->str == "triangle" ||
-            name->str == "saw" ||
-            name->str == "noise" ||
-            name->str == "sample" ||
-            name->str == "delay" ||
-            name->str == "include")
-        {
-            throw OrganicParseException("A function already exists with the name \"" + name->str + "\".", name->location);
-        }
+        context = context->parent;
 
-        return new Define(SourceLocation(path, name->location.line, name->location.character, name->location.start, pos + 1), name->str, inputs, instructions);
+        return new Define(SourceLocation(path, function->location.line, function->location.character, function->location.start, pos + 1), instructions, function);
     }
 
     Assign* Parser::parseAssign(unsigned int pos) const
@@ -563,7 +679,7 @@ namespace Parser
             tokenError(getToken(pos), "variable name");
         }
 
-        Identifier* variable = getToken<Identifier>(pos);
+        VariableDef* variable = context->addVariable(getToken<Identifier>(pos));
 
         Token* value = parseExpression(pos + 2);
 
@@ -597,133 +713,133 @@ namespace Parser
             }
         }
 
-        const BasicToken* str = getToken(start);
+        const Identifier* name = getToken<Identifier>(start);
 
-        const SourceLocation location(path, str->location.line, str->location.character, start, pos + 1);
+        const SourceLocation location(path, name->location.line, name->location.character, start, pos + 1);
 
-        ArgumentList* argumentList = new ArgumentList(SourceLocation(path, str->location.line, str->location.character + 1, start + 1, pos), arguments, str->str);
+        ArgumentList* argumentList = new ArgumentList(SourceLocation(path, name->location.line, name->location.character + 1, start + 1, pos), arguments, name->str);
 
-        if (str->str == "time")
+        if (name->str == "time")
         {
             return new Time(location, argumentList);
         }
 
-        if (str->str == "hold")
+        if (name->str == "hold")
         {
             return new Hold(location, argumentList);
         }
 
-        if (str->str == "lfo")
+        if (name->str == "lfo")
         {
             return new LFO(location, argumentList);
         }
 
-        if (str->str == "sweep")
+        if (name->str == "sweep")
         {
             return new Sweep(location, argumentList);
         }
 
-        if (str->str == "sequence")
+        if (name->str == "sequence")
         {
             return new Sequence(location, argumentList);
         }
 
-        if (str->str == "repeat")
+        if (name->str == "repeat")
         {
             return new Repeat(location, argumentList);
         }
 
-        if (str->str == "random")
+        if (name->str == "random")
         {
             return new Random(location, argumentList);
         }
 
-        if (str->str == "limit")
+        if (name->str == "limit")
         {
             return new Limit(location, argumentList);
         }
 
-        if (str->str == "trigger")
+        if (name->str == "trigger")
         {
             return new Trigger(location, argumentList);
         }
 
-        if (str->str == "if")
+        if (name->str == "if")
         {
             return new If(location, argumentList);
         }
 
-        if (str->str == "all")
+        if (name->str == "all")
         {
             return new All(location, argumentList);
         }
 
-        if (str->str == "any")
+        if (name->str == "any")
         {
             return new Any(location, argumentList);
         }
 
-        if (str->str == "none")
+        if (name->str == "none")
         {
             return new None(location, argumentList);
         }
 
-        if (str->str == "min")
+        if (name->str == "min")
         {
             return new Min(location, argumentList);
         }
 
-        if (str->str == "max")
+        if (name->str == "max")
         {
             return new Max(location, argumentList);
         }
 
-        if (str->str == "round")
+        if (name->str == "round")
         {
             return new Round(location, argumentList);
         }
 
-        if (str->str == "sine")
+        if (name->str == "sine")
         {
             return new Sine(location, argumentList);
         }
 
-        if (str->str == "square")
+        if (name->str == "square")
         {
             return new Square(location, argumentList);
         }
 
-        if (str->str == "triangle")
+        if (name->str == "triangle")
         {
             return new Triangle(location, argumentList);
         }
 
-        if (str->str == "saw")
+        if (name->str == "saw")
         {
             return new Saw(location, argumentList);
         }
 
-        if (str->str == "noise")
+        if (name->str == "noise")
         {
             return new Noise(location, argumentList);
         }
 
-        if (str->str == "sample")
+        if (name->str == "sample")
         {
             return new Sample(location, argumentList);
         }
 
-        if (str->str == "oscillator")
+        if (name->str == "oscillator")
         {
             return new Oscillator(location, argumentList);
         }
 
-        if (str->str == "delay")
+        if (name->str == "delay")
         {
             return new Delay(location, argumentList);
         }
 
-        if (str->str == "include")
+        if (name->str == "include")
         {
             if (top)
             {
@@ -733,7 +849,7 @@ namespace Parser
             throw OrganicIncludeException("Includes must come before all other instructions.", location);
         }
 
-        return new CallUser(location, argumentList);
+        return new CallUser(location, argumentList, context->findFunction(name));
     }
 
     Argument* Parser::parseArgument(unsigned int pos) const
@@ -1073,7 +1189,7 @@ namespace Parser
                 return new E(location);
             }
 
-            return token;
+            return context->findIdentifier(token);
         }
 
         tokenError(getToken(pos), "expression term");
@@ -1088,6 +1204,6 @@ namespace Parser
 
     Program* ParserCreator::parse(const Path* path)
     {
-        return (new Parser(path))->parse();
+        return (new Parser(path, new ParserContext(nullptr, "", {})))->parse();
     }
 }

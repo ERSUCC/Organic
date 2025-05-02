@@ -395,16 +395,6 @@ namespace Parser
     Identifier::Identifier(const SourceLocation location, const std::string str) :
         BasicToken(location, str) {}
 
-    void Identifier::resolveTypes(TypeResolver* visitor)
-    {
-        visitor->resolveTypes(this);
-    }
-
-    void Identifier::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
-    }
-
     EmptyLambda::EmptyLambda(const SourceLocation location) :
         Token(location) {}
 
@@ -551,6 +541,54 @@ namespace Parser
         type = new StringType();
     }
 
+    VariableDef::VariableDef(const SourceLocation location, const std::string str) :
+        Identifier(location, str) {}
+
+    VariableRef::VariableRef(const SourceLocation location, VariableDef* definition) :
+        Identifier(location, definition->str), definition(definition) {}
+
+    void VariableRef::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void VariableRef::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    InputDef::InputDef(const SourceLocation location, const std::string str) :
+        Identifier(location, str) {}
+
+    InputRef::InputRef(const SourceLocation location, InputDef* definition) :
+        Identifier(location, definition->str), definition(definition) {}
+
+    void InputRef::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void InputRef::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    FunctionDef::FunctionDef(const SourceLocation location, const std::string str, const std::vector<InputDef*>& inputs) :
+        Identifier(location, str), inputs(inputs) {}
+
+    FunctionRef::FunctionRef(const SourceLocation location, FunctionDef* definition) :
+        Identifier(location, definition->str), definition(definition) {}
+
+    void FunctionRef::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void FunctionRef::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
     Argument::Argument(const SourceLocation location, const std::string name, Token* value) :
         Token(location), name(name), value(value) {}
 
@@ -655,8 +693,11 @@ namespace Parser
         return "(" + value->string() + ")";
     }
 
-    Assign::Assign(const SourceLocation location, Identifier* variable, Token* value) :
-        Token(location), variable(variable), value(value) {}
+    Assign::Assign(const SourceLocation location, VariableDef* variable, Token* value) :
+        Token(location), variable(variable), value(value)
+    {
+        type = new NoneType();
+    }
 
     void Assign::resolveTypes(TypeResolver* visitor)
     {
@@ -1101,8 +1142,8 @@ namespace Parser
         visitor->transform(this);
     }
 
-    CallUser::CallUser(const SourceLocation location, ArgumentList* arguments) :
-        Call(location, arguments) {}
+    CallUser::CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function) :
+        Call(location, arguments), function(function) {}
 
     void CallUser::resolveTypes(TypeResolver* visitor)
     {
@@ -1237,12 +1278,10 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Define::Define(const SourceLocation location, const std::string name, const std::vector<Identifier*> inputs, const std::vector<Token*> instructions) :
-        Token(location), name(name), inputs(inputs), instructions(instructions)
+    Define::Define(const SourceLocation location, const std::vector<Token*> instructions, FunctionDef* function) :
+        Token(location), instructions(instructions), function(function)
     {
         type = new NoneType();
-
-        block = new InstructionBlock();
     }
 
     void Define::resolveTypes(TypeResolver* visitor)
@@ -1257,15 +1296,15 @@ namespace Parser
 
     std::string Define::string() const
     {
-        std::string result = name + '(';
+        std::string result = function->str + '(';
 
-        if (!inputs.empty())
+        if (!function->inputs.empty())
         {
-            result += inputs[0]->string();
+            result += function->inputs[0]->string();
 
-            for (unsigned int i = 1; i < inputs.size(); i++)
+            for (unsigned int i = 1; i < function->inputs.size(); i++)
             {
-                result += ", " + inputs[i]->string();
+                result += ", " + function->inputs[i]->string();
             }
         }
 
@@ -1282,15 +1321,6 @@ namespace Parser
         }
 
         return result + "\n}";
-    }
-
-    Scope::Scope(const std::string name, const std::vector<Identifier*>& inputs) :
-        name(name)
-    {
-        for (Identifier* input : inputs)
-        {
-            this->inputs[input->str] = input;
-        }
     }
 
     Program::Program(const SourceLocation location, const std::vector<Token*> instructions) :
@@ -1324,50 +1354,27 @@ namespace Parser
     TypeResolver::TypeResolver(const Path* sourcePath, ParserInterface* parser) :
         sourcePath(sourcePath), parser(parser) {}
 
-    void TypeResolver::resolveTypes(Identifier* token)
+    void TypeResolver::resolveTypes(VariableRef* token)
     {
-        if (Identifier* input = getInput(token->str))
-        {
-            if (!input->type)
-            {
-                input->type = expectedType;
-            }
+        token->type = token->definition->type;
+        token->definition->used = true;
+    }
 
-            token->type = input->type;
-            token->id = input->id;
+    void TypeResolver::resolveTypes(InputRef* token)
+    {
+        if (!token->definition->type)
+        {
+            token->definition->type = expectedType;
         }
 
-        else if (const Identifier* variable = getVariable(token->str))
-        {
-            token->type = variable->type;
-            token->id = variable->id;
-        }
+        token->type = token->definition->type;
+        token->definition->used = true;
+    }
 
-        else if (const Define* function = getFunction(token->str))
-        {
-            std::unordered_map<std::string, const Type*> inputTypes;
-
-            for (const Identifier* input : function->inputs)
-            {
-                if (input->type)
-                {
-                    inputTypes[input->str] = input->type;
-                }
-
-                else
-                {
-                    inputTypes[input->str] = new AnyType();
-                }
-            }
-
-            token->type = new LambdaType(inputTypes, function->type);
-            token->id = function->id;
-        }
-
-        else
-        {
-            throw OrganicParseException("Unrecognized variable name \"" + token->str + "\".", token->location);
-        }
+    void TypeResolver::resolveTypes(FunctionRef* token)
+    {
+        token->type = token->definition->type;
+        token->definition->used = true;
     }
 
     void TypeResolver::resolveTypes(List* token)
@@ -1415,25 +1422,7 @@ namespace Parser
             throw OrganicParseException("Functions that return nothing cannot be assigned to a variable.", token->value->location);
         }
 
-        if (getInput(token->variable->str))
-        {
-            throw OrganicParseException("Function inputs cannot be redefined.", token->location);
-        }
-
-        if (getVariable(token->variable->str))
-        {
-            throw OrganicParseException("Variables cannot be redefined.", token->location);
-        }
-
-        if (getFunction(token->variable->str))
-        {
-            throw OrganicParseException("A function already exists with the name \"" + token->variable->str + "\".", token->location);
-        }
-
         token->variable->type = token->value->type;
-        token->variable->id = nextIdentifierId++;
-
-        addVariable(token->variable);
     }
 
     void TypeResolver::resolveTypes(Hold* token)
@@ -1621,7 +1610,12 @@ namespace Parser
             throw OrganicIncludeException("\"" + includePath->string() + "\" is not a file.", str->location);
         }
 
-        if (scopes.back()->includedPaths.count(includePath))
+        if (sourcePath->string() == includePath->string())
+        {
+            Utils::includeWarning("Source file \"" + includePath->string() + "\" is the current file, this include will be ignored.", str->location);
+        }
+
+        else if (includedPaths.count(includePath))
         {
             Utils::includeWarning("Source file \"" + includePath->string() + "\" has already been included, this include will be ignored.", str->location);
         }
@@ -1630,7 +1624,7 @@ namespace Parser
         {
             token->program = parser->parse(includePath);
 
-            scopes.back()->includedPaths.insert(includePath);
+            includedPaths.insert(includePath);
 
             for (Token* instruction : token->program->instructions)
             {
@@ -1641,34 +1635,21 @@ namespace Parser
 
     void TypeResolver::resolveTypes(CallUser* token)
     {
-        if (Define* function = getFunction(token->arguments->name))
+        for (const InputDef* input : token->function->definition->inputs)
         {
-            for (const Identifier* input : function->inputs)
+            if (Type* type = input->type)
             {
-                if (Type* type = input->type)
-                {
-                    resolveArgumentTypes(token->arguments, input->str, type);
-                }
-
-                else
-                {
-                    resolveArgumentTypes(token->arguments, input->str, new AnyType());
-                }
+                resolveArgumentTypes(token->arguments, input->str, type);
             }
 
-            token->function = function;
-            token->type = function->type;
+            else
+            {
+                resolveArgumentTypes(token->arguments, input->str, new AnyType());
+            }
         }
 
-        else if (checkRecursive(token->arguments->name))
-        {
-            throw OrganicParseException("Calling a function in its own definition is not allowed.", token->location);
-        }
-
-        else
-        {
-            throw OrganicParseException("Unknown function name \"" + token->arguments->name + "\".", token->location);
-        }
+        token->type = token->function->definition->type;
+        token->function->definition->used = true;
     }
 
     void TypeResolver::resolveTypes(CallAlias* token)
@@ -1696,43 +1677,10 @@ namespace Parser
 
     void TypeResolver::resolveTypes(Define* token)
     {
-        if (getInput(token->name))
-        {
-            throw OrganicParseException("An input already exists with the name \"" + token->name + "\".", token->location);
-        }
-
-        if (getVariable(token->name))
-        {
-            throw OrganicParseException("A variable already exists with the name \"" + token->name + "\".", token->location);
-        }
-
-        if (getFunction(token->name))
-        {
-            throw OrganicParseException("A function already exists with the name \"" + token->name + "\".", token->location);
-        }
-
-        if (checkRecursive(token->name))
-        {
-            throw OrganicParseException("Redefining a function in its own definition is not allowed.", token->location);
-        }
-
-        for (Identifier* input : token->inputs)
-        {
-            input->id = nextIdentifierId++;
-        }
-
-        scopes.push_back(new Scope(token->name, token->inputs));
-
         for (Token* instruction : token->instructions)
         {
             instruction->resolveTypes(this);
         }
-
-        checkUses();
-
-        scopes.pop_back();
-
-        addFunction(token);
 
         if (token->instructions.empty())
         {
@@ -1751,23 +1699,17 @@ namespace Parser
             throw OrganicParseException("This function has an ambiguous return type.", token->location);
         }
 
-        token->id = nextIdentifierId++;
+        token->function->type = token->type;
     }
 
     void TypeResolver::resolveTypes(Program* token)
     {
-        scopes.push_back(new Scope("", {}));
-
-        scopes.back()->includedPaths.insert(token->location.path);
+        includedPaths.insert(token->location.path);
 
         for (Token* instruction : token->instructions)
         {
             instruction->resolveTypes(this);
         }
-
-        checkUses();
-
-        scopes.pop_back();
     }
 
     void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType)
@@ -1801,101 +1743,6 @@ namespace Parser
         }
 
         arguments->addDefault(name, expectedType);
-    }
-
-    Identifier* TypeResolver::getVariable(const std::string variable)
-    {
-        for (int i = scopes.size() - 1; i >= 0; i--)
-        {
-            if (scopes[i]->variables.count(variable))
-            {
-                scopes[i]->variables[variable]->used = true;
-
-                return scopes[i]->variables[variable];
-            }
-        }
-
-        return nullptr;
-    }
-
-    void TypeResolver::addVariable(Identifier* variable)
-    {
-        scopes.back()->variables[variable->str] = variable;
-    }
-
-    Identifier* TypeResolver::getInput(const std::string input)
-    {
-        for (int i = scopes.size() - 1; i >= 0; i--)
-        {
-            if (scopes[i]->inputs.count(input))
-            {
-                scopes[i]->inputs[input]->used = true;
-
-                return scopes[i]->inputs[input];
-            }
-        }
-
-        return nullptr;
-    }
-
-    Define* TypeResolver::getFunction(const std::string function)
-    {
-        for (int i = scopes.size() - 1; i >= 0; i--)
-        {
-            if (scopes[i]->functions.count(function))
-            {
-                scopes[i]->functions[function]->used = true;
-
-                return scopes[i]->functions[function];
-            }
-        }
-
-        return nullptr;
-    }
-
-    void TypeResolver::addFunction(Define* function)
-    {
-        scopes.back()->functions[function->name] = function;
-    }
-
-    bool TypeResolver::checkRecursive(const std::string function) const
-    {
-        for (int i = scopes.size() - 1; i >= 0; i--)
-        {
-            if (scopes[i]->name == function)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    void TypeResolver::checkUses() const
-    {
-        for (const std::pair<std::string, Identifier*>& pair : scopes.back()->variables)
-        {
-            if (!pair.second->used && pair.second->location.path == sourcePath)
-            {
-                Utils::parseWarning("Unused variable \"" + pair.first + "\".", pair.second->location);
-            }
-        }
-
-        for (const std::pair<std::string, Identifier*>& pair : scopes.back()->inputs)
-        {
-            if (!pair.second->used && pair.second->location.path == sourcePath)
-            {
-                Utils::parseWarning("Unused input \"" + pair.first + "\".", pair.second->location);
-            }
-        }
-
-        for (const std::pair<std::string, Define*>& pair : scopes.back()->functions)
-        {
-            if (!pair.second->used && pair.second->location.path == sourcePath)
-            {
-                Utils::parseWarning("Unused function \"" + pair.first + "\".", pair.second->location);
-            }
-        }
     }
 
     BytecodeTransformer::BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream) :
@@ -1964,14 +1811,35 @@ namespace Parser
         addInstruction(new StackPushDouble(utils->e));
     }
 
-    void BytecodeTransformer::transform(const Identifier* token)
+    void BytecodeTransformer::transform(const VariableRef* token)
     {
-        if (token->id >= nextIdentifierId)
+        addInstruction(new GetVariable(token->definition->id));
+    }
+
+    void BytecodeTransformer::transform(const InputRef* token)
+    {
+        addInstruction(new GetVariable(token->definition->id));
+    }
+
+    void BytecodeTransformer::transform(const FunctionRef* token)
+    {
+        std::vector<std::pair<std::string, unsigned char>> inputs;
+
+        for (const InputDef* input : token->definition->inputs)
         {
-            nextIdentifierId = token->id + 1;
+            inputs.push_back(std::make_pair(input->str, input->id));
         }
 
-        addInstruction(new GetVariable(token->id));
+        std::sort(inputs.begin(), inputs.end(), std::greater());
+
+        for (const std::pair<std::string, unsigned char>& input : inputs)
+        {
+            addInstruction(new GetVariable(input.second));
+        }
+
+        addInstruction(new StackPushAddress(token->definition->block));
+        addInstruction(new StackPushInt(token->definition->inputs.size()));
+        addInstruction(new CallNative(BytecodeConstants::LAMBDA, 2));
     }
 
     void BytecodeTransformer::transform(const EmptyLambda* token)
@@ -1997,14 +1865,19 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Assign* token)
     {
-        token->value->transform(this);
-
-        if (token->variable->id >= nextIdentifierId)
+        if (token->variable->used)
         {
-            nextIdentifierId = token->variable->id + 1;
+            token->value->transform(this);
+
+            token->variable->id = nextIdentifierId++;
+
+            addInstruction(new SetVariable(token->variable->id));
         }
 
-        addInstruction(new SetVariable(token->variable->id));
+        else if (token->variable->location.path == sourcePath)
+        {
+            Utils::parseWarning("Unused variable \"" + token->variable->str + "\".", token->variable->location);
+        }
     }
 
     void BytecodeTransformer::transform(const Time* token)
@@ -2317,19 +2190,14 @@ namespace Parser
     {
         token->arguments->check();
 
-        for (const Identifier* input : token->function->inputs)
+        for (const InputDef* input : token->function->definition->inputs)
         {
             transformArgument(token->arguments, input->str);
-
-            if (input->id >= nextIdentifierId)
-            {
-                nextIdentifierId = input->id + 1;
-            }
 
             addInstruction(new SetVariable(input->id));
         }
 
-        addInstruction(new ::CallUser(token->function->block, token->function->inputs.size()));
+        addInstruction(new ::CallUser(token->function->definition->block, token->function->definition->inputs.size()));
     }
 
     void BytecodeTransformer::transform(const AddAlias* token)
@@ -2414,37 +2282,36 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Define* token)
     {
-        blocks.push(token->block);
-
-        for (const Token* instruction : token->instructions)
+        if (token->function->used)
         {
-            instruction->transform(this);
+            for (InputDef* input : token->function->inputs)
+            {
+                if (input->used)
+                {
+                    input->id = nextIdentifierId++;
+                }
+
+                else
+                {
+                    Utils::parseWarning("Unused input \"" + input->str + "\".", input->location);
+                }
+            }
+
+            blocks.push(token->function->block);
+
+            for (const Token* instruction : token->instructions)
+            {
+                instruction->transform(this);
+            }
+
+            blocks.pop();
+
+            resolver->addInstructionBlock(token->function->block);
         }
 
-        blocks.pop();
-
-        resolver->addInstructionBlock(token->block);
-
-        if (!token->instructions.empty())
+        else if (token->function->location.path == sourcePath)
         {
-            std::vector<std::pair<std::string, unsigned char>> inputs;
-
-            for (const Identifier* input : token->inputs)
-            {
-                inputs.push_back(std::make_pair(input->str, input->id));
-            }
-
-            std::sort(inputs.begin(), inputs.end(), std::greater());
-
-            for (const std::pair<std::string, unsigned char>& input : inputs)
-            {
-                addInstruction(new GetVariable(input.second));
-            }
-
-            addInstruction(new StackPushAddress(token->block));
-            addInstruction(new StackPushInt(token->inputs.size()));
-            addInstruction(new CallNative(BytecodeConstants::LAMBDA, 2));
-            addInstruction(new SetVariable(token->id));
+            Utils::parseWarning("Unused function \"" + token->function->str + "\".", token->function->location);
         }
     }
 

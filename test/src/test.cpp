@@ -12,7 +12,7 @@ const Path* Test::sourcePath(const std::string file) const
 
 const Parser::Program* Test::parseSource(const Path* path) const
 {
-    return (new Parser::Parser(path))->parse();
+    return (new Parser::ParserCreator())->parse(path);
 }
 
 void Test::print(const std::string text)

@@ -321,13 +321,6 @@ namespace Parser
     struct Identifier : public BasicToken
     {
         Identifier(const SourceLocation location, const std::string str);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-
-        unsigned char id;
-
-        bool used = false;
     };
 
     struct EmptyLambda : public Token
@@ -428,6 +421,67 @@ namespace Parser
         String(const SourceLocation location, const std::string str);
     };
 
+    struct VariableDef : public Identifier
+    {
+        VariableDef(const SourceLocation location, const std::string str);
+
+        unsigned char id;
+
+        bool used = false;
+    };
+
+    struct VariableRef : public Identifier
+    {
+        VariableRef(const SourceLocation location, VariableDef* definition);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+
+        VariableDef* definition;
+    };
+
+    struct InputDef : public Identifier
+    {
+        InputDef(const SourceLocation location, const std::string str);
+
+        unsigned char id;
+
+        bool used = false;
+    };
+
+    struct InputRef : public Identifier
+    {
+        InputRef(const SourceLocation location, InputDef* definition);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+
+        InputDef* definition;
+    };
+
+    struct FunctionDef : public Identifier
+    {
+        FunctionDef(const SourceLocation location, const std::string str, const std::vector<InputDef*>& inputs);
+
+        const std::vector<InputDef*> inputs;
+
+        InstructionBlock* block = new InstructionBlock();
+
+        unsigned char id;
+
+        bool used = false;
+    };
+
+    struct FunctionRef : public Identifier
+    {
+        FunctionRef(const SourceLocation location, FunctionDef* definition);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+
+        FunctionDef* definition;
+    };
+
     struct Argument : public Token
     {
         Argument(const SourceLocation location, const std::string name, Token* value);
@@ -484,14 +538,14 @@ namespace Parser
 
     struct Assign : public Token
     {
-        Assign(const SourceLocation location, Identifier* variable, Token* value);
+        Assign(const SourceLocation location, VariableDef* variable, Token* value);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
         std::string string() const override;
 
-        Identifier* variable;
+        VariableDef* variable;
 
         Token* value;
     };
@@ -743,19 +797,17 @@ namespace Parser
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
-        Program* program;
+        Program* program = nullptr;
     };
-
-    struct Define;
 
     struct CallUser : public Call
     {
-        CallUser(const SourceLocation location, ArgumentList* arguments);
+        CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
-        Define* function;
+        FunctionRef* function;
     };
 
     struct CallAlias : public Token
@@ -844,36 +896,16 @@ namespace Parser
 
     struct Define : public Token
     {
-        Define(const SourceLocation location, const std::string name, const std::vector<Identifier*> inputs, const std::vector<Token*> instructions);
+        Define(const SourceLocation location, const std::vector<Token*> instructions, FunctionDef* function);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
 
         std::string string() const override;
 
-        const std::string name;
-
-        const std::vector<Identifier*> inputs;
         const std::vector<Token*> instructions;
 
-        InstructionBlock* block;
-
-        unsigned char id;
-
-        bool used = false;
-    };
-
-    struct Scope
-    {
-        Scope(const std::string name, const std::vector<Identifier*>& inputs);
-
-        const std::string name;
-
-        std::unordered_map<std::string, Identifier*> variables;
-        std::unordered_map<std::string, Identifier*> inputs;
-        std::unordered_map<std::string, Define*> functions;
-
-        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths;
+        FunctionDef* function;
     };
 
     struct Program : public Token
@@ -897,7 +929,9 @@ namespace Parser
     {
         TypeResolver(const Path* sourcePath, ParserInterface* parser);
 
-        void resolveTypes(Identifier* token);
+        void resolveTypes(VariableRef* token);
+        void resolveTypes(InputRef* token);
+        void resolveTypes(FunctionRef* token);
         void resolveTypes(List* token);
         void resolveTypes(ParenthesizedExpression* token);
         void resolveTypes(Assign* token);
@@ -934,26 +968,13 @@ namespace Parser
     private:
         void resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType);
 
-        Identifier* getVariable(const std::string variable);
-        void addVariable(Identifier* variable);
-
-        Identifier* getInput(const std::string input);
-
-        Define* getFunction(const std::string function);
-        void addFunction(Define* function);
-
-        bool checkRecursive(const std::string function) const;
-        void checkUses() const;
-
         const Path* sourcePath;
 
         ParserInterface* parser;
 
-        std::vector<Scope*> scopes;
+        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths;
 
         Type* expectedType = nullptr;
-
-        unsigned char nextIdentifierId = 0;
 
     };
 
@@ -973,7 +994,9 @@ namespace Parser
         void transform(const RoundDown* token);
         void transform(const Pi* token);
         void transform(const E* token);
-        void transform(const Identifier* token);
+        void transform(const VariableRef* token);
+        void transform(const InputRef* token);
+        void transform(const FunctionRef* token);
         void transform(const EmptyLambda* token);
         void transform(const List* token);
         void transform(const ParenthesizedExpression* token);

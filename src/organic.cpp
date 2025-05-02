@@ -10,7 +10,7 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
         utils->setSeed(options.seed.value());
     }
 
-    Parser::Program* program = (new Parser::Parser(path))->parse();
+    Parser::Program* program = (new Parser::ParserCreator())->parse(path);
 
     program->resolveTypes(new Parser::TypeResolver(path, new Parser::ParserCreator()));
 

@@ -18,11 +18,6 @@ Machine::Machine(const Path* path)
 
     variables = (Variable**)malloc(sizeof(Variable*) * str[BytecodeConstants::OBC_ID_LENGTH]);
 
-    for (unsigned int i = 0; i < str[BytecodeConstants::OBC_ID_LENGTH]; i++)
-    {
-        variables[i] = new Variable(new Value(0));
-    }
-
     const unsigned int numResources = str[BytecodeConstants::OBC_ID_LENGTH + 1];
 
     resources = (ValueObject**)malloc(sizeof(ValueObject*) * numResources);
