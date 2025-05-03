@@ -7,6 +7,7 @@
 #include "location.h"
 #include "path.h"
 #include "token.h"
+#include "tokenize.h"
 #include "utils.h"
 
 namespace Parser
@@ -42,11 +43,6 @@ namespace Parser
         Program* parse();
 
     private:
-        void skipWhitespace();
-        void nextCharacter();
-
-        void tokenize();
-
         BasicToken* getToken(const unsigned int pos) const;
         template <typename T> T* getToken(const unsigned int pos) const;
         template <typename T> bool tokenIs(const unsigned int pos) const;
@@ -63,21 +59,11 @@ namespace Parser
         Token* parseTerms(unsigned int pos) const;
         Token* parseTerm(unsigned int pos) const;
 
-        double getFrequency(const double note) const;
-
         const Path* path;
-
-        Utils* utils;
 
         ParserContext* context;
 
-        std::string code;
-
         std::vector<BasicToken*> tokens;
-
-        unsigned int current = 0;
-        unsigned int line = 1;
-        unsigned int character = 1;
 
     };
 

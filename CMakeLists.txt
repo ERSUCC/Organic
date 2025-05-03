@@ -19,6 +19,7 @@ add_library(organic_lib STATIC src/audiosource.cpp
                                src/parse.cpp
                                src/path.cpp
                                src/token.cpp
+                               src/tokenize.cpp
                                src/utils.cpp)
 
 # link dependencies
