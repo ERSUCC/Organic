@@ -10,9 +10,11 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
         utils->setSeed(options.seed.value());
     }
 
-    Parser::Program* program = (new Parser::ParserCreator())->parse(path);
+    std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
 
-    program->resolveTypes(new Parser::TypeResolver(path, new Parser::ParserCreator()));
+    Parser::Program* program = (new Parser::Parser(path, new Parser::ParserContext(nullptr, "", {}), includedPaths))->parse();
+
+    program->resolveTypes(new Parser::TypeResolver(path));
 
     const Path* bytecodePath = Path::beside(path->stem() + ".obc", path);
 

@@ -89,6 +89,30 @@ namespace Parser
         throw OrganicParseException("No function exists with the name \"" + token->str + "\".", token->location);
     }
 
+    void ParserContext::merge(const ParserContext* context)
+    {
+        for (const std::pair<std::string, InputDef*> input : context->inputs)
+        {
+            checkNameConflicts(input.second);
+
+            inputs[input.first] = input.second;
+        }
+
+        for (const std::pair<std::string, VariableDef*> variable : context->variables)
+        {
+            checkNameConflicts(variable.second);
+
+            variables[variable.first] = variable.second;
+        }
+
+        for (const std::pair<std::string, FunctionDef*> function : context->functions)
+        {
+            checkNameConflicts(function.second);
+
+            functions[function.first] = function.second;
+        }
+    }
+
     void ParserContext::checkNameConflicts(const Identifier* token) const
     {
         if (inputs.count(token->str))
@@ -112,8 +136,8 @@ namespace Parser
         return name == token->str || (parent && parent->checkRecursive(token));
     }
 
-    Parser::Parser(const Path* path, ParserContext* context) :
-        path(path), context(context) {}
+    Parser::Parser(const Path* path, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
+        path(path), context(context), includedPaths(includedPaths) {}
 
     Program* Parser::parse()
     {
@@ -125,11 +149,14 @@ namespace Parser
 
         while (tokenIs<Identifier>(current) && tokenIs<OpenParenthesis>(current + 1) && getToken(current)->str == "include")
         {
-            Token* token = parseCall(current, true);
+            Include* include = parseInclude(current);
 
-            instructions.push_back(token);
+            if (include->program)
+            {
+                instructions.push_back(include);
+            }
 
-            current = token->location.end;
+            current = include->location.end;
         }
 
         while (current < tokens.size() - 1)
@@ -177,6 +204,72 @@ namespace Parser
     void Parser::tokenError(const BasicToken* token, const std::string expected) const
     {
         throw OrganicParseException("Expected " + expected + ", received \"" + token->str + "\".", token->location);
+    }
+
+    Include* Parser::parseInclude(unsigned int pos) const
+    {
+        const BasicToken* start = getToken(pos);
+
+        pos += 2;
+
+        if (!tokenIs<String>(pos))
+        {
+            tokenError(getToken(pos), "file path");
+        }
+
+        const String* file = getToken<String>(pos++);
+
+        if (!tokenIs<CloseParenthesis>(pos))
+        {
+            tokenError(getToken(pos), "\")\"");
+        }
+
+        pos++;
+
+        const SourceLocation location = SourceLocation(path, start->location.line, start->location.character, start->location.start, pos);
+
+        if (file->str.empty())
+        {
+            Utils::includeWarning("This include does not specify a source file, it will have no effect.", start->location);
+
+            return new Include(location, nullptr);
+        }
+
+        const Path* includePath = Path::beside(file->str, path);
+
+        if (!includePath->exists())
+        {
+            throw OrganicIncludeException("Source file \"" + includePath->string() + "\" does not exist.", start->location);
+        }
+
+        if (!includePath->isFile())
+        {
+            throw OrganicIncludeException("\"" + includePath->string() + "\" is not a file.", start->location);
+        }
+
+        if (path->string() == includePath->string())
+        {
+            Utils::includeWarning("Source file \"" + includePath->string() + "\" is the current file, this include will be ignored.", start->location);
+
+            return new Include(location, nullptr);
+        }
+
+        if (includedPaths.count(includePath))
+        {
+            Utils::includeWarning("Source file \"" + includePath->string() + "\" has already been included, this include will be ignored.", start->location);
+
+            return new Include(location, nullptr);
+        }
+
+        includedPaths.insert(includePath);
+
+        ParserContext* includeContext = new ParserContext(nullptr, "", {});
+
+        Program* program = (new Parser(includePath, includeContext, includedPaths))->parse();
+
+        context->merge(includeContext);
+
+        return new Include(location, program);
     }
 
     Token* Parser::parseInstruction(unsigned int pos)
@@ -323,7 +416,7 @@ namespace Parser
         return new Assign(SourceLocation(path, variable->location.line, variable->location.character, pos, value->location.end), variable, value);
     }
 
-    Token* Parser::parseCall(unsigned int pos, const bool top) const
+    Token* Parser::parseCall(unsigned int pos) const
     {
         const unsigned int start = pos;
 
@@ -478,11 +571,6 @@ namespace Parser
 
         if (name->str == "include")
         {
-            if (top)
-            {
-                return new Include(location, argumentList);
-            }
-
             throw OrganicIncludeException("Includes must come before all other instructions.", location);
         }
 
@@ -764,7 +852,7 @@ namespace Parser
         {
             if (tokenIs<OpenParenthesis>(pos + 1))
             {
-                return parseCall(pos, false);
+                return parseCall(pos);
             }
 
             return context->findIdentifier(getToken<Identifier>(pos));
@@ -773,10 +861,5 @@ namespace Parser
         tokenError(getToken(pos), "expression term");
 
         return nullptr;
-    }
-
-    Program* ParserCreator::parse(const Path* path)
-    {
-        return (new Parser(path, new ParserContext(nullptr, "", {})))->parse();
     }
 }

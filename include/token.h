@@ -6,7 +6,6 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -765,18 +764,6 @@ namespace Parser
 
     // low pass filter goes here when it's ready
 
-    struct Program;
-
-    struct Include : public Call
-    {
-        Include(const SourceLocation location, ArgumentList* arguments);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-
-        Program* program = nullptr;
-    };
-
     struct CallUser : public Call
     {
         CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function);
@@ -897,14 +884,19 @@ namespace Parser
         const std::vector<Token*> instructions;
     };
 
-    struct ParserInterface
+    struct Include : public Token
     {
-        virtual Program* parse(const Path* path) = 0;
+        Include(const SourceLocation location, Program* program);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+
+        Program* program;
     };
 
     struct TypeResolver
     {
-        TypeResolver(const Path* sourcePath, ParserInterface* parser);
+        TypeResolver(const Path* sourcePath);
 
         void resolveTypes(VariableRef* token);
         void resolveTypes(InputRef* token);
@@ -936,20 +928,16 @@ namespace Parser
         void resolveTypes(Sample* token);
         void resolveTypes(Play* token);
         void resolveTypes(Delay* token);
-        void resolveTypes(Include* token);
         void resolveTypes(CallUser* token);
         void resolveTypes(CallAlias* token);
         void resolveTypes(Define* token);
         void resolveTypes(Program* token);
+        void resolveTypes(Include* token);
 
     private:
         void resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType);
 
         const Path* sourcePath;
-
-        ParserInterface* parser;
-
-        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths;
 
         Type* expectedType = nullptr;
 
@@ -995,7 +983,6 @@ namespace Parser
         void transform(const Play* token);
         void transform(const EmptyEffect* token);
         void transform(const Delay* token);
-        void transform(const Include* token);
         void transform(const CallUser* token);
         void transform(const AddAlias* token);
         void transform(const SubtractAlias* token);
@@ -1009,6 +996,7 @@ namespace Parser
         void transform(const GreaterEqualAlias* token);
         void transform(const Define* token);
         void transform(const Program* token);
+        void transform(const Include* token);
 
     private:
         void transformArgument(const ArgumentList* arguments, const std::string name);

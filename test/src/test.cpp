@@ -12,7 +12,9 @@ const Path* Test::sourcePath(const std::string file) const
 
 const Parser::Program* Test::parseSource(const Path* path) const
 {
-    return (new Parser::ParserCreator())->parse(path);
+    std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
+
+    return (new Parser::Parser(path, new Parser::ParserContext(nullptr, "", {}), includedPaths))->parse();
 }
 
 void Test::print(const std::string text)

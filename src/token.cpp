@@ -1067,22 +1067,6 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Include::Include(const SourceLocation location, ArgumentList* arguments) :
-        Call(location, arguments)
-    {
-        type = new NoneType();
-    }
-
-    void Include::resolveTypes(TypeResolver* visitor)
-    {
-        visitor->resolveTypes(this);
-    }
-
-    void Include::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
-    }
-
     CallUser::CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function) :
         Call(location, arguments), function(function) {}
 
@@ -1292,8 +1276,24 @@ namespace Parser
         return result;
     }
 
-    TypeResolver::TypeResolver(const Path* sourcePath, ParserInterface* parser) :
-        sourcePath(sourcePath), parser(parser) {}
+    Include::Include(const SourceLocation location, Program* program) :
+        Token(location), program(program)
+    {
+        type = new NoneType();
+    }
+
+    void Include::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Include::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    TypeResolver::TypeResolver(const Path* sourcePath) :
+        sourcePath(sourcePath) {}
 
     void TypeResolver::resolveTypes(VariableRef* token)
     {
@@ -1526,54 +1526,6 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "mix", new NumberType());
     }
 
-    void TypeResolver::resolveTypes(Include* token)
-    {
-        resolveArgumentTypes(token->arguments, "file", new StringType());
-
-        const String* str = dynamic_cast<const String*>(token->arguments->get("file"));
-
-        if (!str || str->str.empty())
-        {
-            Utils::includeWarning("This include does not specify a source file, it will have no effect.", token->location);
-
-            return;
-        }
-
-        const Path* includePath = Path::beside(str->str, sourcePath);
-
-        if (!includePath->exists())
-        {
-            throw OrganicIncludeException("Source file \"" + includePath->string() + "\" does not exist.", str->location);
-        }
-
-        if (!includePath->isFile())
-        {
-            throw OrganicIncludeException("\"" + includePath->string() + "\" is not a file.", str->location);
-        }
-
-        if (sourcePath->string() == includePath->string())
-        {
-            Utils::includeWarning("Source file \"" + includePath->string() + "\" is the current file, this include will be ignored.", str->location);
-        }
-
-        else if (includedPaths.count(includePath))
-        {
-            Utils::includeWarning("Source file \"" + includePath->string() + "\" has already been included, this include will be ignored.", str->location);
-        }
-
-        else
-        {
-            token->program = parser->parse(includePath);
-
-            includedPaths.insert(includePath);
-
-            for (Token* instruction : token->program->instructions)
-            {
-                instruction->resolveTypes(this);
-            }
-        }
-    }
-
     void TypeResolver::resolveTypes(CallUser* token)
     {
         for (const InputDef* input : token->function->definition->inputs)
@@ -1652,12 +1604,15 @@ namespace Parser
 
     void TypeResolver::resolveTypes(Program* token)
     {
-        includedPaths.insert(token->location.path);
-
         for (Token* instruction : token->instructions)
         {
             instruction->resolveTypes(this);
         }
+    }
+
+    void TypeResolver::resolveTypes(Include* token)
+    {
+        token->program->resolveTypes(this);
     }
 
     void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType)
@@ -2068,19 +2023,6 @@ namespace Parser
         addInstruction(new CallNative(BytecodeConstants::DELAY, 3));
     }
 
-    void BytecodeTransformer::transform(const Include* token)
-    {
-        token->arguments->check();
-
-        if (token->program)
-        {
-            for (const Token* instruction : token->program->instructions)
-            {
-                instruction->transform(this);
-            }
-        }
-    }
-
     void BytecodeTransformer::transform(const CallUser* token)
     {
         token->arguments->check();
@@ -2226,6 +2168,11 @@ namespace Parser
         blocks.pop();
 
         resolver->output(outputStream, nextIdentifierId);
+    }
+
+    void BytecodeTransformer::transform(const Include* token)
+    {
+        token->program->transform(this);
     }
 
     void BytecodeTransformer::transformArgument(const ArgumentList* arguments, const std::string name)

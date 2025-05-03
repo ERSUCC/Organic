@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "location.h"
@@ -22,6 +23,8 @@ namespace Parser
         Identifier* findIdentifier(const Identifier* token);
         FunctionRef* findFunction(const Identifier* token);
 
+        void merge(const ParserContext* context);
+
         ParserContext* parent;
 
     private:
@@ -38,7 +41,7 @@ namespace Parser
 
     struct Parser
     {
-        Parser(const Path* path, ParserContext* context);
+        Parser(const Path* path, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
 
         Program* parse();
 
@@ -49,10 +52,11 @@ namespace Parser
 
         void tokenError(const BasicToken* token, const std::string message) const;
 
+        Include* parseInclude(unsigned int pos) const;
         Token* parseInstruction(unsigned int pos);
         Define* parseDefine(unsigned int pos);
         Assign* parseAssign(unsigned int pos) const;
-        Token* parseCall(unsigned int pos, const bool top) const;
+        Token* parseCall(unsigned int pos) const;
         Argument* parseArgument(unsigned int pos) const;
         Token* parseExpression(unsigned int pos) const;
         List* parseList(unsigned int pos) const;
@@ -63,12 +67,9 @@ namespace Parser
 
         ParserContext* context;
 
+        std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths;
+
         std::vector<BasicToken*> tokens;
 
-    };
-
-    struct ParserCreator : public ParserInterface
-    {
-        Program* parse(const Path* path) override;
     };
 }
