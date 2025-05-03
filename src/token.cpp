@@ -414,125 +414,66 @@ namespace Parser
         visitor->transform(this);
     }
 
-    SequenceForwards::SequenceForwards(const SourceLocation location) :
-        BasicToken(location, "sequence-forwards")
-    {
-        type = new SequenceOrderType();
-    }
+    Constant::Constant(const SourceLocation location, const std::string str, const unsigned char value) :
+        BasicToken(location, str), value(value) {}
 
-    void SequenceForwards::transform(BytecodeTransformer* visitor) const
+    void Constant::transform(BytecodeTransformer* visitor) const
     {
         visitor->transform(this);
+    }
+
+    SequenceForwards::SequenceForwards(const SourceLocation location) :
+        Constant(location, "sequence-forwards", ::Sequence::OrderEnum::Forwards)
+    {
+        type = new SequenceOrderType();
     }
 
     SequenceBackwards::SequenceBackwards(const SourceLocation location) :
-        BasicToken(location, "sequence-backwards")
+        Constant(location, "sequence-backwards", ::Sequence::OrderEnum::Backwards)
     {
         type = new SequenceOrderType();
-    }
-
-    void SequenceBackwards::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
     }
 
     SequencePingPong::SequencePingPong(const SourceLocation location) :
-        BasicToken(location, "sequence-ping-pong")
+        Constant(location, "sequence-ping-pong", ::Sequence::OrderEnum::PingPong)
     {
         type = new SequenceOrderType();
-    }
-
-    void SequencePingPong::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
     }
 
     SequenceRandom::SequenceRandom(const SourceLocation location) :
-        BasicToken(location, "sequence-random")
+        Constant(location, "sequence-random", ::Sequence::OrderEnum::Random)
     {
         type = new SequenceOrderType();
     }
 
-    void SequenceRandom::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
-    }
-
     RandomStep::RandomStep(const SourceLocation location) :
-        BasicToken(location, "random-step")
+        Constant(location, "random-step", ::Random::TypeEnum::Step)
     {
         type = new RandomTypeType();
-    }
-
-    void RandomStep::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
     }
 
     RandomLinear::RandomLinear(const SourceLocation location) :
-        BasicToken(location, "random-linear")
+        Constant(location, "random-linear", ::Random::TypeEnum::Linear)
     {
         type = new RandomTypeType();
     }
 
-    void RandomLinear::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
-    }
-
     RoundNearest::RoundNearest(const SourceLocation location) :
-        BasicToken(location, "random-linear")
+        Constant(location, "random-linear", ::Round::DirectionEnum::Nearest)
     {
         type = new RoundDirectionType();
-    }
-
-    void RoundNearest::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
     }
 
     RoundUp::RoundUp(const SourceLocation location) :
-        BasicToken(location, "random-linear")
+        Constant(location, "random-linear", ::Round::DirectionEnum::Up)
     {
         type = new RoundDirectionType();
-    }
-
-    void RoundUp::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
     }
 
     RoundDown::RoundDown(const SourceLocation location) :
-        BasicToken(location, "random-linear")
+        Constant(location, "random-linear", ::Round::DirectionEnum::Down)
     {
         type = new RoundDirectionType();
-    }
-
-    void RoundDown::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
-    }
-
-    Pi::Pi(const SourceLocation location) :
-        BasicToken(location, "pi")
-    {
-        type = new NumberType();
-    }
-
-    void Pi::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
-    }
-
-    E::E(const SourceLocation location) :
-        BasicToken(location, "e")
-    {
-        type = new NumberType();
-    }
-
-    void E::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
     }
 
     String::String(const SourceLocation location, const std::string str) :
@@ -1753,69 +1694,16 @@ namespace Parser
     }
 
     BytecodeTransformer::BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream) :
-        sourcePath(sourcePath), outputStream(outputStream)
-    {
-        utils = Utils::get();
-    }
+        sourcePath(sourcePath), outputStream(outputStream) {}
 
     void BytecodeTransformer::transform(const Value* token)
     {
         addInstruction(new StackPushDouble(token->value));
     }
 
-    void BytecodeTransformer::transform(const SequenceForwards* token)
+    void BytecodeTransformer::transform(const Constant* token)
     {
-        addInstruction(new StackPushByte(::Sequence::OrderEnum::Forwards));
-    }
-
-    void BytecodeTransformer::transform(const SequenceBackwards* token)
-    {
-        addInstruction(new StackPushByte(::Sequence::OrderEnum::Backwards));
-    }
-
-    void BytecodeTransformer::transform(const SequencePingPong* token)
-    {
-        addInstruction(new StackPushByte(::Sequence::OrderEnum::PingPong));
-    }
-
-    void BytecodeTransformer::transform(const SequenceRandom* token)
-    {
-        addInstruction(new StackPushByte(::Sequence::OrderEnum::Random));
-    }
-
-    void BytecodeTransformer::transform(const RandomStep* token)
-    {
-        addInstruction(new StackPushByte(::Random::TypeEnum::Step));
-    }
-
-    void BytecodeTransformer::transform(const RandomLinear* token)
-    {
-        addInstruction(new StackPushByte(::Random::TypeEnum::Linear));
-    }
-
-    void BytecodeTransformer::transform(const RoundNearest* token)
-    {
-        addInstruction(new StackPushByte(::Round::DirectionEnum::Nearest));
-    }
-
-    void BytecodeTransformer::transform(const RoundUp* token)
-    {
-        addInstruction(new StackPushByte(::Round::DirectionEnum::Up));
-    }
-
-    void BytecodeTransformer::transform(const RoundDown* token)
-    {
-        addInstruction(new StackPushByte(::Round::DirectionEnum::Down));
-    }
-
-    void BytecodeTransformer::transform(const Pi* token)
-    {
-        addInstruction(new StackPushDouble(utils->pi));
-    }
-
-    void BytecodeTransformer::transform(const E* token)
-    {
-        addInstruction(new StackPushDouble(utils->e));
+        addInstruction(new StackPushByte(token->value));
     }
 
     void BytecodeTransformer::transform(const VariableRef* token)

@@ -67,6 +67,8 @@ namespace Parser
 
         const Path* path;
 
+        Utils* utils;
+
         ParserContext* context;
 
         std::string code;

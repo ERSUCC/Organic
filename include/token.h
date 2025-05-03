@@ -339,81 +339,58 @@ namespace Parser
         const double value;
     };
 
-    struct SequenceForwards : public BasicToken
+    struct Constant : public BasicToken
+    {
+        Constant(const SourceLocation location, const std::string str, const unsigned char value);
+
+        void transform(BytecodeTransformer* visitor) const override;
+
+        const unsigned char value;
+    };
+
+    struct SequenceForwards : public Constant
     {
         SequenceForwards(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct SequenceBackwards : public BasicToken
+    struct SequenceBackwards : public Constant
     {
         SequenceBackwards(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct SequencePingPong : public BasicToken
+    struct SequencePingPong : public Constant
     {
         SequencePingPong(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct SequenceRandom : public BasicToken
+    struct SequenceRandom : public Constant
     {
         SequenceRandom(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct RandomStep : public BasicToken
+    struct RandomStep : public Constant
     {
         RandomStep(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct RandomLinear : public BasicToken
+    struct RandomLinear : public Constant
     {
         RandomLinear(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct RoundNearest : public BasicToken
+    struct RoundNearest : public Constant
     {
         RoundNearest(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct RoundUp : public BasicToken
+    struct RoundUp : public Constant
     {
         RoundUp(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
     };
 
-    struct RoundDown : public BasicToken
+    struct RoundDown : public Constant
     {
         RoundDown(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct Pi : public BasicToken
-    {
-        Pi(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct E : public BasicToken
-    {
-        E(const SourceLocation location);
-
-        void transform(BytecodeTransformer* visitor) const override;
     };
 
     struct String : public BasicToken
@@ -983,17 +960,7 @@ namespace Parser
         BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream);
 
         void transform(const Value* token);
-        void transform(const SequenceForwards* token);
-        void transform(const SequenceBackwards* token);
-        void transform(const SequencePingPong* token);
-        void transform(const SequenceRandom* token);
-        void transform(const RandomStep* token);
-        void transform(const RandomLinear* token);
-        void transform(const RoundNearest* token);
-        void transform(const RoundUp* token);
-        void transform(const RoundDown* token);
-        void transform(const Pi* token);
-        void transform(const E* token);
+        void transform(const Constant* token);
         void transform(const VariableRef* token);
         void transform(const InputRef* token);
         void transform(const FunctionRef* token);
@@ -1055,8 +1022,6 @@ namespace Parser
         std::unordered_map<const Path*, unsigned char, Path::Hash, Path::Equals> resources;
 
         BytecodeResolver* resolver = new BytecodeResolver();
-
-        Utils* utils;
 
         std::stack<InstructionBlock*> blocks;
 

@@ -115,6 +115,8 @@ namespace Parser
     Parser::Parser(const Path* path, ParserContext* context) :
         path(path), context(context)
     {
+        utils = Utils::get();
+
         if (!path->readToString(code))
         {
             throw OrganicFileException("Could not open \"" + path->string() + "\".");
@@ -418,85 +420,145 @@ namespace Parser
                         nextCharacter();
                     }
 
-                    double base = 0;
+                    const SourceLocation location(path, startLine, startCharacter, tokens.size(), tokens.size() + 1);
 
-                    bool match = true;
-
-                    switch (name[0])
+                    if (name == "sequence-forwards")
                     {
-                        case 'c':
-                            break;
-
-                        case 'd':
-                            base = 2;
-
-                            break;
-
-                        case 'e':
-                            base = 4;
-
-                            break;
-
-                        case 'f':
-                            base = 5;
-
-                            break;
-
-                        case 'g':
-                            base = 7;
-
-                            break;
-
-                        case 'a':
-                            base = 9;
-
-                            break;
-
-                        case 'b':
-                            base = 11;
-
-                            break;
-
-                        default:
-                            match = false;
-
-                            break;
+                        tokens.push_back(new SequenceForwards(location));
                     }
 
-                    if (match)
+                    else if (name == "sequence-backwards")
                     {
-                        if (name.size() == 2 && isdigit(name[1]))
+                        tokens.push_back(new SequenceBackwards(location));
+                    }
+
+                    else if (name == "sequence-ping-pong")
+                    {
+                        tokens.push_back(new SequencePingPong(location));
+                    }
+
+                    else if (name == "sequence-random")
+                    {
+                        tokens.push_back(new SequenceRandom(location));
+                    }
+
+                    else if (name == "random-step")
+                    {
+                        tokens.push_back(new RandomStep(location));
+                    }
+
+                    else if (name == "random-linear")
+                    {
+                        tokens.push_back(new RandomLinear(location));
+                    }
+
+                    else if (name == "round-nearest")
+                    {
+                        tokens.push_back(new RoundNearest(location));
+                    }
+
+                    else if (name == "round-up")
+                    {
+                        tokens.push_back(new RoundUp(location));
+                    }
+
+                    else if (name == "round-down")
+                    {
+                        tokens.push_back(new RoundDown(location));
+                    }
+
+                    else if (name == "pi")
+                    {
+                        tokens.push_back(new Value(location, "pi", utils->pi));
+                    }
+
+                    else if (name == "e")
+                    {
+                        tokens.push_back(new Value(location, "pi", utils->e));
+                    }
+
+                    else
+                    {
+                        double base = 0;
+
+                        bool match = true;
+
+                        switch (name[0])
                         {
-                            tokens.push_back(new Value(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name, getFrequency(base + 12 * (name[1] - 48))));
+                            case 'c':
+                                break;
+
+                            case 'd':
+                                base = 2;
+
+                                break;
+
+                            case 'e':
+                                base = 4;
+
+                                break;
+
+                            case 'f':
+                                base = 5;
+
+                                break;
+
+                            case 'g':
+                                base = 7;
+
+                                break;
+
+                            case 'a':
+                                base = 9;
+
+                                break;
+
+                            case 'b':
+                                base = 11;
+
+                                break;
+
+                            default:
+                                match = false;
+
+                                break;
                         }
 
-                        else if (name.size() == 3 && isdigit(name[2]))
+                        if (match)
                         {
-                            if (name[1] == 's')
+                            if (name.size() == 2 && isdigit(name[1]))
                             {
-                                tokens.push_back(new Value(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name, getFrequency(base + 12 * (name[2] - 48) + 1)));
+                                tokens.push_back(new Value(location, name, getFrequency(base + 12 * (name[1] - 48))));
                             }
 
-                            else if (name[1] == 'f')
+                            else if (name.size() == 3 && isdigit(name[2]))
                             {
-                                tokens.push_back(new Value(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name, getFrequency(base + 12 * (name[2] - 48) - 1)));
+                                if (name[1] == 's')
+                                {
+                                    tokens.push_back(new Value(location, name, getFrequency(base + 12 * (name[2] - 48) + 1)));
+                                }
+
+                                else if (name[1] == 'f')
+                                {
+                                    tokens.push_back(new Value(location, name, getFrequency(base + 12 * (name[2] - 48) - 1)));
+                                }
+
+                                else
+                                {
+                                    tokens.push_back(new Identifier(location, name));
+                                }
                             }
 
                             else
                             {
-                                tokens.push_back(new Identifier(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
+                                tokens.push_back(new Identifier(location, name));
                             }
                         }
 
                         else
                         {
-                            tokens.push_back(new Identifier(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
+                            tokens.push_back(new Identifier(location, name));
                         }
-                    }
-
-                    else
-                    {
-                        tokens.push_back(new Identifier(SourceLocation(path, startLine, startCharacter, tokens.size(), tokens.size() + 1), name));
                     }
                 }
 
@@ -1118,7 +1180,7 @@ namespace Parser
 
     Token* Parser::parseTerm(unsigned int pos) const
     {
-        if (tokenIs<Value>(pos) || tokenIs<String>(pos))
+        if (tokenIs<Value>(pos) || tokenIs<Constant>(pos) || tokenIs<String>(pos))
         {
             return getToken(pos);
         }
@@ -1130,66 +1192,7 @@ namespace Parser
                 return parseCall(pos, false);
             }
 
-            Identifier* token = getToken<Identifier>(pos);
-
-            const SourceLocation location(path, token->location.line, token->location.character, pos, pos + 1);
-
-            if (token->str == "sequence-forwards")
-            {
-                return new SequenceForwards(location);
-            }
-
-            if (token->str == "sequence-backwards")
-            {
-                return new SequenceBackwards(location);
-            }
-
-            if (token->str == "sequence-ping-pong")
-            {
-                return new SequencePingPong(location);
-            }
-
-            if (token->str == "sequence-random")
-            {
-                return new SequenceRandom(location);
-            }
-
-            if (token->str == "random-step")
-            {
-                return new RandomStep(location);
-            }
-
-            if (token->str == "random-linear")
-            {
-                return new RandomLinear(location);
-            }
-
-            if (token->str == "round-nearest")
-            {
-                return new RoundNearest(location);
-            }
-
-            if (token->str == "round-up")
-            {
-                return new RoundUp(location);
-            }
-
-            if (token->str == "round-down")
-            {
-                return new RoundDown(location);
-            }
-
-            if (token->str == "pi")
-            {
-                return new Pi(location);
-            }
-
-            if (token->str == "e")
-            {
-                return new E(location);
-            }
-
-            return context->findIdentifier(token);
+            return context->findIdentifier(getToken<Identifier>(pos));
         }
 
         tokenError(getToken(pos), "expression term");
