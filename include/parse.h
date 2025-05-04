@@ -47,22 +47,18 @@ namespace Parser
         Program* parse();
 
     private:
-        BasicToken* getToken(const unsigned int pos) const;
-        template <typename T> T* getToken(const unsigned int pos) const;
-        template <typename T> bool tokenIs(const unsigned int pos) const;
+        void tokenError(const Token* token, const std::string message) const;
 
-        void tokenError(const BasicToken* token, const std::string message) const;
-
-        Include* parseInclude(unsigned int pos) const;
-        Token* parseInstruction(unsigned int pos);
-        Define* parseDefine(unsigned int pos);
-        Assign* parseAssign(unsigned int pos) const;
-        Token* parseCall(unsigned int pos) const;
-        Argument* parseArgument(unsigned int pos) const;
-        Token* parseExpression(unsigned int pos) const;
-        List* parseList(unsigned int pos) const;
-        Token* parseTerms(unsigned int pos) const;
-        Token* parseTerm(unsigned int pos) const;
+        TokenListNode* parseInclude(TokenListNode* start);
+        TokenListNode* parseInstruction(TokenListNode* start);
+        TokenListNode* parseDefine(TokenListNode* start);
+        TokenListNode* parseAssign(TokenListNode* start);
+        TokenListNode* parseCall(TokenListNode* start);
+        TokenListNode* parseArgument(TokenListNode* start);
+        TokenListNode* parseExpression(TokenListNode* start);
+        TokenListNode* parseList(TokenListNode* start);
+        TokenListNode* parseTerms(TokenListNode* start);
+        TokenListNode* parseTerm(TokenListNode* start);
 
         const Path* path;
 
@@ -70,7 +66,7 @@ namespace Parser
 
         std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths;
 
-        std::vector<BasicToken*> tokens;
+        TokenList* tokens;
 
     };
 }

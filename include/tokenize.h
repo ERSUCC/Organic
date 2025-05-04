@@ -10,32 +10,57 @@
 
 namespace Parser
 {
+    struct TokenListNode
+    {
+        TokenListNode(Token* token, TokenListNode* prev, TokenListNode* next, const bool end);
+
+        template <typename T> T* getToken() const
+        {
+            return dynamic_cast<T*>(token);
+        }
+
+        Token* token;
+
+        TokenListNode* prev;
+        TokenListNode* next;
+
+        const bool end;
+    };
+
+    struct TokenList
+    {
+        TokenList();
+
+        void add(Token* token);
+
+        TokenListNode* stitch(TokenListNode* start, TokenListNode* end);
+        TokenListNode* patch(TokenListNode* start, TokenListNode* end, Token* token);
+
+        TokenListNode* head = new TokenListNode(new Token(SourceLocation(nullptr, 0, 0)), nullptr, nullptr, true);
+        TokenListNode* tail = new TokenListNode(new Token(SourceLocation(nullptr, 0, 0)), nullptr, nullptr, true);
+    };
+
     struct Tokenizer
     {
         Tokenizer(const Path* path);
 
-        std::vector<BasicToken*> tokenize();
+        TokenList* tokenize();
 
     private:
-        void tokenizeString(const unsigned int line, const unsigned int character);
-        void tokenizeNumber(const unsigned int line, const unsigned int character);
-        void tokenizeIdentifier(const unsigned int line, const unsigned int character);
+        Token* tokenizeString();
+        Token* tokenizeNumber();
+        Token* tokenizeIdentifier();
 
         void skipWhitespace();
         void nextCharacter();
 
         double getFrequency(const double note) const;
 
-        BasicToken* getToken(const unsigned int pos) const;
-        template <typename T> bool tokenIs(const unsigned int pos) const;
-
         const Path* path;
 
         Utils* utils;
 
         std::string code;
-
-        std::vector<BasicToken*> tokens;
 
         unsigned int current = 0;
         unsigned int line = 1;

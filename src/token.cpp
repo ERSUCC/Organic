@@ -1276,22 +1276,6 @@ namespace Parser
         return result;
     }
 
-    Include::Include(const SourceLocation location, Program* program) :
-        Token(location), program(program)
-    {
-        type = new NoneType();
-    }
-
-    void Include::resolveTypes(TypeResolver* visitor)
-    {
-        visitor->resolveTypes(this);
-    }
-
-    void Include::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
-    }
-
     TypeResolver::TypeResolver(const Path* sourcePath) :
         sourcePath(sourcePath) {}
 
@@ -1608,11 +1592,6 @@ namespace Parser
         {
             instruction->resolveTypes(this);
         }
-    }
-
-    void TypeResolver::resolveTypes(Include* token)
-    {
-        token->program->resolveTypes(this);
     }
 
     void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType)
@@ -2168,11 +2147,6 @@ namespace Parser
         blocks.pop();
 
         resolver->output(outputStream, nextIdentifierId);
-    }
-
-    void BytecodeTransformer::transform(const Include* token)
-    {
-        token->program->transform(this);
     }
 
     void BytecodeTransformer::transformArgument(const ArgumentList* arguments, const std::string name)

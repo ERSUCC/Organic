@@ -932,7 +932,6 @@ namespace Parser
         void resolveTypes(CallAlias* token);
         void resolveTypes(Define* token);
         void resolveTypes(Program* token);
-        void resolveTypes(Include* token);
 
     private:
         void resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType);
@@ -996,7 +995,6 @@ namespace Parser
         void transform(const GreaterEqualAlias* token);
         void transform(const Define* token);
         void transform(const Program* token);
-        void transform(const Include* token);
 
     private:
         void transformArgument(const ArgumentList* arguments, const std::string name);

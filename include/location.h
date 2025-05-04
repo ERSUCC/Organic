@@ -4,7 +4,7 @@
 
 struct SourceLocation
 {
-    SourceLocation(const Path* path, const unsigned int line, const unsigned int character, const unsigned int start, const unsigned int end);
+    SourceLocation(const Path* path, const unsigned int line, const unsigned int character);
 
     bool operator==(const SourceLocation& other) const;
     bool operator!=(const SourceLocation& other) const;
@@ -13,6 +13,4 @@ struct SourceLocation
 
     const unsigned int line;
     const unsigned int character;
-    const unsigned int start;
-    const unsigned int end;
 };
