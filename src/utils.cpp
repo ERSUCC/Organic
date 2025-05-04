@@ -14,11 +14,31 @@ Utils* Utils::get()
 
 void Utils::parseWarning(const std::string message, const SourceLocation& location)
 {
+    if (!Utils::get()->firstWarning)
+    {
+        std::cout << "\n";
+    }
+
+    else
+    {
+        Utils::get()->firstWarning = false;
+    }
+
     std::cout << "Parse warning in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
 }
 
 void Utils::includeWarning(const std::string message, const SourceLocation& location)
 {
+    if (!Utils::get()->firstWarning)
+    {
+        std::cout << "\n";
+    }
+
+    else
+    {
+        Utils::get()->firstWarning = false;
+    }
+
     std::cout << "Include warning in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
 }
 

@@ -49,6 +49,8 @@ private:
 
     static Utils* instance;
 
+    bool firstWarning = true;
+
 };
 
 struct OrganicException : public std::exception
