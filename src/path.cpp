@@ -20,6 +20,32 @@ Path* Path::beside(const std::filesystem::path& path, const Path* other)
     return new Path(other->path.parent_path() / path);
 }
 
+std::filesystem::path Path::formatPath(const std::string path)
+{
+    std::string trimmed;
+
+    unsigned int i = 0;
+
+    while (i < path.size() && isspace(path[i]))
+    {
+        i++;
+    }
+
+    int j = path.size() - 1;
+
+    while (j >= 0 && isspace(path[j]))
+    {
+        j--;
+    }
+
+    while (i < path.size() && i <= j)
+    {
+        trimmed += path[i++];
+    }
+
+    return trimmed;
+}
+
 bool Path::exists() const
 {
     return std::filesystem::exists(path);

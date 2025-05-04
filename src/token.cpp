@@ -1972,7 +1972,7 @@ namespace Parser
 
         const String* str = dynamic_cast<const String*>(token->arguments->get("file"));
 
-        const Path* path = Path::beside(str->str, sourcePath);
+        const Path* path = Path::beside(Path::formatPath(str->str), sourcePath);
 
         if (!path->exists())
         {

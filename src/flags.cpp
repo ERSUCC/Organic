@@ -52,7 +52,7 @@ ProgramOptions FlagParser::getOptions()
                 throw OrganicArgumentException("The option \"export\" was already set.");
             }
 
-            Path* path = Path::relative(nextOption(flag));
+            Path* path = Path::relative(Path::formatPath(nextOption(flag)));
 
             if (!path->parent()->exists())
             {

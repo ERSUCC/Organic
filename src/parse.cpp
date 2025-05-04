@@ -217,7 +217,7 @@ namespace Parser
             tokenError(getToken(pos), "file path");
         }
 
-        const String* file = getToken<String>(pos++);
+        const std::filesystem::path file = Path::formatPath(getToken<String>(pos++)->str);
 
         if (!tokenIs<CloseParenthesis>(pos))
         {
@@ -228,14 +228,14 @@ namespace Parser
 
         const SourceLocation location = SourceLocation(path, start->location.line, start->location.character, start->location.start, pos);
 
-        if (file->str.empty())
+        if (file.empty())
         {
             Utils::includeWarning("This include does not specify a source file, it will have no effect.", start->location);
 
             return new Include(location, nullptr);
         }
 
-        const Path* includePath = Path::beside(file->str, path);
+        const Path* includePath = Path::beside(file, path);
 
         if (!includePath->exists())
         {
