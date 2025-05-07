@@ -645,7 +645,7 @@ namespace Parser
                     tokenError(current->token, "\")\"");
                 }
 
-                current = tokens->patch(first, current->next, new ParenthesizedExpression(first->token->location, current->token));
+                current = tokens->patch(first, current->next, new ParenthesizedExpression(first->token->location, current->prev->token));
             }
 
             else
