@@ -59,6 +59,8 @@ struct OrganicException : public std::exception
 
     const char* what() const noexcept override;
 
+    bool operator==(const OrganicException& other) const;
+
 private:
     const std::string message;
 

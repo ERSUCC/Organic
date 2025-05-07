@@ -1,0 +1,4 @@
+// Define with no curly braces
+// 4 ~ 10 ~ Expected "{", received "0".
+
+sine() = 0

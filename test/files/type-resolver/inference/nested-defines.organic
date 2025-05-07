@@ -1,0 +1,11 @@
+// Nested define inputs are inferred
+
+test(input) = {
+    test2(input2) = {
+        sine(effects: [ input2 ])
+    }
+
+    test2(input2: input)
+}
+
+test(input: delay())

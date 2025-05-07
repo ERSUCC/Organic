@@ -1,0 +1,6 @@
+// Basic function calls
+// sine ~ ( ~ ) ~ sine ~ ( ~ volume ~ : ~ 1 ~ ) ~ sine ~ ( ~ volume ~ : ~ 1 ~ , ~ frequency ~ : ~ 440 ~ )
+
+sine()
+sine(volume: 1)
+sine(volume: 1, frequency: 440)

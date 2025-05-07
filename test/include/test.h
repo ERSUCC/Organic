@@ -10,14 +10,23 @@
 #include "parse.h"
 #include "path.h"
 #include "token.h"
+#include "tokenize.h"
+
+struct TestInfo
+{
+    TestInfo(const Path* path);
+
+    std::vector<std::vector<std::string>> data;
+};
 
 struct Test
 {
-    void testAll();
+    virtual unsigned int test() = 0;
 
 protected:
     const Path* sourcePath(const std::string file) const;
-    const Parser::Program* parseSource(const Path* path) const;
+
+    Parser::Program* parseSource(const Path* path) const;
 
     void print(const std::string text);
 
@@ -31,19 +40,40 @@ protected:
     void fail(const std::string message);
 
     unsigned int indents = 0;
-    unsigned int failures;
+
+    unsigned int suiteFailures;
+    unsigned int sectionFailures;
+    unsigned int testFailures;
 
 };
 
-struct ParserTest : public Test
+struct TokenizerTests : public Test
 {
-
-public:
-    void test();
+    unsigned int test() override;
 
 private:
-    void roundTrip(const std::string name, const Path* path);
+    void checkList(const Path* path);
+
+};
+
+struct ParserTests : public Test
+{
+    unsigned int test() override;
+
+private:
+    void roundTrip(const Path* path);
+    void expectError(const Path* path);
 
     std::string formatSource(const std::string text) const;
+
+};
+
+struct TypeResolverTests : public Test
+{
+    unsigned int test() override;
+
+private:
+    void expectSuccess(const Path* path);
+    void expectError(const Path* path);
 
 };

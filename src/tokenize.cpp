@@ -5,8 +5,11 @@ namespace Parser
     TokenListNode::TokenListNode(Token* token, TokenListNode* prev, TokenListNode* next, const bool end) :
         token(token), prev(prev), next(next), end(end) {}
 
-    TokenList::TokenList()
+    TokenList::TokenList(const Path* path)
     {
+        head = new TokenListNode(new Token(SourceLocation(path, 0, 0)), nullptr, nullptr, true);
+        tail = new TokenListNode(new Token(SourceLocation(path, 0, 0)), nullptr, nullptr, true);
+
         head->prev = head;
         head->next = tail;
 
@@ -49,7 +52,7 @@ namespace Parser
 
     TokenList* Tokenizer::tokenize()
     {
-        TokenList* tokens = new TokenList();
+        TokenList* tokens = new TokenList(path);
 
         while (current < code.size())
         {
@@ -249,6 +252,8 @@ namespace Parser
 
             skipWhitespace();
         }
+
+        tokens->tail->token = new Token(SourceLocation(path, line, character));
 
         return tokens;
     }

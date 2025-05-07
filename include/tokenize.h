@@ -29,15 +29,15 @@ namespace Parser
 
     struct TokenList
     {
-        TokenList();
+        TokenList(const Path* path);
 
         void add(Token* token);
 
         TokenListNode* stitch(TokenListNode* start, TokenListNode* end);
         TokenListNode* patch(TokenListNode* start, TokenListNode* end, Token* token);
 
-        TokenListNode* head = new TokenListNode(new Token(SourceLocation(nullptr, 0, 0)), nullptr, nullptr, true);
-        TokenListNode* tail = new TokenListNode(new Token(SourceLocation(nullptr, 0, 0)), nullptr, nullptr, true);
+        TokenListNode* head;
+        TokenListNode* tail;
     };
 
     struct Tokenizer

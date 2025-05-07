@@ -324,7 +324,7 @@ namespace Parser
 
             if (!current->getToken<CloseParenthesis>())
             {
-                tokenError(current->token, "\")\"");
+                tokenError(current->token, "\",\" or \")\"");
             }
         }
 
@@ -368,11 +368,18 @@ namespace Parser
         while (!current->end && !current->getToken<CloseCurlyBracket>())
         {
             current = parseInstruction(current);
+
+            instructions.push_back(current->prev->token);
+        }
+
+        if (!current->getToken<CloseCurlyBracket>())
+        {
+            tokenError(current->token, "\"}\"");
         }
 
         context = context->parent;
 
-        return tokens->patch(start, current, new Define(function->location, instructions, function));
+        return tokens->patch(start, current->next, new Define(function->location, instructions, function));
     }
 
     TokenListNode* Parser::parseAssign(TokenListNode* start)
@@ -397,6 +404,8 @@ namespace Parser
     {
         TokenListNode* current = start;
 
+        const Identifier* name = start->getToken<Identifier>();
+
         current = current->next->next;
 
         std::vector<Argument*> arguments;
@@ -409,18 +418,26 @@ namespace Parser
             {
                 current = parseArgument(current->next);
 
-                arguments.push_back(current->prev->getToken<Argument>());
+                Argument* argument = current->prev->getToken<Argument>();
+
+                for (const Argument* arg : arguments)
+                {
+                    if (arg->name == argument->name)
+                    {
+                        throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + name->str + "\".", argument->location);
+                    }
+                }
+
+                arguments.push_back(argument);
             } while (current->getToken<Comma>());
 
             if (!current->getToken<CloseParenthesis>())
             {
                 tokenError(current->token, "\")\"");
             }
-
-            current = current->next;
         }
 
-        const Identifier* name = start->getToken<Identifier>();
+        current = current->next;
 
         ArgumentList* argumentList = new ArgumentList(name->location, arguments, name->str);
 

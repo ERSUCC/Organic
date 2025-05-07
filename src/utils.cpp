@@ -69,6 +69,11 @@ const char* OrganicException::what() const noexcept
     return message.c_str();
 }
 
+bool OrganicException::operator==(const OrganicException& other) const
+{
+    return message == other.message;
+}
+
 OrganicArgumentException::OrganicArgumentException(const std::string message) :
     OrganicException("Argument error:\n\t" + message) {}
 

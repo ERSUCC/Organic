@@ -1,0 +1,4 @@
+// Assign to string
+// 4 ~ 1 ~ Expected variable name, received ""test"".
+
+"test" = 0

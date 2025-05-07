@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 struct Path
 {
@@ -35,12 +36,15 @@ struct Path
 
     const Path* parent() const;
 
+    std::vector<const Path*> children() const;
+
     std::string string() const;
 
     std::string stem() const;
 
     bool readToString(std::string& dest) const;
     bool readToStringBinary(std::string& dest) const;
+    bool readLines(std::vector<std::string>& dest) const;
 
 private:
     Path(const std::filesystem::path& path);

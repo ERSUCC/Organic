@@ -459,25 +459,25 @@ namespace Parser
     }
 
     RoundNearest::RoundNearest(const SourceLocation location) :
-        Constant(location, "random-linear", ::Round::DirectionEnum::Nearest)
+        Constant(location, "round-nearest", ::Round::DirectionEnum::Nearest)
     {
         type = new RoundDirectionType();
     }
 
     RoundUp::RoundUp(const SourceLocation location) :
-        Constant(location, "random-linear", ::Round::DirectionEnum::Up)
+        Constant(location, "round-up", ::Round::DirectionEnum::Up)
     {
         type = new RoundDirectionType();
     }
 
     RoundDown::RoundDown(const SourceLocation location) :
-        Constant(location, "random-linear", ::Round::DirectionEnum::Down)
+        Constant(location, "round-down", ::Round::DirectionEnum::Down)
     {
         type = new RoundDirectionType();
     }
 
     String::String(const SourceLocation location, const std::string str) :
-        BasicToken(location, str)
+        BasicToken(location, "\"" + str + "\"")
     {
         type = new StringType();
     }
@@ -667,6 +667,11 @@ namespace Parser
         Call(location, arguments)
     {
         type = new NumberType();
+    }
+
+    void Time::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
     }
 
     void Time::transform(BytecodeTransformer* visitor) const
@@ -1350,10 +1355,17 @@ namespace Parser
         token->variable->type = token->value->type;
     }
 
+    void TypeResolver::resolveTypes(Time* token)
+    {
+        token->arguments->check();
+    }
+
     void TypeResolver::resolveTypes(Hold* token)
     {
         resolveArgumentTypes(token->arguments, "length", new NumberType());
         resolveArgumentTypes(token->arguments, "value", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(LFO* token)
@@ -1361,6 +1373,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "length", new NumberType());
         resolveArgumentTypes(token->arguments, "to", new NumberType());
         resolveArgumentTypes(token->arguments, "from", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Sweep* token)
@@ -1368,18 +1382,24 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "length", new NumberType());
         resolveArgumentTypes(token->arguments, "to", new NumberType());
         resolveArgumentTypes(token->arguments, "from", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Sequence* token)
     {
         resolveArgumentTypes(token->arguments, "order", new SequenceOrderType());
         resolveArgumentTypes(token->arguments, "values", new ListType(new NumberType()));
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Repeat* token)
     {
         resolveArgumentTypes(token->arguments, "repeats", new NumberType());
         resolveArgumentTypes(token->arguments, "value", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Random* token)
@@ -1388,6 +1408,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "length", new NumberType());
         resolveArgumentTypes(token->arguments, "to", new NumberType());
         resolveArgumentTypes(token->arguments, "from", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Limit* token)
@@ -1395,12 +1417,16 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "max", new NumberType());
         resolveArgumentTypes(token->arguments, "min", new NumberType());
         resolveArgumentTypes(token->arguments, "value", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Trigger* token)
     {
         resolveArgumentTypes(token->arguments, "value", new NumberType());
         resolveArgumentTypes(token->arguments, "condition", new BooleanType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(If* token)
@@ -1408,31 +1434,43 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "false", new NumberType());
         resolveArgumentTypes(token->arguments, "true", new NumberType());
         resolveArgumentTypes(token->arguments, "condition", new BooleanType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(All* token)
     {
         resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Any* token)
     {
         resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(None* token)
     {
         resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Min* token)
     {
         resolveArgumentTypes(token->arguments, "values", new ListType(new NumberType()));
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Max* token)
     {
         resolveArgumentTypes(token->arguments, "values", new ListType(new NumberType()));
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Round* token)
@@ -1440,6 +1478,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "direction", new RoundDirectionType());
         resolveArgumentTypes(token->arguments, "step", new NumberType());
         resolveArgumentTypes(token->arguments, "value", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Sine* token)
@@ -1448,6 +1488,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
         resolveArgumentTypes(token->arguments, "pan", new NumberType());
         resolveArgumentTypes(token->arguments, "volume", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Square* token)
@@ -1456,6 +1498,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
         resolveArgumentTypes(token->arguments, "pan", new NumberType());
         resolveArgumentTypes(token->arguments, "volume", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Triangle* token)
@@ -1464,6 +1508,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
         resolveArgumentTypes(token->arguments, "pan", new NumberType());
         resolveArgumentTypes(token->arguments, "volume", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Saw* token)
@@ -1472,6 +1518,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
         resolveArgumentTypes(token->arguments, "pan", new NumberType());
         resolveArgumentTypes(token->arguments, "volume", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Oscillator* token)
@@ -1481,6 +1529,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
         resolveArgumentTypes(token->arguments, "pan", new NumberType());
         resolveArgumentTypes(token->arguments, "volume", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Noise* token)
@@ -1488,6 +1538,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
         resolveArgumentTypes(token->arguments, "pan", new NumberType());
         resolveArgumentTypes(token->arguments, "volume", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Sample* token)
@@ -1496,6 +1548,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
         resolveArgumentTypes(token->arguments, "pan", new NumberType());
         resolveArgumentTypes(token->arguments, "volume", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(Play* token)
@@ -1508,6 +1562,8 @@ namespace Parser
         resolveArgumentTypes(token->arguments, "feedback", new NumberType());
         resolveArgumentTypes(token->arguments, "delay", new NumberType());
         resolveArgumentTypes(token->arguments, "mix", new NumberType());
+
+        token->arguments->check();
     }
 
     void TypeResolver::resolveTypes(CallUser* token)
@@ -1524,6 +1580,8 @@ namespace Parser
                 resolveArgumentTypes(token->arguments, input->str, new AnyType());
             }
         }
+
+        token->arguments->check();
 
         token->type = token->function->definition->type;
         token->function->definition->used = true;
@@ -1711,15 +1769,11 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Time* token)
     {
-        token->arguments->check();
-
         addInstruction(new CallNative(BytecodeConstants::TIME, 0));
     }
 
     void BytecodeTransformer::transform(const Hold* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "length");
         transformArgument(token->arguments, "value");
 
@@ -1728,8 +1782,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const LFO* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "length");
         transformArgument(token->arguments, "to");
         transformArgument(token->arguments, "from");
@@ -1739,8 +1791,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Sweep* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "length");
         transformArgument(token->arguments, "to");
         transformArgument(token->arguments, "from");
@@ -1750,8 +1800,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Sequence* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "order");
         transformArgument(token->arguments, "values");
 
@@ -1760,8 +1808,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Repeat* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "repeats");
         transformArgument(token->arguments, "value");
 
@@ -1770,8 +1816,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Random* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "type");
         transformArgument(token->arguments, "length");
         transformArgument(token->arguments, "to");
@@ -1782,8 +1826,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Limit* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "max");
         transformArgument(token->arguments, "min");
         transformArgument(token->arguments, "value");
@@ -1793,8 +1835,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Trigger* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "value");
         transformArgument(token->arguments, "condition");
 
@@ -1803,8 +1843,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const If* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "false");
         transformArgument(token->arguments, "true");
         transformArgument(token->arguments, "condition");
@@ -1814,8 +1852,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const All* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "values");
 
         addInstruction(new CallNative(BytecodeConstants::ALL, 1));
@@ -1823,8 +1859,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Any* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "values");
 
         addInstruction(new CallNative(BytecodeConstants::ANY, 1));
@@ -1832,8 +1866,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const None* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "values");
 
         addInstruction(new CallNative(BytecodeConstants::NONE, 1));
@@ -1841,8 +1873,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Min* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "values");
 
         addInstruction(new CallNative(BytecodeConstants::MIN, 1));
@@ -1850,8 +1880,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Max* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "values");
 
         addInstruction(new CallNative(BytecodeConstants::MAX, 1));
@@ -1859,8 +1887,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Round* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "direction");
         transformArgument(token->arguments, "step");
         transformArgument(token->arguments, "value");
@@ -1875,8 +1901,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Sine* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "frequency");
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
@@ -1887,8 +1911,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Square* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "frequency");
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
@@ -1899,8 +1921,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Triangle* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "frequency");
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
@@ -1911,8 +1931,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Saw* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "frequency");
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
@@ -1923,8 +1941,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Oscillator* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "waveform");
         transformArgument(token->arguments, "frequency");
         transformArgument(token->arguments, "effects");
@@ -1936,8 +1952,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Noise* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "effects");
         transformArgument(token->arguments, "pan");
         transformArgument(token->arguments, "volume");
@@ -1947,8 +1961,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Sample* token)
     {
-        token->arguments->check();
-
         const String* str = dynamic_cast<const String*>(token->arguments->get("file"));
 
         const Path* path = Path::beside(Path::formatPath(str->str), sourcePath);
@@ -1993,8 +2005,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Delay* token)
     {
-        token->arguments->check();
-
         transformArgument(token->arguments, "feedback");
         transformArgument(token->arguments, "delay");
         transformArgument(token->arguments, "mix");
@@ -2004,8 +2014,6 @@ namespace Parser
 
     void BytecodeTransformer::transform(const CallUser* token)
     {
-        token->arguments->check();
-
         for (const InputDef* input : token->function->definition->inputs)
         {
             transformArgument(token->arguments, input->str);

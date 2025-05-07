@@ -1,0 +1,10 @@
+// Input types are inferred
+
+test(input1, input2) = {
+    sine(volume: input1, frequency: sequence(values: input2))
+}
+
+test(input1: 1, input2: [
+    hold(value: 220, length: 1000),
+    hold(value: 440, length: 1000)
+])

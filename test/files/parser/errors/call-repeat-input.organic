@@ -1,0 +1,4 @@
+// Call input specified twice
+// 4 ~ 17 ~ Input "volume" specified more than once for function "sine".
+
+sine(volume: 1, volume: 1)

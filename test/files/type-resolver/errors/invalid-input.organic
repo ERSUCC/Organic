@@ -1,0 +1,4 @@
+// Invalid input
+// 4 ~ 6 ~ Invalid input name "squiggle" for function "sine".
+
+sine(squiggle: 0)

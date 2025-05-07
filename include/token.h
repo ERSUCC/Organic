@@ -539,6 +539,7 @@ namespace Parser
     {
         Time(const SourceLocation location, ArgumentList* arguments);
 
+        void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
     };
 
@@ -904,6 +905,7 @@ namespace Parser
         void resolveTypes(List* token);
         void resolveTypes(ParenthesizedExpression* token);
         void resolveTypes(Assign* token);
+        void resolveTypes(Time* token);
         void resolveTypes(Hold* token);
         void resolveTypes(LFO* token);
         void resolveTypes(Sweep* token);

@@ -1,0 +1,4 @@
+// Call with improper input format
+// 4 ~ 12 ~ Expected ":", received ")".
+
+sine(volume)

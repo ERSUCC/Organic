@@ -1,0 +1,4 @@
+// Missing closing curly brace
+// 5 ~ 1 ~ Expected "}", received "".
+
+test() = {

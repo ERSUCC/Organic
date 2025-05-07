@@ -1,0 +1,10 @@
+// Assign various literals
+// test ~ = ~ 1.33 ~ test ~ = ~ -6.78 ~ test ~ = ~ "test" ~ test ~ = ~ sequence-forwards ~ test ~ = ~ var ~ test ~ = ~ snake-sss ~ test ~ = ~ under_the_score
+
+test = 1.33
+test = -6.78
+test = "test"
+test = sequence-forwards
+test = var
+test = snake-sss
+test = under_the_score

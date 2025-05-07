@@ -1,0 +1,4 @@
+// Undefined variable
+// 4 ~ 14 ~ No variable, input, or function exists with the name "test".
+
+sine(volume: test)

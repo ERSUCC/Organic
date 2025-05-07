@@ -1,0 +1,4 @@
+// Assign to number
+// 4 ~ 1 ~ Expected variable name, received "42".
+
+42 = 0

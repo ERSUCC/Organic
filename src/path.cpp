@@ -66,6 +66,23 @@ const Path* Path::parent() const
     return new Path(path.parent_path());
 }
 
+std::vector<const Path*> Path::children() const
+{
+    if (isDirectory())
+    {
+        std::vector<const Path*> paths;
+
+        for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path))
+        {
+            paths.push_back(new Path(entry.path()));
+        }
+
+        return paths;
+    }
+
+    return {};
+}
+
 std::string Path::string() const
 {
     return path.string();
@@ -112,6 +129,29 @@ bool Path::readToStringBinary(std::string& dest) const
     file.close();
 
     dest = stream.str();
+
+    return done;
+}
+
+bool Path::readLines(std::vector<std::string>& dest) const
+{
+    std::ifstream file(string());
+
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    std::string line;
+
+    for (std::string line; std::getline(file, line, '\n');)
+    {
+        dest.push_back(line);
+    }
+
+    const bool done = file.eof();
+
+    file.close();
 
     return done;
 }

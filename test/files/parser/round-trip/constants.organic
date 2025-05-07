@@ -1,8 +1,13 @@
+// Language constants
+
 test1 = sequence-forwards
 test2 = sequence-backwards
 test3 = sequence-ping-pong
 test4 = sequence-random
 test5 = random-step
 test6 = random-linear
-test7 = pi
-test8 = e
+test7 = round-nearest
+test8 = round-up
+test9 = round-down
+testa = pi
+testb = e

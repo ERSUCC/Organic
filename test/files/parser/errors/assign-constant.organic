@@ -1,0 +1,4 @@
+// Assign to language constant
+// 4 ~ 1 ~ Expected variable name, received "sequence-forwards".
+
+sequence-forwards = 0
