@@ -1,6 +1,6 @@
 # Organic
 
-Organic is a programming language for generative audio synthesis, with the goal of providing electronic musicians with a flexible yet easy-to-learn way to create unique music.
+Organic is a programming language for algorithmic audio synthesis, with the goal of providing electronic musicians with a flexible yet easy-to-learn way to create unique music.
 
 ## Table of Contents
 
