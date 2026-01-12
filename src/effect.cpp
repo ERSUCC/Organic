@@ -112,3 +112,362 @@ void LowPassFilter::init()
     mix->start(startTime);
     cutoff->start(startTime);
 }
+
+Buffer::Buffer(const size_t length) :
+    length(length)
+{
+    buffer = (double*)malloc(sizeof(double) * length);
+}
+
+Buffer::~Buffer()
+{
+    free(buffer);
+}
+
+void Buffer::write(const double* source, const size_t length)
+{
+    if (end >= this->length)
+    {
+        end = 0;
+    }
+
+    memcpy(buffer + end, source, sizeof(double) * length);
+
+    end += length;
+}
+
+void Buffer::read(double* dest, const size_t offset, const size_t length) const
+{
+    memcpy(dest, buffer + offset, sizeof(double) * length);
+}
+
+void Buffer::push(const double value)
+{
+    if (end >= length)
+    {
+        end = 0;
+    }
+
+    buffer[end++] = value;
+}
+
+size_t Buffer::size() const
+{
+    return end;
+}
+
+RingBuffer::RingBuffer(const size_t length) :
+    length(length)
+{
+    buffer = (double*)malloc(sizeof(double) * length);
+}
+
+RingBuffer::~RingBuffer()
+{
+    free(buffer);
+}
+
+void RingBuffer::push(const double value)
+{
+    buffer[back++] = value;
+
+    if (back >= length)
+    {
+        back = 0;
+    }
+
+    if (size >= length)
+    {
+        if (++front >= length)
+        {
+            front = 0;
+        }
+    }
+
+    else
+    {
+        size++;
+    }
+}
+
+void RingBuffer::add(const size_t offset, const double value)
+{
+    size_t index = front + offset;
+
+    if (index >= length)
+    {
+        index -= length;
+    }
+
+    buffer[index] += value;
+}
+
+double RingBuffer::pop()
+{
+    if (size == 0)
+    {
+        return 0;
+    }
+
+    const double value = buffer[front++];
+
+    if (front >= length)
+    {
+        front = 0;
+    }
+
+    size--;
+
+    return value;
+}
+
+Convolver::Convolver(const size_t length, const size_t offset, const double* impulse) :
+    length(length), offset(offset)
+{
+    powers = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length);
+
+    for (size_t i = 0; i < length; i++)
+    {
+        powers[i] = std::exp(std::complex(0.0, 2 * M_PI * i / (length * 2)));
+    }
+
+    inputBuffer = (double*)calloc(length * 2, sizeof(double));
+
+    buffer1 = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length * 2);
+    buffer2 = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length * 2);
+
+    overlap = (double*)calloc(length, sizeof(double));
+
+    this->impulse = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length * 2);
+
+    std::fill(this->impulse, this->impulse + length * 2, 0);
+
+    double* padded = (double*)malloc(sizeof(double) * length * 2);
+
+    std::fill(padded, padded + length * 2, 0);
+
+    memcpy(padded, impulse, sizeof(double) * length);
+
+    fft(padded, length * 2, 1, this->impulse);
+
+    free(padded);
+}
+
+Convolver::~Convolver()
+{
+    free(powers);
+    free(inputBuffer);
+    free(buffer1);
+    free(buffer2);
+    free(overlap);
+    free(impulse);
+}
+
+void Convolver::execute(const Buffer* input, const size_t position, RingBuffer* output)
+{
+    if (position <= last)
+    {
+        last = 0;
+    }
+
+    if (position >= last + length)
+    {
+        input->read(inputBuffer, last, length);
+
+        std::fill(buffer1, buffer1 + length * 2, 0);
+        std::fill(buffer2, buffer2 + length * 2, 0);
+
+        fft(inputBuffer, length * 2, 1, buffer1);
+
+        for(size_t i = 0; i < length * 2; i++)
+        {
+            buffer1[i] *= impulse[i];
+        }
+
+        ifft(buffer1, length * 2, 1, buffer2);
+
+        for (size_t i = 0; i < length; i++)
+        {
+            output->add(offset + i, (buffer2[i].real() + overlap[i]) / (length * 2));
+
+            overlap[i] = buffer2[i + length].real();
+        }
+
+        last = position;
+    }
+}
+
+void Convolver::fft(const double* start, const size_t length, const size_t step, std::complex<double>* result) const
+{
+    if (length == 1)
+    {
+        result[0] = start[0];
+
+        return;
+    }
+
+    fft(start, length / 2, step * 2, result);
+    fft(start + step, length / 2, step * 2, result + length / 2);
+
+    for (size_t i = 0; i < length / 2; i++)
+    {
+        const std::complex<double> even = result[i];
+        const std::complex<double> odd = powers[i * step] * result[i + length / 2];
+
+        result[i] += odd;
+        result[i + length / 2] = even - odd;
+    }
+}
+
+void Convolver::ifft(const std::complex<double>* start, const size_t length, const size_t step, std::complex<double>* result) const
+{
+    if (length == 1)
+    {
+        result[0] = start[0];
+
+        return;
+    }
+
+    ifft(start, length / 2, step * 2, result);
+    ifft(start + step, length / 2, step * 2, result + length / 2);
+
+    for (size_t i = 0; i < length / 2; i++)
+    {
+        const std::complex<double> even = result[i];
+        const std::complex<double> odd = result[i + length / 2] / powers[i * step];
+
+        result[i] += odd;
+        result[i + length / 2] = even - odd;
+    }
+}
+
+ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const double* impulse) :
+    segments(segments)
+{
+    convolvers = (Convolver**)malloc(sizeof(Convolver*) * segments.size());
+
+    size_t length = 0;
+
+    for (size_t i = 0; i < segments.size(); i++)
+    {
+        convolvers[i] = new Convolver(segments[i], length, impulse + length);
+
+        length += segments[i];
+    }
+
+    input = new Buffer(segments.back());
+
+    output = new RingBuffer(length);
+
+    for (size_t i = 0; i < length; i++)
+    {
+        output->push(0);
+    }
+}
+
+ConvolverStream::~ConvolverStream()
+{
+    free(convolvers);
+    free(input);
+    free(output);
+}
+
+void ConvolverStream::write(const double* source, const size_t length, const size_t stride)
+{
+    for (size_t i = 0; i < length; i += stride)
+    {
+        input->push(source[i]);
+    }
+}
+
+void ConvolverStream::execute()
+{
+    for (size_t i = 0; i < segments.size(); i++)
+    {
+        convolvers[i]->execute(input, input->size(), output);
+    }
+}
+
+void ConvolverStream::read(double* dest, const size_t length, const size_t stride, const double mix)
+{
+    for (size_t i = 0; i < length; i += stride)
+    {
+        dest[i] = dest[i] * (1 - mix) + output->pop() * mix;
+
+        output->push(0);
+    }
+}
+
+Reverb::Reverb(ValueObject* mix, ValueObject* response) :
+    mix(mix), response(response)
+{
+    streams = (ConvolverStream**)malloc(sizeof(ConvolverStream*) * utils->channels);
+
+    const Resource* impulse = response->getLeafAs<Resource>();
+
+    size_t segmentSize = 256;
+    size_t segmentSum = 0;
+
+    while (segmentSum < impulse->length)
+    {
+        segments.push_back(segmentSize);
+
+        segmentSum += segmentSize;
+
+        if (segmentSize < 8192)
+        {
+            segmentSize *= 2;
+        }
+    }
+
+    double* samples = (double*)malloc(sizeof(double) * segmentSum);
+
+    std::fill(samples, samples + segmentSum, 0);
+
+    memcpy(samples, impulse->samples, sizeof(double) * impulse->length);
+
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        streams[i] = new ConvolverStream(segments, samples);
+    }
+
+    free(samples);
+}
+
+Reverb::~Reverb()
+{
+    free(streams);
+}
+
+void Reverb::apply(double* buffer, const unsigned int bufferLength)
+{
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        streams[i]->write(buffer + i, bufferLength * utils->channels, utils->channels);
+    }
+
+    offset += bufferLength;
+
+    if (offset >= segments[0])
+    {
+        for (unsigned int i = 0; i < utils->channels; i++)
+        {
+            streams[i]->execute();
+        }
+
+        offset = 0;
+    }
+
+    const double mixValue = mix->getValue();
+
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        streams[i]->read(buffer + i, bufferLength * utils->channels, utils->channels, mixValue);
+    }
+}
+
+void Reverb::init()
+{
+    mix->start(startTime);
+    response->start(startTime);
+}

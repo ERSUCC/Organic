@@ -60,6 +60,7 @@ struct BytecodeConstants
 
     static constexpr unsigned char EMPTY_EFFECT = 0x70;
     static constexpr unsigned char DELAY = 0x71;
+    static constexpr unsigned char REVERB = 0x72;
 
     static constexpr unsigned char PLAY = 0x90;
 };
