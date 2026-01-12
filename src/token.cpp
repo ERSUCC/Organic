@@ -477,7 +477,7 @@ namespace Parser
     }
 
     String::String(const SourceLocation location, const std::string str) :
-        BasicToken(location, "\"" + str + "\"")
+        BasicToken(location, str)
     {
         type = new StringType();
     }
@@ -1072,6 +1072,19 @@ namespace Parser
         visitor->transform(this);
     }
 
+    Reverb::Reverb(const SourceLocation location, ArgumentList* arguments) :
+        Effect(location, arguments) {}
+
+    void Reverb::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Reverb::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
     CallUser::CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function) :
         Call(location, arguments), function(function) {}
 
@@ -1566,6 +1579,14 @@ namespace Parser
         token->arguments->check();
     }
 
+    void TypeResolver::resolveTypes(Reverb* token)
+    {
+        resolveArgumentTypes(token->arguments, "response", new StringType());
+        resolveArgumentTypes(token->arguments, "mix", new NumberType());
+
+        token->arguments->check();
+    }
+
     void TypeResolver::resolveTypes(CallUser* token)
     {
         for (const InputDef* input : token->function->definition->inputs)
@@ -2010,6 +2031,36 @@ namespace Parser
         transformArgument(token->arguments, "mix");
 
         addInstruction(new CallNative(BytecodeConstants::DELAY, 3));
+    }
+
+    void BytecodeTransformer::transform(const Reverb* token)
+    {
+        const String* str = dynamic_cast<const String*>(token->arguments->get("response"));
+
+        const Path* path = Path::beside(Path::formatPath(str->str), sourcePath);
+
+        if (!path->exists())
+        {
+            throw OrganicIncludeException("Audio file \"" + path->string() + "\" does not exist.", str->location);
+        }
+
+        if (!path->isFile())
+        {
+            throw OrganicIncludeException("\"" + path->string() + "\" is not a file.", str->location);
+        }
+
+        if (!resources.count(path))
+        {
+            resources[path] = resources.size();
+
+            resolver->addResourceBlock(new ResourceBlock(path));
+        }
+
+        addInstruction(new StackPushResource(resources[path]));
+
+        transformArgument(token->arguments, "mix");
+
+        addInstruction(new CallNative(BytecodeConstants::REVERB, 2));
     }
 
     void BytecodeTransformer::transform(const CallUser* token)

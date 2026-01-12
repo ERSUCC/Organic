@@ -350,6 +350,7 @@ namespace Parser
             function->str == "noise" ||
             function->str == "sample" ||
             function->str == "delay" ||
+            function->str == "reverb" ||
             function->str == "include")
         {
             throw OrganicParseException("A function already exists with the name \"" + function->str + "\".", function->location);
@@ -559,6 +560,11 @@ namespace Parser
         if (name->str == "delay")
         {
             return tokens->patch(start, current, new Delay(name->location, argumentList));
+        }
+
+        if (name->str == "reverb")
+        {
+            return tokens->patch(start, current, new Reverb(name->location, argumentList));
         }
 
         if (name->str == "include")
