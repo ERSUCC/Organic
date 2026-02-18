@@ -35,9 +35,9 @@ Machine::Machine(const Path* path)
 
     for (unsigned int i = 0; i < numResources; i++)
     {
-        const unsigned int length = readUnsignedInt(chars + i * 12);
-        const unsigned int sampleRate = readUnsignedInt(chars + i * 12 + 4);
-        const unsigned int channels = readUnsignedInt(chars + i * 12 + 8);
+        const unsigned int length = readUnsignedInt(chars);
+        const unsigned int sampleRate = readUnsignedInt(chars + 4);
+        const unsigned int channels = readUnsignedInt(chars + 8);
 
         chars += 12;
 
