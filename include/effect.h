@@ -1,7 +1,11 @@
 #pragma once
 
 #include <complex>
+#include <condition_variable>
+#include <functional>
+#include <mutex>
 #include <queue>
+#include <thread>
 #include <vector>
 
 #include "object.h"
@@ -91,6 +95,43 @@ private:
 
 };
 
+struct ExecutorThread
+{
+    ExecutorThread();
+    ~ExecutorThread();
+
+    void schedule(const std::function<void()>& function);
+    void wait();
+
+private:
+    std::thread thread;
+
+    std::mutex lock;
+    std::condition_variable signal;
+
+    std::queue<std::function<void()>> functions;
+
+    bool executing = true;
+
+};
+
+struct ExecutorPool
+{
+    ExecutorPool(const size_t numThreads);
+    ~ExecutorPool();
+
+    void schedule(const std::function<void()>& function);
+    void wait();
+
+private:
+    const size_t numThreads;
+
+    ExecutorThread** threads;
+
+    size_t next = 0;
+
+};
+
 struct Convolver
 {
     Convolver(const size_t length, const size_t offset, const double* impulse);
@@ -137,6 +178,8 @@ private:
     Buffer* input;
 
     RingBuffer* output;
+
+    ExecutorPool* executor;
 
 };
 
