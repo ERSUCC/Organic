@@ -221,6 +221,101 @@ double RingBuffer::pop()
     return value;
 }
 
+ExecutorThread::ExecutorThread()
+{
+    thread = std::thread([=]()
+    {
+        std::unique_lock unique(lock);
+
+        while (executing)
+        {
+            signal.wait(unique);
+
+            if (executing && !functions.empty())
+            {
+                while (!functions.empty())
+                {
+                    functions.front()();
+                    functions.pop();
+                }
+
+                signal.notify_all();
+            }
+        }
+    });
+}
+
+ExecutorThread::~ExecutorThread()
+{
+    lock.lock();
+
+    executing = false;
+
+    lock.unlock();
+
+    signal.notify_all();
+
+    if (thread.joinable())
+    {
+        thread.join();
+    }
+}
+
+void ExecutorThread::schedule(const std::function<void()>& function)
+{
+    lock.lock();
+
+    functions.push(function);
+
+    lock.unlock();
+
+    signal.notify_all();
+}
+
+void ExecutorThread::wait()
+{
+    std::unique_lock unique(lock);
+
+    while (!functions.empty())
+    {
+        signal.wait(unique);
+    }
+}
+
+ExecutorPool::ExecutorPool(const size_t numThreads) :
+    numThreads(numThreads)
+{
+    threads = (ExecutorThread**)malloc(sizeof(ExecutorThread*) * numThreads);
+
+    for (size_t i = 0; i < numThreads; i++)
+    {
+        threads[i] = new ExecutorThread();
+    }
+}
+
+ExecutorPool::~ExecutorPool()
+{
+    free(threads);
+}
+
+void ExecutorPool::schedule(const std::function<void()>& function)
+{
+    threads[next++]->schedule(function);
+
+    if (next >= numThreads)
+    {
+        next = 0;
+    }
+}
+
+void ExecutorPool::wait()
+{
+    for (size_t i = 0; i < numThreads; i++)
+    {
+        threads[i]->wait();
+    }
+}
+
 Convolver::Convolver(const size_t length, const size_t offset, const double* impulse) :
     length(length), offset(offset)
 {
@@ -363,6 +458,8 @@ ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const doub
     {
         output->push(0);
     }
+
+    executor = new ExecutorPool(4);
 }
 
 ConvolverStream::~ConvolverStream()
@@ -384,8 +481,13 @@ void ConvolverStream::execute()
 {
     for (size_t i = 0; i < segments.size(); i++)
     {
-        convolvers[i]->execute(input, input->size(), output);
+        executor->schedule([=]()
+        {
+            convolvers[i]->execute(input, input->size(), output);
+        });
     }
+
+    executor->wait();
 }
 
 void ConvolverStream::read(double* dest, const size_t length, const size_t stride, const double mix)
