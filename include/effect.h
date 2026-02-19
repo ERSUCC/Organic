@@ -101,19 +101,23 @@ struct Executable
 
 struct ExecutorThread
 {
-    ExecutorThread();
+    ExecutorThread(const size_t maxScheduled);
     ~ExecutorThread();
 
     void schedule(Executable* executable);
     void wait();
 
 private:
+    const size_t maxScheduled;
+
     std::thread thread;
 
     std::mutex lock;
     std::condition_variable signal;
 
-    std::queue<Executable*> scheduled;
+    Executable** scheduled;
+
+    size_t end = 0;
 
     bool executing = true;
 
@@ -121,7 +125,7 @@ private:
 
 struct ExecutorPool
 {
-    ExecutorPool(const size_t numThreads);
+    ExecutorPool(const size_t numThreads, const size_t maxScheduled);
     ~ExecutorPool();
 
     void schedule(Executable* executable);
