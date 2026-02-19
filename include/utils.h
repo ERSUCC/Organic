@@ -99,3 +99,26 @@ struct OrganicAudioException : public OrganicException
 {
     OrganicAudioException(const std::string message);
 };
+
+struct Profiler
+{
+    Profiler(const double frequency);
+
+    void start();
+    void report();
+
+private:
+    void reset();
+
+    const double frequency;
+
+    std::chrono::high_resolution_clock clock;
+
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+    std::chrono::time_point<std::chrono::high_resolution_clock> reportTime;
+
+    std::chrono::duration<std::chrono::high_resolution_clock::rep, std::chrono::high_resolution_clock::period> elapsed;
+
+    size_t count;
+
+};

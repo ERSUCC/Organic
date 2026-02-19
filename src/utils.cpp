@@ -91,3 +91,34 @@ OrganicMachineException::OrganicMachineException(const std::string message) :
 
 OrganicAudioException::OrganicAudioException(const std::string message) :
     OrganicException("Audio error:\n\t" + message) {}
+
+Profiler::Profiler(const double frequency) :
+    frequency(frequency)
+{
+    reset();
+}
+
+void Profiler::start()
+{
+    startTime = clock.now();
+}
+
+void Profiler::report()
+{
+    elapsed += clock.now() - startTime;
+    count++;
+
+    if ((clock.now() - reportTime).count() >= frequency * 1e9)
+    {
+        std::cout << elapsed.count() / count << "\n";
+
+        reset();
+    }
+}
+
+void Profiler::reset()
+{
+    reportTime = clock.now();
+    elapsed = std::chrono::nanoseconds(0);
+    count = 0;
+}
