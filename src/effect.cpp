@@ -221,8 +221,11 @@ double RingBuffer::pop()
     return value;
 }
 
-ExecutorThread::ExecutorThread()
+ExecutorThread::ExecutorThread(const size_t maxScheduled) :
+    maxScheduled(maxScheduled)
 {
+    scheduled = (Executable**)malloc(sizeof(Executable*) * maxScheduled);
+
     thread = std::thread([=]()
     {
         std::unique_lock unique(lock);
@@ -231,12 +234,11 @@ ExecutorThread::ExecutorThread()
         {
             signal.wait(unique);
 
-            if (executing && !scheduled.empty())
+            if (executing && end > 0)
             {
-                while (!scheduled.empty())
+                while (end > 0)
                 {
-                    scheduled.front()->execute();
-                    scheduled.pop();
+                    scheduled[--end]->execute();
                 }
 
                 signal.notify_all();
@@ -259,13 +261,15 @@ ExecutorThread::~ExecutorThread()
     {
         thread.join();
     }
+
+    free(scheduled);
 }
 
 void ExecutorThread::schedule(Executable* executable)
 {
     lock.lock();
 
-    scheduled.push(executable);
+    scheduled[end++] = executable;
 
     lock.unlock();
 
@@ -276,20 +280,20 @@ void ExecutorThread::wait()
 {
     std::unique_lock unique(lock);
 
-    while (!scheduled.empty())
+    while (end > 0)
     {
         signal.wait(unique);
     }
 }
 
-ExecutorPool::ExecutorPool(const size_t numThreads) :
+ExecutorPool::ExecutorPool(const size_t numThreads, const size_t maxScheduled) :
     numThreads(numThreads)
 {
     threads = (ExecutorThread**)malloc(sizeof(ExecutorThread*) * numThreads);
 
     for (size_t i = 0; i < numThreads; i++)
     {
-        threads[i] = new ExecutorThread();
+        threads[i] = new ExecutorThread(maxScheduled);
     }
 }
 
@@ -465,7 +469,7 @@ ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const doub
         length += segments[i];
     }
 
-    executor = new ExecutorPool(16);
+    executor = new ExecutorPool(16, segments.size() / 16 + 1);
 }
 
 ConvolverStream::~ConvolverStream()
