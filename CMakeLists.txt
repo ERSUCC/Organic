@@ -22,6 +22,10 @@ add_library(organic_lib STATIC src/audiosource.cpp
                                src/tokenize.cpp
                                src/utils.cpp)
 
+if (NOT WIN32)
+    target_compile_options(organic_lib PRIVATE -O3)
+endif ()
+
 # link dependencies
 
 set(BUILD_SHARED_LIBS True)
