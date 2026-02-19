@@ -2,7 +2,6 @@
 
 #include <complex>
 #include <condition_variable>
-#include <functional>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -95,12 +94,17 @@ private:
 
 };
 
+struct Executable
+{
+    virtual void execute() = 0;
+};
+
 struct ExecutorThread
 {
     ExecutorThread();
     ~ExecutorThread();
 
-    void schedule(const std::function<void()>& function);
+    void schedule(Executable* executable);
     void wait();
 
 private:
@@ -109,7 +113,7 @@ private:
     std::mutex lock;
     std::condition_variable signal;
 
-    std::queue<std::function<void()>> functions;
+    std::queue<Executable*> scheduled;
 
     bool executing = true;
 
@@ -120,7 +124,7 @@ struct ExecutorPool
     ExecutorPool(const size_t numThreads);
     ~ExecutorPool();
 
-    void schedule(const std::function<void()>& function);
+    void schedule(Executable* executable);
     void wait();
 
 private:
@@ -132,12 +136,12 @@ private:
 
 };
 
-struct Convolver
+struct Convolver : public Executable
 {
-    Convolver(const size_t length, const size_t offset, const double* impulse);
+    Convolver(const size_t length, const size_t offset, const double* impulse, const Buffer* input, RingBuffer* output);
     ~Convolver();
 
-    void execute(const Buffer* input, const size_t position, RingBuffer* output);
+    void execute() override;
 
 private:
     void fft(const double* start, const size_t length, const size_t step, std::complex<double>* result) const;
@@ -145,6 +149,10 @@ private:
 
     const size_t length;
     const size_t offset;
+
+    const Buffer* input;
+
+    RingBuffer* output;
 
     std::complex<double>* powers;
 

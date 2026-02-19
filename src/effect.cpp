@@ -231,12 +231,12 @@ ExecutorThread::ExecutorThread()
         {
             signal.wait(unique);
 
-            if (executing && !functions.empty())
+            if (executing && !scheduled.empty())
             {
-                while (!functions.empty())
+                while (!scheduled.empty())
                 {
-                    functions.front()();
-                    functions.pop();
+                    scheduled.front()->execute();
+                    scheduled.pop();
                 }
 
                 signal.notify_all();
@@ -261,11 +261,11 @@ ExecutorThread::~ExecutorThread()
     }
 }
 
-void ExecutorThread::schedule(const std::function<void()>& function)
+void ExecutorThread::schedule(Executable* executable)
 {
     lock.lock();
 
-    functions.push(function);
+    scheduled.push(executable);
 
     lock.unlock();
 
@@ -276,7 +276,7 @@ void ExecutorThread::wait()
 {
     std::unique_lock unique(lock);
 
-    while (!functions.empty())
+    while (!scheduled.empty())
     {
         signal.wait(unique);
     }
@@ -298,9 +298,9 @@ ExecutorPool::~ExecutorPool()
     free(threads);
 }
 
-void ExecutorPool::schedule(const std::function<void()>& function)
+void ExecutorPool::schedule(Executable* executable)
 {
-    threads[next++]->schedule(function);
+    threads[next++]->schedule(executable);
 
     if (next >= numThreads)
     {
@@ -316,8 +316,8 @@ void ExecutorPool::wait()
     }
 }
 
-Convolver::Convolver(const size_t length, const size_t offset, const double* impulse) :
-    length(length), offset(offset)
+Convolver::Convolver(const size_t length, const size_t offset, const double* impulse, const Buffer* input, RingBuffer* output) :
+    length(length), offset(offset), input(input), output(output)
 {
     powers = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length);
 
@@ -358,8 +358,10 @@ Convolver::~Convolver()
     free(impulse);
 }
 
-void Convolver::execute(const Buffer* input, const size_t position, RingBuffer* output)
+void Convolver::execute()
 {
+    const size_t position = input->size();
+
     if (position <= last)
     {
         last = 0;
@@ -369,12 +371,9 @@ void Convolver::execute(const Buffer* input, const size_t position, RingBuffer* 
     {
         input->read(inputBuffer, last, length);
 
-        std::fill(buffer1, buffer1 + length * 2, 0);
-        std::fill(buffer2, buffer2 + length * 2, 0);
-
         fft(inputBuffer, length * 2, 1, buffer1);
 
-        for(size_t i = 0; i < length * 2; i++)
+        for (size_t i = 0; i < length * 2; i++)
         {
             buffer1[i] *= impulse[i];
         }
@@ -439,14 +438,10 @@ void Convolver::ifft(const std::complex<double>* start, const size_t length, con
 ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const double* impulse) :
     segments(segments)
 {
-    convolvers = (Convolver**)malloc(sizeof(Convolver*) * segments.size());
-
     size_t length = 0;
 
     for (size_t i = 0; i < segments.size(); i++)
     {
-        convolvers[i] = new Convolver(segments[i], length, impulse + length);
-
         length += segments[i];
     }
 
@@ -459,14 +454,23 @@ ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const doub
         output->push(0);
     }
 
-    executor = new ExecutorPool(4);
+    convolvers = (Convolver**)malloc(sizeof(Convolver*) * segments.size());
+
+    length = 0;
+
+    for (size_t i = 0; i < segments.size(); i++)
+    {
+        convolvers[i] = new Convolver(segments[i], length, impulse + length, input, output);
+
+        length += segments[i];
+    }
+
+    executor = new ExecutorPool(16);
 }
 
 ConvolverStream::~ConvolverStream()
 {
     free(convolvers);
-    free(input);
-    free(output);
 }
 
 void ConvolverStream::write(const double* source, const size_t length, const size_t stride)
@@ -481,10 +485,7 @@ void ConvolverStream::execute()
 {
     for (size_t i = 0; i < segments.size(); i++)
     {
-        executor->schedule([=]()
-        {
-            convolvers[i]->execute(input, input->size(), output);
-        });
+        executor->schedule(convolvers[i]);
     }
 
     executor->wait();
@@ -516,7 +517,7 @@ Reverb::Reverb(ValueObject* mix, ValueObject* response) :
 
         segmentSum += segmentSize;
 
-        if (segmentSize < 8192)
+        if (segmentSize < 16384)
         {
             segmentSize *= 2;
         }
