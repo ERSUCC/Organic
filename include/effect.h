@@ -78,10 +78,15 @@ struct RingBuffer
     RingBuffer(const size_t length);
     ~RingBuffer();
 
-    inline void push(const double value);
-    inline void add(const size_t offset, const double value);
+    void push(const double value);
+    void add(const size_t offset, const double value);
 
-    inline double pop();
+    double pop();
+
+    inline size_t getOffset() const;
+
+    inline void lock();
+    inline void unlock();
 
 private:
     const size_t length;
@@ -91,76 +96,35 @@ private:
     size_t front = 0;
     size_t back = 0;
     size_t size = 0;
+    size_t offset = 0;
+
+    std::mutex bufferLock;
 
 };
 
-struct Executable
-{
-    virtual void execute() = 0;
-};
-
-struct ExecutorThread
-{
-    ExecutorThread(const size_t maxScheduled);
-    ~ExecutorThread();
-
-    void schedule(Executable* executable);
-    void wait();
-
-private:
-    const size_t maxScheduled;
-
-    std::thread thread;
-
-    std::mutex lock;
-    std::condition_variable signal;
-
-    Executable** scheduled;
-
-    size_t end = 0;
-
-    bool executing = true;
-
-};
-
-struct ExecutorPool
-{
-    ExecutorPool(const size_t numThreads, const size_t maxScheduled);
-    ~ExecutorPool();
-
-    void schedule(Executable* executable);
-    void wait();
-
-private:
-    const size_t numThreads;
-
-    ExecutorThread** threads;
-
-    size_t next = 0;
-
-};
-
-struct Convolver : public Executable
+struct Convolver
 {
     Convolver(const size_t length, const size_t offset, const double* impulse, const Buffer* input, RingBuffer* output);
     ~Convolver();
 
-    void execute() override;
+    bool ready() const;
+
+    void prepareInput(double* buffer);
+
+    void execute(const size_t outputPosition, const double* inputBuffer);
+
+    const size_t length;
+    const size_t offset;
 
 private:
     void fft(const double* start, const size_t length, const size_t step, std::complex<double>* result) const;
     void ifft(const std::complex<double>* start, const size_t length, const size_t step, std::complex<double>* result) const;
-
-    const size_t length;
-    const size_t offset;
 
     const Buffer* input;
 
     RingBuffer* output;
 
     std::complex<double>* powers;
-
-    double* inputBuffer;
 
     std::complex<double>* buffer1;
     std::complex<double>* buffer2;
@@ -170,6 +134,65 @@ private:
     std::complex<double>* impulse;
 
     size_t last = 0;
+
+};
+
+struct Task
+{
+    Task(const size_t outputPosition, Convolver* convolver);
+    ~Task();
+
+    inline void execute() const;
+
+    inline size_t offset() const;
+
+private:
+    const size_t outputPosition;
+
+    Convolver* convolver;
+
+    double* inputBuffer;
+
+};
+
+struct ExecutorThread
+{
+    ExecutorThread(const RingBuffer* output);
+    ~ExecutorThread();
+
+    void schedule(Task* task);
+    void wait();
+
+private:
+    const RingBuffer* output;
+
+    std::thread thread;
+
+    std::mutex lock;
+    std::condition_variable signal;
+
+    std::vector<Task*> scheduled;
+
+    bool executing = true;
+
+};
+
+struct ExecutorPool
+{
+    ExecutorPool(const RingBuffer* output, const size_t numThreads);
+    ~ExecutorPool();
+
+    void schedule(Task* task);
+    void wait();
+
+private:
+    const RingBuffer* output;
+
+    const size_t numThreads;
+
+    ExecutorThread** threads;
+
+    size_t next = 0;
 
 };
 

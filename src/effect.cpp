@@ -217,107 +217,24 @@ double RingBuffer::pop()
     }
 
     size--;
+    offset++;
 
     return value;
 }
 
-ExecutorThread::ExecutorThread(const size_t maxScheduled) :
-    maxScheduled(maxScheduled)
+size_t RingBuffer::getOffset() const
 {
-    scheduled = (Executable**)malloc(sizeof(Executable*) * maxScheduled);
-
-    thread = std::thread([=]()
-    {
-        std::unique_lock unique(lock);
-
-        while (executing)
-        {
-            signal.wait(unique);
-
-            if (executing && end > 0)
-            {
-                while (end > 0)
-                {
-                    scheduled[--end]->execute();
-                }
-
-                signal.notify_all();
-            }
-        }
-    });
+    return offset;
 }
 
-ExecutorThread::~ExecutorThread()
+void RingBuffer::lock()
 {
-    lock.lock();
-
-    executing = false;
-
-    lock.unlock();
-
-    signal.notify_all();
-
-    if (thread.joinable())
-    {
-        thread.join();
-    }
-
-    free(scheduled);
+    bufferLock.lock();
 }
 
-void ExecutorThread::schedule(Executable* executable)
+void RingBuffer::unlock()
 {
-    lock.lock();
-
-    scheduled[end++] = executable;
-
-    lock.unlock();
-
-    signal.notify_all();
-}
-
-void ExecutorThread::wait()
-{
-    std::unique_lock unique(lock);
-
-    while (end > 0)
-    {
-        signal.wait(unique);
-    }
-}
-
-ExecutorPool::ExecutorPool(const size_t numThreads, const size_t maxScheduled) :
-    numThreads(numThreads)
-{
-    threads = (ExecutorThread**)malloc(sizeof(ExecutorThread*) * numThreads);
-
-    for (size_t i = 0; i < numThreads; i++)
-    {
-        threads[i] = new ExecutorThread(maxScheduled);
-    }
-}
-
-ExecutorPool::~ExecutorPool()
-{
-    free(threads);
-}
-
-void ExecutorPool::schedule(Executable* executable)
-{
-    threads[next++]->schedule(executable);
-
-    if (next >= numThreads)
-    {
-        next = 0;
-    }
-}
-
-void ExecutorPool::wait()
-{
-    for (size_t i = 0; i < numThreads; i++)
-    {
-        threads[i]->wait();
-    }
+    bufferLock.unlock();
 }
 
 Convolver::Convolver(const size_t length, const size_t offset, const double* impulse, const Buffer* input, RingBuffer* output) :
@@ -329,8 +246,6 @@ Convolver::Convolver(const size_t length, const size_t offset, const double* imp
     {
         powers[i] = std::exp(std::complex(0.0, 2 * M_PI * i / (length * 2)));
     }
-
-    inputBuffer = (double*)calloc(length * 2, sizeof(double));
 
     buffer1 = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length * 2);
     buffer2 = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length * 2);
@@ -355,44 +270,64 @@ Convolver::Convolver(const size_t length, const size_t offset, const double* imp
 Convolver::~Convolver()
 {
     free(powers);
-    free(inputBuffer);
     free(buffer1);
     free(buffer2);
     free(overlap);
     free(impulse);
 }
 
-void Convolver::execute()
+bool Convolver::ready() const
 {
     const size_t position = input->size();
 
     if (position <= last)
     {
-        last = 0;
+        return position >= length;
     }
 
-    if (position >= last + length)
+    return position >= last + length;
+}
+
+void Convolver::prepareInput(double* buffer)
+{
+    const size_t position = input->size();
+
+    if (position <= last)
     {
-        input->read(inputBuffer, last, length);
-
-        fft(inputBuffer, length * 2, 1, buffer1);
-
-        for (size_t i = 0; i < length * 2; i++)
-        {
-            buffer1[i] *= impulse[i];
-        }
-
-        ifft(buffer1, length * 2, 1, buffer2);
-
-        for (size_t i = 0; i < length; i++)
-        {
-            output->add(offset + i, (buffer2[i].real() + overlap[i]) / (length * 2));
-
-            overlap[i] = buffer2[i + length].real();
-        }
-
-        last = position;
+        input->read(buffer, 0, length);
     }
+
+    else
+    {
+        input->read(buffer, last, length);
+    }
+
+    last = position;
+}
+
+void Convolver::execute(const size_t outputPosition, const double* inputBuffer)
+{
+    fft(inputBuffer, length * 2, 1, buffer1);
+
+    for (size_t i = 0; i < length * 2; i++)
+    {
+        buffer1[i] *= impulse[i];
+    }
+
+    ifft(buffer1, length * 2, 1, buffer2);
+
+    output->lock();
+
+    const size_t start = offset - (output->getOffset() - outputPosition);
+
+    for (size_t i = 0; i < length; i++)
+    {
+        output->add(start + i, (buffer2[i].real() + overlap[i]) / (length * 2));
+
+        overlap[i] = buffer2[i + length].real();
+    }
+
+    output->unlock();
 }
 
 void Convolver::fft(const double* start, const size_t length, const size_t step, std::complex<double>* result) const
@@ -439,6 +374,136 @@ void Convolver::ifft(const std::complex<double>* start, const size_t length, con
     }
 }
 
+Task::Task(const size_t outputPosition, Convolver* convolver) :
+    outputPosition(outputPosition), convolver(convolver)
+{
+    inputBuffer = (double*)malloc(sizeof(double) * convolver->length * 2);
+
+    convolver->prepareInput(inputBuffer);
+}
+
+Task::~Task()
+{
+    free(inputBuffer);
+}
+
+void Task::execute() const
+{
+    convolver->execute(outputPosition, inputBuffer);
+}
+
+size_t Task::offset() const
+{
+    return outputPosition + convolver->offset;
+}
+
+ExecutorThread::ExecutorThread(const RingBuffer* output) :
+    output(output)
+{
+    thread = std::thread([=]()
+    {
+        std::unique_lock unique(lock);
+
+        while (executing)
+        {
+            signal.wait(unique);
+
+            if (executing && !scheduled.empty())
+            {
+                for (size_t i = 0; i < scheduled.size(); i++)
+                {
+                    scheduled[i]->execute();
+                }
+
+                scheduled.clear();
+
+                signal.notify_all();
+            }
+        }
+    });
+}
+
+ExecutorThread::~ExecutorThread()
+{
+    lock.lock();
+
+    executing = false;
+
+    lock.unlock();
+
+    signal.notify_all();
+
+    if (thread.joinable())
+    {
+        thread.join();
+    }
+}
+
+void ExecutorThread::schedule(Task* task)
+{
+    lock.lock();
+
+    size_t i = 0;
+
+    for (; i < scheduled.size(); i++)
+    {
+        if (task->offset() < scheduled[i]->offset())
+        {
+            break;
+        }
+    }
+
+    scheduled.insert(scheduled.begin() + i, task);
+
+    lock.unlock();
+
+    signal.notify_all();
+}
+
+void ExecutorThread::wait()
+{
+    std::unique_lock unique(lock);
+
+    while (!scheduled.empty() && scheduled[0]->offset() <= output->getOffset())
+    {
+        signal.wait(unique);
+    }
+}
+
+ExecutorPool::ExecutorPool(const RingBuffer* output, const size_t numThreads) :
+    output(output), numThreads(numThreads)
+{
+    threads = (ExecutorThread**)malloc(sizeof(ExecutorThread*) * numThreads);
+
+    for (size_t i = 0; i < numThreads; i++)
+    {
+        threads[i] = new ExecutorThread(output);
+    }
+}
+
+ExecutorPool::~ExecutorPool()
+{
+    free(threads);
+}
+
+void ExecutorPool::schedule(Task* task)
+{
+    threads[next++]->schedule(task);
+
+    if (next >= numThreads)
+    {
+        next = 0;
+    }
+}
+
+void ExecutorPool::wait()
+{
+    for (size_t i = 0; i < numThreads; i++)
+    {
+        threads[i]->wait();
+    }
+}
+
 ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const double* impulse) :
     segments(segments)
 {
@@ -469,7 +534,7 @@ ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const doub
         length += segments[i];
     }
 
-    executor = new ExecutorPool(16, segments.size() / 16 + 1);
+    executor = new ExecutorPool(output, 16);
 }
 
 ConvolverStream::~ConvolverStream()
@@ -489,20 +554,27 @@ void ConvolverStream::execute()
 {
     for (size_t i = 0; i < segments.size(); i++)
     {
-        executor->schedule(convolvers[i]);
+        if (convolvers[i]->ready())
+        {
+            executor->schedule(new Task(output->getOffset(), convolvers[i]));
+        }
     }
-
-    executor->wait();
 }
 
 void ConvolverStream::read(double* dest, const size_t length, const size_t stride, const double mix)
 {
+    executor->wait();
+
+    output->lock();
+
     for (size_t i = 0; i < length; i += stride)
     {
         dest[i] = dest[i] * (1 - mix) + output->pop() * mix;
 
         output->push(0);
     }
+
+    output->unlock();
 }
 
 Reverb::Reverb(ValueObject* mix, ValueObject* response) :
