@@ -12,6 +12,7 @@
 #include <exception>
 #include <iostream>
 #include <limits>
+#include <mutex>
 #include <random>
 #include <string>
 
@@ -109,6 +110,8 @@ struct Profiler
 
 private:
     void reset();
+
+    static std::mutex lock;
 
     const double frequency;
 

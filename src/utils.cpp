@@ -105,12 +105,18 @@ void Profiler::start()
 
 void Profiler::report()
 {
+    static std::mutex lock;
+
     elapsed += clock.now() - startTime;
     count++;
 
     if ((clock.now() - reportTime).count() >= frequency * 1e9)
     {
+        lock.lock();
+
         std::cout << elapsed.count() / count << "\n";
+
+        lock.unlock();
 
         reset();
     }
