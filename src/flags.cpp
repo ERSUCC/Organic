@@ -81,10 +81,7 @@ ProgramOptions FlagParser::getOptions()
         {
             if (options.seed)
             {
-                if (options.seed)
-                {
-                    throw OrganicArgumentException("The option \"seed\" was already set.");
-                }
+                throw OrganicArgumentException("The option \"seed\" was already set.");
             }
 
             const std::string next = nextOption(flag);

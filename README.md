@@ -31,6 +31,8 @@ The following section details the optional inputs, for more advanced use of Orga
 
 --mono: Use mono audio for the program. If not included, the program will run in stereo.
 
+--seed *number*: Use the provided seed for random number generation.
+
 ## Organic Language Specification
 
 TBD
@@ -45,9 +47,8 @@ Once you have downloaded the Organic source code, open the command-line and navi
 
 ```
 mkdir build
-cd build
-cmake ..
-cmake --build .
+cmake -B build
+cmake --build build --config Release
 ```
 
 This will create the `organic` binary in the `build` directory (Mac/Linux) or the `build/Debug` directory (Windows). Move it wherever you would like, then return to [Using Organic](#using-organic) to continue.
