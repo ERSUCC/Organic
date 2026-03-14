@@ -104,7 +104,7 @@ private:
 
 struct Convolver
 {
-    Convolver(const size_t length, const size_t offset, const double* impulse, const Buffer* input, RingBuffer* output);
+    Convolver(const size_t length, const size_t offset, const double* impulse, const size_t* reverse, const Buffer* input, RingBuffer* output);
     ~Convolver();
 
     bool ready() const;
@@ -126,7 +126,7 @@ private:
 
     std::complex<double>* powers;
 
-    size_t* reverse;
+    const size_t* reverse;
 
     std::complex<double>* buffer1;
     std::complex<double>* buffer2;
@@ -202,7 +202,7 @@ private:
 
 struct ConvolverStream
 {
-    ConvolverStream(const std::vector<size_t>& segments, const double* impulse);
+    ConvolverStream(const std::vector<size_t>& segments, const double* impulse, size_t** reverse, const size_t minLog);
     ~ConvolverStream();
 
     inline void write(const double* source, const size_t length, const size_t stride);
@@ -236,10 +236,18 @@ protected:
     void init() override;
 
 private:
+    static constexpr size_t minSegmentSize = 256;
+    static constexpr size_t maxSegmentSize = 16384;
+
+    static constexpr size_t minSegmentLog = 8;
+    static constexpr size_t maxSegmentLog = 14;
+
     std::vector<size_t> segments;
 
     size_t offset = 0;
 
     ConvolverStream** streams;
+
+    size_t** reverse;
 
 };

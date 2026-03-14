@@ -237,26 +237,14 @@ void RingBuffer::unlock()
     bufferLock.unlock();
 }
 
-Convolver::Convolver(const size_t length, const size_t offset, const double* impulse, const Buffer* input, RingBuffer* output) :
-    length(length), offset(offset), input(input), output(output)
+Convolver::Convolver(const size_t length, const size_t offset, const double* impulse, const size_t* reverse, const Buffer* input, RingBuffer* output) :
+    length(length), offset(offset), reverse(reverse), input(input), output(output)
 {
     powers = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length);
 
     for (size_t i = 0; i < length; i++)
     {
         powers[i] = std::exp(std::complex(0.0, 2 * M_PI * i / (length * 2)));
-    }
-
-    const size_t logLength = log2(length * 2);
-
-    reverse = (size_t*)calloc(length * 2, sizeof(size_t));
-
-    for (size_t i = 0; i < length * 2; i++)
-    {
-        for (size_t j = 0; j < logLength / 2; j++)
-        {
-            reverse[i] |= (((i >> j) & 0b1) << (logLength - j - 1)) | (((i >> (logLength - j - 1)) & 0b1) << j);
-        }
     }
 
     buffer1 = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length * 2);
@@ -282,7 +270,6 @@ Convolver::Convolver(const size_t length, const size_t offset, const double* imp
 Convolver::~Convolver()
 {
     free(powers);
-    free(reverse);
     free(buffer1);
     free(buffer2);
     free(overlap);
@@ -525,7 +512,7 @@ void ExecutorPool::wait()
     }
 }
 
-ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const double* impulse) :
+ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const double* impulse, size_t** reverse, const size_t minLog) :
     segments(segments)
 {
     size_t length = 0;
@@ -550,7 +537,7 @@ ConvolverStream::ConvolverStream(const std::vector<size_t>& segments, const doub
 
     for (size_t i = 0; i < segments.size(); i++)
     {
-        convolvers[i] = new Convolver(segments[i], length, impulse + length, input, output);
+        convolvers[i] = new Convolver(segments[i], length, impulse + length, reverse[(size_t)log2(segments[i]) - minLog], input, output);
 
         length += segments[i];
     }
@@ -605,7 +592,7 @@ Reverb::Reverb(ValueObject* mix, ValueObject* response) :
 
     const Resource* impulse = response->getLeafAs<Resource>();
 
-    size_t segmentSize = 256;
+    size_t segmentSize = minSegmentSize;
     size_t segmentSum = 0;
 
     while (segmentSum < impulse->length)
@@ -614,7 +601,7 @@ Reverb::Reverb(ValueObject* mix, ValueObject* response) :
 
         segmentSum += segmentSize;
 
-        if (segmentSize < 16384)
+        if (segmentSize < maxSegmentSize)
         {
             segmentSize *= 2;
         }
@@ -626,9 +613,26 @@ Reverb::Reverb(ValueObject* mix, ValueObject* response) :
 
     memcpy(samples, impulse->samples, sizeof(double) * impulse->length);
 
+    reverse = (size_t**)malloc(sizeof(size_t) * (maxSegmentLog - minSegmentLog + 1));
+
+    for (size_t i = minSegmentLog; i <= maxSegmentLog; i++)
+    {
+        const size_t length = 1 << i;
+
+        reverse[i - minSegmentLog] = (size_t*)calloc(length * 2, sizeof(size_t));
+
+        for (size_t j = 0; j < length * 2; j++)
+        {
+            for (size_t k = 0; k < i; k++)
+            {
+                reverse[i - minSegmentLog][j] |= (((j >> k) & 0b1) << (i - k)) | (((j >> (i - k)) & 0b1) << k);
+            }
+        }
+    }
+
     for (unsigned int i = 0; i < utils->channels; i++)
     {
-        streams[i] = new ConvolverStream(segments, samples);
+        streams[i] = new ConvolverStream(segments, samples, reverse, minSegmentLog);
     }
 
     free(samples);
@@ -636,6 +640,12 @@ Reverb::Reverb(ValueObject* mix, ValueObject* response) :
 
 Reverb::~Reverb()
 {
+    for (size_t i = 0; i <= maxSegmentLog - minSegmentLog; i++)
+    {
+        free(reverse[i]);
+    }
+
+    free(reverse);
     free(streams);
 }
 
