@@ -117,14 +117,16 @@ struct Convolver
     const size_t offset;
 
 private:
-    void fft(const double* start, const size_t length, const size_t step, std::complex<double>* result) const;
-    void ifft(const std::complex<double>* start, const size_t length, const size_t step, std::complex<double>* result) const;
+    void fft(const double* start, const size_t length, std::complex<double>* result) const;
+    void ifft(const std::complex<double>* start, const size_t length, std::complex<double>* result) const;
 
     const Buffer* input;
 
     RingBuffer* output;
 
     std::complex<double>* powers;
+
+    size_t* reverse;
 
     std::complex<double>* buffer1;
     std::complex<double>* buffer2;
@@ -134,6 +136,8 @@ private:
     std::complex<double>* impulse;
 
     size_t last = 0;
+
+    std::mutex lock;
 
 };
 

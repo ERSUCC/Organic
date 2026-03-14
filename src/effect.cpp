@@ -247,6 +247,18 @@ Convolver::Convolver(const size_t length, const size_t offset, const double* imp
         powers[i] = std::exp(std::complex(0.0, 2 * M_PI * i / (length * 2)));
     }
 
+    const size_t logLength = log2(length * 2);
+
+    reverse = (size_t*)calloc(length * 2, sizeof(size_t));
+
+    for (size_t i = 0; i < length * 2; i++)
+    {
+        for (size_t j = 0; j < logLength / 2; j++)
+        {
+            reverse[i] |= (((i >> j) & 0b1) << (logLength - j - 1)) | (((i >> (logLength - j - 1)) & 0b1) << j);
+        }
+    }
+
     buffer1 = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length * 2);
     buffer2 = (std::complex<double>*)malloc(sizeof(std::complex<double>) * length * 2);
 
@@ -262,7 +274,7 @@ Convolver::Convolver(const size_t length, const size_t offset, const double* imp
 
     memcpy(padded, impulse, sizeof(double) * length);
 
-    fft(padded, length * 2, 1, this->impulse);
+    fft(padded, length * 2, this->impulse);
 
     free(padded);
 }
@@ -270,6 +282,7 @@ Convolver::Convolver(const size_t length, const size_t offset, const double* imp
 Convolver::~Convolver()
 {
     free(powers);
+    free(reverse);
     free(buffer1);
     free(buffer2);
     free(overlap);
@@ -307,14 +320,16 @@ void Convolver::prepareInput(double* buffer)
 
 void Convolver::execute(const size_t outputPosition, const double* inputBuffer)
 {
-    fft(inputBuffer, length * 2, 1, buffer1);
+    lock.lock();
+
+    fft(inputBuffer, length * 2, buffer1);
 
     for (size_t i = 0; i < length * 2; i++)
     {
         buffer1[i] *= impulse[i];
     }
 
-    ifft(buffer1, length * 2, 1, buffer2);
+    ifft(buffer1, length * 2, buffer2);
 
     output->lock();
 
@@ -328,49 +343,53 @@ void Convolver::execute(const size_t outputPosition, const double* inputBuffer)
     }
 
     output->unlock();
+
+    lock.unlock();
 }
 
-void Convolver::fft(const double* start, const size_t length, const size_t step, std::complex<double>* result) const
+void Convolver::fft(const double* start, const size_t length, std::complex<double>* result) const
 {
-    if (length == 1)
+    for (size_t i = 0; i < length; i++)
     {
-        result[0] = start[0];
-
-        return;
+        result[i] = start[reverse[i]];
     }
 
-    fft(start, length / 2, step * 2, result);
-    fft(start + step, length / 2, step * 2, result + length / 2);
-
-    for (size_t i = 0; i < length / 2; i++)
+    for (size_t i = 2; i <= length; i *= 2)
     {
-        const std::complex<double> even = result[i];
-        const std::complex<double> odd = powers[i * step] * result[i + length / 2];
+        for (size_t j = 0; j < length; j += i)
+        {
+            for (size_t k = j; k < j + i / 2; k++)
+            {
+                const std::complex<double> even = result[k];
+                const std::complex<double> odd = powers[(k - j) * (length / i)] * result[k + i / 2];
 
-        result[i] += odd;
-        result[i + length / 2] = even - odd;
+                result[k] += odd;
+                result[k + i / 2] = even - odd;
+            }
+        }
     }
 }
 
-void Convolver::ifft(const std::complex<double>* start, const size_t length, const size_t step, std::complex<double>* result) const
+void Convolver::ifft(const std::complex<double>* start, const size_t length, std::complex<double>* result) const
 {
-    if (length == 1)
+    for (size_t i = 0; i < length; i++)
     {
-        result[0] = start[0];
-
-        return;
+        result[i] = start[reverse[i]];
     }
 
-    ifft(start, length / 2, step * 2, result);
-    ifft(start + step, length / 2, step * 2, result + length / 2);
-
-    for (size_t i = 0; i < length / 2; i++)
+    for (size_t i = 2; i <= length; i *= 2)
     {
-        const std::complex<double> even = result[i];
-        const std::complex<double> odd = result[i + length / 2] / powers[i * step];
+        for (size_t j = 0; j < length; j += i)
+        {
+            for (size_t k = j; k < j + i / 2; k++)
+            {
+                const std::complex<double> even = result[k];
+                const std::complex<double> odd = result[k + i / 2] / powers[(k - j) * (length / i)];
 
-        result[i] += odd;
-        result[i + length / 2] = even - odd;
+                result[k] += odd;
+                result[k + i / 2] = even - odd;
+            }
+        }
     }
 }
 
@@ -413,6 +432,8 @@ ExecutorThread::ExecutorThread(const RingBuffer* output) :
                 for (size_t i = 0; i < scheduled.size(); i++)
                 {
                     scheduled[i]->execute();
+
+                    delete scheduled[i];
                 }
 
                 scheduled.clear();
