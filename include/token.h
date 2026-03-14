@@ -395,6 +395,8 @@ namespace Parser
     struct String : public BasicToken
     {
         String(const SourceLocation location, const std::string str);
+
+        const std::string value;
     };
 
     struct VariableDef : public Identifier

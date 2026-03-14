@@ -477,7 +477,7 @@ namespace Parser
     }
 
     String::String(const SourceLocation location, const std::string str) :
-        BasicToken(location, "\"" + str + "\"")
+        BasicToken(location, "\"" + str + "\""), value(str)
     {
         type = new StringType();
     }
@@ -1963,7 +1963,7 @@ namespace Parser
     {
         const String* str = dynamic_cast<const String*>(token->arguments->get("file"));
 
-        const Path* path = Path::beside(Path::formatPath(str->str), sourcePath);
+        const Path* path = Path::beside(Path::formatPath(str->value), sourcePath);
 
         if (!path->exists())
         {
