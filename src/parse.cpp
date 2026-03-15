@@ -561,6 +561,11 @@ namespace Parser
             return tokens->patch(start, current, new Delay(name->location, argumentList));
         }
 
+        if (name->str == "comb")
+        {
+            return tokens->patch(start, current, new Comb(name->location, argumentList));
+        }
+
         if (name->str == "include")
         {
             throw OrganicIncludeException("Includes must come before all other instructions.", name->location);

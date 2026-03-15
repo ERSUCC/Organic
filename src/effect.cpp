@@ -112,3 +112,44 @@ void LowPassFilter::init()
     mix->start(startTime);
     cutoff->start(startTime);
 }
+
+Comb::Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
+    mix(mix), delay(delay), feedback(feedback) {}
+
+void Comb::apply(double* buffer, const unsigned int bufferLength)
+{
+    const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
+
+    while (delayBuffer.size() > delayFrames)
+    {
+        delayBuffer.pop();
+    }
+
+    const double mixValue = mix->getValue();
+    const double feedbackValue = feedback->getValue();
+
+    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
+    {
+        if (delayBuffer.size() >= delayFrames)
+        {
+            const double value = delayBuffer.front();
+
+            delayBuffer.pop();
+            delayBuffer.push(buffer[i] + value * feedbackValue);
+
+            buffer[i] += value * mixValue;
+        }
+
+        else
+        {
+            delayBuffer.push(buffer[i]);
+        }
+    }
+}
+
+void Comb::init()
+{
+    mix->start(startTime);
+    delay->start(startTime);
+    feedback->start(startTime);
+}

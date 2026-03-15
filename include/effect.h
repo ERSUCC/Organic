@@ -46,3 +46,21 @@ private:
     double filtered2[2] = { 0 };
 
 };
+
+struct Comb : public Effect
+{
+    Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
+
+    void apply(double* buffer, const unsigned int bufferLength) override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* mix;
+    ValueObject* delay;
+    ValueObject* feedback;
+
+    std::queue<double> delayBuffer;
+
+};
