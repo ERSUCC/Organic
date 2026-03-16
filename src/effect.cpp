@@ -130,7 +130,7 @@ void Comb::apply(double* buffer, const unsigned int bufferLength)
 
     for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
     {
-        if (delayBuffer.size() >= delayFrames)
+        if (delayFrames > 0 && delayBuffer.size() >= delayFrames)
         {
             const double value = delayBuffer.front();
 
