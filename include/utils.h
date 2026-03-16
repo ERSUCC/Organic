@@ -40,7 +40,6 @@ struct Utils
 
     double e;
 
-    double volume = 0.25;
     double time = 0;
 
     std::mt19937 rng;

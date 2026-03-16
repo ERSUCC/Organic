@@ -110,7 +110,7 @@ void Organic::startExport()
 {
     const unsigned int steps = (options.time.value() / 1000) * utils->sampleRate;
 
-    SndfileHandle* file = new SndfileHandle(options.exportPath.value()->string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_32, utils->channels, utils->sampleRate);
+    SndfileHandle* file = new SndfileHandle(options.exportPath.value()->string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_DOUBLE, utils->channels, utils->sampleRate);
 
     double* samples = (double*)malloc(sizeof(double) * steps * utils->channels);
 
