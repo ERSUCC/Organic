@@ -443,6 +443,8 @@ namespace Parser
 
         const std::vector<InputDef*> inputs;
 
+        Type* returnType;
+
         InstructionBlock* block = new InstructionBlock();
 
         unsigned char id;

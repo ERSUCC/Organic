@@ -1627,7 +1627,7 @@ namespace Parser
 
         token->arguments->check();
 
-        token->type = token->function->definition->type;
+        token->type = token->function->definition->returnType;
         token->function->definition->used = true;
     }
 
@@ -1686,6 +1686,7 @@ namespace Parser
         }
 
         token->function->type = new LambdaType(inputTypes, token->type);
+        token->function->returnType = token->type;
     }
 
     void TypeResolver::resolveTypes(Program* token)
