@@ -64,3 +64,21 @@ private:
     std::queue<double> delayBuffer;
 
 };
+
+struct AllPass : public Effect
+{
+    AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
+
+    void apply(double* buffer, const unsigned int bufferLength) override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* mix;
+    ValueObject* delay;
+    ValueObject* feedback;
+
+    std::queue<double> delayBuffer;
+
+};

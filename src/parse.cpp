@@ -566,6 +566,11 @@ namespace Parser
             return tokens->patch(start, current, new Comb(name->location, argumentList));
         }
 
+        if (name->str == "all-pass")
+        {
+            return tokens->patch(start, current, new AllPass(name->location, argumentList));
+        }
+
         if (name->str == "include")
         {
             throw OrganicIncludeException("Includes must come before all other instructions.", name->location);

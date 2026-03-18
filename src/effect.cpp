@@ -153,3 +153,42 @@ void Comb::init()
     delay->start(startTime);
     feedback->start(startTime);
 }
+
+AllPass::AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
+    mix(mix), delay(delay), feedback(feedback) {}
+
+void AllPass::apply(double* buffer, const unsigned int bufferLength)
+{
+    const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
+
+    while (delayBuffer.size() > delayFrames)
+    {
+        delayBuffer.pop();
+    }
+
+    const double mixValue = mix->getValue();
+    const double feedbackValue = feedback->getValue();
+
+    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
+    {
+        double value = buffer[i] * feedbackValue;
+
+        if (delayFrames > 0 && delayBuffer.size() >= delayFrames)
+        {
+            value += delayBuffer.front();
+
+            delayBuffer.pop();
+        }
+
+        delayBuffer.push(buffer[i] - value * feedbackValue);
+
+        buffer[i] = buffer[i] * (1 - mixValue) + value * mixValue;
+    }
+}
+
+void AllPass::init()
+{
+    mix->start(startTime);
+    delay->start(startTime);
+    feedback->start(startTime);
+}

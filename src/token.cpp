@@ -1085,6 +1085,19 @@ namespace Parser
         visitor->transform(this);
     }
 
+    AllPass::AllPass(const SourceLocation location, ArgumentList* arguments) :
+        Effect(location, arguments) {}
+
+    void AllPass::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void AllPass::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
     CallUser::CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function) :
         Call(location, arguments), function(function) {}
 
@@ -1588,6 +1601,15 @@ namespace Parser
         token->arguments->check();
     }
 
+    void TypeResolver::resolveTypes(AllPass* token)
+    {
+        resolveArgumentTypes(token->arguments, "feedback", new NumberType());
+        resolveArgumentTypes(token->arguments, "delay", new NumberType());
+        resolveArgumentTypes(token->arguments, "mix", new NumberType());
+
+        token->arguments->check();
+    }
+
     void TypeResolver::resolveTypes(CallUser* token)
     {
         for (const InputDef* input : token->function->definition->inputs)
@@ -2041,6 +2063,15 @@ namespace Parser
         transformArgument(token->arguments, "mix");
 
         addInstruction(new CallNative(BytecodeConstants::COMB, 3));
+    }
+
+    void BytecodeTransformer::transform(const AllPass* token)
+    {
+        transformArgument(token->arguments, "feedback");
+        transformArgument(token->arguments, "delay");
+        transformArgument(token->arguments, "mix");
+
+        addInstruction(new CallNative(BytecodeConstants::ALL_PASS, 3));
     }
 
     void BytecodeTransformer::transform(const CallUser* token)

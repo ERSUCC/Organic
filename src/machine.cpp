@@ -460,6 +460,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
+                    case BytecodeConstants::ALL_PASS:
+                        stack.push(new AllPass(inputs[0], inputs[1], inputs[2]));
+
+                        break;
+
                     case BytecodeConstants::PLAY:
                     {
                         AudioSource* audioSource = static_cast<AudioSource*>(inputs[0]);
