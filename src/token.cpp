@@ -1335,7 +1335,7 @@ namespace Parser
 
     void TypeResolver::resolveTypes(List* token)
     {
-        Type* innerType;
+        Type* innerType = nullptr;
 
         if (const ListType* listType = dynamic_cast<ListType*>(expectedType))
         {
@@ -1344,7 +1344,20 @@ namespace Parser
 
         else
         {
-            innerType = new AnyType();
+            for (const Token* value : token->values)
+            {
+                if (value->type)
+                {
+                    innerType = value->type;
+
+                    break;
+                }
+            }
+        }
+
+        if (!innerType)
+        {
+            throw OrganicParseException("This list has an ambiguous inner type.", token->location);
         }
 
         for (Token* value : token->values)
@@ -1359,7 +1372,7 @@ namespace Parser
             }
         }
 
-        token->type = new ListType(token->values[0]->type);
+        token->type = new ListType(innerType);
     }
 
     void TypeResolver::resolveTypes(ParenthesizedExpression* token)
