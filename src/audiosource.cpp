@@ -53,6 +53,11 @@ void Phase::init()
     phase = 0;
 }
 
+void Phase::reinit()
+{
+    phase = 0;
+}
+
 Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     SingleAudioSource(volume, pan, effects), frequency(frequency), phase(new Phase()) {}
 
@@ -75,6 +80,14 @@ void Oscillator::prepareForEffects(const unsigned int bufferLength)
     phase->setDelta(utils->twoPi * frequency->getValue() / utils->sampleRate);
 
     const double volumeValue = volume->getValue();
+
+    if (lastVolume == 0 && volumeValue != 0)
+    {
+        phase->repeat(utils->time);
+    }
+
+    lastVolume = volumeValue;
+
     const double panValue = pan->getValue();
 
     for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
@@ -130,7 +143,7 @@ Triangle::Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, 
 
 double Triangle::getValue()
 {
-    return 2 * fabs(phase->getValue() - utils->pi) / utils->pi - 1;
+    return 2 * asin(sin(phase->getValue())) / utils->pi;
 }
 
 CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, ValueObject* waveform) :

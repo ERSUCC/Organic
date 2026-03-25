@@ -41,6 +41,7 @@ struct Phase : public ValueObject
 
 protected:
     void init() override;
+    void reinit() override;
 
 private:
     double phase = 0;
@@ -60,6 +61,8 @@ protected:
     ValueObject* frequency;
 
     Phase* phase;
+
+    double lastVolume = 0;
 
 };
 
