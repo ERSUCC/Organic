@@ -85,14 +85,17 @@ void Organic::startPlayback()
 
     machine->run();
 
-    while (!callbackActive) {}
-
-    std::chrono::high_resolution_clock clock;
-    std::chrono::time_point<std::chrono::high_resolution_clock> start = clock.now();
-
-    while (!options.time || utils->time < options.time.value())
+    if (options.time.has_value())
     {
-        utils->time = (clock.now() - start).count() / 1000000.0;
+        std::this_thread::sleep_for(std::chrono::milliseconds((long long)options.time.value()));
+    }
+
+    else
+    {
+        while (true)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(LLONG_MAX));
+        }
     }
 
     if (audio.isStreamRunning())
@@ -116,19 +119,11 @@ void Organic::startExport()
 
     machine->run();
 
-    for (unsigned int i = 0; i < steps; i += utils->bufferLength)
+    for (unsigned int i = 0; i < steps; i++)
     {
         utils->time = i * 1000.0 / utils->sampleRate;
 
-        if (i + utils->bufferLength < steps)
-        {
-            machine->processAudioSources(samples + i * utils->channels, utils->bufferLength);
-        }
-
-        else
-        {
-            machine->processAudioSources(samples + i * utils->channels, steps - i);
-        }
+        machine->processAudioSources(samples + i * utils->channels);
     }
 
     if (file->write(samples, steps * utils->channels) != steps * utils->channels)
@@ -139,9 +134,12 @@ void Organic::startExport()
 
 int Organic::processAudio(void* output, unsigned int frames)
 {
-    callbackActive = true;
+    for (unsigned int i = 0; i < frames; i++)
+    {
+        machine->processAudioSources((double*)output + i * utils->channels);
 
-    machine->processAudioSources((double*)output, frames);
+        utils->time += 1000.0 / utils->sampleRate;
+    }
 
     return 0;
 }

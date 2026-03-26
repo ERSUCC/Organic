@@ -82,13 +82,13 @@ void Machine::run()
     execute(0, 0);
 }
 
-void Machine::processAudioSources(double* buffer, const unsigned int bufferLength)
+void Machine::processAudioSources(double* buffer)
 {
-    std::fill(buffer, buffer + bufferLength * utils->channels, 0);
+    std::fill(buffer, buffer + utils->channels, 0);
 
     for (unsigned int i = 0; i < audioSources.size(); i++)
     {
-        audioSources[i]->fillBuffer(buffer, bufferLength);
+        audioSources[i]->fillBuffer(buffer);
     }
 }
 

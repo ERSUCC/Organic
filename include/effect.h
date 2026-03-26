@@ -6,14 +6,14 @@
 
 struct Effect : public ValueObject
 {
-    virtual void apply(double* buffer, const unsigned int bufferLength);
+    virtual void apply(double* buffer);
 };
 
 struct Delay : public Effect
 {
     Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
 
-    void apply(double* buffer, const unsigned int bufferLength) override;
+    void apply(double* buffer) override;
 
     ValueObject* mix;
     ValueObject* delay;
@@ -31,7 +31,7 @@ struct LowPassFilter : public Effect
 {
     LowPassFilter(ValueObject* mix, ValueObject* cutoff);
 
-    void apply(double* buffer, const unsigned int bufferLength) override;
+    void apply(double* buffer) override;
 
     ValueObject* mix;
     ValueObject* cutoff;
@@ -51,7 +51,7 @@ struct Comb : public Effect
 {
     Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
 
-    void apply(double* buffer, const unsigned int bufferLength) override;
+    void apply(double* buffer) override;
 
 protected:
     void init() override;
@@ -69,7 +69,7 @@ struct AllPass : public Effect
 {
     AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
 
-    void apply(double* buffer, const unsigned int bufferLength) override;
+    void apply(double* buffer) override;
 
 protected:
     void init() override;

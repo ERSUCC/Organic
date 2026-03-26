@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <functional>
+#include <limits.h>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -37,7 +38,5 @@ private:
     Utils* utils;
 
     Machine* machine;
-
-    bool callbackActive = false;
 
 };

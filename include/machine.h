@@ -20,7 +20,7 @@ struct Machine
 
     void run();
 
-    void processAudioSources(double* buffer, const unsigned int bufferLength);
+    void processAudioSources(double* buffer);
 
 private:
     unsigned int readUnsignedInt(const void* buffer) const;

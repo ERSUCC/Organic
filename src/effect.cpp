@@ -1,11 +1,11 @@
 #include "../include/effect.h"
 
-void Effect::apply(double* buffer, const unsigned int bufferLength) {}
+void Effect::apply(double* buffer) {}
 
 Delay::Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
 
-void Delay::apply(double* buffer, const unsigned int bufferLength)
+void Delay::apply(double* buffer)
 {
     const double delayLength = utils->sampleRate * delay->getValue() / 1000;
 
@@ -14,39 +14,36 @@ void Delay::apply(double* buffer, const unsigned int bufferLength)
         return;
     }
 
-    for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
+    if (utils->channels == 1)
     {
-        if (utils->channels == 1)
+        if (this->buffer.size() > delayLength)
         {
-            if (this->buffer.size() > delayLength)
-            {
-                buffer[i] += this->buffer.front() * mix->getValue() * feedback->getValue();
+            buffer[0] += this->buffer.front() * mix->getValue() * feedback->getValue();
 
-                this->buffer.pop();
-            }
-
-            this->buffer.push(buffer[i]);
+            this->buffer.pop();
         }
 
-        else
+        this->buffer.push(buffer[0]);
+    }
+
+    else
+    {
+        if (this->buffer.size() > delayLength * 2)
         {
-            if (this->buffer.size() > delayLength * 2)
-            {
-                const double mixValue = mix->getValue();
-                const double feedbackValue = feedback->getValue();
+            const double mixValue = mix->getValue();
+            const double feedbackValue = feedback->getValue();
 
-                buffer[i] += this->buffer.front() * mixValue * feedbackValue;
+            buffer[0] += this->buffer.front() * mixValue * feedbackValue;
 
-                this->buffer.pop();
+            this->buffer.pop();
 
-                buffer[i + 1] += this->buffer.front() * mixValue * feedbackValue;
+            buffer[1] += this->buffer.front() * mixValue * feedbackValue;
 
-                this->buffer.pop();
-            }
-
-            this->buffer.push(buffer[i]);
-            this->buffer.push(buffer[i + 1]);
+            this->buffer.pop();
         }
+
+        this->buffer.push(buffer[0]);
+        this->buffer.push(buffer[1]);
     }
 }
 
@@ -60,7 +57,7 @@ void Delay::init()
 LowPassFilter::LowPassFilter(ValueObject* mix, ValueObject* cutoff) :
     mix(mix), cutoff(cutoff) {}
 
-void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
+void LowPassFilter::apply(double* buffer)
 {
     const double omega = tan(utils->pi * cutoff->getValue() / utils->sampleRate);
     const double omega2 = omega * omega;
@@ -70,40 +67,37 @@ void LowPassFilter::apply(double* buffer, unsigned int bufferLength)
     const double b1 = 2 * (omega2 - 1) / c;
     const double b2 = (1 - 2 * cos(utils->pi / 4) * omega + omega2) / c;
 
-    for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
+    const double mixValue = mix->getValue();
+
+    const double rawl = buffer[0];
+
+    if (utils->channels == 1)
     {
-        const double mixValue = mix->getValue();
+        buffer[0] = mixValue * (a0 * buffer[0] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
 
-        const double rawl = buffer[i];
+        raw2[0] = raw1[0];
+        raw1[0] = rawl;
 
-        if (utils->channels == 1)
-        {
-            buffer[i] = mixValue * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
+        filtered2[0] = filtered1[0];
+        filtered1[0] = buffer[0];
+    }
 
-            raw2[0] = raw1[0];
-            raw1[0] = rawl;
+    else
+    {
+        const double rawr = buffer[1];
 
-            filtered2[0] = filtered1[0];
-            filtered1[0] = buffer[i];
-        }
+        buffer[0] = mixValue * (a0 * buffer[0] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
+        buffer[1] = mixValue * (a0 * buffer[1] + a1 * raw1[1] + a0 * raw2[1] - b1 * filtered1[1] - b2 * filtered2[1]);
 
-        else
-        {
-            const double rawr = buffer[i + 1];
+        raw2[0] = raw1[0];
+        raw2[1] = raw1[1];
+        raw1[0] = rawl;
+        raw1[1] = rawr;
 
-            buffer[i] = mixValue * (a0 * buffer[i] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
-            buffer[i + 1] = mixValue * (a0 * buffer[i + 1] + a1 * raw1[1] + a0 * raw2[1] - b1 * filtered1[1] - b2 * filtered2[1]);
-
-            raw2[0] = raw1[0];
-            raw2[1] = raw1[1];
-            raw1[0] = rawl;
-            raw1[1] = rawr;
-
-            filtered2[0] = filtered1[0];
-            filtered2[1] = filtered1[1];
-            filtered1[0] = buffer[i];
-            filtered1[1] = buffer[i + 1];
-        }
+        filtered2[0] = filtered1[0];
+        filtered2[1] = filtered1[1];
+        filtered1[0] = buffer[0];
+        filtered1[1] = buffer[1];
     }
 }
 
@@ -116,7 +110,7 @@ void LowPassFilter::init()
 Comb::Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
 
-void Comb::apply(double* buffer, const unsigned int bufferLength)
+void Comb::apply(double* buffer)
 {
     const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
 
@@ -128,7 +122,7 @@ void Comb::apply(double* buffer, const unsigned int bufferLength)
     const double mixValue = mix->getValue();
     const double feedbackValue = feedback->getValue();
 
-    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
+    for (unsigned int i = 0; i < utils->channels; i++)
     {
         if (delayFrames > 0 && delayBuffer.size() >= delayFrames)
         {
@@ -157,7 +151,7 @@ void Comb::init()
 AllPass::AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
 
-void AllPass::apply(double* buffer, const unsigned int bufferLength)
+void AllPass::apply(double* buffer)
 {
     const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
 
@@ -169,7 +163,7 @@ void AllPass::apply(double* buffer, const unsigned int bufferLength)
     const double mixValue = mix->getValue();
     const double feedbackValue = feedback->getValue();
 
-    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
+    for (unsigned int i = 0; i < utils->channels; i++)
     {
         double value = buffer[i] * feedbackValue;
 

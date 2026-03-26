@@ -1,11 +1,11 @@
 #include "../include/audiosource.h"
 
-void AudioSource::fillBuffer(double* buffer, const unsigned int bufferLength) {}
+void AudioSource::fillBuffer(double* buffer) {}
 
 SingleAudioSource::SingleAudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     volume(volume), pan(pan), effects(effects)
 {
-    effectBuffer = (double*)malloc(sizeof(double) * utils->bufferLength * utils->channels);
+    effectBuffer = (double*)malloc(sizeof(double) * utils->channels);
 }
 
 SingleAudioSource::~SingleAudioSource()
@@ -13,16 +13,16 @@ SingleAudioSource::~SingleAudioSource()
     free(effectBuffer);
 }
 
-void SingleAudioSource::fillBuffer(double* buffer, const unsigned int bufferLength)
+void SingleAudioSource::fillBuffer(double* buffer)
 {
-    prepareForEffects(bufferLength);
+    prepareForEffects();
 
     for (ValueObject* effect : effects->getLeafAs<List>()->objects)
     {
-        effect->getLeafAs<Effect>()->apply(effectBuffer, bufferLength);
+        effect->getLeafAs<Effect>()->apply(effectBuffer);
     }
 
-    for (unsigned int i = 0; i < bufferLength * utils->channels; i++)
+    for (unsigned int i = 0; i < utils->channels; i++)
     {
         buffer[i] += effectBuffer[i];
     }
@@ -75,7 +75,7 @@ void Oscillator::init()
     phase->start(startTime);
 }
 
-void Oscillator::prepareForEffects(const unsigned int bufferLength)
+void Oscillator::prepareForEffects()
 {
     phase->setDelta(utils->twoPi * frequency->getValue() / utils->sampleRate);
 
@@ -90,23 +90,20 @@ void Oscillator::prepareForEffects(const unsigned int bufferLength)
 
     const double panValue = pan->getValue();
 
-    for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
+    const double value = volumeValue * getValue();
+
+    if (utils->channels == 1)
     {
-        const double value = volumeValue * getValue();
-
-        if (utils->channels == 1)
-        {
-            effectBuffer[i] = value;
-        }
-
-        else
-        {
-            effectBuffer[i] = value * (1 - panValue) / 2;
-            effectBuffer[i + 1] = value * (panValue + 1) / 2;
-        }
-
-        phase->incrementPhase();
+        effectBuffer[0] = value;
     }
+
+    else
+    {
+        effectBuffer[0] = value * (1 - panValue) / 2;
+        effectBuffer[1] = value * (panValue + 1) / 2;
+    }
+
+    phase->incrementPhase();
 }
 
 Sine::Sine(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
@@ -175,25 +172,22 @@ void CustomOscillator::init()
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     SingleAudioSource(volume, pan, effects) {}
 
-void Noise::prepareForEffects(const unsigned int bufferLength)
+void Noise::prepareForEffects()
 {
     const double volumeValue = volume->getValue();
     const double panValue = pan->getValue();
 
-    for (int i = 0; i < bufferLength * utils->channels; i += utils->channels)
+    const double value = volumeValue * udist(utils->rng);
+
+    if (utils->channels == 1)
     {
-        const double value = volumeValue * udist(utils->rng);
+        effectBuffer[0] = value;
+    }
 
-        if (utils->channels == 1)
-        {
-            effectBuffer[i] = value;
-        }
-
-        else
-        {
-            effectBuffer[i] = value * (1 - panValue) / 2;
-            effectBuffer[i + 1] = value * (panValue + 1) / 2;
-        }
+    else
+    {
+        effectBuffer[0] = value * (1 - panValue) / 2;
+        effectBuffer[1] = value * (panValue + 1) / 2;
     }
 }
 
@@ -214,39 +208,36 @@ void Sample::init()
     index = 0;
 }
 
-void Sample::prepareForEffects(const unsigned int bufferLength)
+void Sample::prepareForEffects()
 {
     const double volumeValue = volume->getValue();
     const double panValue = pan->getValue();
 
     const Resource* resourceLeaf = resource->getLeafAs<Resource>();
 
-    for (unsigned int i = 0; i < bufferLength * utils->channels; i += utils->channels)
+    const double value1 = volumeValue * resourceLeaf->samples[(unsigned int)floor(index)];
+    double value2 = value1;
+
+    if (resourceLeaf->channels == 2)
     {
-        const double value1 = volumeValue * resourceLeaf->samples[(unsigned int)floor(index)];
-        double value2 = value1;
+        value2 = volumeValue * resourceLeaf->samples[(unsigned int)floor(index) + 1];
+    }
 
-        if (resourceLeaf->channels == 2)
-        {
-            value2 = volumeValue * resourceLeaf->samples[(unsigned int)floor(index) + 1];
-        }
+    if (utils->channels == 1)
+    {
+        effectBuffer[0] = (value1 + value2) / 2;
+    }
 
-        if (utils->channels == 1)
-        {
-            effectBuffer[i] = (value1 + value2) / 2;
-        }
+    else
+    {
+        effectBuffer[0] = value1 * (1 - panValue) / 2;
+        effectBuffer[1] = value2 * (panValue + 1) / 2;
+    }
 
-        else
-        {
-            effectBuffer[i] = value1 * (1 - panValue) / 2;
-            effectBuffer[i + 1] = value2 * (panValue + 1) / 2;
-        }
+    index += resourceLeaf->channels * (double)resourceLeaf->sampleRate / utils->sampleRate;
 
-        index += resourceLeaf->channels * (double)resourceLeaf->sampleRate / utils->sampleRate;
-
-        if (index >= resourceLeaf->length)
-        {
-            index = fmod(index, resourceLeaf->length);
-        }
+    if (index >= resourceLeaf->length)
+    {
+        index = fmod(index, resourceLeaf->length);
     }
 }

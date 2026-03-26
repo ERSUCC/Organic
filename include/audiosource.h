@@ -10,7 +10,7 @@
 
 struct AudioSource : public ValueObject
 {
-    virtual void fillBuffer(double* buffer, const unsigned int bufferLength);
+    virtual void fillBuffer(double* buffer);
 };
 
 struct SingleAudioSource : public AudioSource
@@ -18,10 +18,10 @@ struct SingleAudioSource : public AudioSource
     SingleAudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects);
     ~SingleAudioSource();
 
-    void fillBuffer(double* buffer, const unsigned int bufferLength) override;
+    void fillBuffer(double* buffer) override;
 
 protected:
-    virtual void prepareForEffects(const unsigned int bufferLength) = 0;
+    virtual void prepareForEffects() = 0;
 
     double* effectBuffer;
 
@@ -56,7 +56,7 @@ struct Oscillator : public SingleAudioSource
 protected:
     void init() override;
 
-    void prepareForEffects(const unsigned int bufferLength) override;
+    void prepareForEffects() override;
 
     ValueObject* frequency;
 
@@ -113,7 +113,7 @@ struct Noise : public SingleAudioSource
     Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects);
 
 protected:
-    void prepareForEffects(const unsigned int bufferLength) override;
+    void prepareForEffects() override;
 
 private:
     std::uniform_real_distribution<> udist = std::uniform_real_distribution<>(-1, 1);
@@ -127,7 +127,7 @@ struct Sample : public SingleAudioSource
 protected:
     void init() override;
 
-    void prepareForEffects(const unsigned int bufferLength) override;
+    void prepareForEffects() override;
 
 private:
     ValueObject* resource;
