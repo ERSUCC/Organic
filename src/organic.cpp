@@ -130,6 +130,8 @@ void Organic::startExport()
     {
         throw OrganicFileException("Could not write output file: " + std::string(file->strError()));
     }
+
+    free(samples);
 }
 
 int Organic::processAudio(void* output, unsigned int frames)
