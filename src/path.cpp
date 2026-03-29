@@ -157,4 +157,4 @@ bool Path::readLines(std::vector<std::string>& dest) const
 }
 
 Path::Path(const std::filesystem::path& path) :
-    path(std::filesystem::weakly_canonical(path)) {}
+    path(std::filesystem::absolute(std::filesystem::weakly_canonical(path))) {}
