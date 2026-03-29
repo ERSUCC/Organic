@@ -1,7 +1,7 @@
 // Language constants
 
-test1 = sequence-forwards
-test2 = sequence-backwards
+test1 = sequence-forward
+test2 = sequence-backward
 test3 = sequence-ping-pong
 test4 = sequence-random
 test5 = random-step

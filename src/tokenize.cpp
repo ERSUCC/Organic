@@ -331,14 +331,14 @@ namespace Parser
             nextCharacter();
         }
 
-        if (name == "sequence-forwards")
+        if (name == "sequence-forward")
         {
-            return new SequenceForwards(location);
+            return new SequenceForward(location);
         }
 
-        if (name == "sequence-backwards")
+        if (name == "sequence-backward")
         {
-            return new SequenceBackwards(location);
+            return new SequenceBackward(location);
         }
 
         if (name == "sequence-ping-pong")

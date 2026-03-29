@@ -225,8 +225,8 @@ struct Sequence : public ValueObject
 {
     enum OrderEnum
     {
-        Forwards,
-        Backwards,
+        Forward,
+        Backward,
         PingPong,
         Random
     };

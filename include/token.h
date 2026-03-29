@@ -347,14 +347,14 @@ namespace Parser
         const unsigned char value;
     };
 
-    struct SequenceForwards : public Constant
+    struct SequenceForward : public Constant
     {
-        SequenceForwards(const SourceLocation location);
+        SequenceForward(const SourceLocation location);
     };
 
-    struct SequenceBackwards : public Constant
+    struct SequenceBackward : public Constant
     {
-        SequenceBackwards(const SourceLocation location);
+        SequenceBackward(const SourceLocation location);
     };
 
     struct SequencePingPong : public Constant

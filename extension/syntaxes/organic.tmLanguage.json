@@ -68,7 +68,7 @@
 			"patterns": [
 				{
 					"name": "constant.language.sequence.organic",
-					"match": "\\b(sequence-forwards|sequence-backwards|sequence-ping-pong|sequence-random)\\b"
+					"match": "\\b(sequence-forward|sequence-backward|sequence-ping-pong|sequence-random)\\b"
 				},
 				{
 					"name": "constant.language.random.organic",

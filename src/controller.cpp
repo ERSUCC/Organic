@@ -407,7 +407,7 @@ void Sequence::init()
         max_switches = objects.size() - 1;
     }
 
-    if (orderNum == OrderEnum::Backwards)
+    if (orderNum == OrderEnum::Backward)
     {
         current = objects.size() - 1;
     }
@@ -443,12 +443,12 @@ void Sequence::reinit()
 
     switch (order->getLeafAs<ValueByte>()->value)
     {
-        case OrderEnum::Forwards:
+        case OrderEnum::Forward:
             current = (current + 1) % objects.size();
 
             break;
 
-        case OrderEnum::Backwards:
+        case OrderEnum::Backward:
         {
             current -= 1;
 

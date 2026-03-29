@@ -111,7 +111,7 @@ namespace Parser
 
     Token* SequenceOrderType::getDefault(const SourceLocation location)
     {
-        return new SequenceForwards(location);
+        return new SequenceForward(location);
     }
 
     RandomTypeType::RandomTypeType() :
@@ -422,14 +422,14 @@ namespace Parser
         visitor->transform(this);
     }
 
-    SequenceForwards::SequenceForwards(const SourceLocation location) :
-        Constant(location, "sequence-forwards", ::Sequence::OrderEnum::Forwards)
+    SequenceForward::SequenceForward(const SourceLocation location) :
+        Constant(location, "sequence-forward", ::Sequence::OrderEnum::Forward)
     {
         type = new SequenceOrderType();
     }
 
-    SequenceBackwards::SequenceBackwards(const SourceLocation location) :
-        Constant(location, "sequence-backwards", ::Sequence::OrderEnum::Backwards)
+    SequenceBackward::SequenceBackward(const SourceLocation location) :
+        Constant(location, "sequence-backward", ::Sequence::OrderEnum::Backward)
     {
         type = new SequenceOrderType();
     }
