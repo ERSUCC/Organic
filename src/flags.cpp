@@ -111,6 +111,40 @@ ProgramOptions FlagParser::getOptions()
             }
         }
 
+        else if (flag == "--buffer-length")
+        {
+            if (options.bufferLength)
+            {
+                throw OrganicArgumentException("The option \"buffer-length\" was already set.");
+            }
+
+            const std::string next = nextOption(flag);
+
+            if (next[0] == '-')
+            {
+                throw OrganicArgumentException("Buffer length must be greater than or equal to zero.");
+            }
+
+            size_t end = 0;
+
+            try
+            {
+                options.bufferLength = std::stoul(next, &end);
+            }
+
+            catch (const std::out_of_range& error)
+            {
+                throw OrganicArgumentException("Buffer length must be in the range of a 32-bit unsigned integer.");
+            }
+
+            catch (const std::invalid_argument& error) {}
+
+            if (end < next.size())
+            {
+                throw OrganicArgumentException("Expected unsigned integer, received \"" + next + "\".");
+            }
+        }
+
         else
         {
             throw OrganicArgumentException("Unknown option \"" + flag + "\".");
@@ -120,6 +154,11 @@ ProgramOptions FlagParser::getOptions()
     if (options.exportPath && !options.time)
     {
         throw OrganicArgumentException("Cannot export without a time limit.");
+    }
+
+    if (options.exportPath && options.bufferLength)
+    {
+        throw OrganicArgumentException("Cannot set buffer length when exporting.");
     }
 
     return options;

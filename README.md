@@ -33,6 +33,8 @@ The following section details the optional inputs, for more advanced use of Orga
 
 --seed *number*: Use the provided seed for random number generation.
 
+--buffer-length *number*: Use the provided buffer length for audio output. If not specified, the buffer length will be 128 samples.
+
 ## Organic Language Specification
 
 TBD

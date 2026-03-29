@@ -16,6 +16,7 @@ struct ProgramOptions
     std::optional<Path*> exportPath;
     std::optional<bool> mono;
     std::optional<unsigned int> seed;
+    std::optional<unsigned int> bufferLength;
 };
 
 struct FlagParser

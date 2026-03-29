@@ -39,6 +39,11 @@ void Organic::start()
         utils->channels = 1;
     }
 
+    if (options.bufferLength)
+    {
+        utils->bufferLength = options.bufferLength.value();
+    }
+
     if (options.exportPath)
     {
         startExport();
@@ -66,9 +71,7 @@ void Organic::startPlayback()
     parameters.deviceId = audio.getDefaultOutputDevice();
     parameters.nChannels = utils->channels;
 
-    unsigned int bufferFrames = utils->bufferLength;
-
-    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &bufferFrames, std::bind(&Organic::processAudio, this, std::placeholders::_1, std::placeholders::_3), nullptr))
+    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &utils->bufferLength, std::bind(&Organic::processAudio, this, std::placeholders::_1, std::placeholders::_3), nullptr))
     {
         throw OrganicAudioException(audio.getErrorText());
     }
