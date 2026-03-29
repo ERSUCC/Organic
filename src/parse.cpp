@@ -349,7 +349,10 @@ namespace Parser
             function->str == "saw" ||
             function->str == "noise" ||
             function->str == "sample" ||
+            function->str == "group" ||
             function->str == "delay" ||
+            function->str == "comb" ||
+            function->str == "all-pass" ||
             function->str == "include")
         {
             throw OrganicParseException("A function already exists with the name \"" + function->str + "\".", function->location);
