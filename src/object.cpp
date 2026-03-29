@@ -49,6 +49,14 @@ ValueObject* ValueObject::getLeaf()
 List::List(const std::vector<ValueObject*> objects) :
     objects(objects) {}
 
+void List::init()
+{
+    for (ValueObject* object : objects)
+    {
+        object->start(startTime);
+    }
+}
+
 Variable::Variable(ValueObject* value) :
     value(value) {}
 

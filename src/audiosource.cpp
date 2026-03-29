@@ -65,13 +65,8 @@ void Oscillator::init()
 {
     volume->start(startTime);
     pan->start(startTime);
+    effects->start(startTime);
     frequency->start(startTime);
-
-    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
-    {
-        effect->start(startTime);
-    }
-
     phase->start(startTime);
 }
 
@@ -158,14 +153,9 @@ void CustomOscillator::init()
 {
     volume->start(startTime);
     pan->start(startTime);
+    effects->start(startTime);
     frequency->start(startTime);
     waveform->start(startTime);
-
-    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
-    {
-        effect->start(startTime);
-    }
-
     phase->start(startTime);
 }
 
@@ -198,12 +188,8 @@ void Sample::init()
 {
     volume->start(startTime);
     pan->start(startTime);
+    effects->start(startTime);
     resource->start(startTime);
-
-    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
-    {
-        effect->start(startTime);
-    }
 
     index = 0;
 }
@@ -292,14 +278,6 @@ void Group::init()
 {
     volume->start(startTime);
     pan->start(startTime);
-
-    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
-    {
-        effect->start(startTime);
-    }
-
-    for (ValueObject* source : sources->getLeafAs<List>()->objects)
-    {
-        source->start(startTime);
-    }
+    effects->start(startTime);
+    sources->start(startTime);
 }

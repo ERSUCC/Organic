@@ -153,10 +153,7 @@ double All::getValue()
 
 void All::init()
 {
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
+    values->start(startTime);
 }
 
 Any::Any(ValueObject* values) :
@@ -177,10 +174,7 @@ double Any::getValue()
 
 void Any::init()
 {
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
+    values->start(startTime);
 }
 
 None::None(ValueObject* values) :
@@ -201,10 +195,7 @@ double None::getValue()
 
 void None::init()
 {
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
+    values->start(startTime);
 }
 
 Min::Min(ValueObject* values) :
@@ -236,10 +227,7 @@ double Min::getValue()
 
 void Min::init()
 {
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
+    values->start(startTime);
 }
 
 Max::Max(ValueObject* values) :
@@ -271,10 +259,7 @@ double Max::getValue()
 
 void Max::init()
 {
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
+    values->start(startTime);
 }
 
 Round::Round(ValueObject* value, ValueObject* step, ValueObject* direction) :

@@ -44,6 +44,10 @@ struct List : public ValueObject
     List(const std::vector<ValueObject*> objects);
 
     const std::vector<ValueObject*> objects;
+
+protected:
+    void init() override;
+
 };
 
 struct Variable : public ValueObject
