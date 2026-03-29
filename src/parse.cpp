@@ -556,6 +556,11 @@ namespace Parser
             return tokens->patch(start, current, new Oscillator(name->location, argumentList));
         }
 
+        if (name->str == "group")
+        {
+            return tokens->patch(start, current, new Group(name->location, argumentList));
+        }
+
         if (name->str == "delay")
         {
             return tokens->patch(start, current, new Delay(name->location, argumentList));

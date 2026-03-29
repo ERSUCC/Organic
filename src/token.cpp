@@ -1024,6 +1024,19 @@ namespace Parser
         visitor->transform(this);
     }
 
+    Group::Group(const SourceLocation location, ArgumentList* arguments) :
+        AudioSource(location, arguments) {}
+
+    void Group::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Group::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
     Play::Play(const SourceLocation location, AudioSource* audioSource) :
         Token(location), audioSource(audioSource)
     {
@@ -1591,6 +1604,16 @@ namespace Parser
         token->arguments->check();
     }
 
+    void TypeResolver::resolveTypes(Group* token)
+    {
+        resolveArgumentTypes(token->arguments, "sources", new ListType(new AudioSourceType()));
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "pan", new NumberType());
+        resolveArgumentTypes(token->arguments, "volume", new NumberType());
+
+        token->arguments->check();
+    }
+
     void TypeResolver::resolveTypes(Play* token)
     {
         token->audioSource->resolveTypes(this);
@@ -2047,6 +2070,16 @@ namespace Parser
         transformArgument(token->arguments, "volume");
 
         addInstruction(new CallNative(BytecodeConstants::SAMPLE, 4));
+    }
+
+    void BytecodeTransformer::transform(const Group* token)
+    {
+        transformArgument(token->arguments, "sources");
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "pan");
+        transformArgument(token->arguments, "volume");
+
+        addInstruction(new CallNative(BytecodeConstants::GROUP, 4));
     }
 
     void BytecodeTransformer::transform(const Play* token)

@@ -735,6 +735,14 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
+    struct Group : public AudioSource
+    {
+        Group(const SourceLocation location, ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
     struct Play : public Token
     {
         Play(const SourceLocation location, AudioSource* audioSource);
@@ -948,6 +956,7 @@ namespace Parser
         void resolveTypes(Oscillator* token);
         void resolveTypes(Noise* token);
         void resolveTypes(Sample* token);
+        void resolveTypes(Group* token);
         void resolveTypes(Play* token);
         void resolveTypes(Delay* token);
         void resolveTypes(Comb* token);
@@ -1003,6 +1012,7 @@ namespace Parser
         void transform(const Oscillator* token);
         void transform(const Noise* token);
         void transform(const Sample* token);
+        void transform(const Group* token);
         void transform(const Play* token);
         void transform(const EmptyEffect* token);
         void transform(const Delay* token);

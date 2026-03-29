@@ -241,3 +241,65 @@ void Sample::prepareForEffects()
         index = fmod(index, resourceLeaf->length);
     }
 }
+
+Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources) :
+    volume(volume), pan(pan), effects(effects), sources(sources)
+{
+    effectBuffer = (double*)malloc(sizeof(double) * utils->channels);
+}
+
+Group::~Group()
+{
+    free(effectBuffer);
+}
+
+void Group::fillBuffer(double* buffer)
+{
+    memset(effectBuffer, 0, sizeof(double) * utils->channels);
+
+    for (ValueObject* source : sources->getLeafAs<List>()->objects)
+    {
+        source->getLeafAs<AudioSource>()->fillBuffer(effectBuffer);
+    }
+
+    const double volumeValue = volume->getValue();
+
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        effectBuffer[i] *= volumeValue;
+    }
+
+    const double panValue = pan->getValue();
+
+    if (utils->channels == 2)
+    {
+        effectBuffer[0] = effectBuffer[0] * (1 - panValue) / 2;
+        effectBuffer[1] = effectBuffer[1] * (1 + panValue) / 2;
+    }
+
+    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
+    {
+        effect->getLeafAs<Effect>()->apply(effectBuffer);
+    }
+
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        buffer[i] += effectBuffer[i];
+    }
+}
+
+void Group::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+
+    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
+    {
+        effect->start(startTime);
+    }
+
+    for (ValueObject* source : sources->getLeafAs<List>()->objects)
+    {
+        source->start(startTime);
+    }
+}

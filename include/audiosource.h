@@ -135,3 +135,23 @@ private:
     double index;
 
 };
+
+struct Group : public AudioSource
+{
+    Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources);
+    ~Group();
+
+    void fillBuffer(double* buffer) override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* volume;
+    ValueObject* pan;
+    ValueObject* effects;
+    ValueObject* sources;
+
+    double* effectBuffer;
+
+};
