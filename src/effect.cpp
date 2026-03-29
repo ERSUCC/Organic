@@ -7,43 +7,32 @@ Delay::Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
 
 void Delay::apply(double* buffer)
 {
-    const double delayLength = utils->sampleRate * delay->getValue() / 1000;
+    const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
 
-    if (delayLength == 0)
+    while (delayBuffer.size() > delayFrames)
     {
-        return;
+        delayBuffer.pop();
     }
 
-    if (utils->channels == 1)
-    {
-        if (this->buffer.size() > delayLength)
-        {
-            buffer[0] += this->buffer.front() * mix->getValue() * feedback->getValue();
+    const double mixValue = mix->getValue();
+    const double feedbackValue = feedback->getValue();
 
-            this->buffer.pop();
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        if (delayFrames > 0 && delayBuffer.size() >= delayFrames)
+        {
+            const double value = delayBuffer.front() * feedbackValue;
+
+            delayBuffer.pop();
+            delayBuffer.push(buffer[i] + value);
+
+            buffer[i] += value * mixValue;
         }
 
-        this->buffer.push(buffer[0]);
-    }
-
-    else
-    {
-        if (this->buffer.size() > delayLength * 2)
+        else
         {
-            const double mixValue = mix->getValue();
-            const double feedbackValue = feedback->getValue();
-
-            buffer[0] += this->buffer.front() * mixValue * feedbackValue;
-
-            this->buffer.pop();
-
-            buffer[1] += this->buffer.front() * mixValue * feedbackValue;
-
-            this->buffer.pop();
+            delayBuffer.push(buffer[i]);
         }
-
-        this->buffer.push(buffer[0]);
-        this->buffer.push(buffer[1]);
     }
 }
 

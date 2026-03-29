@@ -15,15 +15,15 @@ struct Delay : public Effect
 
     void apply(double* buffer) override;
 
-    ValueObject* mix;
-    ValueObject* delay;
-    ValueObject* feedback;
-
 protected:
     void init() override;
 
 private:
-    std::queue<double> buffer;
+    ValueObject* mix;
+    ValueObject* delay;
+    ValueObject* feedback;
+
+    std::queue<double> delayBuffer;
 
 };
 
