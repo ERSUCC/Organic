@@ -84,7 +84,7 @@ void Machine::run()
 
 void Machine::processAudioSources(double* buffer)
 {
-    std::fill(buffer, buffer + utils->channels, 0);
+    memset(buffer, 0, sizeof(double) * utils->channels);
 
     for (unsigned int i = 0; i < audioSources.size(); i++)
     {
