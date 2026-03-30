@@ -30,6 +30,7 @@ endif ()
 
 set(BUILD_SHARED_LIBS True)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(BUILD_TESTING False)
 
 add_subdirectory(deps/rtaudio)
 add_subdirectory(deps/libsndfile)

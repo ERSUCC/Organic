@@ -1,0 +1,9 @@
+[submodule "deps/libsamplerate"]
+	path = deps/libsamplerate
+	url = https://github.com/libsndfile/libsamplerate
+[submodule "deps/libsndfile"]
+	path = deps/libsndfile
+	url = https://github.com/libsndfile/libsndfile
+[submodule "deps/rtaudio"]
+	path = deps/rtaudio
+	url = https://github.com/thestk/rtaudio
