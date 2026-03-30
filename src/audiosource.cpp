@@ -201,30 +201,22 @@ void Sample::prepareForEffects()
 
     const Resource* resourceLeaf = resource->getLeafAs<Resource>();
 
-    const double value1 = volumeValue * resourceLeaf->samples[(unsigned int)floor(index)];
-    double value2 = value1;
-
-    if (resourceLeaf->channels == 2)
-    {
-        value2 = volumeValue * resourceLeaf->samples[(unsigned int)floor(index) + 1];
-    }
-
     if (utils->channels == 1)
     {
-        effectBuffer[0] = (value1 + value2) / 2;
+        effectBuffer[0] = volumeValue * resourceLeaf->samples[index];
     }
 
     else
     {
-        effectBuffer[0] = value1 * (1 - panValue) / 2;
-        effectBuffer[1] = value2 * (panValue + 1) / 2;
+        effectBuffer[0] = volumeValue * resourceLeaf->samples[index] * (1 - panValue) / 2;
+        effectBuffer[1] = volumeValue * resourceLeaf->samples[index + 1] * (panValue + 1) / 2;
     }
 
-    index += resourceLeaf->channels * (double)resourceLeaf->sampleRate / utils->sampleRate;
+    index += utils->channels;
 
     if (index >= resourceLeaf->length)
     {
-        index = fmod(index, resourceLeaf->length);
+        index -= resourceLeaf->length;
     }
 }
 

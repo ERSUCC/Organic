@@ -41,13 +41,13 @@ Machine::Machine(const Path* path)
 
         chars += 12;
 
-        double* samples = (double*)malloc(sizeof(double) * length);
+        float* samples = (float*)malloc(sizeof(float) * length);
 
-        double max = 0;
+        float max = 0;
 
         for (unsigned int j = 0; j < length; j++)
         {
-            samples[j] = (double)readInt(chars + j * 4) / INT_MAX;
+            samples[j] = (float)readInt(chars + j * 4) / INT_MAX;
 
             if (fabs(samples[j]) > max)
             {
@@ -60,7 +60,61 @@ Machine::Machine(const Path* path)
             samples[j] /= max;
         }
 
-        resources[i] = new Resource(samples, length, sampleRate, channels);
+        unsigned int scaledLength = length;
+
+        if (sampleRate != utils->sampleRate)
+        {
+            scaledLength = length * (double)utils->sampleRate / sampleRate;
+
+            float* scaledSamples = (float*)malloc(sizeof(float) * scaledLength);
+
+            SRC_DATA data;
+
+            data.data_in = samples;
+            data.data_out = scaledSamples;
+            data.input_frames = length / channels;
+            data.output_frames = scaledLength / channels;
+            data.src_ratio = (double)utils->sampleRate / sampleRate;
+
+            const int result = src_simple(&data, SRC_SINC_BEST_QUALITY, channels);
+
+            if (result)
+            {
+                throw OrganicMachineException(std::string("Failed to convert sample rate of audio file: ") + src_strerror(result));
+            }
+
+            samples = scaledSamples;
+            scaledLength = data.output_frames_gen * channels;
+        }
+
+        double* doubleSamples = (double*)malloc(sizeof(double) * scaledLength);
+
+        if (channels == utils->channels)
+        {
+            for (size_t j = 0; j < scaledLength; j++)
+            {
+                doubleSamples[j] = samples[j];
+            }
+        }
+
+        else if (channels == 1)
+        {
+            for (size_t j = 0; j < scaledLength; j++)
+            {
+                doubleSamples[j * 2] = samples[j] / 2;
+                doubleSamples[j * 2 + 1] = samples[j] / 2;
+            }
+        }
+
+        else
+        {
+            for (size_t j = 0; j < scaledLength / 2; j)
+            {
+                doubleSamples[j] = samples[j * 2] + samples[j * 2 + 1];
+            }
+        }
+
+        resources[i] = new Resource(doubleSamples, scaledLength);
 
         chars += length * 4;
     }

@@ -111,8 +111,8 @@ void Lambda::init()
     value->start(startTime);
 }
 
-Resource::Resource(double* samples, const unsigned int length, const unsigned int sampleRate, const unsigned int channels) :
-    samples(samples), length(length), sampleRate(sampleRate), channels(channels) {}
+Resource::Resource(double* samples, const unsigned int length) :
+    samples(samples), length(length) {}
 
 Resource::~Resource()
 {

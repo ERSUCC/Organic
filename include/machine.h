@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <samplerate.h>
+
 #include "audiosource.h"
 #include "constants.h"
 #include "controller.h"

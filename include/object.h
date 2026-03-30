@@ -86,14 +86,12 @@ private:
 
 struct Resource : public ValueObject
 {
-    Resource(double* samples, const unsigned int length, const unsigned int sampleRate, const unsigned int channels);
+    Resource(double* samples, const unsigned int length);
     ~Resource();
 
     double* samples;
 
     const unsigned int length;
-    const unsigned int sampleRate;
-    const unsigned int channels;
 };
 
 struct Time : public ValueObject

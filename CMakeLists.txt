@@ -33,10 +33,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_subdirectory(deps/rtaudio)
 add_subdirectory(deps/libsndfile)
+add_subdirectory(deps/libsamplerate)
 
-target_include_directories(organic_lib PUBLIC deps/rtaudio deps/libsndfile/include)
+target_include_directories(organic_lib PUBLIC deps/rtaudio deps/libsndfile/include deps/libsamplerate/include)
 
-target_link_libraries(organic_lib rtaudio sndfile)
+target_link_libraries(organic_lib rtaudio sndfile samplerate)
 
 # build command line entry point
 

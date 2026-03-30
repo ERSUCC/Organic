@@ -132,7 +132,7 @@ protected:
 private:
     ValueObject* resource;
 
-    double index;
+    unsigned int index;
 
 };
 
