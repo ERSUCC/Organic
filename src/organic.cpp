@@ -5,6 +5,16 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
 {
     utils = Utils::get();
 
+    if (options.mono)
+    {
+        utils->channels = 1;
+    }
+
+    if (options.bufferLength)
+    {
+        utils->bufferLength = options.bufferLength.value();
+    }
+
     if (options.seed)
     {
         utils->setSeed(options.seed.value());
@@ -34,16 +44,6 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
 
 void Organic::start()
 {
-    if (options.mono)
-    {
-        utils->channels = 1;
-    }
-
-    if (options.bufferLength)
-    {
-        utils->bufferLength = options.bufferLength.value();
-    }
-
     if (options.exportPath)
     {
         startExport();

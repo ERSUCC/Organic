@@ -83,11 +83,13 @@ Machine::Machine(const Path* path)
                 throw OrganicMachineException(std::string("Failed to convert sample rate of audio file: ") + src_strerror(result));
             }
 
+            free(samples);
+
             samples = scaledSamples;
-            scaledLength = data.output_frames_gen * channels;
+            scaledLength = data.output_frames_gen * utils->channels;
         }
 
-        double* doubleSamples = (double*)malloc(sizeof(double) * scaledLength);
+        double* doubleSamples = (double*)calloc(scaledLength, sizeof(double));
 
         if (channels == utils->channels)
         {
@@ -101,18 +103,19 @@ Machine::Machine(const Path* path)
         {
             for (size_t j = 0; j < scaledLength; j++)
             {
-                doubleSamples[j * 2] = samples[j] / 2;
-                doubleSamples[j * 2 + 1] = samples[j] / 2;
+                doubleSamples[j] = samples[j / 2] / 2;
             }
         }
 
         else
         {
-            for (size_t j = 0; j < scaledLength / 2; j)
+            for (size_t j = 0; j < scaledLength; j++)
             {
-                doubleSamples[j] = samples[j * 2] + samples[j * 2 + 1];
+                doubleSamples[j / 2] += samples[j];
             }
         }
+
+        free(samples);
 
         resources[i] = new Resource(doubleSamples, scaledLength);
 
