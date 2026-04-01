@@ -559,6 +559,11 @@ namespace Parser
             return tokens->patch(start, current, new Oscillator(name->location, argumentList));
         }
 
+        if (name->str == "granulate")
+        {
+            return tokens->patch(start, current, new Granulate(name->location, argumentList));
+        }
+
         if (name->str == "group")
         {
             return tokens->patch(start, current, new Group(name->location, argumentList));

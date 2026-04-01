@@ -324,9 +324,11 @@ namespace Parser
 
     struct EmptyLambda : public Token
     {
-        EmptyLambda(const SourceLocation location);
+        EmptyLambda(const SourceLocation location, Token* value);
 
         void transform(BytecodeTransformer* visitor) const override;
+
+        Token* value;
     };
 
     struct Value : public BasicToken
@@ -483,7 +485,7 @@ namespace Parser
 
         Token* get(const std::string name) const;
 
-        void addDefault(const std::string name, Type* type);
+        void add(const std::string name, Token* value);
 
         void check() const;
 
@@ -735,6 +737,14 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
+    struct Granulate : public AudioSource
+    {
+        Granulate(const SourceLocation location, ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
     struct Group : public AudioSource
     {
         Group(const SourceLocation location, ArgumentList* arguments);
@@ -956,6 +966,7 @@ namespace Parser
         void resolveTypes(Oscillator* token);
         void resolveTypes(Noise* token);
         void resolveTypes(Sample* token);
+        void resolveTypes(Granulate* token);
         void resolveTypes(Group* token);
         void resolveTypes(Play* token);
         void resolveTypes(Delay* token);
@@ -967,7 +978,7 @@ namespace Parser
         void resolveTypes(Program* token);
 
     private:
-        void resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType);
+        void resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType, Token* defaultValue = nullptr);
 
         const Path* sourcePath;
 
@@ -1012,6 +1023,7 @@ namespace Parser
         void transform(const Oscillator* token);
         void transform(const Noise* token);
         void transform(const Sample* token);
+        void transform(const Granulate* token);
         void transform(const Group* token);
         void transform(const Play* token);
         void transform(const EmptyEffect* token);

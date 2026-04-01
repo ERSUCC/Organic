@@ -47,7 +47,8 @@ struct BytecodeConstants
     static constexpr unsigned char NOISE = 0x35;
     static constexpr unsigned char SAMPLE = 0x36;
     static constexpr unsigned char OSCILLATOR = 0x37;
-    static constexpr unsigned char GROUP = 0x38;
+    static constexpr unsigned char GRANULATE = 0x38;
+    static constexpr unsigned char GROUP = 0x39;
 
     static constexpr unsigned char HOLD = 0x50;
     static constexpr unsigned char LFO = 0x51;

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -133,6 +134,65 @@ private:
     ValueObject* resource;
 
     unsigned int index;
+
+};
+
+struct ShapeCoordinator : public ValueObject
+{
+    double getValue() override;
+
+    inline void setValue(const double value);
+
+private:
+    double value = 0;
+
+};
+
+struct Grain : public Sync
+{
+    Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const unsigned int length);
+
+    void apply(double* buffer);
+
+private:
+    unsigned int randomIndex(const unsigned int max);
+
+    ValueObject* resource;
+    ValueObject* shape;
+
+    ShapeCoordinator* coordinator;
+
+    const unsigned int length;
+
+    std::uniform_int_distribution<unsigned int> udist;
+
+    unsigned int currentLength = 0;
+
+    unsigned int index;
+    unsigned int start;
+
+};
+
+struct Granulate : public SingleAudioSource
+{
+    Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, ValueObject* shape);
+
+protected:
+    void init() override;
+
+    void prepareForEffects() override;
+
+private:
+    ValueObject* resource;
+    ValueObject* grains;
+    ValueObject* length;
+    ValueObject* shape;
+
+    ShapeCoordinator* coordinator = new ShapeCoordinator();
+
+    Grain** grainArray;
+
+    size_t grainNumber;
 
 };
 

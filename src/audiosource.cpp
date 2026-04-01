@@ -220,6 +220,117 @@ void Sample::prepareForEffects()
     }
 }
 
+double ShapeCoordinator::getValue()
+{
+    return value;
+}
+
+void ShapeCoordinator::setValue(const double value)
+{
+    this->value = value;
+}
+
+Grain::Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const unsigned int length) :
+    resource(resource), shape(shape), coordinator(coordinator), length(length)
+{
+    index = randomIndex(resource->getLeafAs<Resource>()->length);
+    start = index;
+
+    index += std::uniform_int_distribution<unsigned int>(0, length)(utils->rng);
+}
+
+void Grain::apply(double* buffer)
+{
+    coordinator->setValue((double)(index - start) / length);
+
+    const double shapeValue = shape->getValue();
+
+    const Resource* resourceLeaf = resource->getLeafAs<Resource>();
+
+    buffer[0] += resourceLeaf->samples[index] * shapeValue;
+
+    if (utils->channels == 2)
+    {
+        buffer[1] += resourceLeaf->samples[index + 1] * shapeValue;
+    }
+
+    if (index >= start + length)
+    {
+        index = randomIndex(resourceLeaf->length);
+        start = index;
+    }
+
+    else
+    {
+        index += utils->channels;
+    }
+}
+
+unsigned int Grain::randomIndex(const unsigned int max)
+{
+    if (max != currentLength)
+    {
+        udist = std::uniform_int_distribution<unsigned int>(0, max - length);
+
+        currentLength = max;
+    }
+
+    return (udist(utils->rng) / utils->channels) * utils->channels;
+}
+
+Granulate::Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, ValueObject* shape) :
+    SingleAudioSource(volume, pan, effects), resource(resource), grains(grains), length(length), shape(shape)
+{
+    shape->getLeafAs<Lambda>()->setInputs({ coordinator });
+}
+
+void Granulate::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+    resource->start(startTime);
+    grains->start(startTime);
+    length->start(startTime);
+    shape->start(startTime);
+
+    grainNumber = grains->getValue();
+
+    grainArray = (Grain**)malloc(sizeof(Grain*) * grainNumber);
+
+    const unsigned int lengthValue = utils->sampleRate * utils->channels * length->getValue() / 1000;
+
+    for (size_t i = 0; i < grainNumber; i++)
+    {
+        grainArray[i] = new Grain(resource, shape, coordinator, lengthValue);
+    }
+}
+
+void Granulate::prepareForEffects()
+{
+    memset(effectBuffer, 0, sizeof(double) * utils->channels);
+
+    for (size_t i = 0; i < grainNumber; i++)
+    {
+        grainArray[i]->apply(effectBuffer);
+    }
+
+    const double volumeValue = volume->getValue();
+
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        effectBuffer[i] *= volumeValue / (1.3 * sqrt(grainNumber));
+    }
+
+    const double panValue = pan->getValue();
+
+    if (utils->channels == 2)
+    {
+        effectBuffer[0] = effectBuffer[0] * (1 - panValue) / 2;
+        effectBuffer[1] = effectBuffer[1] * (1 + panValue) / 2;
+    }
+}
+
 Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources) :
     volume(volume), pan(pan), effects(effects), sources(sources)
 {

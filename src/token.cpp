@@ -271,7 +271,7 @@ namespace Parser
 
     Token* LambdaType::getDefault(const SourceLocation location)
     {
-        return new EmptyLambda(location);
+        return new EmptyLambda(location, new Value(location, "0", 0));
     }
 
     std::string LambdaType::inputString(const std::unordered_map<std::string, const Type*>& inputTypes) const
@@ -395,8 +395,8 @@ namespace Parser
     Identifier::Identifier(const SourceLocation location, const std::string str) :
         BasicToken(location, str) {}
 
-    EmptyLambda::EmptyLambda(const SourceLocation location) :
-        Token(location) {}
+    EmptyLambda::EmptyLambda(const SourceLocation location, Token* value) :
+        Token(location), value(value) {}
 
     void EmptyLambda::transform(BytecodeTransformer* visitor) const
     {
@@ -571,9 +571,9 @@ namespace Parser
         return nullptr;
     }
 
-    void ArgumentList::addDefault(const std::string name, Type* type)
+    void ArgumentList::add(const std::string name, Token* value)
     {
-        Argument* argument = new Argument(location, name, type->getDefault(location));
+        Argument* argument = new Argument(location, name, value);
 
         argument->used = true;
 
@@ -1020,6 +1020,19 @@ namespace Parser
     }
 
     void Sample::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
+    Granulate::Granulate(const SourceLocation location, ArgumentList* arguments) :
+        AudioSource(location, arguments) {}
+
+    void Granulate::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Granulate::transform(BytecodeTransformer* visitor) const
     {
         visitor->transform(this);
     }
@@ -1604,6 +1617,21 @@ namespace Parser
         token->arguments->check();
     }
 
+    void TypeResolver::resolveTypes(Granulate* token)
+    {
+        EmptyLambda* defaultLambda = new EmptyLambda(token->arguments->location, new Value(token->arguments->location, "1", 1));
+
+        resolveArgumentTypes(token->arguments, "shape", new LambdaType({ { "value", new NumberType() } }, new NumberType()), defaultLambda);
+        resolveArgumentTypes(token->arguments, "length", new NumberType());
+        resolveArgumentTypes(token->arguments, "grains", new NumberType());
+        resolveArgumentTypes(token->arguments, "sample", new StringType());
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "pan", new NumberType());
+        resolveArgumentTypes(token->arguments, "volume", new NumberType());
+
+        token->arguments->check();
+    }
+
     void TypeResolver::resolveTypes(Group* token)
     {
         resolveArgumentTypes(token->arguments, "sources", new ListType(new AudioSourceType()));
@@ -1733,7 +1761,7 @@ namespace Parser
         }
     }
 
-    void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType)
+    void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType, Token* defaultValue)
     {
         for (unsigned int i = 0; i < arguments->arguments.size(); i++)
         {
@@ -1763,7 +1791,15 @@ namespace Parser
             }
         }
 
-        arguments->addDefault(name, expectedType);
+        if (defaultValue)
+        {
+            arguments->add(name, defaultValue);
+        }
+
+        else
+        {
+            arguments->add(name, expectedType->getDefault(arguments->location));
+        }
     }
 
     BytecodeTransformer::BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream) :
@@ -1812,7 +1848,9 @@ namespace Parser
 
     void BytecodeTransformer::transform(const EmptyLambda* token)
     {
-        addInstruction(new CallNative(BytecodeConstants::EMPTY_LAMBDA, 0));
+        token->value->transform(this);
+
+        addInstruction(new CallNative(BytecodeConstants::EMPTY_LAMBDA, 1));
     }
 
     void BytecodeTransformer::transform(const List* token)
@@ -2070,6 +2108,42 @@ namespace Parser
         transformArgument(token->arguments, "volume");
 
         addInstruction(new CallNative(BytecodeConstants::SAMPLE, 4));
+    }
+
+    void BytecodeTransformer::transform(const Granulate* token)
+    {
+        transformArgument(token->arguments, "shape");
+        transformArgument(token->arguments, "length");
+        transformArgument(token->arguments, "grains");
+
+        const String* str = dynamic_cast<const String*>(token->arguments->get("sample"));
+
+        const Path* path = Path::beside(Path::formatPath(str->value), sourcePath);
+
+        if (!path->exists())
+        {
+            throw OrganicIncludeException("Audio file \"" + path->string() + "\" does not exist.", str->location);
+        }
+
+        if (!path->isFile())
+        {
+            throw OrganicIncludeException("\"" + path->string() + "\" is not a file.", str->location);
+        }
+
+        if (!resources.count(path))
+        {
+            resources[path] = resources.size();
+
+            resolver->addResourceBlock(new ResourceBlock(path));
+        }
+
+        addInstruction(new StackPushResource(resources[path]));
+
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "pan");
+        transformArgument(token->arguments, "volume");
+
+        addInstruction(new CallNative(BytecodeConstants::GRANULATE, 7));
     }
 
     void BytecodeTransformer::transform(const Group* token)

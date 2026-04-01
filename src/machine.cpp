@@ -328,7 +328,7 @@ void Machine::execute(unsigned int address, const double startTime)
                     }
 
                     case BytecodeConstants::EMPTY_LAMBDA:
-                        stack.push(new Lambda({}, new Value(0)));
+                        stack.push(new Lambda({}, inputs[0]));
 
                         break;
 
@@ -454,6 +454,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                     case BytecodeConstants::OSCILLATOR:
                         stack.push(new CustomOscillator(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4]));
+
+                        break;
+
+                    case BytecodeConstants::GRANULATE:
+                        stack.push(new Granulate(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6]));
 
                         break;
 
