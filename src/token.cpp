@@ -571,7 +571,7 @@ namespace Parser
         return nullptr;
     }
 
-    void ArgumentList::add(const std::string name, Token* value)
+    void ArgumentList::addDefault(const std::string name, Token* value)
     {
         Argument* argument = new Argument(location, name, value);
 
@@ -1793,12 +1793,12 @@ namespace Parser
 
         if (defaultValue)
         {
-            arguments->add(name, defaultValue);
+            arguments->addDefault(name, defaultValue);
         }
 
         else
         {
-            arguments->add(name, expectedType->getDefault(arguments->location));
+            arguments->addDefault(name, expectedType->getDefault(arguments->location));
         }
     }
 

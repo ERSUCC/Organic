@@ -195,17 +195,17 @@ struct GrainList : public Sync
 
     void append(Grain* grain);
 
-    void apply(double* buffer, const size_t grainLength, const size_t maxGrains);
+    void apply(double* buffer, const unsigned int grainLength, const unsigned int maxGrains);
 
-    inline size_t getActiveLength() const;
-    inline size_t getTotalLength() const;
+    inline unsigned int getActiveLength() const;
+    inline unsigned int getTotalLength() const;
 
 private:
     GrainNode* head = new GrainNode(nullptr, nullptr, nullptr);
     GrainNode* tail = new GrainNode(nullptr, nullptr, nullptr);
 
-    size_t activeLength = 0;
-    size_t totalLength = 0;
+    unsigned int activeLength = 0;
+    unsigned int totalLength = 0;
 
 };
 

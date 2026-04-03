@@ -485,7 +485,7 @@ namespace Parser
 
         Token* get(const std::string name) const;
 
-        void add(const std::string name, Token* value);
+        void addDefault(const std::string name, Token* value);
 
         void check() const;
 
