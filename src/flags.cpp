@@ -31,6 +31,21 @@ ProgramOptions FlagParser::getOptions()
             }
         }
 
+        else if (flag == "--fast-forward")
+        {
+            if (options.fastForward)
+            {
+                throw OrganicArgumentException("The option \"--fast-forward\" was already set.");
+            }
+
+            options.fastForward = nextDouble(flag);
+
+            if (options.fastForward < 0)
+            {
+                throw OrganicArgumentException("The value provided for option \"--fast-forward\" cannot be negative.");
+            }
+        }
+
         else if (flag == "--export")
         {
             if (options.exportPath)
@@ -102,6 +117,11 @@ ProgramOptions FlagParser::getOptions()
     if (options.exportPath && !options.time)
     {
         throw OrganicArgumentException("Cannot export without a time limit.");
+    }
+
+    if (options.exportPath && options.fastForward)
+    {
+        throw OrganicArgumentException("Cannot fast forward when exporting.");
     }
 
     if (options.exportPath && options.bufferLength)

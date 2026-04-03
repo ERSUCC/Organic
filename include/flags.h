@@ -13,6 +13,7 @@
 struct ProgramOptions
 {
     std::optional<double> time;
+    std::optional<double> fastForward;
     std::optional<Path*> exportPath;
     std::optional<unsigned int> channels;
     std::optional<unsigned int> sampleRate;

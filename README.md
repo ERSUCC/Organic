@@ -27,6 +27,8 @@ The following section details the optional inputs, for more advanced use of Orga
 
 --time *number*: Set the runtime of the program in milliseconds. If unspecified, the program will run infinitely.
 
+--fast-forward *number*: Skip to the provided time in milliseconds before starting audio output.
+
 --export *string*: Render the program to the specified audio file instead of playing back in time. Must be used in conjunction with --time.
 
 --mono: Use mono audio for the program. If not included, the program will run in stereo.

@@ -66,6 +66,24 @@ void Organic::startPlayback()
         throw OrganicAudioException(audio.getErrorText());
     }
 
+    machine->run();
+
+    if (options.fastForward)
+    {
+        const size_t frames = utils->sampleRate * options.fastForward.value() / 1000;
+
+        double* buffer = (double*)malloc(sizeof(double) * utils->channels);
+
+        for (size_t i = 0; i < frames; i++)
+        {
+            utils->time = i * 1000.0 / utils->sampleRate;
+
+            machine->processAudioSources(buffer);
+        }
+
+        free(buffer);
+    }
+
     if (audio.startStream())
     {
         if (audio.isStreamOpen())
@@ -75,8 +93,6 @@ void Organic::startPlayback()
 
         throw OrganicAudioException(audio.getErrorText());
     }
-
-    machine->run();
 
     if (options.time.has_value())
     {
