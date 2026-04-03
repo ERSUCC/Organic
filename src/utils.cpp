@@ -42,9 +42,9 @@ void Utils::includeWarning(const std::string message, const SourceLocation& loca
     std::cout << "Include warning in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
 }
 
-void Utils::setSeed(unsigned int seed)
+void Utils::setSeed(const std::optional<unsigned int>& seed)
 {
-    rng = std::mt19937(seed);
+    rng = std::mt19937(seed.value_or(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
 }
 
 Utils::Utils()
@@ -55,10 +55,6 @@ Utils::Utils()
     {
         littleEndian = true;
     }
-
-    e = exp(1);
-
-    rng = std::mt19937(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 }
 
 OrganicException::OrganicException(const std::string message) :

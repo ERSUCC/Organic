@@ -5,25 +5,10 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
 {
     utils = Utils::get();
 
-    if (options.mono)
-    {
-        utils->channels = 1;
-    }
-
-    if (options.sampleRate)
-    {
-        utils->sampleRate = options.sampleRate.value();
-    }
-
-    if (options.bufferLength)
-    {
-        utils->bufferLength = options.bufferLength.value();
-    }
-
-    if (options.seed)
-    {
-        utils->setSeed(options.seed.value());
-    }
+    utils->channels = options.channels.value_or(2);
+    utils->sampleRate = options.sampleRate.value_or(44100);
+    utils->bufferLength = options.bufferLength.value_or(128);
+    utils->setSeed(options.seed);
 
     std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
 

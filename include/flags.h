@@ -14,10 +14,10 @@ struct ProgramOptions
 {
     std::optional<double> time;
     std::optional<Path*> exportPath;
-    std::optional<bool> mono;
-    std::optional<unsigned int> seed;
-    std::optional<unsigned int> bufferLength;
+    std::optional<unsigned int> channels;
     std::optional<unsigned int> sampleRate;
+    std::optional<unsigned int> bufferLength;
+    std::optional<unsigned int> seed;
 };
 
 struct FlagParser
@@ -27,7 +27,11 @@ struct FlagParser
     ProgramOptions getOptions();
 
 private:
-    std::string nextOption(const std::string previous);
+    std::string nextOption(const std::string flag);
+
+    unsigned int nextInt(const std::string flag);
+
+    double nextDouble(const std::string flag);
 
     std::queue<std::string> flags;
 

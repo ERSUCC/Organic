@@ -13,6 +13,7 @@
 #include <iostream>
 #include <limits>
 #include <mutex>
+#include <optional>
 #include <random>
 #include <string>
 
@@ -26,19 +27,18 @@ struct Utils
     static void parseWarning(const std::string message, const SourceLocation& location);
     static void includeWarning(const std::string message, const SourceLocation& location);
 
-    void setSeed(unsigned int seed);
+    void setSeed(const std::optional<unsigned int>& seed);
 
     bool littleEndian = false;
 
-    unsigned int sampleRate = 44100;
-    unsigned int channels = 2;
-    unsigned int bufferLength = 128;
+    unsigned int channels;
+    unsigned int sampleRate;
+    unsigned int bufferLength;
 
     const double pi = M_PI;
     const double twoPi = M_PI * 2;
+    const double e = M_E;
     const double infinity = std::numeric_limits<double>::infinity();
-
-    double e;
 
     double time = 0;
 
