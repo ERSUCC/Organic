@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <random>
 #include <string>
-#include <vector>
 
 #include "effect.h"
 #include "object.h"
@@ -154,22 +153,59 @@ struct Grain : public Sync
 
     void apply(double* buffer);
 
+    inline void setLength(const unsigned int length);
+
+protected:
+    void init() override;
+
 private:
-    unsigned int randomIndex(const unsigned int max);
+    unsigned int clampLength(const unsigned int max) const;
+    unsigned int randomIndex(const unsigned int max) const;
 
     ValueObject* resource;
     ValueObject* shape;
 
     ShapeCoordinator* coordinator;
 
-    const unsigned int length;
+    unsigned int length;
 
-    std::uniform_int_distribution<unsigned int> udist;
+    unsigned int currentIndex;
+    unsigned int startIndex;
 
-    unsigned int currentLength = 0;
+    bool firstInit = true;
 
-    unsigned int index;
-    unsigned int start;
+};
+
+struct GrainNode
+{
+    GrainNode(Grain* grain, GrainNode* prev, GrainNode* next);
+    ~GrainNode();
+
+    Grain* grain;
+
+    GrainNode* prev;
+    GrainNode* next;
+
+    bool active = true;
+};
+
+struct GrainList : public Sync
+{
+    GrainList();
+
+    void append(Grain* grain);
+
+    void apply(double* buffer, const size_t grainLength, const size_t maxGrains);
+
+    inline size_t getActiveLength() const;
+    inline size_t getTotalLength() const;
+
+private:
+    GrainNode* head = new GrainNode(nullptr, nullptr, nullptr);
+    GrainNode* tail = new GrainNode(nullptr, nullptr, nullptr);
+
+    size_t activeLength = 0;
+    size_t totalLength = 0;
 
 };
 
@@ -190,9 +226,7 @@ private:
 
     ShapeCoordinator* coordinator = new ShapeCoordinator();
 
-    Grain** grainArray;
-
-    size_t grainNumber;
+    GrainList* grainList = new GrainList();
 
 };
 
