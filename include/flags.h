@@ -17,6 +17,7 @@ struct ProgramOptions
     std::optional<bool> mono;
     std::optional<unsigned int> seed;
     std::optional<unsigned int> bufferLength;
+    std::optional<unsigned int> sampleRate;
 };
 
 struct FlagParser

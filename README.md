@@ -35,6 +35,8 @@ The following section details the optional inputs, for more advanced use of Orga
 
 --buffer-length *number*: Use the provided buffer length for audio output. If not specified, the buffer length will be 128 samples.
 
+--sample-rate *number*: Use the provided sample rate. If not specified, the sample rate will be 44100 Hz.
+
 ## Organic Language Specification
 
 TBD

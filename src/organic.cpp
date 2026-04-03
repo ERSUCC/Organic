@@ -10,6 +10,11 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
         utils->channels = 1;
     }
 
+    if (options.sampleRate)
+    {
+        utils->sampleRate = options.sampleRate.value();
+    }
+
     if (options.bufferLength)
     {
         utils->bufferLength = options.bufferLength.value();
