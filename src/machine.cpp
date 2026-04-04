@@ -417,6 +417,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
+                    case BytecodeConstants::ABS:
+                        stack.push(new Absolute(inputs[0]));
+
+                        break;
+
                     case BytecodeConstants::EMPTY_AUDIO_SOURCE:
                         stack.push(new AudioSource());
 

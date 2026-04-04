@@ -346,6 +346,7 @@ namespace Parser
             function->str == "min" ||
             function->str == "max" ||
             function->str == "round" ||
+            function->str == "absolute" ||
             function->str == "sine" ||
             function->str == "square" ||
             function->str == "triangle" ||
@@ -527,6 +528,11 @@ namespace Parser
         if (name->str == "round")
         {
             return tokens->patch(start, current, new Round(name->location, argumentList));
+        }
+
+        if (name->str == "absolute")
+        {
+            return tokens->patch(start, current, new Absolute(name->location, argumentList));
         }
 
         if (name->str == "sine")

@@ -919,6 +919,22 @@ namespace Parser
         visitor->transform(this);
     }
 
+    Absolute::Absolute(const SourceLocation location, ArgumentList* arguments) :
+        Call(location, arguments)
+    {
+        type = new NumberType();
+    }
+
+    void Absolute::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void Absolute::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
     AudioSource::AudioSource(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
@@ -1547,6 +1563,13 @@ namespace Parser
         token->arguments->check();
     }
 
+    void TypeResolver::resolveTypes(Absolute* token)
+    {
+        resolveArgumentTypes(token->arguments, "value", new NumberType());
+
+        token->arguments->check();
+    }
+
     void TypeResolver::resolveTypes(Sine* token)
     {
         resolveArgumentTypes(token->arguments, "frequency", new NumberType());
@@ -2011,6 +2034,13 @@ namespace Parser
         transformArgument(token->arguments, "value");
 
         addInstruction(new CallNative(BytecodeConstants::ROUND, 3));
+    }
+
+    void BytecodeTransformer::transform(const Absolute* token)
+    {
+        transformArgument(token->arguments, "value");
+
+        addInstruction(new CallNative(BytecodeConstants::ABS, 1));
     }
 
     void BytecodeTransformer::transform(const EmptyAudioSource* token)

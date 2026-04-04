@@ -221,6 +221,21 @@ private:
 
 };
 
+struct Absolute : public ValueObject
+{
+    Absolute(ValueObject* value);
+
+    double syncLength() const override;
+    double getValue() override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* value;
+
+};
+
 struct Sequence : public ValueObject
 {
     enum OrderEnum

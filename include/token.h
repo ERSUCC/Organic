@@ -669,6 +669,14 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
+    struct Absolute : public Call
+    {
+        Absolute(const SourceLocation location, ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
     struct AudioSource : public Call
     {
         AudioSource(const SourceLocation location, ArgumentList* arguments);
@@ -959,6 +967,7 @@ namespace Parser
         void resolveTypes(Min* token);
         void resolveTypes(Max* token);
         void resolveTypes(Round* token);
+        void resolveTypes(Absolute* token);
         void resolveTypes(Sine* token);
         void resolveTypes(Square* token);
         void resolveTypes(Triangle* token);
@@ -1015,6 +1024,7 @@ namespace Parser
         void transform(const Min* token);
         void transform(const Max* token);
         void transform(const Round* token);
+        void transform(const Absolute* token);
         void transform(const EmptyAudioSource* token);
         void transform(const Sine* token);
         void transform(const Square* token);

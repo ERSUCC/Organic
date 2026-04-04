@@ -313,6 +313,29 @@ void Round::init()
     direction->start(startTime);
 }
 
+Absolute::Absolute(ValueObject* value) :
+    value(value) {}
+
+double Absolute::syncLength() const
+{
+    return value->syncLength();
+}
+
+double Absolute::getValue()
+{
+    if (utils->time - startTime >= syncLength())
+    {
+        stop();
+    }
+
+    return fabs(value->getValue());
+}
+
+void Absolute::init()
+{
+    value->start(startTime);
+}
+
 Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
     controllers(controllers), order(order) {}
 
