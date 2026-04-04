@@ -67,4 +67,16 @@ struct BytecodeConstants
     static constexpr unsigned char ALL_PASS = 0x73;
 
     static constexpr unsigned char PLAY = 0x90;
+
+    static constexpr unsigned char SEQUENCE_FORWARD = 0x0;
+    static constexpr unsigned char SEQUENCE_BACKWARD = 0x1;
+    static constexpr unsigned char SEQUENCE_PING_PONG = 0x2;
+    static constexpr unsigned char SEQUENCE_RANDOM = 0x3;
+
+    static constexpr unsigned char RANDOM_STEP = 0x0;
+    static constexpr unsigned char RANDOM_LINEAR = 0x1;
+
+    static constexpr unsigned char ROUND_NEAREST = 0x0;
+    static constexpr unsigned char ROUND_UP = 0x1;
+    static constexpr unsigned char ROUND_DOWN = 0x2;
 };

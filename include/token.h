@@ -11,7 +11,6 @@
 
 #include "bytecode.h"
 #include "constants.h"
-#include "controller.h"
 #include "location.h"
 #include "path.h"
 #include "utils.h"

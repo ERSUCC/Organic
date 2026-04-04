@@ -423,55 +423,55 @@ namespace Parser
     }
 
     SequenceForward::SequenceForward(const SourceLocation location) :
-        Constant(location, "sequence-forward", ::Sequence::OrderEnum::Forward)
+        Constant(location, "sequence-forward", BytecodeConstants::SEQUENCE_FORWARD)
     {
         type = new SequenceOrderType();
     }
 
     SequenceBackward::SequenceBackward(const SourceLocation location) :
-        Constant(location, "sequence-backward", ::Sequence::OrderEnum::Backward)
+        Constant(location, "sequence-backward", BytecodeConstants::SEQUENCE_BACKWARD)
     {
         type = new SequenceOrderType();
     }
 
     SequencePingPong::SequencePingPong(const SourceLocation location) :
-        Constant(location, "sequence-ping-pong", ::Sequence::OrderEnum::PingPong)
+        Constant(location, "sequence-ping-pong", BytecodeConstants::SEQUENCE_PING_PONG)
     {
         type = new SequenceOrderType();
     }
 
     SequenceRandom::SequenceRandom(const SourceLocation location) :
-        Constant(location, "sequence-random", ::Sequence::OrderEnum::Random)
+        Constant(location, "sequence-random", BytecodeConstants::SEQUENCE_RANDOM)
     {
         type = new SequenceOrderType();
     }
 
     RandomStep::RandomStep(const SourceLocation location) :
-        Constant(location, "random-step", ::Random::TypeEnum::Step)
+        Constant(location, "random-step", BytecodeConstants::RANDOM_STEP)
     {
         type = new RandomTypeType();
     }
 
     RandomLinear::RandomLinear(const SourceLocation location) :
-        Constant(location, "random-linear", ::Random::TypeEnum::Linear)
+        Constant(location, "random-linear", BytecodeConstants::RANDOM_LINEAR)
     {
         type = new RandomTypeType();
     }
 
     RoundNearest::RoundNearest(const SourceLocation location) :
-        Constant(location, "round-nearest", ::Round::DirectionEnum::Nearest)
+        Constant(location, "round-nearest", BytecodeConstants::ROUND_NEAREST)
     {
         type = new RoundDirectionType();
     }
 
     RoundUp::RoundUp(const SourceLocation location) :
-        Constant(location, "round-up", ::Round::DirectionEnum::Up)
+        Constant(location, "round-up", BytecodeConstants::ROUND_UP)
     {
         type = new RoundDirectionType();
     }
 
     RoundDown::RoundDown(const SourceLocation location) :
-        Constant(location, "round-down", ::Round::DirectionEnum::Down)
+        Constant(location, "round-down", BytecodeConstants::ROUND_DOWN)
     {
         type = new RoundDirectionType();
     }

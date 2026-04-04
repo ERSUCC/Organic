@@ -4,6 +4,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "constants.h"
 #include "object.h"
 
 struct ValueByte : public ValueObject
@@ -199,13 +200,6 @@ private:
 
 struct Round : public ValueObject
 {
-    enum DirectionEnum
-    {
-        Nearest,
-        Up,
-        Down
-    };
-
     Round(ValueObject* value, ValueObject* step, ValueObject* direction);
 
     double syncLength() const override;
@@ -238,14 +232,6 @@ private:
 
 struct Sequence : public ValueObject
 {
-    enum OrderEnum
-    {
-        Forward,
-        Backward,
-        PingPong,
-        Random
-    };
-
     Sequence(ValueObject* controllers, ValueObject* order);
 
     double syncLength() const override;
@@ -353,12 +339,6 @@ private:
 
 struct Random : public ValueObject
 {
-    enum TypeEnum
-    {
-        Step,
-        Linear
-    };
-
     Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type);
 
     double syncLength() const override;

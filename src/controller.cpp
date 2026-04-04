@@ -287,17 +287,17 @@ double Round::getValue()
 
     switch (direction->getLeafAs<ValueByte>()->value)
     {
-        case DirectionEnum::Nearest:
+        case BytecodeConstants::ROUND_NEAREST:
             return round(val / st) * st;
 
             break;
 
-        case DirectionEnum::Up:
+        case BytecodeConstants::ROUND_UP:
             return ceil(val / st) * st;
 
             break;
 
-        case DirectionEnum::Down:
+        case BytecodeConstants::ROUND_DOWN:
             return floor(val / st) * st;
 
             break;
@@ -350,7 +350,7 @@ double Sequence::syncLength() const
 
     double length = 0;
 
-    if (order->getLeafAs<ValueByte>()->value == OrderEnum::PingPong)
+    if (order->getLeafAs<ValueByte>()->value == BytecodeConstants::SEQUENCE_PING_PONG)
     {
         length += objects[0]->syncLength();
 
@@ -420,7 +420,7 @@ void Sequence::init()
 
     const unsigned char orderNum = order->getLeafAs<ValueByte>()->value;
 
-    if (orderNum == OrderEnum::PingPong)
+    if (orderNum == BytecodeConstants::SEQUENCE_PING_PONG)
     {
         max_switches = objects.size() * 2 - 2;
     }
@@ -430,12 +430,12 @@ void Sequence::init()
         max_switches = objects.size() - 1;
     }
 
-    if (orderNum == OrderEnum::Backward)
+    if (orderNum == BytecodeConstants::SEQUENCE_BACKWARD)
     {
         current = objects.size() - 1;
     }
 
-    else if (orderNum == OrderEnum::Random)
+    else if (orderNum == BytecodeConstants::SEQUENCE_RANDOM)
     {
         current = udist(utils->rng);
 
@@ -466,12 +466,12 @@ void Sequence::reinit()
 
     switch (order->getLeafAs<ValueByte>()->value)
     {
-        case OrderEnum::Forward:
+        case BytecodeConstants::SEQUENCE_FORWARD:
             current = (current + 1) % objects.size();
 
             break;
 
-        case OrderEnum::Backward:
+        case BytecodeConstants::SEQUENCE_BACKWARD:
         {
             current -= 1;
 
@@ -483,7 +483,7 @@ void Sequence::reinit()
             break;
         }
 
-        case OrderEnum::PingPong:
+        case BytecodeConstants::SEQUENCE_PING_PONG:
         {
             if ((direction == -1 && current <= 0) || current >= objects.size() - 1)
             {
@@ -495,7 +495,7 @@ void Sequence::reinit()
             break;
         }
 
-        case OrderEnum::Random:
+        case BytecodeConstants::SEQUENCE_RANDOM:
         {
             if (chosen.size() < objects.size())
             {
@@ -663,10 +663,10 @@ double Random::getValue()
 
     switch (type->getLeafAs<ValueByte>()->value)
     {
-        case TypeEnum::Step:
+        case BytecodeConstants::RANDOM_STEP:
             return current;
 
-        case TypeEnum::Linear:
+        case BytecodeConstants::RANDOM_LINEAR:
             return current + (next - current) * (utils->time - startTime) / syncLength();
     }
 
