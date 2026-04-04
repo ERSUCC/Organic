@@ -54,7 +54,7 @@ namespace Parser
         virtual bool checkSpecifiedType(const ListType* expected) const;
         virtual bool checkSpecifiedType(const LambdaType* expected) const;
 
-        virtual Token* getDefault(const SourceLocation location);
+        virtual Token* getDefault(const SourceLocation location) const;
 
     private:
         const std::string str;
@@ -85,7 +85,7 @@ namespace Parser
 
         bool checkSpecifiedType(const SequenceOrderType* expected) const override;
 
-        Token* getDefault(const SourceLocation location) override;
+        Token* getDefault(const SourceLocation location) const override;
     };
 
     struct RandomTypeType : public Type
@@ -96,7 +96,7 @@ namespace Parser
 
         bool checkSpecifiedType(const RandomTypeType* expected) const override;
 
-        Token* getDefault(const SourceLocation location) override;
+        Token* getDefault(const SourceLocation location) const override;
     };
 
     struct RoundDirectionType : public Type
@@ -107,7 +107,7 @@ namespace Parser
 
         bool checkSpecifiedType(const RoundDirectionType* expected) const override;
 
-        Token* getDefault(const SourceLocation location) override;
+        Token* getDefault(const SourceLocation location) const override;
     };
 
     struct NumberType : public Type
@@ -145,7 +145,7 @@ namespace Parser
 
         bool checkSpecifiedType(const AudioSourceType* expected) const override;
 
-        Token* getDefault(const SourceLocation location) override;
+        Token* getDefault(const SourceLocation location) const override;
     };
 
     struct EffectType : public Type
@@ -156,7 +156,7 @@ namespace Parser
 
         bool checkSpecifiedType(const EffectType* expected) const override;
 
-        Token* getDefault(const SourceLocation location) override;
+        Token* getDefault(const SourceLocation location) const override;
     };
 
     struct ListType : public Type
@@ -167,7 +167,7 @@ namespace Parser
 
         bool checkSpecifiedType(const ListType* expected) const override;
 
-        Token* getDefault(const SourceLocation location) override;
+        Token* getDefault(const SourceLocation location) const override;
 
         Type* subType;
     };
@@ -180,7 +180,7 @@ namespace Parser
 
         bool checkSpecifiedType(const LambdaType* expected) const override;
 
-        Token* getDefault(const SourceLocation location) override;
+        Token* getDefault(const SourceLocation location) const override;
 
     private:
         std::string inputString(const std::unordered_map<std::string, const Type*>& inputTypes) const;

@@ -70,7 +70,7 @@ namespace Parser
         return false;
     }
 
-    Token* Type::getDefault(const SourceLocation location)
+    Token* Type::getDefault(const SourceLocation location) const
     {
         return new Value(location, "0", 0);
     }
@@ -109,7 +109,7 @@ namespace Parser
         return true;
     }
 
-    Token* SequenceOrderType::getDefault(const SourceLocation location)
+    Token* SequenceOrderType::getDefault(const SourceLocation location) const
     {
         return new SequenceForward(location);
     }
@@ -127,7 +127,7 @@ namespace Parser
         return true;
     }
 
-    Token* RandomTypeType::getDefault(const SourceLocation location)
+    Token* RandomTypeType::getDefault(const SourceLocation location) const
     {
         return new RandomStep(location);
     }
@@ -145,7 +145,7 @@ namespace Parser
         return true;
     }
 
-    Token* RoundDirectionType::getDefault(const SourceLocation location)
+    Token* RoundDirectionType::getDefault(const SourceLocation location) const
     {
         return new RoundNearest(location);
     }
@@ -202,7 +202,7 @@ namespace Parser
         return true;
     }
 
-    Token* AudioSourceType::getDefault(const SourceLocation location)
+    Token* AudioSourceType::getDefault(const SourceLocation location) const
     {
         return new EmptyAudioSource(location);
     }
@@ -220,7 +220,7 @@ namespace Parser
         return true;
     }
 
-    Token* EffectType::getDefault(const SourceLocation location)
+    Token* EffectType::getDefault(const SourceLocation location) const
     {
         return new EmptyEffect(location);
     }
@@ -238,7 +238,7 @@ namespace Parser
         return expected->subType->checkType(subType);
     }
 
-    Token* ListType::getDefault(const SourceLocation location)
+    Token* ListType::getDefault(const SourceLocation location) const
     {
         return new List(location, {});
     }
@@ -269,9 +269,9 @@ namespace Parser
         return true;
     }
 
-    Token* LambdaType::getDefault(const SourceLocation location)
+    Token* LambdaType::getDefault(const SourceLocation location) const
     {
-        return new EmptyLambda(location, new Value(location, "0", 0));
+        return new EmptyLambda(location, returnType->getDefault(location));
     }
 
     std::string LambdaType::inputString(const std::unordered_map<std::string, const Type*>& inputTypes) const
