@@ -560,7 +560,7 @@ void Repeat::reinit()
     value->start(repeatTime);
 }
 
-Value::Value(double value) :
+Value::Value(const double value) :
     value(value) {}
 
 double Value::getValue()

@@ -62,6 +62,7 @@ protected:
 
     Phase* phase;
 
+private:
     double lastVolume = 0;
 
 };

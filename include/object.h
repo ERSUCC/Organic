@@ -14,9 +14,6 @@ struct Sync
 
     virtual double syncLength() const;
 
-    double startTime = 0;
-    double repeatTime = 0;
-
     bool enabled = false;
 
 protected:
@@ -24,6 +21,9 @@ protected:
     virtual void reinit();
 
     Utils* utils;
+
+    double startTime = 0;
+    double repeatTime = 0;
 
 };
 

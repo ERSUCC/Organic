@@ -292,11 +292,13 @@ private:
 
 struct Value : public ValueObject
 {
-    Value(double value);
+    Value(const double value);
 
     double getValue() override;
 
-    double value;
+private:
+    const double value;
+
 };
 
 struct Hold : public ValueObject

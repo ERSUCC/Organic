@@ -33,13 +33,13 @@ struct LowPassFilter : public Effect
 
     void apply(double* buffer) override;
 
-    ValueObject* mix;
-    ValueObject* cutoff;
-
 protected:
     void init() override;
 
 private:
+    ValueObject* mix;
+    ValueObject* cutoff;
+
     double raw1[2] = { 0 };
     double raw2[2] = { 0 };
     double filtered1[2] = { 0 };
