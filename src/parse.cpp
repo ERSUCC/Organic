@@ -343,12 +343,17 @@ namespace Parser
             function->str == "all" ||
             function->str == "any" ||
             function->str == "none" ||
+            function->str == "min" ||
+            function->str == "max" ||
+            function->str == "round" ||
             function->str == "sine" ||
             function->str == "square" ||
             function->str == "triangle" ||
             function->str == "saw" ||
             function->str == "noise" ||
             function->str == "sample" ||
+            function->str == "oscillator" ||
+            function->str == "granulate" ||
             function->str == "group" ||
             function->str == "delay" ||
             function->str == "comb" ||
