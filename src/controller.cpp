@@ -11,17 +11,19 @@ ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
 
 double ValueCombination::syncLength() const
 {
-    return value1->syncLength();
+    return fmax(value1->syncLength(), value2->syncLength());
 }
 
 double ValueCombination::getValue()
 {
-    if (!value1->enabled || !value2->enabled)
+    const double value = getValueInternal();
+
+    if (!value1->enabled && !value2->enabled)
     {
         stop();
     }
 
-    return getValueInternal();
+    return value;
 }
 
 void ValueCombination::init()
@@ -272,12 +274,13 @@ double Round::syncLength() const
 
 double Round::getValue()
 {
-    if (utils->time - startTime >= syncLength())
+    const double val = value->getValue();
+
+    if (!value->enabled)
     {
         stop();
     }
 
-    const double val = value->getValue();
     double st = step->getValue();
 
     if (st == 0)
@@ -323,12 +326,14 @@ double Absolute::syncLength() const
 
 double Absolute::getValue()
 {
-    if (utils->time - startTime >= syncLength())
+    const double val = fabs(value->getValue());
+
+    if (!value->enabled)
     {
         stop();
     }
 
-    return fabs(value->getValue());
+    return val;
 }
 
 void Absolute::init()
@@ -385,6 +390,8 @@ double Sequence::getValue()
         return 0;
     }
 
+    const double value = objects[current]->getValue();
+
     if (!objects[current]->enabled)
     {
         last = current;
@@ -400,7 +407,7 @@ double Sequence::getValue()
         }
     }
 
-    return objects[current]->getValue();
+    return value;
 }
 
 void Sequence::init()
@@ -531,9 +538,13 @@ double Repeat::syncLength() const
 
 double Repeat::getValue()
 {
+    const double val = value->getValue();
+
     if (!value->enabled)
     {
-        if (repeats->getValue() == 0 || ++times < repeats->getValue())
+        const double repeatsValue = repeats->getValue();
+
+        if (repeatsValue == 0 || ++times < repeatsValue)
         {
             repeat(repeatTime + value->syncLength());
         }
@@ -544,7 +555,7 @@ double Repeat::getValue()
         }
     }
 
-    return value->getValue();
+    return val;
 }
 
 void Repeat::init()
@@ -578,7 +589,7 @@ double Hold::syncLength() const
 
 double Hold::getValue()
 {
-    if (utils->time - startTime >= syncLength())
+    if (utils->time - startTime >= length->getValue())
     {
         stop();
     }
@@ -602,14 +613,19 @@ double Sweep::syncLength() const
 
 double Sweep::getValue()
 {
-    if (utils->time - startTime >= syncLength())
+    const double lengthValue = length->getValue();
+    const double toValue = to->getValue();
+
+    if (utils->time - startTime >= lengthValue)
     {
         stop();
 
-        return to->getValue();
+        return toValue;
     }
 
-    return from->getValue() + (to->getValue() - from->getValue()) * (utils->time - startTime) / syncLength();
+    const double fromValue = from->getValue();
+
+    return fromValue + (toValue - fromValue) * (utils->time - startTime) / lengthValue;
 }
 
 void Sweep::init()
@@ -629,14 +645,17 @@ double LFO::syncLength() const
 
 double LFO::getValue()
 {
-    if (utils->time - startTime >= syncLength())
+    const double lengthValue = length->getValue();
+    const double fromValue = from->getValue();
+
+    if (utils->time - startTime >= lengthValue)
     {
         stop();
 
-        return from->getValue();
+        return fromValue;
     }
 
-    return from->getValue() + (to->getValue() - from->getValue()) * (-cos(utils->twoPi * (utils->time - startTime) / syncLength()) / 2 + 0.5);
+    return fromValue + (to->getValue() - fromValue) * (-cos(utils->twoPi * (utils->time - startTime) / lengthValue) / 2 + 0.5);
 }
 
 void LFO::init()
@@ -656,7 +675,9 @@ double Random::syncLength() const
 
 double Random::getValue()
 {
-    if (utils->time - startTime >= syncLength())
+    const double lengthValue = length->getValue();
+
+    if (utils->time - startTime >= lengthValue)
     {
         stop();
     }
@@ -667,7 +688,7 @@ double Random::getValue()
             return current;
 
         case BytecodeConstants::RANDOM_LINEAR:
-            return current + (next - current) * (utils->time - startTime) / syncLength();
+            return current + (next - current) * (utils->time - startTime) / lengthValue;
     }
 
     return 0;
