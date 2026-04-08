@@ -356,6 +356,7 @@ namespace Parser
             function->str == "oscillator" ||
             function->str == "granulate" ||
             function->str == "group" ||
+            function->str == "effect-group" ||
             function->str == "delay" ||
             function->str == "comb" ||
             function->str == "all-pass" ||
@@ -578,6 +579,11 @@ namespace Parser
         if (name->str == "group")
         {
             return tokens->patch(start, current, new Group(name->location, argumentList));
+        }
+
+        if (name->str == "effect-group")
+        {
+            return tokens->patch(start, current, new EffectGroup(name->location, argumentList));
         }
 
         if (name->str == "delay")

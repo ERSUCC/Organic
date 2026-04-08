@@ -2,6 +2,52 @@
 
 void Effect::apply(double* buffer) {}
 
+EffectGroup::EffectGroup(ValueObject* mix, ValueObject* effects) :
+    mix(mix), effects(effects)
+{
+    original = (double*)malloc(sizeof(double) * utils->channels);
+    applied = (double*)malloc(sizeof(double) * utils->channels);
+}
+
+EffectGroup::~EffectGroup()
+{
+    free(original);
+    free(applied);
+}
+
+void EffectGroup::apply(double* buffer)
+{
+    memcpy(original, buffer, sizeof(double) * utils->channels);
+    memset(buffer, 0, sizeof(double) * utils->channels);
+
+    const double mixValue = mix->getValue();
+
+    const std::vector<ValueObject*>& effectObjects = effects->getLeafAs<List>()->objects;
+
+    for (ValueObject* effect : effectObjects)
+    {
+        memcpy(applied, original, sizeof(double) * utils->channels);
+
+        static_cast<Effect*>(effect)->apply(applied);
+
+        for (unsigned int i = 0; i < utils->channels; i++)
+        {
+            buffer[i] += applied[i] / effectObjects.size();
+        }
+    }
+
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        buffer[i] = original[i] * (1 - mixValue) + buffer[i] * mixValue;
+    }
+}
+
+void EffectGroup::init()
+{
+    mix->start(startTime);
+    effects->start(startTime);
+}
+
 Delay::Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
 

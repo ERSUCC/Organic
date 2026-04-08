@@ -1101,6 +1101,19 @@ namespace Parser
         visitor->transform(this);
     }
 
+    EffectGroup::EffectGroup(const SourceLocation location, ArgumentList* arguments) :
+        Effect(location, arguments) {}
+
+    void EffectGroup::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void EffectGroup::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
     Delay::Delay(const SourceLocation location, ArgumentList* arguments) :
         Effect(location, arguments) {}
 
@@ -1670,6 +1683,14 @@ namespace Parser
         token->audioSource->resolveTypes(this);
     }
 
+    void TypeResolver::resolveTypes(EffectGroup* token)
+    {
+        resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
+        resolveArgumentTypes(token->arguments, "mix", new NumberType());
+
+        token->arguments->check();
+    }
+
     void TypeResolver::resolveTypes(Delay* token)
     {
         resolveArgumentTypes(token->arguments, "feedback", new NumberType());
@@ -2196,6 +2217,14 @@ namespace Parser
     void BytecodeTransformer::transform(const EmptyEffect* token)
     {
         addInstruction(new CallNative(BytecodeConstants::EMPTY_EFFECT, 0));
+    }
+
+    void BytecodeTransformer::transform(const EffectGroup* token)
+    {
+        transformArgument(token->arguments, "effects");
+        transformArgument(token->arguments, "mix");
+
+        addInstruction(new CallNative(BytecodeConstants::EFFECT_GROUP, 2));
     }
 
     void BytecodeTransformer::transform(const Delay* token)

@@ -62,9 +62,10 @@ struct BytecodeConstants
     static constexpr unsigned char IF = 0x58;
 
     static constexpr unsigned char EMPTY_EFFECT = 0x70;
-    static constexpr unsigned char DELAY = 0x71;
-    static constexpr unsigned char COMB = 0x72;
-    static constexpr unsigned char ALL_PASS = 0x73;
+    static constexpr unsigned char EFFECT_GROUP = 0x71;
+    static constexpr unsigned char DELAY = 0x72;
+    static constexpr unsigned char COMB = 0x73;
+    static constexpr unsigned char ALL_PASS = 0x74;
 
     static constexpr unsigned char PLAY = 0x90;
 

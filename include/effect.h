@@ -9,6 +9,25 @@ struct Effect : public ValueObject
     virtual void apply(double* buffer);
 };
 
+struct EffectGroup : public Effect
+{
+    EffectGroup(ValueObject* mix, ValueObject* effects);
+    ~EffectGroup();
+
+    void apply(double* buffer) override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* mix;
+    ValueObject* effects;
+
+    double* original;
+    double* applied;
+
+};
+
 struct Delay : public Effect
 {
     Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback);

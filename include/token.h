@@ -784,6 +784,14 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
+    struct EffectGroup : public Effect
+    {
+        EffectGroup(const SourceLocation location, ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
     struct Delay : public Effect
     {
         Delay(const SourceLocation location, ArgumentList* arguments);
@@ -977,6 +985,7 @@ namespace Parser
         void resolveTypes(Granulate* token);
         void resolveTypes(Group* token);
         void resolveTypes(Play* token);
+        void resolveTypes(EffectGroup* token);
         void resolveTypes(Delay* token);
         void resolveTypes(Comb* token);
         void resolveTypes(AllPass* token);
@@ -1036,6 +1045,7 @@ namespace Parser
         void transform(const Group* token);
         void transform(const Play* token);
         void transform(const EmptyEffect* token);
+        void transform(const EffectGroup* token);
         void transform(const Delay* token);
         void transform(const Comb* token);
         void transform(const AllPass* token);

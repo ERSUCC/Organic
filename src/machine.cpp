@@ -522,6 +522,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
+                    case BytecodeConstants::EFFECT_GROUP:
+                        stack.push(new EffectGroup(inputs[0], inputs[1]));
+
+                        break;
+
                     case BytecodeConstants::DELAY:
                         stack.push(new Delay(inputs[0], inputs[1], inputs[2]));
 
