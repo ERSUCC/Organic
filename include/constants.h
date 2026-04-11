@@ -66,6 +66,7 @@ struct BytecodeConstants
     static constexpr unsigned char DELAY = 0x72;
     static constexpr unsigned char COMB = 0x73;
     static constexpr unsigned char ALL_PASS = 0x74;
+    static constexpr unsigned char LOW_PASS = 0x75;
 
     static constexpr unsigned char PLAY = 0x90;
 

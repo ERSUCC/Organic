@@ -360,6 +360,7 @@ namespace Parser
             function->str == "delay" ||
             function->str == "comb" ||
             function->str == "all-pass" ||
+            function->str == "low-pass" ||
             function->str == "include")
         {
             throw OrganicParseException("A function already exists with the name \"" + function->str + "\".", function->location);
@@ -599,6 +600,11 @@ namespace Parser
         if (name->str == "all-pass")
         {
             return tokens->patch(start, current, new AllPass(name->location, argumentList));
+        }
+
+        if (name->str == "low-pass")
+        {
+            return tokens->patch(start, current, new LowPass(name->location, argumentList));
         }
 
         if (name->str == "include")

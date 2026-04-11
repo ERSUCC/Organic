@@ -800,8 +800,6 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
-    // low pass filter goes here when it's ready
-
     struct Comb : public Effect
     {
         Comb(const SourceLocation location, ArgumentList* arguments);
@@ -813,6 +811,14 @@ namespace Parser
     struct AllPass : public Effect
     {
         AllPass(const SourceLocation location, ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
+    struct LowPass : public Effect
+    {
+        LowPass(const SourceLocation location, ArgumentList* arguments);
 
         void resolveTypes(TypeResolver* visitor) override;
         void transform(BytecodeTransformer* visitor) const override;
@@ -989,6 +995,7 @@ namespace Parser
         void resolveTypes(Delay* token);
         void resolveTypes(Comb* token);
         void resolveTypes(AllPass* token);
+        void resolveTypes(LowPass* token);
         void resolveTypes(CallUser* token);
         void resolveTypes(CallAlias* token);
         void resolveTypes(Define* token);
@@ -1049,6 +1056,7 @@ namespace Parser
         void transform(const Delay* token);
         void transform(const Comb* token);
         void transform(const AllPass* token);
+        void transform(const LowPass* token);
         void transform(const CallUser* token);
         void transform(const AddAlias* token);
         void transform(const SubtractAlias* token);

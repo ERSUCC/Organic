@@ -89,59 +89,6 @@ void Delay::init()
     feedback->start(startTime);
 }
 
-LowPassFilter::LowPassFilter(ValueObject* mix, ValueObject* cutoff) :
-    mix(mix), cutoff(cutoff) {}
-
-void LowPassFilter::apply(double* buffer)
-{
-    const double omega = tan(utils->pi * cutoff->getValue() / utils->sampleRate);
-    const double omega2 = omega * omega;
-    const double c = 1 + 2 * cos(utils->pi / 4) * omega + omega2;
-    const double a0 = omega2 / c;
-    const double a1 = 2 * a0;
-    const double b1 = 2 * (omega2 - 1) / c;
-    const double b2 = (1 - 2 * cos(utils->pi / 4) * omega + omega2) / c;
-
-    const double mixValue = mix->getValue();
-
-    const double rawl = buffer[0];
-
-    if (utils->channels == 1)
-    {
-        buffer[0] = mixValue * (a0 * buffer[0] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
-
-        raw2[0] = raw1[0];
-        raw1[0] = rawl;
-
-        filtered2[0] = filtered1[0];
-        filtered1[0] = buffer[0];
-    }
-
-    else
-    {
-        const double rawr = buffer[1];
-
-        buffer[0] = mixValue * (a0 * buffer[0] + a1 * raw1[0] + a0 * raw2[0] - b1 * filtered1[0] - b2 * filtered2[0]);
-        buffer[1] = mixValue * (a0 * buffer[1] + a1 * raw1[1] + a0 * raw2[1] - b1 * filtered1[1] - b2 * filtered2[1]);
-
-        raw2[0] = raw1[0];
-        raw2[1] = raw1[1];
-        raw1[0] = rawl;
-        raw1[1] = rawr;
-
-        filtered2[0] = filtered1[0];
-        filtered2[1] = filtered1[1];
-        filtered1[0] = buffer[0];
-        filtered1[1] = buffer[1];
-    }
-}
-
-void LowPassFilter::init()
-{
-    mix->start(startTime);
-    cutoff->start(startTime);
-}
-
 Comb::Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
 
@@ -220,4 +167,45 @@ void AllPass::init()
     mix->start(startTime);
     delay->start(startTime);
     feedback->start(startTime);
+}
+
+LowPass::LowPass(ValueObject* threshold) :
+    threshold(threshold)
+{
+    raw = (double*)calloc(utils->channels * 2, sizeof(double));
+    filtered = (double*)calloc(utils->channels * 2, sizeof(double));
+}
+
+LowPass::~LowPass()
+{
+    free(raw);
+    free(filtered);
+}
+
+void LowPass::apply(double* buffer)
+{
+    const double omega = tan(utils->pi * threshold->getValue() / utils->sampleRate);
+    const double omega2 = omega * omega;
+    const double c = 1 + sqrt(2) * omega + omega2;
+    const double a = omega2 / c;
+    const double b1 = 2 * (omega2 - 1) / c;
+    const double b2 = (1 - sqrt(2) * omega + omega2) / c;
+
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        const double value = buffer[i];
+
+        buffer[i] = a * (buffer[i] +  raw[i] * 2 + raw[i + 2]) - b1 * filtered[i] - b2 * filtered[i + 2];
+
+        raw[i + 2] = raw[i];
+        raw[i] = value;
+
+        filtered[i + 2] = filtered[i];
+        filtered[i] = buffer[i];
+    }
+}
+
+void LowPass::init()
+{
+    threshold->start(startTime);
 }

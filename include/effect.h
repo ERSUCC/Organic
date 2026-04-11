@@ -46,26 +46,6 @@ private:
 
 };
 
-struct LowPassFilter : public Effect
-{
-    LowPassFilter(ValueObject* mix, ValueObject* cutoff);
-
-    void apply(double* buffer) override;
-
-protected:
-    void init() override;
-
-private:
-    ValueObject* mix;
-    ValueObject* cutoff;
-
-    double raw1[2] = { 0 };
-    double raw2[2] = { 0 };
-    double filtered1[2] = { 0 };
-    double filtered2[2] = { 0 };
-
-};
-
 struct Comb : public Effect
 {
     Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
@@ -99,5 +79,23 @@ private:
     ValueObject* feedback;
 
     std::queue<double> delayBuffer;
+
+};
+
+struct LowPass : public Effect
+{
+    LowPass(ValueObject* threshold);
+    ~LowPass();
+
+    void apply(double* buffer) override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* threshold;
+
+    double* raw;
+    double* filtered;
 
 };

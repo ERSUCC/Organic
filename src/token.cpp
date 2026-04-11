@@ -1153,6 +1153,19 @@ namespace Parser
         visitor->transform(this);
     }
 
+    LowPass::LowPass(const SourceLocation location, ArgumentList* arguments) :
+        Effect(location, arguments) {}
+
+    void LowPass::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
+
+    void LowPass::transform(BytecodeTransformer* visitor) const
+    {
+        visitor->transform(this);
+    }
+
     CallUser::CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function) :
         Call(location, arguments), function(function) {}
 
@@ -1718,6 +1731,13 @@ namespace Parser
         token->arguments->check();
     }
 
+    void TypeResolver::resolveTypes(LowPass* token)
+    {
+        resolveArgumentTypes(token->arguments, "threshold", new NumberType());
+
+        token->arguments->check();
+    }
+
     void TypeResolver::resolveTypes(CallUser* token)
     {
         for (const InputDef* input : token->function->definition->inputs)
@@ -2252,6 +2272,13 @@ namespace Parser
         transformArgument(token->arguments, "mix");
 
         addInstruction(new CallNative(BytecodeConstants::ALL_PASS, 3));
+    }
+
+    void BytecodeTransformer::transform(const LowPass* token)
+    {
+        transformArgument(token->arguments, "threshold");
+
+        addInstruction(new CallNative(BytecodeConstants::LOW_PASS, 1));
     }
 
     void BytecodeTransformer::transform(const CallUser* token)

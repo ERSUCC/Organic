@@ -542,6 +542,11 @@ void Machine::execute(unsigned int address, const double startTime)
 
                         break;
 
+                    case BytecodeConstants::LOW_PASS:
+                        stack.push(new LowPass(inputs[0]));
+
+                        break;
+
                     case BytecodeConstants::PLAY:
                     {
                         AudioSource* audioSource = static_cast<AudioSource*>(inputs[0]);
