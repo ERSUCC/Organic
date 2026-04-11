@@ -195,12 +195,12 @@ void LowPass::apply(double* buffer)
     {
         const double value = buffer[i];
 
-        buffer[i] = a * (buffer[i] +  raw[i] * 2 + raw[i + 2]) - b1 * filtered[i] - b2 * filtered[i + 2];
+        buffer[i] = a * (buffer[i] +  raw[i] * 2 + raw[i + utils->channels]) - b1 * filtered[i] - b2 * filtered[i + utils->channels];
 
-        raw[i + 2] = raw[i];
+        raw[i + utils->channels] = raw[i];
         raw[i] = value;
 
-        filtered[i + 2] = filtered[i];
+        filtered[i + utils->channels] = filtered[i];
         filtered[i] = buffer[i];
     }
 }
