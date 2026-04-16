@@ -10,6 +10,11 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
     utils->bufferLength = options.bufferLength.value_or(128);
     utils->setSeed(options.seed);
 
+    if (options.info.value_or(false))
+    {
+        Utils::printInfo();
+    }
+
     std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
 
     Parser::Program* program = (new Parser::Parser(path, new Parser::ParserContext(nullptr, "", {}), includedPaths))->parse();

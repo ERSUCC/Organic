@@ -12,6 +12,7 @@
 
 struct ProgramOptions
 {
+    std::optional<bool> info;
     std::optional<double> time;
     std::optional<double> fastForward;
     std::optional<Path*> exportPath;

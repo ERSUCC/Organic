@@ -12,6 +12,17 @@ Utils* Utils::get()
     return instance;
 }
 
+void Utils::printInfo()
+{
+    const Utils* utils = Utils::get();
+
+    std::cout << "Organic v0.1.0" << "\n";
+    std::cout << "Channels: " << utils->channels << "\n";
+    std::cout << "Sample Rate: " << utils->sampleRate << "\n";
+    std::cout << "Buffer Length: " << utils->bufferLength << "\n";
+    std::cout << "Random Seed: " << utils->seed << "\n";
+}
+
 void Utils::parseWarning(const std::string message, const SourceLocation& location)
 {
     if (!Utils::get()->firstWarning)
@@ -44,7 +55,9 @@ void Utils::includeWarning(const std::string message, const SourceLocation& loca
 
 void Utils::setSeed(const std::optional<unsigned int>& seed)
 {
-    rng = std::mt19937(seed.value_or(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
+    this->seed = seed.value_or(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+
+    rng = std::mt19937(this->seed);
 }
 
 Utils::Utils()

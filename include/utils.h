@@ -24,6 +24,7 @@ struct Utils
 {
     static Utils* get();
 
+    static void printInfo();
     static void parseWarning(const std::string message, const SourceLocation& location);
     static void includeWarning(const std::string message, const SourceLocation& location);
 
@@ -34,6 +35,7 @@ struct Utils
     unsigned int channels;
     unsigned int sampleRate;
     unsigned int bufferLength;
+    unsigned int seed;
 
     const double pi = M_PI;
     const double twoPi = M_PI * 2;

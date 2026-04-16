@@ -25,6 +25,8 @@ The following section details the optional inputs, for more advanced use of Orga
 
 ### Program Arguments
 
+--info: Display configuration info before running the program.
+
 --time *number*: Set the runtime of the program in milliseconds. If unspecified, the program will run infinitely.
 
 --fast-forward *number*: Skip to the provided time in milliseconds before starting audio output.

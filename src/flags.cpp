@@ -16,7 +16,17 @@ ProgramOptions FlagParser::getOptions()
     {
         std::string flag = nextOption("");
 
-        if (flag == "--time")
+        if (flag == "--info")
+        {
+            if (options.info)
+            {
+                throw OrganicArgumentException("The option \"--info\" was already set.");
+            }
+
+            options.info = true;
+        }
+
+        else if (flag == "--time")
         {
             if (options.time)
             {
