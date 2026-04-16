@@ -1,4 +1,4 @@
 // Define with improper input format
-// 4 ~ 12 ~ Expected "," or ")", received ":".
+// 4 ~ 12 ~ Expected ":", received ")".
 
-test(volume: 0) = {}
+test(volume) = {}

@@ -309,17 +309,23 @@ namespace Parser
             {
                 current = current->next;
 
-                if (const Identifier* input = current->getToken<Identifier>())
-                {
-                    inputs.push_back(new InputDef(input->location, input->str));
-                }
+                const Identifier* input = current->getToken<Identifier>();
 
-                else
+                if (!input)
                 {
                     tokenError(current->token, "input name");
                 }
 
                 current = current->next;
+
+                if (!current->getToken<Colon>())
+                {
+                    tokenError(current->token, "\":\"");
+                }
+
+                current = parseExpression(current->next);
+
+                inputs.push_back(new InputDef(input->location, input->str, current->prev->token));
             } while (current->getToken<Comma>());
 
             if (!current->getToken<CloseParenthesis>())

@@ -421,7 +421,11 @@ namespace Parser
 
     struct InputDef : public Identifier
     {
-        InputDef(const SourceLocation location, const std::string str);
+        InputDef(const SourceLocation location, const std::string str, Token* defaultValue);
+
+        void resolveTypes(TypeResolver* visitor) override;
+
+        Token* defaultValue;
 
         unsigned char id;
 
@@ -959,6 +963,7 @@ namespace Parser
         TypeResolver(const Path* sourcePath);
 
         void resolveTypes(VariableRef* token);
+        void resolveTypes(InputDef* token);
         void resolveTypes(InputRef* token);
         void resolveTypes(FunctionRef* token);
         void resolveTypes(List* token);
@@ -1002,11 +1007,9 @@ namespace Parser
         void resolveTypes(Program* token);
 
     private:
-        void resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType, Token* defaultValue = nullptr);
+        void resolveArgumentTypes(ArgumentList* arguments, const std::string name, const Type* expectedType, Token* defaultValue = nullptr);
 
         const Path* sourcePath;
-
-        Type* expectedType = nullptr;
 
     };
 

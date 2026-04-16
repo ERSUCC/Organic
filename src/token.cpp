@@ -498,8 +498,13 @@ namespace Parser
         visitor->transform(this);
     }
 
-    InputDef::InputDef(const SourceLocation location, const std::string str) :
-        Identifier(location, str) {}
+    InputDef::InputDef(const SourceLocation location, const std::string str, Token* defaultValue) :
+        Identifier(location, str), defaultValue(defaultValue) {}
+
+    void InputDef::resolveTypes(TypeResolver* visitor)
+    {
+        visitor->resolveTypes(this);
+    }
 
     InputRef::InputRef(const SourceLocation location, InputDef* definition) :
         Identifier(location, definition->str), definition(definition) {}
@@ -1384,13 +1389,14 @@ namespace Parser
         token->definition->used = true;
     }
 
+    void TypeResolver::resolveTypes(InputDef* token)
+    {
+        token->defaultValue->resolveTypes(this);
+        token->type = token->defaultValue->type;
+    }
+
     void TypeResolver::resolveTypes(InputRef* token)
     {
-        if (!token->definition->type)
-        {
-            token->definition->type = expectedType;
-        }
-
         token->type = token->definition->type;
         token->definition->used = true;
     }
@@ -1403,35 +1409,8 @@ namespace Parser
 
     void TypeResolver::resolveTypes(List* token)
     {
-        Type* innerType = nullptr;
-
-        if (const ListType* listType = dynamic_cast<ListType*>(expectedType))
-        {
-            innerType = listType->subType;
-        }
-
-        else
-        {
-            for (const Token* value : token->values)
-            {
-                if (value->type)
-                {
-                    innerType = value->type;
-
-                    break;
-                }
-            }
-        }
-
-        if (!innerType)
-        {
-            throw OrganicParseException("This list has an ambiguous inner type.", token->location);
-        }
-
         for (Token* value : token->values)
         {
-            expectedType = innerType;
-
             value->resolveTypes(this);
 
             if (!token->values[0]->type->checkType(value->type))
@@ -1440,7 +1419,7 @@ namespace Parser
             }
         }
 
-        token->type = new ListType(innerType);
+        token->type = new ListType(token->values[0]->type);
     }
 
     void TypeResolver::resolveTypes(ParenthesizedExpression* token)
@@ -1742,15 +1721,7 @@ namespace Parser
     {
         for (const InputDef* input : token->function->definition->inputs)
         {
-            if (Type* type = input->type)
-            {
-                resolveArgumentTypes(token->arguments, input->str, type);
-            }
-
-            else
-            {
-                resolveArgumentTypes(token->arguments, input->str, new AnyType());
-            }
+            resolveArgumentTypes(token->arguments, input->str, input->type, input->defaultValue);
         }
 
         token->arguments->check();
@@ -1763,11 +1734,7 @@ namespace Parser
     {
         NumberType* number = new NumberType();
 
-        expectedType = number;
-
         token->a->resolveTypes(this);
-
-        expectedType = number;
 
         token->b->resolveTypes(this);
 
@@ -1784,6 +1751,15 @@ namespace Parser
 
     void TypeResolver::resolveTypes(Define* token)
     {
+        std::unordered_map<std::string, const Type*> inputTypes;
+
+        for (InputDef* input : token->function->inputs)
+        {
+            input->resolveTypes(this);
+
+            inputTypes[input->str] = input->type;
+        }
+
         for (Token* instruction : token->instructions)
         {
             instruction->resolveTypes(this);
@@ -1806,13 +1782,6 @@ namespace Parser
             throw OrganicParseException("This function has an ambiguous return type.", token->location);
         }
 
-        std::unordered_map<std::string, const Type*> inputTypes;
-
-        for (const InputDef* input : token->function->inputs)
-        {
-            inputTypes[input->str] = input->type;
-        }
-
         token->function->type = new LambdaType(inputTypes, token->type);
         token->function->returnType = token->type;
     }
@@ -1825,7 +1794,7 @@ namespace Parser
         }
     }
 
-    void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, Type* expectedType, Token* defaultValue)
+    void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, const Type* expectedType, Token* defaultValue)
     {
         for (unsigned int i = 0; i < arguments->arguments.size(); i++)
         {
@@ -1839,8 +1808,6 @@ namespace Parser
                 }
 
                 argument->used = true;
-
-                this->expectedType = expectedType;
 
                 argument->value->resolveTypes(this);
 
