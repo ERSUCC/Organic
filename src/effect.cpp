@@ -111,9 +111,9 @@ void Comb::apply(double* buffer)
             const double value = delayBuffer.front();
 
             delayBuffer.pop();
-            delayBuffer.push(buffer[i] * (1 - feedbackValue) + value * feedbackValue);
+            delayBuffer.push(buffer[i] - value * feedbackValue);
 
-            buffer[i] = buffer[i] * (1 - mixValue) + value * mixValue;
+            buffer[i] = buffer[i] * (1 - mixValue) - value * feedbackValue * mixValue;
         }
 
         else
