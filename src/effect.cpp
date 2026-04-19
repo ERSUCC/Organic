@@ -209,3 +209,102 @@ void LowPass::init()
 {
     threshold->start(startTime);
 }
+
+RingBuffer::RingBuffer(const size_t length) :
+    length(length)
+{
+    buffer = (double*)calloc(length, sizeof(double));
+}
+
+RingBuffer::~RingBuffer()
+{
+    free(buffer);
+}
+
+void RingBuffer::push(const double value)
+{
+    buffer[front++] = value;
+
+    if (front >= length)
+    {
+        front = 0;
+    }
+}
+
+double RingBuffer::pop() const
+{
+    return buffer[front];
+}
+
+DelayMatrix::DelayMatrix()
+{
+    Utils* utils = Utils::get();
+
+    buffers = (RingBuffer**)malloc(sizeof(RingBuffer*) * 16);
+
+    std::uniform_int_distribution udist(0U, 1000U);
+
+    for (size_t i = 0; i < 16; i++)
+    {
+        buffers[i] = new RingBuffer(2000U + i * 1000U + udist(utils->rng));
+    }
+
+    values = (double*)malloc(sizeof(double) * 16);
+}
+
+DelayMatrix::~DelayMatrix()
+{
+    for (size_t i = 0; i < 16; i++)
+    {
+        delete buffers[i];
+    }
+
+    free(buffers);
+    free(values);
+}
+
+void DelayMatrix::apply(double* buffer, const double feedbackValue, const double mixValue)
+{
+    for (size_t i = 0; i < 16; i++)
+    {
+        values[i] = buffers[i]->pop();
+    }
+
+    double sum = 0;
+
+    for (size_t i = 0; i < 16; i++)
+    {
+        double mult = 0;
+
+        for (size_t j = 0; j < 16; j++)
+        {
+            mult += values[j] * coeffs[i * 16 + j] * 0.25;
+        }
+
+        buffers[i]->push(*buffer + mult * feedbackValue);
+
+        sum += mult;
+    }
+
+    *buffer = *buffer * (1 - mixValue) + sum * mixValue / 16;
+}
+
+Reverb::Reverb(ValueObject* mix, ValueObject* feedback) :
+    mix(mix), feedback(feedback) {}
+
+void Reverb::apply(double* buffer)
+{
+    const double mixValue = mix->getValue();
+    const double feedbackValue = feedback->getValue();
+
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        matrix->apply(buffer + i, feedbackValue, mixValue);
+    }
+}
+
+void Reverb::init()
+{
+    mix->start(startTime);
+    feedback->start(startTime);
+}

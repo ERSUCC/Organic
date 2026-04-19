@@ -816,6 +816,14 @@ namespace Parser
         void transform(BytecodeTransformer* visitor) const override;
     };
 
+    struct Reverb : public Effect
+    {
+        Reverb(const SourceLocation location, ArgumentList* arguments);
+
+        void resolveTypes(TypeResolver* visitor) override;
+        void transform(BytecodeTransformer* visitor) const override;
+    };
+
     struct CallUser : public Call
     {
         CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function);
@@ -988,6 +996,7 @@ namespace Parser
         void resolveTypes(Comb* token);
         void resolveTypes(AllPass* token);
         void resolveTypes(LowPass* token);
+        void resolveTypes(Reverb* token);
         void resolveTypes(CallUser* token);
         void resolveTypes(CallAlias* token);
         void resolveTypes(Define* token);
@@ -1046,6 +1055,7 @@ namespace Parser
         void transform(const Comb* token);
         void transform(const AllPass* token);
         void transform(const LowPass* token);
+        void transform(const Reverb* token);
         void transform(const CallUser* token);
         void transform(const AddAlias* token);
         void transform(const SubtractAlias* token);

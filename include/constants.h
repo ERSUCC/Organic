@@ -67,6 +67,7 @@ struct BytecodeConstants
     static constexpr unsigned char COMB = 0x73;
     static constexpr unsigned char ALL_PASS = 0x74;
     static constexpr unsigned char LOW_PASS = 0x75;
+    static constexpr unsigned char REVERB = 0x76;
 
     static constexpr unsigned char SEQUENCE_FORWARD = 0x0;
     static constexpr unsigned char SEQUENCE_BACKWARD = 0x1;
