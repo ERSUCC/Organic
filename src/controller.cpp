@@ -11,14 +11,14 @@ ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
 
 double ValueCombination::syncLength() const
 {
-    return fmax(value1->syncLength(), value2->syncLength());
+    return fmin(value1->syncLength(), value2->syncLength());
 }
 
 double ValueCombination::getValue()
 {
     const double value = getValueInternal();
 
-    if (!value1->enabled && !value2->enabled)
+    if (!value1->enabled || !value2->enabled)
     {
         stop();
     }
