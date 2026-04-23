@@ -55,9 +55,12 @@ Machine::Machine(const Path* path)
             }
         }
 
-        for (unsigned int j = 0; j < length; j++)
+        if (max != 0)
         {
-            samples[j] /= max;
+            for (unsigned int j = 0; j < length; j++)
+            {
+                samples[j] /= max;
+            }
         }
 
         unsigned int scaledLength = length;
