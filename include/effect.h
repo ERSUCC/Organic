@@ -108,7 +108,7 @@ struct RingBuffer
 
     void push(const double value);
 
-    double pop() const;
+    double value() const;
 
 private:
     const size_t length;
@@ -116,6 +116,27 @@ private:
     double* buffer;
 
     size_t front = 0;
+
+};
+
+struct DelayLine
+{
+    DelayLine(const size_t length);
+    ~DelayLine();
+
+    void push(const double value);
+
+    double value();
+
+private:
+    RingBuffer* buffer;
+
+    double raw[2] = { 0 };
+    double filtered[2] = { 0 };
+
+    double c0;
+    double c1;
+    double c2;
 
 };
 
@@ -147,7 +168,9 @@ private:
         1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, -1, -1, -1, 1
     };
 
-    RingBuffer** buffers;
+    Utils* utils;
+
+    DelayLine** lines;
 
     double* values;
 

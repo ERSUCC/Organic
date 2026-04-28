@@ -231,22 +231,66 @@ void RingBuffer::push(const double value)
     }
 }
 
-double RingBuffer::pop() const
+double RingBuffer::value() const
 {
     return buffer[front];
 }
 
+DelayLine::DelayLine(const size_t length)
+{
+    buffer = new RingBuffer(length);
+
+    const Utils* utils = Utils::get();
+
+    const double omega = tan(utils->pi * 5000 / utils->sampleRate);
+    const double omega2 = omega * omega;
+    const double c = 1 + sqrt(2) * omega + omega2;
+
+    c0 = omega2 / c;
+    c1 = 2 * (omega2 - 1) / c;
+    c2 = (1 - sqrt(2) * omega + omega2) / c;
+}
+
+DelayLine::~DelayLine()
+{
+    delete buffer;
+}
+
+void DelayLine::push(const double value)
+{
+    buffer->push(value);
+}
+
+double DelayLine::value()
+{
+    const double input = buffer->value();
+    const double output = c0 * (input + raw[0] * 2 + raw[1]) - c1 * filtered[0] - c2 * filtered[1];
+
+    raw[1] = raw[0];
+    raw[0] = input;
+
+    filtered[1] = filtered[0];
+    filtered[0] = output;
+
+    return output;
+}
+
 DelayMatrix::DelayMatrix()
 {
-    Utils* utils = Utils::get();
+    utils = Utils::get();
 
-    buffers = (RingBuffer**)malloc(sizeof(RingBuffer*) * 16);
+    lines = (DelayLine**)malloc(sizeof(DelayLine*) * 16 * utils->channels);
 
     std::uniform_int_distribution udist(0U, 1000U);
 
     for (size_t i = 0; i < 16; i++)
     {
-        buffers[i] = new RingBuffer(2000U + i * 1000U + udist(utils->rng));
+        const size_t length = 2000U + i * 1000U + udist(utils->rng);
+
+        for (unsigned int j = 0; j < utils->channels; j++)
+        {
+            lines[i * utils->channels + j] = new DelayLine(length);
+        }
     }
 
     values = (double*)malloc(sizeof(double) * 16);
@@ -254,39 +298,42 @@ DelayMatrix::DelayMatrix()
 
 DelayMatrix::~DelayMatrix()
 {
-    for (size_t i = 0; i < 16; i++)
+    for (size_t i = 0; i < 16 * utils->channels; i++)
     {
-        delete buffers[i];
+        delete lines[i];
     }
 
-    free(buffers);
+    free(lines);
     free(values);
 }
 
 void DelayMatrix::apply(double* buffer, const double feedbackValue, const double mixValue)
 {
-    for (size_t i = 0; i < 16; i++)
+    for (unsigned int i = 0; i < utils->channels; i++)
     {
-        values[i] = buffers[i]->pop();
-    }
+        for (size_t j = 0; j < 16; j++)
+        {
+            values[j] = lines[j * utils->channels + i]->value();
+        }
 
-    double sum = 0;
-
-    for (size_t i = 0; i < 16; i++)
-    {
-        double mult = 0;
+        double sum = 0;
 
         for (size_t j = 0; j < 16; j++)
         {
-            mult += values[j] * coeffs[i * 16 + j] * 0.25;
+            double mult = 0;
+
+            for (size_t k = 0; k < 16; k++)
+            {
+                mult += values[k] * coeffs[j * 16 + k] * 0.25;
+            }
+
+            lines[j * utils->channels + i]->push(buffer[i] + mult * feedbackValue);
+
+            sum += mult;
         }
 
-        buffers[i]->push(*buffer + mult * feedbackValue);
-
-        sum += mult;
+        buffer[i] = buffer[i] * (1 - mixValue) + sum * mixValue / 16;
     }
-
-    *buffer = *buffer * (1 - mixValue) + sum * mixValue / 16;
 }
 
 Reverb::Reverb(ValueObject* mix, ValueObject* feedback) :
@@ -294,13 +341,7 @@ Reverb::Reverb(ValueObject* mix, ValueObject* feedback) :
 
 void Reverb::apply(double* buffer)
 {
-    const double mixValue = mix->getValue();
-    const double feedbackValue = feedback->getValue();
-
-    for (unsigned int i = 0; i < utils->channels; i++)
-    {
-        matrix->apply(buffer + i, feedbackValue, mixValue);
-    }
+    matrix->apply(buffer, feedback->getValue(), mix->getValue());
 }
 
 void Reverb::init()
