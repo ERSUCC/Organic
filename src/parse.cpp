@@ -285,14 +285,7 @@ namespace Parser
             }
         }
 
-        current = parseExpression(start);
-
-        if (AudioSource* audioSource = current->prev->getToken<AudioSource>())
-        {
-            current->prev->token = new Play(audioSource->location, audioSource);
-        }
-
-        return current;
+        return parseExpression(start);
     }
 
     TokenListNode* Parser::parseDefine(TokenListNode* start)

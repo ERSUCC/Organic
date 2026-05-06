@@ -139,7 +139,24 @@ Machine::~Machine()
 
 void Machine::run()
 {
+    while (!stack.empty())
+    {
+        stack.pop();
+    }
+
     execute(0, 0);
+
+    while (!stack.empty())
+    {
+        if (AudioSource* audioSource = dynamic_cast<AudioSource*>(stack.top()))
+        {
+            audioSources.push_back(audioSource);
+
+            audioSource->start(0);
+        }
+
+        stack.pop();
+    }
 }
 
 void Machine::processAudioSources(double* buffer)
@@ -549,19 +566,6 @@ void Machine::execute(unsigned int address, const double startTime)
                         stack.push(new LowPass(inputs[0]));
 
                         break;
-
-                    case BytecodeConstants::PLAY:
-                    {
-                        AudioSource* audioSource = static_cast<AudioSource*>(inputs[0]);
-
-                        audioSources.push_back(audioSource);
-
-                        audioSource->start(startTime);
-
-                        stack.push(audioSource);
-
-                        break;
-                    }
 
                     default:
                         throw OrganicMachineException("Intermediate file is invalid or corrupted, unable to continue execution.");

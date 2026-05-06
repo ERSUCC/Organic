@@ -1071,27 +1071,6 @@ namespace Parser
         visitor->transform(this);
     }
 
-    Play::Play(const SourceLocation location, AudioSource* audioSource) :
-        Token(location), audioSource(audioSource)
-    {
-        type = new AudioSourceType();
-    }
-
-    void Play::resolveTypes(TypeResolver* visitor)
-    {
-        visitor->resolveTypes(this);
-    }
-
-    void Play::transform(BytecodeTransformer* visitor) const
-    {
-        visitor->transform(this);
-    }
-
-    std::string Play::string() const
-    {
-        return audioSource->string();
-    }
-
     Effect::Effect(const SourceLocation location, ArgumentList* arguments) :
         Call(location, arguments)
     {
@@ -1670,11 +1649,6 @@ namespace Parser
         token->arguments->check();
     }
 
-    void TypeResolver::resolveTypes(Play* token)
-    {
-        token->audioSource->resolveTypes(this);
-    }
-
     void TypeResolver::resolveTypes(EffectGroup* token)
     {
         resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
@@ -2192,13 +2166,6 @@ namespace Parser
         transformArgument(token->arguments, "volume");
 
         addInstruction(new CallNative(BytecodeConstants::GROUP, 4));
-    }
-
-    void BytecodeTransformer::transform(const Play* token)
-    {
-        token->audioSource->transform(this);
-
-        addInstruction(new CallNative(BytecodeConstants::PLAY, 1));
     }
 
     void BytecodeTransformer::transform(const EmptyEffect* token)
