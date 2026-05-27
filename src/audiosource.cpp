@@ -162,6 +162,13 @@ void CustomOscillator::init()
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     SingleAudioSource(volume, pan, effects) {}
 
+void Noise::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+}
+
 void Noise::prepareForEffects()
 {
     const double volumeValue = volume->getValue();

@@ -114,6 +114,8 @@ struct Noise : public SingleAudioSource
     Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects);
 
 protected:
+    void init() override;
+
     void prepareForEffects() override;
 
 private:
