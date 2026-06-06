@@ -1706,7 +1706,7 @@ namespace Parser
 
     void TypeResolver::resolveTypes(Reverb* token)
     {
-        resolveArgumentTypes(token->arguments, "feedback", new NumberType());
+        resolveArgumentTypes(token->arguments, "length", new NumberType());
         resolveArgumentTypes(token->arguments, "mix", new NumberType());
 
         token->arguments->check();
@@ -2238,7 +2238,7 @@ namespace Parser
 
     void BytecodeTransformer::transform(const Reverb* token)
     {
-        transformArgument(token->arguments, "feedback");
+        transformArgument(token->arguments, "length");
         transformArgument(token->arguments, "mix");
 
         addInstruction(new CallNative(BytecodeConstants::REVERB, 2));

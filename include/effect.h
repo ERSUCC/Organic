@@ -174,11 +174,13 @@ private:
 
     double* values;
 
+    double delayLength;
+
 };
 
 struct Reverb : public Effect
 {
-    Reverb(ValueObject* mix, ValueObject* feedback);
+    Reverb(ValueObject* mix, ValueObject* length);
 
     void apply(double* buffer) override;
 
@@ -187,7 +189,7 @@ protected:
 
 private:
     ValueObject* mix;
-    ValueObject* feedback;
+    ValueObject* length;
 
     DelayMatrix* matrix = new DelayMatrix();
 

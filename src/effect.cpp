@@ -291,6 +291,11 @@ DelayMatrix::DelayMatrix()
         {
             lines[i * utils->channels + j] = new DelayLine(length);
         }
+
+        if (i == 15)
+        {
+            delayLength = length * 1000 / utils->sampleRate;
+        }
     }
 
     values = (double*)malloc(sizeof(double) * 16);
@@ -307,8 +312,10 @@ DelayMatrix::~DelayMatrix()
     free(values);
 }
 
-void DelayMatrix::apply(double* buffer, const double feedbackValue, const double mixValue)
+void DelayMatrix::apply(double* buffer, const double lengthValue, const double mixValue)
 {
+    const double feedbackValue = exp(-3 * delayLength / lengthValue);
+
     for (unsigned int i = 0; i < utils->channels; i++)
     {
         for (size_t j = 0; j < 16; j++)
@@ -327,7 +334,9 @@ void DelayMatrix::apply(double* buffer, const double feedbackValue, const double
                 mult += values[k] * coeffs[j * 16 + k] * 0.25;
             }
 
-            lines[j * utils->channels + i]->push(buffer[i] + mult * feedbackValue);
+            mult *= feedbackValue;
+
+            lines[j * utils->channels + i]->push(buffer[i] + mult);
 
             sum += mult;
         }
@@ -336,16 +345,16 @@ void DelayMatrix::apply(double* buffer, const double feedbackValue, const double
     }
 }
 
-Reverb::Reverb(ValueObject* mix, ValueObject* feedback) :
-    mix(mix), feedback(feedback) {}
+Reverb::Reverb(ValueObject* mix, ValueObject* length) :
+    mix(mix), length(length) {}
 
 void Reverb::apply(double* buffer)
 {
-    matrix->apply(buffer, feedback->getValue(), mix->getValue());
+    matrix->apply(buffer, length->getValue(), mix->getValue());
 }
 
 void Reverb::init()
 {
     mix->start(startTime);
-    feedback->start(startTime);
+    length->start(startTime);
 }
