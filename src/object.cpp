@@ -1,5 +1,7 @@
 #include "../include/object.h"
 
+using namespace Engine;
+
 Sync::Sync() :
     utils(Utils::get()) {}
 
@@ -109,14 +111,6 @@ void Lambda::init()
     }
 
     value->start(startTime);
-}
-
-Resource::Resource(double* samples, const unsigned int length) :
-    samples(samples), length(length) {}
-
-Resource::~Resource()
-{
-    free(samples);
 }
 
 double Time::getValue()

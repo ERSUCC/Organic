@@ -7,6 +7,9 @@
 
 #include "effect.h"
 #include "object.h"
+#include "resource.h"
+
+namespace Engine {
 
 struct AudioSource : public ValueObject
 {
@@ -252,3 +255,5 @@ private:
     double* effectBuffer;
 
 };
+
+}

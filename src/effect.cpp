@@ -1,5 +1,7 @@
 #include "../include/effect.h"
 
+using namespace Engine;
+
 void Effect::apply(double* buffer) {}
 
 EffectGroup::EffectGroup(ValueObject* mix, ValueObject* effects) :

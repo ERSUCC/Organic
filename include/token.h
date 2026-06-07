@@ -1,1091 +1,806 @@
 #pragma once
 
-#include <algorithm>
-#include <fstream>
-#include <functional>
-#include <stack>
 #include <string>
-#include <unordered_map>
-#include <utility>
 #include <vector>
 
-#include "bytecode.h"
 #include "constants.h"
 #include "location.h"
 #include "path.h"
+#include "program.h"
+#include "transform.h"
+#include "types.h"
 #include "utils.h"
 
-namespace Parser
+struct TokenTransformer;
+
+namespace Parser {
+
+struct Type;
+struct TypeResolver;
+
+struct Token
 {
-    struct Token;
+    Token(const SourceLocation location);
+
+    virtual void resolveTypes(TypeResolver* visitor);
+
+    virtual Engine::ValueObject* transform(TokenTransformer* visitor) const;
+
+    virtual std::string string() const;
+
+    const SourceLocation location;
+
+    Type* type = nullptr;
+};
+
+struct BasicToken : public Token
+{
+    BasicToken(const SourceLocation location, const std::string str);
+
+    std::string string() const override;
+
+    const std::string str;
+};
+
+struct OpenParenthesis : public BasicToken
+{
+    OpenParenthesis(const SourceLocation location);
+};
+
+struct CloseParenthesis : public BasicToken
+{
+    CloseParenthesis(const SourceLocation location);
+};
+
+struct OpenSquareBracket : public BasicToken
+{
+    OpenSquareBracket(const SourceLocation location);
+};
+
+struct CloseSquareBracket : public BasicToken
+{
+    CloseSquareBracket(const SourceLocation location);
+};
+
+struct OpenCurlyBracket : public BasicToken
+{
+    OpenCurlyBracket(const SourceLocation location);
+};
+
+struct CloseCurlyBracket : public BasicToken
+{
+    CloseCurlyBracket(const SourceLocation location);
+};
 
-    struct NoneType;
-    struct AnyType;
-    struct SequenceOrderType;
-    struct RandomTypeType;
-    struct RoundDirectionType;
-    struct NumberType;
-    struct BooleanType;
-    struct StringType;
-    struct AudioSourceType;
-    struct EffectType;
-    struct ListType;
-    struct LambdaType;
+struct Colon : public BasicToken
+{
+    Colon(const SourceLocation location);
+};
 
-    struct Type
-    {
-        Type(const std::string str);
+struct Comma : public BasicToken
+{
+    Comma(const SourceLocation location);
+};
+
+struct Equals : public BasicToken
+{
+    Equals(const SourceLocation location);
+};
+
+struct Operator : public BasicToken
+{
+    Operator(const SourceLocation location, const std::string str);
+};
+
+struct Add : public Operator
+{
+    Add(const SourceLocation location);
+};
+
+struct Subtract : public Operator
+{
+    Subtract(const SourceLocation location);
+};
+
+struct Multiply : public Operator
+{
+    Multiply(const SourceLocation location);
+};
+
+struct Divide : public Operator
+{
+    Divide(const SourceLocation location);
+};
+
+struct Power : public Operator
+{
+    Power(const SourceLocation location);
+};
+
+struct DoubleEquals : public Operator
+{
+    DoubleEquals(const SourceLocation location);
+};
+
+struct Less : public Operator
+{
+    Less(const SourceLocation location);
+};
+
+struct Greater : public Operator
+{
+    Greater(const SourceLocation location);
+};
+
+struct LessEqual : public Operator
+{
+    LessEqual(const SourceLocation location);
+};
+
+struct GreaterEqual : public Operator
+{
+    GreaterEqual(const SourceLocation location);
+};
 
-        std::string name() const;
+struct Identifier : public BasicToken
+{
+    Identifier(const SourceLocation location, const std::string str);
+};
 
-        virtual bool checkType(const Type* actual) const = 0;
+struct EmptyLambda : public Token
+{
+    EmptyLambda(const SourceLocation location, Token* value);
 
-        virtual bool checkSpecifiedType(const NoneType* expected) const;
-        virtual bool checkSpecifiedType(const AnyType* expected) const;
-        virtual bool checkSpecifiedType(const SequenceOrderType* expected) const;
-        virtual bool checkSpecifiedType(const RandomTypeType* expected) const;
-        virtual bool checkSpecifiedType(const RoundDirectionType* expected) const;
-        virtual bool checkSpecifiedType(const NumberType* expected) const;
-        virtual bool checkSpecifiedType(const BooleanType* expected) const;
-        virtual bool checkSpecifiedType(const StringType* expected) const;
-        virtual bool checkSpecifiedType(const AudioSourceType* expected) const;
-        virtual bool checkSpecifiedType(const EffectType* expected) const;
-        virtual bool checkSpecifiedType(const ListType* expected) const;
-        virtual bool checkSpecifiedType(const LambdaType* expected) const;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-        virtual Token* getDefault(const SourceLocation location) const;
+    Token* value;
+};
 
-    private:
-        const std::string str;
+struct Value : public BasicToken
+{
+    Value(const SourceLocation location, const std::string str, const double value);
 
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    struct NoneType : public Type
-    {
-        NoneType();
+    const double value;
+};
 
-        bool checkType(const Type* actual) const override;
+struct Constant : public BasicToken
+{
+    Constant(const SourceLocation location, const std::string str, const unsigned char value);
 
-        bool checkSpecifiedType(const NoneType* expected) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    struct AnyType : public Type
-    {
-        AnyType();
+    const unsigned char value;
+};
 
-        bool checkType(const Type* actual) const override;
-    };
+struct SequenceForward : public Constant
+{
+    SequenceForward(const SourceLocation location);
+};
 
-    struct SequenceOrderType : public Type
-    {
-        SequenceOrderType();
+struct SequenceBackward : public Constant
+{
+    SequenceBackward(const SourceLocation location);
+};
 
-        bool checkType(const Type* actual) const override;
+struct SequencePingPong : public Constant
+{
+    SequencePingPong(const SourceLocation location);
+};
 
-        bool checkSpecifiedType(const SequenceOrderType* expected) const override;
+struct SequenceRandom : public Constant
+{
+    SequenceRandom(const SourceLocation location);
+};
 
-        Token* getDefault(const SourceLocation location) const override;
-    };
+struct RandomStep : public Constant
+{
+    RandomStep(const SourceLocation location);
+};
 
-    struct RandomTypeType : public Type
-    {
-        RandomTypeType();
+struct RandomLinear : public Constant
+{
+    RandomLinear(const SourceLocation location);
+};
 
-        bool checkType(const Type* actual) const override;
+struct RoundNearest : public Constant
+{
+    RoundNearest(const SourceLocation location);
+};
 
-        bool checkSpecifiedType(const RandomTypeType* expected) const override;
+struct RoundUp : public Constant
+{
+    RoundUp(const SourceLocation location);
+};
 
-        Token* getDefault(const SourceLocation location) const override;
-    };
+struct RoundDown : public Constant
+{
+    RoundDown(const SourceLocation location);
+};
 
-    struct RoundDirectionType : public Type
-    {
-        RoundDirectionType();
+struct String : public BasicToken
+{
+    String(const SourceLocation location, const std::string str);
 
-        bool checkType(const Type* actual) const override;
+    const std::string value;
+};
 
-        bool checkSpecifiedType(const RoundDirectionType* expected) const override;
+struct VariableDef : public Identifier
+{
+    VariableDef(const SourceLocation location, const std::string str);
 
-        Token* getDefault(const SourceLocation location) const override;
-    };
+    bool used = false;
+};
 
-    struct NumberType : public Type
-    {
-        NumberType();
+struct VariableRef : public Identifier
+{
+    VariableRef(const SourceLocation location, VariableDef* definition);
 
-        bool checkType(const Type* actual) const override;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        bool checkSpecifiedType(const NumberType* expected) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    struct BooleanType : public Type
-    {
-        BooleanType();
+    VariableDef* definition;
+};
 
-        bool checkType(const Type* actual) const override;
+struct InputDef : public Identifier
+{
+    InputDef(const SourceLocation location, const std::string str, Token* defaultValue);
 
-        bool checkSpecifiedType(const BooleanType* expected) const override;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct StringType : public Type
-    {
-        StringType();
+    Token* defaultValue;
 
-        bool checkType(const Type* actual) const override;
+    bool used = false;
+};
 
-        bool checkSpecifiedType(const StringType* expected) const override;
-    };
+struct InputRef : public Identifier
+{
+    InputRef(const SourceLocation location, InputDef* definition);
 
-    struct AudioSourceType : public Type
-    {
-        AudioSourceType();
+    void resolveTypes(TypeResolver* visitor) override;
 
-        bool checkType(const Type* actual) const override;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-        bool checkSpecifiedType(const AudioSourceType* expected) const override;
+    InputDef* definition;
+};
 
-        Token* getDefault(const SourceLocation location) const override;
-    };
+struct FunctionDef : public Identifier
+{
+    FunctionDef(const SourceLocation location, const std::string str, const std::vector<InputDef*>& inputs);
 
-    struct EffectType : public Type
-    {
-        EffectType();
+    const std::vector<InputDef*> inputs;
 
-        bool checkType(const Type* actual) const override;
+    Type* returnType;
 
-        bool checkSpecifiedType(const EffectType* expected) const override;
+    bool used = false;
+};
 
-        Token* getDefault(const SourceLocation location) const override;
-    };
+struct FunctionRef : public Identifier
+{
+    FunctionRef(const SourceLocation location, FunctionDef* definition);
 
-    struct ListType : public Type
-    {
-        ListType(Type* subType);
+    void resolveTypes(TypeResolver* visitor) override;
 
-        bool checkType(const Type* actual) const override;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-        bool checkSpecifiedType(const ListType* expected) const override;
+    FunctionDef* definition;
+};
 
-        Token* getDefault(const SourceLocation location) const override;
+struct Argument : public Token
+{
+    Argument(const SourceLocation location, const std::string name, Token* value);
 
-        Type* subType;
-    };
+    std::string string() const override;
 
-    struct LambdaType : public Type
-    {
-        LambdaType(const std::unordered_map<std::string, const Type*> inputTypes, const Type* returnType);
+    const std::string name;
 
-        bool checkType(const Type* actual) const override;
+    Token* value;
 
-        bool checkSpecifiedType(const LambdaType* expected) const override;
+    bool used = false;
+};
 
-        Token* getDefault(const SourceLocation location) const override;
+struct ArgumentList : public Token
+{
+    ArgumentList(const SourceLocation location, const std::vector<Argument*>& arguments, const std::string name);
 
-    private:
-        std::string inputString(const std::unordered_map<std::string, const Type*>& inputTypes) const;
+    std::string string() const override;
 
-        const std::unordered_map<std::string, const Type*> inputTypes;
+    Token* get(const std::string name) const;
 
-        const Type* returnType;
+    void addDefault(const std::string name, Token* value);
 
-    };
+    void check() const;
 
-    struct TypeResolver;
-    struct BytecodeTransformer;
+    std::vector<Argument*> arguments;
 
-    struct Token
-    {
-        Token(const SourceLocation location);
+    const std::string name;
+};
 
-        virtual void resolveTypes(TypeResolver* visitor);
-        virtual void transform(BytecodeTransformer* visitor) const;
+struct List : public Token
+{
+    List(const SourceLocation location, const std::vector<Token*> values);
 
-        virtual std::string string() const;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        const SourceLocation location;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-        Type* type = nullptr;
-    };
+    std::string string() const override;
 
-    struct BasicToken : public Token
-    {
-        BasicToken(const SourceLocation location, const std::string str);
+    const std::vector<Token*> values;
+};
 
-        std::string string() const override;
+struct ParenthesizedExpression : public Token
+{
+    ParenthesizedExpression(const SourceLocation location, Token* value);
 
-        const std::string str;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct OpenParenthesis : public BasicToken
-    {
-        OpenParenthesis(const SourceLocation location);
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    struct CloseParenthesis : public BasicToken
-    {
-        CloseParenthesis(const SourceLocation location);
-    };
+    std::string string() const override;
 
-    struct OpenSquareBracket : public BasicToken
-    {
-        OpenSquareBracket(const SourceLocation location);
-    };
+    Token* value;
+};
 
-    struct CloseSquareBracket : public BasicToken
-    {
-        CloseSquareBracket(const SourceLocation location);
-    };
+struct Assign : public Token
+{
+    Assign(const SourceLocation location, VariableDef* variable, Token* value);
 
-    struct OpenCurlyBracket : public BasicToken
-    {
-        OpenCurlyBracket(const SourceLocation location);
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct CloseCurlyBracket : public BasicToken
-    {
-        CloseCurlyBracket(const SourceLocation location);
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    struct Colon : public BasicToken
-    {
-        Colon(const SourceLocation location);
-    };
+    std::string string() const override;
 
-    struct Comma : public BasicToken
-    {
-        Comma(const SourceLocation location);
-    };
+    VariableDef* variable;
 
-    struct Equals : public BasicToken
-    {
-        Equals(const SourceLocation location);
-    };
+    Token* value;
+};
 
-    struct Operator : public BasicToken
-    {
-        Operator(const SourceLocation location, const std::string str);
-    };
+struct Call : public Token
+{
+    Call(const SourceLocation location, ArgumentList* arguments);
 
-    struct Add : public Operator
-    {
-        Add(const SourceLocation location);
-    };
+    std::string string() const override;
 
-    struct Subtract : public Operator
-    {
-        Subtract(const SourceLocation location);
-    };
+    ArgumentList* arguments;
+};
 
-    struct Multiply : public Operator
-    {
-        Multiply(const SourceLocation location);
-    };
+struct Time : public Call
+{
+    Time(const SourceLocation location, ArgumentList* arguments);
 
-    struct Divide : public Operator
-    {
-        Divide(const SourceLocation location);
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct Power : public Operator
-    {
-        Power(const SourceLocation location);
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct DoubleEquals : public Operator
-    {
-        DoubleEquals(const SourceLocation location);
-    };
+struct Hold : public Call
+{
+    Hold(const SourceLocation location, ArgumentList* arguments);
 
-    struct Less : public Operator
-    {
-        Less(const SourceLocation location);
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct Greater : public Operator
-    {
-        Greater(const SourceLocation location);
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct LessEqual : public Operator
-    {
-        LessEqual(const SourceLocation location);
-    };
+struct LFO : public Call
+{
+    LFO(const SourceLocation location, ArgumentList* arguments);
 
-    struct GreaterEqual : public Operator
-    {
-        GreaterEqual(const SourceLocation location);
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct Identifier : public BasicToken
-    {
-        Identifier(const SourceLocation location, const std::string str);
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct EmptyLambda : public Token
-    {
-        EmptyLambda(const SourceLocation location, Token* value);
+struct Sweep : public Call
+{
+    Sweep(const SourceLocation location, ArgumentList* arguments);
 
-        void transform(BytecodeTransformer* visitor) const override;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        Token* value;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Value : public BasicToken
-    {
-        Value(const SourceLocation location, const std::string str, const double value);
+struct Sequence : public Call
+{
+    Sequence(const SourceLocation location, ArgumentList* arguments);
 
-        void transform(BytecodeTransformer* visitor) const override;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        const double value;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Constant : public BasicToken
-    {
-        Constant(const SourceLocation location, const std::string str, const unsigned char value);
+struct Repeat : public Call
+{
+    Repeat(const SourceLocation location, ArgumentList* arguments);
 
-        void transform(BytecodeTransformer* visitor) const override;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        const unsigned char value;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct SequenceForward : public Constant
-    {
-        SequenceForward(const SourceLocation location);
-    };
+struct Random : public Call
+{
+    Random(const SourceLocation location, ArgumentList* arguments);
 
-    struct SequenceBackward : public Constant
-    {
-        SequenceBackward(const SourceLocation location);
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct SequencePingPong : public Constant
-    {
-        SequencePingPong(const SourceLocation location);
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct SequenceRandom : public Constant
-    {
-        SequenceRandom(const SourceLocation location);
-    };
+struct Limit : public Call
+{
+    Limit(const SourceLocation location, ArgumentList* arguments);
 
-    struct RandomStep : public Constant
-    {
-        RandomStep(const SourceLocation location);
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct RandomLinear : public Constant
-    {
-        RandomLinear(const SourceLocation location);
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct RoundNearest : public Constant
-    {
-        RoundNearest(const SourceLocation location);
-    };
+struct Trigger : public Call
+{
+    Trigger(const SourceLocation location, ArgumentList* arguments);
 
-    struct RoundUp : public Constant
-    {
-        RoundUp(const SourceLocation location);
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct RoundDown : public Constant
-    {
-        RoundDown(const SourceLocation location);
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct String : public BasicToken
-    {
-        String(const SourceLocation location, const std::string str);
+struct If : public Call
+{
+    If(const SourceLocation location, ArgumentList* arguments);
 
-        const std::string value;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct VariableDef : public Identifier
-    {
-        VariableDef(const SourceLocation location, const std::string str);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        unsigned char id;
+struct All : public Call
+{
+    All(const SourceLocation location, ArgumentList* arguments);
 
-        bool used = false;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct VariableRef : public Identifier
-    {
-        VariableRef(const SourceLocation location, VariableDef* definition);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
+struct Any : public Call
+{
+    Any(const SourceLocation location, ArgumentList* arguments);
 
-        VariableDef* definition;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct InputDef : public Identifier
-    {
-        InputDef(const SourceLocation location, const std::string str, Token* defaultValue);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        void resolveTypes(TypeResolver* visitor) override;
+struct None : public Call
+{
+    None(const SourceLocation location, ArgumentList* arguments);
 
-        Token* defaultValue;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        unsigned char id;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        bool used = false;
-    };
+struct Min : public Call
+{
+    Min(const SourceLocation location, ArgumentList* arguments);
 
-    struct InputRef : public Identifier
-    {
-        InputRef(const SourceLocation location, InputDef* definition);
+    void resolveTypes(TypeResolver* visitor) override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        InputDef* definition;
-    };
+struct Max : public Call
+{
+    Max(const SourceLocation location, ArgumentList* arguments);
 
-    struct FunctionDef : public Identifier
-    {
-        FunctionDef(const SourceLocation location, const std::string str, const std::vector<InputDef*>& inputs);
+    void resolveTypes(TypeResolver* visitor) override;
 
-        const std::vector<InputDef*> inputs;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        Type* returnType;
+struct Round : public Call
+{
+    Round(const SourceLocation location, ArgumentList* arguments);
 
-        InstructionBlock* block = new InstructionBlock();
+    void resolveTypes(TypeResolver* visitor) override;
 
-        unsigned char id;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        bool used = false;
-    };
+struct Absolute : public Call
+{
+    Absolute(const SourceLocation location, ArgumentList* arguments);
 
-    struct FunctionRef : public Identifier
-    {
-        FunctionRef(const SourceLocation location, FunctionDef* definition);
+    void resolveTypes(TypeResolver* visitor) override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        FunctionDef* definition;
-    };
+struct AudioSource : public Call
+{
+    AudioSource(const SourceLocation location, ArgumentList* arguments);
+};
 
-    struct Argument : public Token
-    {
-        Argument(const SourceLocation location, const std::string name, Token* value);
+struct EmptyAudioSource : public AudioSource
+{
+    EmptyAudioSource(const SourceLocation location);
 
-        std::string string() const override;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        const std::string name;
+struct Sine : public AudioSource
+{
+    Sine(const SourceLocation location, ArgumentList* arguments);
 
-        Token* value;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        bool used = false;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct ArgumentList : public Token
-    {
-        ArgumentList(const SourceLocation location, const std::vector<Argument*>& arguments, const std::string name);
+struct Square : public AudioSource
+{
+    Square(const SourceLocation location, ArgumentList* arguments);
 
-        std::string string() const override;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        Token* get(const std::string name) const;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        void addDefault(const std::string name, Token* value);
+struct Triangle : public AudioSource
+{
+    Triangle(const SourceLocation location, ArgumentList* arguments);
 
-        void check() const;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        std::vector<Argument*> arguments;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        const std::string name;
-    };
+struct Saw : public AudioSource
+{
+    Saw(const SourceLocation location, ArgumentList* arguments);
 
-    struct List : public Token
-    {
-        List(const SourceLocation location, const std::vector<Token*> values);
+    void resolveTypes(TypeResolver* visitor) override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        std::string string() const override;
+struct Oscillator : public AudioSource
+{
+    Oscillator(const SourceLocation, ArgumentList* arguments);
 
-        const std::vector<Token*> values;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct ParenthesizedExpression : public Token
-    {
-        ParenthesizedExpression(const SourceLocation location, Token* value);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
+struct Noise : public AudioSource
+{
+    Noise(const SourceLocation location, ArgumentList* arguments);
 
-        std::string string() const override;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        Token* value;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Assign : public Token
-    {
-        Assign(const SourceLocation location, VariableDef* variable, Token* value);
+struct Sample : public AudioSource
+{
+    Sample(const SourceLocation location, ArgumentList* arguments);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
+    void resolveTypes(TypeResolver* visitor) override;
 
-        std::string string() const override;
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        VariableDef* variable;
+struct Granulate : public AudioSource
+{
+    Granulate(const SourceLocation location, ArgumentList* arguments);
 
-        Token* value;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct Call : public Token
-    {
-        Call(const SourceLocation location, ArgumentList* arguments);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        std::string string() const override;
+struct Group : public AudioSource
+{
+    Group(const SourceLocation location, ArgumentList* arguments);
 
-        ArgumentList* arguments;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct Time : public Call
-    {
-        Time(const SourceLocation location, ArgumentList* arguments);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+struct Effect : public Call
+{
+    Effect(const SourceLocation location, ArgumentList* arguments);
+};
 
-    struct Hold : public Call
-    {
-        Hold(const SourceLocation location, ArgumentList* arguments);
+struct EmptyEffect : public Effect
+{
+    EmptyEffect(const SourceLocation location);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct LFO : public Call
-    {
-        LFO(const SourceLocation location, ArgumentList* arguments);
+struct EffectGroup : public Effect
+{
+    EffectGroup(const SourceLocation location, ArgumentList* arguments);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct Sweep : public Call
-    {
-        Sweep(const SourceLocation location, ArgumentList* arguments);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+struct Delay : public Effect
+{
+    Delay(const SourceLocation location, ArgumentList* arguments);
 
-    struct Sequence : public Call
-    {
-        Sequence(const SourceLocation location, ArgumentList* arguments);
+    void resolveTypes(TypeResolver* visitor) override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Repeat : public Call
-    {
-        Repeat(const SourceLocation location, ArgumentList* arguments);
+struct Comb : public Effect
+{
+    Comb(const SourceLocation location, ArgumentList* arguments);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct Random : public Call
-    {
-        Random(const SourceLocation location, ArgumentList* arguments);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+struct AllPass : public Effect
+{
+    AllPass(const SourceLocation location, ArgumentList* arguments);
 
-    struct Limit : public Call
-    {
-        Limit(const SourceLocation location, ArgumentList* arguments);
+    void resolveTypes(TypeResolver* visitor) override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Trigger : public Call
-    {
-        Trigger(const SourceLocation location, ArgumentList* arguments);
+struct LowPass : public Effect
+{
+    LowPass(const SourceLocation location, ArgumentList* arguments);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct If : public Call
-    {
-        If(const SourceLocation location, ArgumentList* arguments);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+struct Reverb : public Effect
+{
+    Reverb(const SourceLocation location, ArgumentList* arguments);
 
-    struct All : public Call
-    {
-        All(const SourceLocation location, ArgumentList* arguments);
+    void resolveTypes(TypeResolver* visitor) override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Any : public Call
-    {
-        Any(const SourceLocation location, ArgumentList* arguments);
+struct CallUser : public Call
+{
+    CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct None : public Call
-    {
-        None(const SourceLocation location, ArgumentList* arguments);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    FunctionRef* function;
+};
 
-    struct Min : public Call
-    {
-        Min(const SourceLocation location, ArgumentList* arguments);
+struct CallAlias : public Token
+{
+    CallAlias(const SourceLocation location, Token* a, Token* b, const std::string op);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct Max : public Call
-    {
-        Max(const SourceLocation location, ArgumentList* arguments);
+    std::string string() const override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Token* a;
+    Token* b;
 
-    struct Round : public Call
-    {
-        Round(const SourceLocation location, ArgumentList* arguments);
+    const std::string op;
+};
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+struct AddAlias : public CallAlias
+{
+    AddAlias(const SourceLocation location, Token* a, Token* b);
 
-    struct Absolute : public Call
-    {
-        Absolute(const SourceLocation location, ArgumentList* arguments);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+struct SubtractAlias : public CallAlias
+{
+    SubtractAlias(const SourceLocation location, Token* a, Token* b);
 
-    struct AudioSource : public Call
-    {
-        AudioSource(const SourceLocation location, ArgumentList* arguments);
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct EmptyAudioSource : public AudioSource
-    {
-        EmptyAudioSource(const SourceLocation location);
+struct MultiplyAlias : public CallAlias
+{
+    MultiplyAlias(const SourceLocation location, Token* a, Token* b);
 
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Sine : public AudioSource
-    {
-        Sine(const SourceLocation location, ArgumentList* arguments);
+struct DivideAlias : public CallAlias
+{
+    DivideAlias(const SourceLocation location, Token* a, Token* b);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Square : public AudioSource
-    {
-        Square(const SourceLocation location, ArgumentList* arguments);
+struct PowerAlias : public CallAlias
+{
+    PowerAlias(const SourceLocation location, Token* a, Token* b);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Triangle : public AudioSource
-    {
-        Triangle(const SourceLocation location, ArgumentList* arguments);
+struct EqualAlias : public CallAlias
+{
+    EqualAlias(const SourceLocation location, Token* a, Token* b);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Saw : public AudioSource
-    {
-        Saw(const SourceLocation location, ArgumentList* arguments);
+struct LessAlias : public CallAlias
+{
+    LessAlias(const SourceLocation location, Token* a, Token* b);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Oscillator : public AudioSource
-    {
-        Oscillator(const SourceLocation, ArgumentList* arguments);
+struct GreaterAlias : public CallAlias
+{
+    GreaterAlias(const SourceLocation location, Token* a, Token* b);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Noise : public AudioSource
-    {
-        Noise(const SourceLocation location, ArgumentList* arguments);
+struct LessEqualAlias : public CallAlias
+{
+    LessEqualAlias(const SourceLocation location, Token* a, Token* b);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Sample : public AudioSource
-    {
-        Sample(const SourceLocation location, ArgumentList* arguments);
+struct GreaterEqualAlias : public CallAlias
+{
+    GreaterEqualAlias(const SourceLocation location, Token* a, Token* b);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
 
-    struct Granulate : public AudioSource
-    {
-        Granulate(const SourceLocation location, ArgumentList* arguments);
+struct Define : public Token
+{
+    Define(const SourceLocation location, const std::vector<Token*> instructions, FunctionDef* function);
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    void resolveTypes(TypeResolver* visitor) override;
 
-    struct Group : public AudioSource
-    {
-        Group(const SourceLocation location, ArgumentList* arguments);
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    std::string string() const override;
 
-    struct Effect : public Call
-    {
-        Effect(const SourceLocation location, ArgumentList* arguments);
-    };
+    const std::vector<Token*> instructions;
 
-    struct EmptyEffect : public Effect
-    {
-        EmptyEffect(const SourceLocation location);
+    FunctionDef* function;
+};
 
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+struct Program : public Token
+{
+    Program(const SourceLocation location, const std::vector<Token*> instructions);
 
-    struct EffectGroup : public Effect
-    {
-        EffectGroup(const SourceLocation location, ArgumentList* arguments);
+    void resolveTypes(TypeResolver* visitor) override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    struct Delay : public Effect
-    {
-        Delay(const SourceLocation location, ArgumentList* arguments);
+    std::string string() const override;
 
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
+    const std::vector<Token*> instructions;
+};
 
-    struct Comb : public Effect
-    {
-        Comb(const SourceLocation location, ArgumentList* arguments);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct AllPass : public Effect
-    {
-        AllPass(const SourceLocation location, ArgumentList* arguments);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct LowPass : public Effect
-    {
-        LowPass(const SourceLocation location, ArgumentList* arguments);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct Reverb : public Effect
-    {
-        Reverb(const SourceLocation location, ArgumentList* arguments);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct CallUser : public Call
-    {
-        CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-
-        FunctionRef* function;
-    };
-
-    struct CallAlias : public Token
-    {
-        CallAlias(const SourceLocation location, Token* a, Token* b, const std::string op);
-
-        void resolveTypes(TypeResolver* visitor) override;
-
-        std::string string() const override;
-
-        Token* a;
-        Token* b;
-
-        const std::string op;
-    };
-
-    struct AddAlias : public CallAlias
-    {
-        AddAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct SubtractAlias : public CallAlias
-    {
-        SubtractAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct MultiplyAlias : public CallAlias
-    {
-        MultiplyAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct DivideAlias : public CallAlias
-    {
-        DivideAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct PowerAlias : public CallAlias
-    {
-        PowerAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct EqualAlias : public CallAlias
-    {
-        EqualAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct LessAlias : public CallAlias
-    {
-        LessAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct GreaterAlias : public CallAlias
-    {
-        GreaterAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct LessEqualAlias : public CallAlias
-    {
-        LessEqualAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct GreaterEqualAlias : public CallAlias
-    {
-        GreaterEqualAlias(const SourceLocation location, Token* a, Token* b);
-
-        void transform(BytecodeTransformer* visitor) const override;
-    };
-
-    struct Define : public Token
-    {
-        Define(const SourceLocation location, const std::vector<Token*> instructions, FunctionDef* function);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-
-        std::string string() const override;
-
-        const std::vector<Token*> instructions;
-
-        FunctionDef* function;
-    };
-
-    struct Program : public Token
-    {
-        Program(const SourceLocation location, const std::vector<Token*> instructions);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-
-        std::string string() const override;
-
-        const std::vector<Token*> instructions;
-    };
-
-    struct Include : public Token
-    {
-        Include(const SourceLocation location, Program* program);
-
-        void resolveTypes(TypeResolver* visitor) override;
-        void transform(BytecodeTransformer* visitor) const override;
-
-        Program* program;
-    };
-
-    struct TypeResolver
-    {
-        TypeResolver(const Path* sourcePath);
-
-        void resolveTypes(VariableRef* token);
-        void resolveTypes(InputDef* token);
-        void resolveTypes(InputRef* token);
-        void resolveTypes(FunctionRef* token);
-        void resolveTypes(List* token);
-        void resolveTypes(ParenthesizedExpression* token);
-        void resolveTypes(Assign* token);
-        void resolveTypes(Time* token);
-        void resolveTypes(Hold* token);
-        void resolveTypes(LFO* token);
-        void resolveTypes(Sweep* token);
-        void resolveTypes(Sequence* token);
-        void resolveTypes(Repeat* token);
-        void resolveTypes(Random* token);
-        void resolveTypes(Limit* token);
-        void resolveTypes(Trigger* token);
-        void resolveTypes(If* token);
-        void resolveTypes(All* token);
-        void resolveTypes(Any* token);
-        void resolveTypes(None* token);
-        void resolveTypes(Min* token);
-        void resolveTypes(Max* token);
-        void resolveTypes(Round* token);
-        void resolveTypes(Absolute* token);
-        void resolveTypes(Sine* token);
-        void resolveTypes(Square* token);
-        void resolveTypes(Triangle* token);
-        void resolveTypes(Saw* token);
-        void resolveTypes(Oscillator* token);
-        void resolveTypes(Noise* token);
-        void resolveTypes(Sample* token);
-        void resolveTypes(Granulate* token);
-        void resolveTypes(Group* token);
-        void resolveTypes(EffectGroup* token);
-        void resolveTypes(Delay* token);
-        void resolveTypes(Comb* token);
-        void resolveTypes(AllPass* token);
-        void resolveTypes(LowPass* token);
-        void resolveTypes(Reverb* token);
-        void resolveTypes(CallUser* token);
-        void resolveTypes(CallAlias* token);
-        void resolveTypes(Define* token);
-        void resolveTypes(Program* token);
-
-    private:
-        void resolveArgumentTypes(ArgumentList* arguments, const std::string name, const Type* expectedType, Token* defaultValue = nullptr);
-
-        const Path* sourcePath;
-
-    };
-
-    struct BytecodeTransformer
-    {
-        BytecodeTransformer(const Path* sourcePath, std::ofstream& outputStream);
-
-        void transform(const Value* token);
-        void transform(const Constant* token);
-        void transform(const VariableRef* token);
-        void transform(const InputRef* token);
-        void transform(const FunctionRef* token);
-        void transform(const EmptyLambda* token);
-        void transform(const List* token);
-        void transform(const ParenthesizedExpression* token);
-        void transform(const Assign* token);
-        void transform(const Time* token);
-        void transform(const Hold* token);
-        void transform(const LFO* token);
-        void transform(const Sweep* token);
-        void transform(const Sequence* token);
-        void transform(const Repeat* token);
-        void transform(const Random* token);
-        void transform(const Limit* token);
-        void transform(const Trigger* token);
-        void transform(const If* token);
-        void transform(const All* token);
-        void transform(const Any* token);
-        void transform(const None* token);
-        void transform(const Min* token);
-        void transform(const Max* token);
-        void transform(const Round* token);
-        void transform(const Absolute* token);
-        void transform(const EmptyAudioSource* token);
-        void transform(const Sine* token);
-        void transform(const Square* token);
-        void transform(const Triangle* token);
-        void transform(const Saw* token);
-        void transform(const Oscillator* token);
-        void transform(const Noise* token);
-        void transform(const Sample* token);
-        void transform(const Granulate* token);
-        void transform(const Group* token);
-        void transform(const EmptyEffect* token);
-        void transform(const EffectGroup* token);
-        void transform(const Delay* token);
-        void transform(const Comb* token);
-        void transform(const AllPass* token);
-        void transform(const LowPass* token);
-        void transform(const Reverb* token);
-        void transform(const CallUser* token);
-        void transform(const AddAlias* token);
-        void transform(const SubtractAlias* token);
-        void transform(const MultiplyAlias* token);
-        void transform(const DivideAlias* token);
-        void transform(const PowerAlias* token);
-        void transform(const EqualAlias* token);
-        void transform(const LessAlias* token);
-        void transform(const GreaterAlias* token);
-        void transform(const LessEqualAlias* token);
-        void transform(const GreaterEqualAlias* token);
-        void transform(const Define* token);
-        void transform(const Program* token);
-
-    private:
-        void transformArgument(const ArgumentList* arguments, const std::string name);
-
-        void addInstruction(const BytecodeInstruction* instruction);
-
-        const Path* sourcePath;
-
-        std::ofstream& outputStream;
-
-        std::unordered_map<const Path*, unsigned char, Path::Hash, Path::Equals> resources;
-
-        BytecodeResolver* resolver = new BytecodeResolver();
-
-        std::stack<InstructionBlock*> blocks;
-
-        unsigned char nextIdentifierId = 0;
-
-    };
 }

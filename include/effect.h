@@ -5,6 +5,8 @@
 
 #include "object.h"
 
+namespace Engine {
+
 struct Effect : public ValueObject
 {
     virtual void apply(double* buffer);
@@ -194,3 +196,5 @@ private:
     DelayMatrix* matrix = new DelayMatrix();
 
 };
+
+}

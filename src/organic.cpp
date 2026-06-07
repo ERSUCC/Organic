@@ -21,20 +21,7 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
 
     program->resolveTypes(new Parser::TypeResolver(path));
 
-    const Path* bytecodePath = Path::beside(path->stem() + ".obc", path);
-
-    std::ofstream stream(bytecodePath->string(), std::ios::binary);
-
-    if (!stream.is_open())
-    {
-        throw OrganicFileException("Error creating intermediate file \"" + bytecodePath->string() + "\".");
-    }
-
-    program->transform(new Parser::BytecodeTransformer(path, stream));
-
-    stream.close();
-
-    machine = new Machine(bytecodePath);
+    this->program = program->transform(new TokenTransformer(path))->getLeafAs<Engine::Program>();
 }
 
 void Organic::start()
@@ -71,7 +58,7 @@ void Organic::startPlayback()
         throw OrganicAudioException(audio.getErrorText());
     }
 
-    machine->run();
+    program->start(0);
 
     if (options.fastForward)
     {
@@ -83,7 +70,7 @@ void Organic::startPlayback()
         {
             utils->time = i * 1000.0 / utils->sampleRate;
 
-            machine->processAudioSources(buffer);
+            program->processAudioSources(buffer);
         }
 
         free(buffer);
@@ -131,13 +118,13 @@ void Organic::startExport()
 
     double* samples = (double*)malloc(sizeof(double) * steps * utils->channels);
 
-    machine->run();
+    program->start(0);
 
     for (unsigned int i = 0; i < steps; i++)
     {
         utils->time = i * 1000.0 / utils->sampleRate;
 
-        machine->processAudioSources(samples + i * utils->channels);
+        program->processAudioSources(samples + i * utils->channels);
     }
 
     if (file->write(samples, steps * utils->channels) != steps * utils->channels)
@@ -152,7 +139,7 @@ int Organic::processAudio(void* output, unsigned int frames)
 {
     for (unsigned int i = 0; i < frames; i++)
     {
-        machine->processAudioSources((double*)output + i * utils->channels);
+        program->processAudioSources((double*)output + i * utils->channels);
 
         utils->time += 1000.0 / utils->sampleRate;
     }

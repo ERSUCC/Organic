@@ -8,18 +8,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # build main API as static library so it can be linked efficiently with the command line program and the test suite
 
 add_library(organic_lib STATIC src/audiosource.cpp
-                               src/bytecode.cpp
                                src/controller.cpp
                                src/effect.cpp
                                src/flags.cpp
                                src/location.cpp
-                               src/machine.cpp
                                src/object.cpp
                                src/organic.cpp
                                src/parse.cpp
                                src/path.cpp
+                               src/program.cpp
+                               src/resource.cpp
                                src/token.cpp
                                src/tokenize.cpp
+                               src/transform.cpp
+                               src/types.cpp
                                src/utils.cpp)
 
 if (NOT WIN32)

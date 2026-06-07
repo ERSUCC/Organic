@@ -4,6 +4,8 @@
 
 #include "utils.h"
 
+namespace Engine {
+
 struct Sync
 {
     Sync();
@@ -84,17 +86,9 @@ private:
 
 };
 
-struct Resource : public ValueObject
-{
-    Resource(double* samples, const unsigned int length);
-    ~Resource();
-
-    double* samples;
-
-    const unsigned int length;
-};
-
 struct Time : public ValueObject
 {
     double getValue() override;
 };
+
+}

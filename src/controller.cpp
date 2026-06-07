@@ -1,5 +1,7 @@
 #include "../include/controller.h"
 
+using namespace Engine;
+
 ValueByte::ValueByte(const unsigned char value) :
     value(value) {}
 
@@ -290,17 +292,17 @@ double Round::getValue()
 
     switch (direction->getLeafAs<ValueByte>()->value)
     {
-        case BytecodeConstants::ROUND_NEAREST:
+        case Constants::Round::Nearest:
             return round(val / st) * st;
 
             break;
 
-        case BytecodeConstants::ROUND_UP:
+        case Constants::Round::Up:
             return ceil(val / st) * st;
 
             break;
 
-        case BytecodeConstants::ROUND_DOWN:
+        case Constants::Round::Down:
             return floor(val / st) * st;
 
             break;
@@ -355,7 +357,7 @@ double Sequence::syncLength() const
 
     double length = 0;
 
-    if (order->getLeafAs<ValueByte>()->value == BytecodeConstants::SEQUENCE_PING_PONG)
+    if (order->getLeafAs<ValueByte>()->value == Constants::Sequence::PingPong)
     {
         length += objects[0]->syncLength();
 
@@ -427,7 +429,7 @@ void Sequence::init()
 
     const unsigned char orderNum = order->getLeafAs<ValueByte>()->value;
 
-    if (orderNum == BytecodeConstants::SEQUENCE_PING_PONG)
+    if (orderNum == Constants::Sequence::PingPong)
     {
         max_switches = objects.size() * 2 - 2;
     }
@@ -437,12 +439,12 @@ void Sequence::init()
         max_switches = objects.size() - 1;
     }
 
-    if (orderNum == BytecodeConstants::SEQUENCE_BACKWARD)
+    if (orderNum == Constants::Sequence::Backward)
     {
         current = objects.size() - 1;
     }
 
-    else if (orderNum == BytecodeConstants::SEQUENCE_RANDOM)
+    else if (orderNum == Constants::Sequence::Random)
     {
         current = udist(utils->rng);
 
@@ -473,12 +475,12 @@ void Sequence::reinit()
 
     switch (order->getLeafAs<ValueByte>()->value)
     {
-        case BytecodeConstants::SEQUENCE_FORWARD:
+        case Constants::Sequence::Forward:
             current = (current + 1) % objects.size();
 
             break;
 
-        case BytecodeConstants::SEQUENCE_BACKWARD:
+        case Constants::Sequence::Backward:
         {
             current -= 1;
 
@@ -490,7 +492,7 @@ void Sequence::reinit()
             break;
         }
 
-        case BytecodeConstants::SEQUENCE_PING_PONG:
+        case Constants::Sequence::PingPong:
         {
             if ((direction == -1 && current <= 0) || current >= objects.size() - 1)
             {
@@ -502,7 +504,7 @@ void Sequence::reinit()
             break;
         }
 
-        case BytecodeConstants::SEQUENCE_RANDOM:
+        case Constants::Sequence::Random:
         {
             if (chosen.size() < objects.size())
             {
@@ -684,10 +686,10 @@ double Random::getValue()
 
     switch (type->getLeafAs<ValueByte>()->value)
     {
-        case BytecodeConstants::RANDOM_STEP:
+        case Constants::Random::Step:
             return current;
 
-        case BytecodeConstants::RANDOM_LINEAR:
+        case Constants::Random::Linear:
             return current + (next - current) * (utils->time - startTime) / lengthValue;
     }
 

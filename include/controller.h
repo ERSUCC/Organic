@@ -7,6 +7,8 @@
 #include "constants.h"
 #include "object.h"
 
+namespace Engine {
+
 struct ValueByte : public ValueObject
 {
     ValueByte(const unsigned char value);
@@ -411,3 +413,5 @@ private:
     ValueObject* falseValue;
 
 };
+
+}

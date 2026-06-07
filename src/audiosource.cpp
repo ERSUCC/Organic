@@ -1,5 +1,7 @@
 #include "../include/audiosource.h"
 
+using namespace Engine;
+
 void AudioSource::fillBuffer(double* buffer) {}
 
 SingleAudioSource::SingleAudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :

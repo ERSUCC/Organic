@@ -60,16 +60,6 @@ void Utils::setSeed(const std::optional<unsigned int>& seed)
     rng = std::mt19937(this->seed);
 }
 
-Utils::Utils()
-{
-    const unsigned int i = 1;
-
-    if (*reinterpret_cast<const unsigned char*>(&i) == 1)
-    {
-        littleEndian = true;
-    }
-}
-
 OrganicException::OrganicException(const std::string message) :
     message(message) {}
 
@@ -94,9 +84,6 @@ OrganicParseException::OrganicParseException(const std::string message, const So
 
 OrganicIncludeException::OrganicIncludeException(const std::string message, const SourceLocation& location) :
     OrganicException("Include error in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message), location(location) {}
-
-OrganicMachineException::OrganicMachineException(const std::string message) :
-    OrganicException("Virtual machine error:\n\t" + message) {}
 
 OrganicAudioException::OrganicAudioException(const std::string message) :
     OrganicException("Audio error:\n\t" + message) {}

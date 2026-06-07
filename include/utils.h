@@ -30,8 +30,6 @@ struct Utils
 
     void setSeed(const std::optional<unsigned int>& seed);
 
-    bool littleEndian = false;
-
     unsigned int channels;
     unsigned int sampleRate;
     unsigned int bufferLength;
@@ -47,8 +45,6 @@ struct Utils
     std::mt19937 rng;
 
 private:
-    Utils();
-
     static Utils* instance;
 
     bool firstWarning = true;
@@ -90,11 +86,6 @@ struct OrganicIncludeException : public OrganicException
     OrganicIncludeException(const std::string message, const SourceLocation& location);
 
     const SourceLocation location;
-};
-
-struct OrganicMachineException : public OrganicException
-{
-    OrganicMachineException(const std::string message);
 };
 
 struct OrganicAudioException : public OrganicException

@@ -14,10 +14,12 @@
 #include <sndfile.hh>
 
 #include "flags.h"
-#include "machine.h"
 #include "parse.h"
 #include "path.h"
+#include "program.h"
 #include "token.h"
+#include "transform.h"
+#include "types.h"
 #include "utils.h"
 
 struct Organic
@@ -38,6 +40,6 @@ private:
 
     Utils* utils;
 
-    Machine* machine;
+    Engine::Program* program;
 
 };
