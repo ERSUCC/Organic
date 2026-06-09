@@ -870,7 +870,7 @@ Engine::ValueObject* CallUser::transform(TokenTransformer* visitor) const
 }
 
 CallAlias::CallAlias(const SourceLocation location, Token* a, Token* b, const std::string op) :
-    Token(location), a(a), b(b), op(op) {}
+    Call(location, new ArgumentList(location, { new Argument(a->location, "a", a), new Argument(b->location, "b", b) }, op)), op(op) {}
 
 void CallAlias::resolveTypes(TypeResolver* visitor)
 {
@@ -879,7 +879,7 @@ void CallAlias::resolveTypes(TypeResolver* visitor)
 
 std::string CallAlias::string() const
 {
-    return a->string() + " " + op + " " + b->string();
+    return arguments->get("a")->string() + " " + op + " " + arguments->get("b")->string();
 }
 
 AddAlias::AddAlias(const SourceLocation location, Token* a, Token* b) :

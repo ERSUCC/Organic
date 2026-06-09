@@ -1,5 +1,7 @@
 #include "../include/transform.h"
 
+#define ARG(name) transformArgument(token->arguments, name)
+
 TokenTransformer::TokenTransformer(const Path* sourcePath) :
     sourcePath(sourcePath), utils(Utils::get()) {}
 
@@ -84,131 +86,82 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Time* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Hold* token)
 {
-    Engine::ValueObject* value = transformArgument(token->arguments, "value");
-    Engine::ValueObject* length = transformArgument(token->arguments, "length");
-
-    return new Engine::Hold(value, length);
+    return new Engine::Hold(ARG("value"), ARG("length"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::LFO* token)
 {
-    Engine::ValueObject* from = transformArgument(token->arguments, "from");
-    Engine::ValueObject* to = transformArgument(token->arguments, "to");
-    Engine::ValueObject* length = transformArgument(token->arguments, "length");
-
-    return new Engine::LFO(from, to, length);
+    return new Engine::LFO(ARG("from"), ARG("to"), ARG("length"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sweep* token)
 {
-    Engine::ValueObject* from = transformArgument(token->arguments, "from");
-    Engine::ValueObject* to = transformArgument(token->arguments, "to");
-    Engine::ValueObject* length = transformArgument(token->arguments, "length");
-
-    return new Engine::Sweep(from, to, length);
+    return new Engine::Sweep(ARG("from"), ARG("to"), ARG("length"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sequence* token)
 {
-    Engine::ValueObject* values = transformArgument(token->arguments, "values");
-    Engine::ValueObject* order = transformArgument(token->arguments, "order");
-
-    return new Engine::Sequence(values, order);
+    return new Engine::Sequence(ARG("values"), ARG("order"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Repeat* token)
 {
-    Engine::ValueObject* value = transformArgument(token->arguments, "value");
-    Engine::ValueObject* repeats = transformArgument(token->arguments, "repeats");
-
-    return new Engine::Repeat(value, repeats);
+    return new Engine::Repeat(ARG("value"), ARG("repeats"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Random* token)
 {
-    Engine::ValueObject* from = transformArgument(token->arguments, "from");
-    Engine::ValueObject* to = transformArgument(token->arguments, "to");
-    Engine::ValueObject* length = transformArgument(token->arguments, "length");
-    Engine::ValueObject* type = transformArgument(token->arguments, "type");
-
-    return new Engine::Random(from, to, length, type);
+    return new Engine::Random(ARG("from"), ARG("to"), ARG("length"), ARG("type"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Limit* token)
 {
-    Engine::ValueObject* value = transformArgument(token->arguments, "value");
-    Engine::ValueObject* min = transformArgument(token->arguments, "min");
-    Engine::ValueObject* max = transformArgument(token->arguments, "max");
-
-    return new Engine::Limit(value, min, max);
+    return new Engine::Limit(ARG("value"), ARG("min"), ARG("max"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Trigger* token)
 {
-    Engine::ValueObject* condition = transformArgument(token->arguments, "condition");
-    Engine::ValueObject* value = transformArgument(token->arguments, "value");
-
-    return new Engine::Trigger(condition, value);
+    return new Engine::Trigger(ARG("condition"), ARG("value"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::If* token)
 {
-    Engine::ValueObject* condition = transformArgument(token->arguments, "condition");
-    Engine::ValueObject* trueValue = transformArgument(token->arguments, "true");
-    Engine::ValueObject* falseValue = transformArgument(token->arguments, "false");
-
-    return new Engine::If(condition, trueValue, falseValue);
+    return new Engine::If(ARG("condition"), ARG("true"), ARG("false"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::All* token)
 {
-    Engine::ValueObject* values = transformArgument(token->arguments, "values");
-
-    return new Engine::All(values);
+    return new Engine::All(ARG("values"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Any* token)
 {
-    Engine::ValueObject* values = transformArgument(token->arguments, "values");
-
-    return new Engine::Any(values);
+    return new Engine::Any(ARG("values"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::None* token)
 {
-    Engine::ValueObject* values = transformArgument(token->arguments, "values");
-
-    return new Engine::None(values);
+    return new Engine::None(ARG("values"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Min* token)
 {
-    Engine::ValueObject* values = transformArgument(token->arguments, "values");
-
-    return new Engine::Min(values);
+    return new Engine::Min(ARG("values"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Max* token)
 {
-    Engine::ValueObject* values = transformArgument(token->arguments, "values");
-
-    return new Engine::Max(values);
+    return new Engine::Max(ARG("values"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Round* token)
 {
-    Engine::ValueObject* value = transformArgument(token->arguments, "value");
-    Engine::ValueObject* step = transformArgument(token->arguments, "step");
-    Engine::ValueObject* direction = transformArgument(token->arguments, "direction");
-
-    return new Engine::Round(value, step, direction);
+    return new Engine::Round(ARG("value"), ARG("step"), ARG("direction"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Absolute* token)
 {
-    Engine::ValueObject* value = transformArgument(token->arguments, "value");
-
-    return new Engine::Absolute(value);
+    return new Engine::Absolute(ARG("value"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyAudioSource* token)
@@ -218,106 +171,59 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyAudioSource*
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sine* token)
 {
-    Engine::ValueObject* volume = transformArgument(token->arguments, "volume");
-    Engine::ValueObject* pan = transformArgument(token->arguments, "pan");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-    Engine::ValueObject* frequency = transformArgument(token->arguments, "frequency");
-
-    return new Engine::Sine(volume, pan, effects, frequency);
+    return new Engine::Sine(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Square* token)
 {
-    Engine::ValueObject* volume = transformArgument(token->arguments, "volume");
-    Engine::ValueObject* pan = transformArgument(token->arguments, "pan");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-    Engine::ValueObject* frequency = transformArgument(token->arguments, "frequency");
-
-    return new Engine::Square(volume, pan, effects, frequency);
+    return new Engine::Square(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Triangle* token)
 {
-    Engine::ValueObject* volume = transformArgument(token->arguments, "volume");
-    Engine::ValueObject* pan = transformArgument(token->arguments, "pan");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-    Engine::ValueObject* frequency = transformArgument(token->arguments, "frequency");
-
-    return new Engine::Triangle(volume, pan, effects, frequency);
+    return new Engine::Triangle(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Saw* token)
 {
-    Engine::ValueObject* volume = transformArgument(token->arguments, "volume");
-    Engine::ValueObject* pan = transformArgument(token->arguments, "pan");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-    Engine::ValueObject* frequency = transformArgument(token->arguments, "frequency");
-
-    return new Engine::Saw(volume, pan, effects, frequency);
+    return new Engine::Saw(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Oscillator* token)
 {
-    Engine::ValueObject* volume = transformArgument(token->arguments, "volume");
-    Engine::ValueObject* pan = transformArgument(token->arguments, "pan");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-    Engine::ValueObject* frequency = transformArgument(token->arguments, "frequency");
-    Engine::ValueObject* waveform = transformArgument(token->arguments, "waveform");
-
-    return new Engine::CustomOscillator(volume, pan, effects, frequency, waveform);
+    return new Engine::CustomOscillator(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"), ARG("waveform"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Noise* token)
 {
-    Engine::ValueObject* volume = transformArgument(token->arguments, "volume");
-    Engine::ValueObject* pan = transformArgument(token->arguments, "pan");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-
-    return new Engine::Noise(volume, pan, effects);
+    return new Engine::Noise(ARG("volume"), ARG("pan"), ARG("effects"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 {
-    Engine::ValueObject* volume = transformArgument(token->arguments, "volume");
-    Engine::ValueObject* pan = transformArgument(token->arguments, "pan");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-
     const Parser::String* str = static_cast<const Parser::String*>(token->arguments->get("file"));
 
     const Path* path = Path::beside(Path::formatPath(str->value), sourcePath);
 
     Engine::Resource* resource = new Engine::Resource(path, str->location);
 
-    return new Engine::Sample(volume, pan, effects, resource);
+    return new Engine::Sample(ARG("volume"), ARG("pan"), ARG("effects"), resource);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 {
-    Engine::ValueObject* volume = transformArgument(token->arguments, "volume");
-    Engine::ValueObject* pan = transformArgument(token->arguments, "pan");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-
     const Parser::String* str = static_cast<const Parser::String*>(token->arguments->get("sample"));
 
     const Path* path = Path::beside(Path::formatPath(str->value), sourcePath);
 
     Engine::Resource* resource = new Engine::Resource(path, str->location);
 
-    Engine::ValueObject* grains = transformArgument(token->arguments, "grains");
-    Engine::ValueObject* length = transformArgument(token->arguments, "length");
-    Engine::ValueObject* shape = transformArgument(token->arguments, "shape");
-
-    return new Engine::Granulate(volume, pan, effects, resource, grains, length, shape);
+    return new Engine::Granulate(ARG("volume"), ARG("pan"), ARG("effects"), resource, ARG("grains"), ARG("length"), ARG("shape"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Group* token)
 {
-    Engine::ValueObject* volume = transformArgument(token->arguments, "volume");
-    Engine::ValueObject* pan = transformArgument(token->arguments, "pan");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-    Engine::ValueObject* sources = transformArgument(token->arguments, "sources");
-
-    return new Engine::Group(volume, pan, effects, sources);
+    return new Engine::Group(ARG("volume"), ARG("pan"), ARG("effects"), ARG("sources"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyEffect* token)
@@ -327,52 +233,32 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyEffect* toke
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::EffectGroup* token)
 {
-    Engine::ValueObject* mix = transformArgument(token->arguments, "mix");
-    Engine::ValueObject* effects = transformArgument(token->arguments, "effects");
-
-    return new Engine::EffectGroup(mix, effects);
+    return new Engine::EffectGroup(ARG("mix"), ARG("effects"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Delay* token)
 {
-    Engine::ValueObject* mix = transformArgument(token->arguments, "mix");
-    Engine::ValueObject* delay = transformArgument(token->arguments, "delay");
-    Engine::ValueObject* feedback = transformArgument(token->arguments, "feedback");
-
-    return new Engine::Delay(mix, delay, feedback);
+    return new Engine::Delay(ARG("mix"), ARG("delay"), ARG("feedback"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Comb* token)
 {
-    Engine::ValueObject* mix = transformArgument(token->arguments, "mix");
-    Engine::ValueObject* delay = transformArgument(token->arguments, "delay");
-    Engine::ValueObject* feedback = transformArgument(token->arguments, "feedback");
-
-    return new Engine::Comb(mix, delay, feedback);
+    return new Engine::Comb(ARG("mix"), ARG("delay"), ARG("feedback"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::AllPass* token)
 {
-    Engine::ValueObject* mix = transformArgument(token->arguments, "mix");
-    Engine::ValueObject* delay = transformArgument(token->arguments, "delay");
-    Engine::ValueObject* feedback = transformArgument(token->arguments, "feedback");
-
-    return new Engine::AllPass(mix, delay, feedback);
+    return new Engine::AllPass(ARG("mix"), ARG("delay"), ARG("feedback"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::LowPass* token)
 {
-    Engine::ValueObject* threshold = transformArgument(token->arguments, "threshold");
-
-    return new Engine::LowPass(threshold);
+    return new Engine::LowPass(ARG("threshold"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Reverb* token)
 {
-    Engine::ValueObject* mix = transformArgument(token->arguments, "mix");
-    Engine::ValueObject* length = transformArgument(token->arguments, "length");
-
-    return new Engine::Reverb(mix, length);
+    return new Engine::Reverb(ARG("mix"), ARG("length"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
@@ -389,89 +275,57 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
         function->instructions[i]->transform(this);
     }
 
-    Engine::ValueObject* value = function->instructions.back()->transform(this);
-
-    return value;
+    return function->instructions.back()->transform(this);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::AddAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValueAdd(a, b);
+    return new Engine::ValueAdd(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::SubtractAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValueSubtract(a, b);
+    return new Engine::ValueSubtract(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::MultiplyAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValueMultiply(a, b);
+    return new Engine::ValueMultiply(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::DivideAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValueDivide(a, b);
+    return new Engine::ValueDivide(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::PowerAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValuePower(a, b);
+    return new Engine::ValuePower(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::EqualAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValueEquals(a, b);
+    return new Engine::ValueEquals(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::LessAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValueLess(a, b);
+    return new Engine::ValueLess(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::GreaterAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValueGreater(a, b);
+    return new Engine::ValueGreater(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::LessEqualAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValueLessEqual(a, b);
+    return new Engine::ValueLessEqual(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::GreaterEqualAlias* token)
 {
-    Engine::ValueObject* a = token->a->transform(this);
-    Engine::ValueObject* b = token->b->transform(this);
-
-    return new Engine::ValueGreaterEqual(a, b);
+    return new Engine::ValueGreaterEqual(ARG("a"), ARG("b"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Define* token)

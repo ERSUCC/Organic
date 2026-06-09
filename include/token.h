@@ -691,7 +691,7 @@ struct CallUser : public Call
     FunctionRef* function;
 };
 
-struct CallAlias : public Token
+struct CallAlias : public Call
 {
     CallAlias(const SourceLocation location, Token* a, Token* b, const std::string op);
 
@@ -699,10 +699,9 @@ struct CallAlias : public Token
 
     std::string string() const override;
 
-    Token* a;
-    Token* b;
-
+private:
     const std::string op;
+
 };
 
 struct AddAlias : public CallAlias

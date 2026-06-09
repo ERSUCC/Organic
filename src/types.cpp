@@ -668,20 +668,8 @@ void TypeResolver::resolveTypes(CallUser* token)
 
 void TypeResolver::resolveTypes(CallAlias* token)
 {
-    token->a->resolveTypes(this);
-    token->b->resolveTypes(this);
-
-    NumberType* number = new NumberType();
-
-    if (!token->a->type->checkSpecifiedType(number))
-    {
-        throw OrganicParseException("Expected \"" + number->name() + "\", received \"" + token->a->type->name() + "\".", token->a->location);
-    }
-
-    if (!token->b->type->checkSpecifiedType(number))
-    {
-        throw OrganicParseException("Expected \"" + number->name() + "\", received \"" + token->b->type->name() + "\".", token->b->location);
-    }
+    resolveArgumentTypes(token->arguments, "a", new NumberType());
+    resolveArgumentTypes(token->arguments, "b", new NumberType());
 }
 
 void TypeResolver::resolveTypes(Define* token)
