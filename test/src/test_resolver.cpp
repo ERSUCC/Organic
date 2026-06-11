@@ -12,16 +12,12 @@ void TestResolver::test()
         expectSuccess(path);
     }
 
-    endSuite();
-
     beginSuite("Type resolver errors");
 
     for (const Path* path : sourcePath("type-resolver/errors")->children())
     {
         expectError(path);
     }
-
-    endSuite();
 }
 
 void TestResolver::expectSuccess(const Path* path)
@@ -43,7 +39,7 @@ void TestResolver::expectSuccess(const Path* path)
 
 void TestResolver::expectError(const Path* path)
 {
-    TestErrorInfo* info = new TestErrorInfo(path);
+    const TestErrorInfo* info = new TestErrorInfo(path);
 
     beginTest(info);
 

@@ -1,9 +1,9 @@
-#include <iostream>
+#include <string>
 
-#include "../include/test.h"
 #include "../include/test_parser.h"
 #include "../include/test_resolver.h"
 #include "../include/test_tokenizer.h"
+#include "../include/test_utils.h"
 
 int main(int argc, char** argv)
 {
@@ -17,22 +17,22 @@ int main(int argc, char** argv)
 
     const size_t failures = tracker->endSection();
 
-    std::cout << "\n~~~ Test Summary ~~~\n\n";
-
     if (failures == 0)
     {
-        std::cout << "All tests passed.\n";
+        TestUtils::printSuccess("\nAll tests passed.");
+
+        return 0;
     }
 
-    else if (failures == 1)
+    if (failures == 1)
     {
-        std::cout << "1 failing suite.\n";
+        TestUtils::printError("\n1 failing test.");
     }
 
-    else if (failures)
+    else
     {
-        std::cout << failures << " failing suites.\n";
+        TestUtils::printError("\n" + std::to_string(failures) + " failing tests.");
     }
 
-    return 0;
+    return 1;
 }

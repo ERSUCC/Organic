@@ -11,13 +11,11 @@ void TestTokenizer::test()
     {
         checkList(path);
     }
-
-    endSuite();
 }
 
 void TestTokenizer::checkList(const Path* path)
 {
-    TestTokenizerInfo* info = new TestTokenizerInfo(path);
+    const TestTokenizerInfo* info = new TestTokenizerInfo(path);
 
     beginTest(info);
 

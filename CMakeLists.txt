@@ -55,7 +55,8 @@ add_executable(organic_test test/src/main.cpp
                             test/src/test.cpp
                             test/src/test_parser.cpp
                             test/src/test_resolver.cpp
-                            test/src/test_tokenizer.cpp)
+                            test/src/test_tokenizer.cpp
+                            test/src/test_utils.cpp)
 
 target_compile_definitions(organic_test PRIVATE ORGANIC_TEST_DIR="${CMAKE_SOURCE_DIR}/test/files")
 
