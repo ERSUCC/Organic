@@ -11,13 +11,11 @@ void TestParser::test()
     {
         expectError(path);
     }
-
-    endSuite();
 }
 
 void TestParser::expectError(const Path* path)
 {
-    TestErrorInfo* info = new TestErrorInfo(path);
+    const TestErrorInfo* info = new TestErrorInfo(path);
 
     beginTest(info);
 
