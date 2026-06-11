@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
+#include "exception.h"
 #include "location.h"
 #include "path.h"
 #include "token.h"
@@ -29,7 +29,7 @@ namespace Parser
 
     struct TokenList
     {
-        TokenList(const Path* path);
+        TokenList(const SourceFile* source);
 
         void add(Token* token);
 
@@ -42,7 +42,7 @@ namespace Parser
 
     struct Tokenizer
     {
-        Tokenizer(const Path* path);
+        Tokenizer(const SourceFile* source);
 
         TokenList* tokenize();
 
@@ -52,19 +52,14 @@ namespace Parser
         Token* tokenizeIdentifier();
 
         void skipWhitespace();
-        void nextCharacter();
 
         double getFrequency(const double note) const;
 
-        const Path* path;
+        const SourceFile* source;
 
-        Utils* utils;
+        const Utils* utils;
 
-        std::string code;
-
-        unsigned int current = 0;
-        unsigned int line = 1;
-        unsigned int character = 1;
+        size_t current = 0;
 
     };
 }

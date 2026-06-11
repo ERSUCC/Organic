@@ -1,16 +1,26 @@
 #pragma once
 
+#include <string>
+
 #include "path.h"
 
 struct SourceLocation
 {
-    SourceLocation(const Path* path, const unsigned int line, const unsigned int character);
+    SourceLocation(const SourceFile* source, const size_t start, const size_t end);
 
-    bool operator==(const SourceLocation& other) const;
-    bool operator!=(const SourceLocation& other) const;
+    inline std::string string() const
+    {
+        return source->get(start, end - start);
+    }
 
-    const Path* path;
+    inline bool operator==(const SourceLocation& other) const;
+    inline bool operator!=(const SourceLocation& other) const;
 
-    const unsigned int line;
-    const unsigned int character;
+    const SourceFile* source;
+
+    const size_t start;
+    const size_t end;
+
+    const size_t line;
+    const size_t character;
 };

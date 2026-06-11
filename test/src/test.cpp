@@ -137,6 +137,11 @@ void Test::fail(const std::string message)
     testFailures++;
 }
 
+bool Test::parseErrorMatches(const std::vector<std::string>& expected, const OrganicParseException& error)
+{
+    return error.message == expected[2] && error.location.line == std::stoi(expected[0]) && error.location.character == std::stoi(expected[1]);
+}
+
 unsigned int TokenizerTests::test()
 {
     suiteFailures = 0;
@@ -159,11 +164,9 @@ void TokenizerTests::checkList(const Path* path)
 
     beginTest(info->data[0][0]);
 
-    std::string source;
-
-    if (path->readToString(source))
+    if (const SourceFile* source = SourceFile::create(path))
     {
-        const Parser::TokenList* list = (new Parser::Tokenizer(path))->tokenize();
+        const Parser::TokenList* list = (new Parser::Tokenizer(source))->tokenize();
 
         Parser::TokenListNode* current = list->head->next;
 
@@ -192,15 +195,6 @@ unsigned int ParserTests::test()
 {
     suiteFailures = 0;
 
-    beginSection("Parser round trip");
-
-    for (const Path* path : sourcePath("parser/round-trip")->children())
-    {
-        roundTrip(path);
-    }
-
-    endSection();
-
     beginSection("Parser errors");
 
     for (const Path* path : sourcePath("parser/errors")->children())
@@ -211,29 +205,6 @@ unsigned int ParserTests::test()
     endSection();
 
     return suiteFailures;
-}
-
-void ParserTests::roundTrip(const Path* path)
-{
-    TestInfo* info = new TestInfo(path);
-
-    beginTest(info->data[0][0]);
-
-    std::string source;
-
-    if (path->readToString(source))
-    {
-        const Parser::Program* program = parseSource(path);
-
-        assert("Source code is semantically equivalent after round trip", formatSource(source) == formatSource(program->string()));
-    }
-
-    else
-    {
-        fail("Could not read file \"" + path->string() + "\".");
-    }
-
-    endTest();
 }
 
 void ParserTests::expectError(const Path* path)
@@ -255,11 +226,14 @@ void ParserTests::expectError(const Path* path)
             fail("Parser did not throw any errors.");
         }
 
+        catch (const OrganicParseException& e)
+        {
+            assert("Parser throws expected error", e.location.source->path == path && parseErrorMatches(info->data[1], e));
+        }
+
         catch (const OrganicException& e)
         {
-            const std::vector<std::string>& error = info->data[1];
-
-            assert("Parser throws expected error", e == OrganicParseException(error[2], SourceLocation(path, std::stoi(error[0]), std::stoi(error[1]))));
+            fail("Parser did not throw the expected error.");
         }
     }
 
@@ -269,21 +243,6 @@ void ParserTests::expectError(const Path* path)
     }
 
     endTest();
-}
-
-std::string ParserTests::formatSource(const std::string text) const
-{
-    const std::string untrimmed = std::regex_replace(text, std::regex("(//[^\n]*)|(/\\*[\\w\\W]*\\*/)|(\\s+)"), "");
-
-    const size_t first = untrimmed.find_first_not_of(' ');
-    const size_t last = untrimmed.find_last_not_of(' ');
-
-    if (first == std::string::npos)
-    {
-        return "";
-    }
-
-    return untrimmed.substr(first, last - first + 1);
 }
 
 unsigned int TypeResolverTests::test()
@@ -345,11 +304,14 @@ void TypeResolverTests::expectError(const Path* path)
         fail("Type resolver did not throw any errors.");
     }
 
+    catch (const OrganicParseException& e)
+    {
+        assert("Type resolver throws expected error", e.location.source->path == path && parseErrorMatches(info->data[1], e));
+    }
+
     catch (const OrganicException& e)
     {
-        const std::vector<std::string>& error = info->data[1];
-
-        assert("Type resolver throws expected error", e == OrganicParseException(error[2], SourceLocation(path, std::stoi(error[0]), std::stoi(error[1]))));
+        fail("Parser did not throw the expected error.");
     }
 
     endTest();

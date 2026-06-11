@@ -3,9 +3,9 @@
 #include <samplerate.h>
 #include <sndfile.hh>
 
+#include "exception.h"
 #include "object.h"
 #include "path.h"
-#include "utils.h"
 
 namespace Engine
 {

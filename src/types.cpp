@@ -72,7 +72,7 @@ bool Type::checkSpecifiedType(const LambdaType* expected) const
 
 Token* Type::getDefault(const SourceLocation location) const
 {
-    return new Value(location, "0", 0);
+    return new Value(location, 0);
 }
 
 NoneType::NoneType() :
@@ -580,7 +580,7 @@ void TypeResolver::resolveTypes(Sample* token)
 
 void TypeResolver::resolveTypes(Granulate* token)
 {
-    EmptyLambda* defaultLambda = new EmptyLambda(token->arguments->location, new Value(token->arguments->location, "1", 1));
+    EmptyLambda* defaultLambda = new EmptyLambda(token->arguments->location, new Value(token->arguments->location, 1));
 
     resolveArgumentTypes(token->arguments, "shape", new LambdaType({ { "value", new NumberType() } }, new NumberType()), defaultLambda);
     resolveArgumentTypes(token->arguments, "length", new NumberType());
@@ -657,7 +657,7 @@ void TypeResolver::resolveTypes(CallUser* token)
 {
     for (const InputDef* input : token->function->definition->inputs)
     {
-        resolveArgumentTypes(token->arguments, input->str, input->type, input->defaultValue);
+        resolveArgumentTypes(token->arguments, input->string(), input->type, input->defaultValue);
     }
 
     token->arguments->check();
@@ -680,7 +680,7 @@ void TypeResolver::resolveTypes(Define* token)
     {
         input->resolveTypes(this);
 
-        inputTypes[input->str] = input->type;
+        inputTypes[input->string()] = input->type;
     }
 
     for (Token* instruction : token->instructions)

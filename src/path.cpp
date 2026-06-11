@@ -111,28 +111,6 @@ bool Path::readToString(std::string& dest) const
     return done;
 }
 
-bool Path::readToStringBinary(std::string& dest) const
-{
-    std::ifstream file(string(), std::ios::binary);
-
-    if (!file.is_open())
-    {
-        return false;
-    }
-
-    std::ostringstream stream(std::ios::binary);
-
-    stream << file.rdbuf();
-
-    const bool done = file.good();
-
-    file.close();
-
-    dest = stream.str();
-
-    return done;
-}
-
 bool Path::readLines(std::vector<std::string>& dest) const
 {
     std::ifstream file(string());
@@ -158,3 +136,48 @@ bool Path::readLines(std::vector<std::string>& dest) const
 
 Path::Path(const std::filesystem::path& path) :
     path(std::filesystem::absolute(std::filesystem::weakly_canonical(path))) {}
+
+SourceFile* SourceFile::create(const Path* path)
+{
+    SourceFile* source = new SourceFile(path);
+
+    if (source->read())
+    {
+        return source;
+    }
+
+    return nullptr;
+}
+
+size_t SourceFile::line(const size_t offset) const
+{
+    return std::distance(lineOffsets.begin(), lineOffsets.upper_bound(offset));
+}
+
+size_t SourceFile::character(const size_t offset) const
+{
+    return offset - *(--lineOffsets.upper_bound(offset)) + 1;
+}
+
+SourceFile::SourceFile(const Path* path) :
+    path(path) {}
+
+bool SourceFile::read()
+{
+    if (!path->readToString(source))
+    {
+        return false;
+    }
+
+    lineOffsets.insert(0);
+
+    for (size_t i = 0; i < source.size(); i++)
+    {
+        if (source[i] == '\n')
+        {
+            lineOffsets.insert(i + 1);
+        }
+    }
+
+    return true;
+}

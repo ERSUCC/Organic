@@ -1,11 +1,10 @@
 #pragma once
 
-#include <fstream>
 #include <iostream>
-#include <regex>
 #include <string>
 #include <unordered_set>
 
+#include "exception.h"
 #include "location.h"
 #include "parse.h"
 #include "path.h"
@@ -39,6 +38,8 @@ protected:
     void assert(const std::string name, const bool result);
     void fail(const std::string message);
 
+    bool parseErrorMatches(const std::vector<std::string>& expected, const OrganicParseException& error);
+
     unsigned int indents = 0;
 
     unsigned int suiteFailures;
@@ -61,10 +62,7 @@ struct ParserTests : public Test
     unsigned int test() override;
 
 private:
-    void roundTrip(const Path* path);
     void expectError(const Path* path);
-
-    std::string formatSource(const std::string text) const;
 
 };
 

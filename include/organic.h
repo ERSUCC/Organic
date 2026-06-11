@@ -13,6 +13,7 @@
 #include <RtAudio.h>
 #include <sndfile.hh>
 
+#include "exception.h"
 #include "flags.h"
 #include "parse.h"
 #include "path.h"

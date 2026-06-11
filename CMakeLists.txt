@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_library(organic_lib STATIC src/audiosource.cpp
                                src/controller.cpp
                                src/effect.cpp
+                               src/exception.cpp
                                src/flags.cpp
                                src/location.cpp
                                src/object.cpp

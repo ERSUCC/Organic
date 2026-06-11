@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "exception.h"
 #include "location.h"
 #include "path.h"
 #include "token.h"

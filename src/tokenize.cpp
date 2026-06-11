@@ -5,10 +5,10 @@ namespace Parser
     TokenListNode::TokenListNode(Token* token, TokenListNode* prev, TokenListNode* next, const bool end) :
         token(token), prev(prev), next(next), end(end) {}
 
-    TokenList::TokenList(const Path* path)
+    TokenList::TokenList(const SourceFile* source)
     {
-        head = new TokenListNode(new Token(SourceLocation(path, 0, 0)), nullptr, nullptr, true);
-        tail = new TokenListNode(new Token(SourceLocation(path, 0, 0)), nullptr, nullptr, true);
+        head = new TokenListNode(new Token(SourceLocation(source, 0, 0)), nullptr, nullptr, true);
+        tail = new TokenListNode(new Token(SourceLocation(source, 0, 0)), nullptr, nullptr, true);
 
         head->prev = head;
         head->next = tail;
@@ -39,297 +39,291 @@ namespace Parser
         return end;
     }
 
-    Tokenizer::Tokenizer(const Path* path) :
-        path(path)
-    {
-        utils = Utils::get();
-
-        if (!path->readToString(code))
-        {
-            throw OrganicFileException("Could not open \"" + path->string() + "\".");
-        }
-    }
+    Tokenizer::Tokenizer(const SourceFile* source) :
+        source(source), utils(Utils::get()) {}
 
     TokenList* Tokenizer::tokenize()
     {
-        TokenList* tokens = new TokenList(path);
+        TokenList* tokens = new TokenList(source);
 
-        while (current < code.size())
+        while (current < source->length())
         {
             skipWhitespace();
 
-            if (code[current] == '/' && current < code.size() - 1 && code[current + 1] == '/')
+            if (source->get(current) == '/' && current < source->length() - 1 && source->get(current + 1) == '/')
             {
-                while (current < code.size() && code[current] != '\n')
+                while (current < source->length() && source->get(current) != '\n')
                 {
-                    nextCharacter();
+                    current++;
                 }
             }
 
-            else if (code[current] == '/' && current < code.size() - 1 && code[current + 1] == '*')
+            else if (source->get(current) == '/' && current < source->length() - 1 && source->get(current + 1) == '*')
             {
-                nextCharacter();
-                nextCharacter();
+                current++;
+                current++;
 
-                while (current < code.size() - 1 && !(code[current] == '*' && code[current + 1] == '/'))
+                while (current < source->length() - 1 && !(source->get(current) == '*' && source->get(current + 1) == '/'))
                 {
-                    nextCharacter();
+                    current++;
                 }
 
-                nextCharacter();
-                nextCharacter();
+                current++;
+                current++;
             }
 
-            else if (code[current] == '(')
+            else if (source->get(current) == '(')
             {
-                tokens->add(new OpenParenthesis(SourceLocation(path, line, character)));
+                tokens->add(new OpenParenthesis(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == ')')
+            else if (source->get(current) == ')')
             {
-                tokens->add(new CloseParenthesis(SourceLocation(path, line, character)));
+                tokens->add(new CloseParenthesis(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '[')
+            else if (source->get(current) == '[')
             {
-                tokens->add(new OpenSquareBracket(SourceLocation(path, line, character)));
+                tokens->add(new OpenSquareBracket(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == ']')
+            else if (source->get(current) == ']')
             {
-                tokens->add(new CloseSquareBracket(SourceLocation(path, line, character)));
+                tokens->add(new CloseSquareBracket(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '{')
+            else if (source->get(current) == '{')
             {
-                tokens->add(new OpenCurlyBracket(SourceLocation(path, line, character)));
+                tokens->add(new OpenCurlyBracket(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '}')
+            else if (source->get(current) == '}')
             {
-                tokens->add(new CloseCurlyBracket(SourceLocation(path, line, character)));
+                tokens->add(new CloseCurlyBracket(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == ':')
+            else if (source->get(current) == ':')
             {
-                tokens->add(new Colon(SourceLocation(path, line, character)));
+                tokens->add(new Colon(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == ',')
+            else if (source->get(current) == ',')
             {
-                tokens->add(new Comma(SourceLocation(path, line, character)));
+                tokens->add(new Comma(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '=')
+            else if (source->get(current) == '=')
             {
-                if (current < code.size() - 1 && code[current + 1] == '=')
+                if (current < source->length() - 1 && source->get(current + 1) == '=')
                 {
-                    tokens->add(new DoubleEquals(SourceLocation(path, line, character)));
+                    tokens->add(new DoubleEquals(SourceLocation(source, current, current + 2)));
 
-                    nextCharacter();
+                    current++;
                 }
 
                 else
                 {
-                    tokens->add(new Equals(SourceLocation(path, line, line)));
+                    tokens->add(new Equals(SourceLocation(source, current, current + 1)));
                 }
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '+')
+            else if (source->get(current) == '+')
             {
-                tokens->add(new Add(SourceLocation(path, line, character)));
+                tokens->add(new Add(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '-')
+            else if (source->get(current) == '-')
             {
-                if (current < code.size() - 1 && isdigit(code[current + 1]) && !tokens->tail->prev->getToken<Identifier>() && !tokens->tail->prev->getToken<Value>())
+                if (current < source->length() - 1 && isdigit(source->get(current + 1)) && !tokens->tail->prev->getToken<Identifier>() && !tokens->tail->prev->getToken<Value>())
                 {
                     tokens->add(tokenizeNumber());
                 }
 
                 else
                 {
-                    tokens->add(new Subtract(SourceLocation(path, line, character)));
+                    tokens->add(new Subtract(SourceLocation(source, current, current + 1)));
 
-                    nextCharacter();
+                    current++;
                 }
             }
 
-            else if (code[current] == '*')
+            else if (source->get(current) == '*')
             {
-                tokens->add(new Multiply(SourceLocation(path, line, character)));
+                tokens->add(new Multiply(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '/')
+            else if (source->get(current) == '/')
             {
-                tokens->add(new Divide(SourceLocation(path, line, character)));
+                tokens->add(new Divide(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '^')
+            else if (source->get(current) == '^')
             {
-                tokens->add(new Power(SourceLocation(path, line, character)));
+                tokens->add(new Power(SourceLocation(source, current, current + 1)));
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '<')
+            else if (source->get(current) == '<')
             {
-                if (current < code.size() - 1 && code[current] + 1 == '=')
+                if (current < source->length() - 1 && source->get(current + 1) == '=')
                 {
-                    tokens->add(new LessEqual(SourceLocation(path, line, character)));
+                    tokens->add(new LessEqual(SourceLocation(source, current, current + 2)));
 
-                    nextCharacter();
+                    current++;
                 }
 
                 else
                 {
-                    tokens->add(new Less(SourceLocation(path, line, character)));
+                    tokens->add(new Less(SourceLocation(source, current, current + 1)));
                 }
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '>')
+            else if (source->get(current) == '>')
             {
-                if (current < code.size() - 1 && code[current + 1] == '=')
+                if (current < source->length() - 1 && source->get(current + 1) == '=')
                 {
-                    tokens->add(new GreaterEqual(SourceLocation(path, line, character)));
+                    tokens->add(new GreaterEqual(SourceLocation(source, current, current + 2)));
 
-                    nextCharacter();
+                    current++;
                 }
 
                 else
                 {
-                    tokens->add(new Greater(SourceLocation(path, line, character)));
+                    tokens->add(new Greater(SourceLocation(source, current, current + 1)));
                 }
 
-                nextCharacter();
+                current++;
             }
 
-            else if (code[current] == '"')
+            else if (source->get(current) == '"')
             {
                 tokens->add(tokenizeString());
             }
 
-            else if (isdigit(code[current]))
+            else if (isdigit(source->get(current)))
             {
                 tokens->add(tokenizeNumber());
             }
 
-            else if (isalpha(code[current]) || code[current] == '_')
+            else if (isalpha(source->get(current)) || source->get(current) == '_')
             {
                 tokens->add(tokenizeIdentifier());
             }
 
             else
             {
-                throw OrganicParseException("Unrecognized symbol \"" + std::string(1, code[current]) + "\".", SourceLocation(path, line, character));
+                throw OrganicParseException("Unrecognized symbol \"" + source->get(current, 1) + "\".", SourceLocation(source, current, current + 1));
             }
 
             skipWhitespace();
         }
 
-        tokens->tail->token = new Token(SourceLocation(path, line, character));
+        tokens->tail->token = new Token(SourceLocation(source, current, current));
 
         return tokens;
     }
 
     Token* Tokenizer::tokenizeString()
     {
-        const SourceLocation location = SourceLocation(path, line, character);
+        const size_t start = current;
 
-        nextCharacter();
+        current++;
 
         std::string str;
 
-        while (current < code.size() && code[current] != '"')
+        while (current < source->length() && source->get(current) != '"')
         {
-            str += code[current];
+            str += source->get(current);
 
-            nextCharacter();
+            current++;
         }
 
-        if (current >= code.size() || code[current] != '"')
+        if (current >= source->length() || source->get(current) != '"')
         {
-            throw OrganicParseException("Unexpected end of file.", SourceLocation(path, line, character));
+            throw OrganicParseException("Unexpected end of file.", SourceLocation(source, current, current));
         }
 
-        nextCharacter();
+        current++;
 
-        return new String(location, str);
+        return new String(SourceLocation(source, start, current), str);
     }
 
     Token* Tokenizer::tokenizeNumber()
     {
-        const SourceLocation location = SourceLocation(path, line, character);
+        const size_t start = current;
 
         std::string constant;
 
-        if (code[current] == '-')
+        if (source->get(current) == '-')
         {
             constant += '-';
 
-            nextCharacter();
+            current++;
         }
 
         bool period = false;
 
-        while (current < code.size() && (isdigit(code[current]) || code[current] == '.'))
+        while (current < source->length() && (isdigit(source->get(current)) || source->get(current) == '.'))
         {
-            if (code[current] == '.')
+            if (source->get(current) == '.')
             {
                 if (period)
                 {
-                    throw OrganicParseException("Numbers cannot contain more than one decimal point.", SourceLocation(path, line, character));
+                    throw OrganicParseException("Numbers cannot contain more than one decimal point.", SourceLocation(source, current, current + 1));
                 }
 
                 period = true;
             }
 
-            constant += code[current];
+            constant += source->get(current);
 
-            nextCharacter();
+            current++;
         }
 
-        return new Value(location, constant, std::stod(constant));
+        return new Value(SourceLocation(source, start, current), std::stod(constant));
     }
 
     Token* Tokenizer::tokenizeIdentifier()
     {
-        const SourceLocation location(path, line, character);
+        const size_t start = current;
 
         std::string name;
 
-        while (current < code.size() && (isalnum(code[current]) || code[current] == '-' || code[current] == '_'))
+        while (current < source->length() && (isalnum(source->get(current)) || source->get(current) == '-' || source->get(current) == '_'))
         {
-            name += code[current];
+            name += source->get(current);
 
-            nextCharacter();
+            current++;
         }
+
+        const SourceLocation location(source, start, current);
 
         if (name == "sequence-forward")
         {
@@ -378,12 +372,12 @@ namespace Parser
 
         if (name == "pi")
         {
-            return new Value(location, "pi", utils->pi);
+            return new Value(location, utils->pi);
         }
 
         if (name == "e")
         {
-            return new Value(location, "e", utils->e);
+            return new Value(location, utils->e);
         }
 
         double base = 0;
@@ -435,44 +429,32 @@ namespace Parser
         {
             if (name.size() == 2 && isdigit(name[1]))
             {
-                return new Value(location, name, getFrequency(base + 12 * (name[1] - 48)));
+                return new Value(location, getFrequency(base + 12 * (name[1] - 48)));
             }
 
             if (name.size() == 3 && isdigit(name[2]))
             {
                 if (name[1] == 's')
                 {
-                    return new Value(location, name, getFrequency(base + 12 * (name[2] - 48) + 1));
+                    return new Value(location, getFrequency(base + 12 * (name[2] - 48) + 1));
                 }
 
                 if (name[1] == 'f')
                 {
-                    return new Value(location, name, getFrequency(base + 12 * (name[2] - 48) - 1));
+                    return new Value(location, getFrequency(base + 12 * (name[2] - 48) - 1));
                 }
             }
         }
 
-        return new Identifier(location, name);
+        return new Identifier(location);
     }
 
     void Tokenizer::skipWhitespace()
     {
-        while (current < code.size() && isspace(code[current]))
+        while (current < source->length() && isspace(source->get(current)))
         {
-            nextCharacter();
+            current++;
         }
-    }
-
-    void Tokenizer::nextCharacter()
-    {
-        if (code[current] == '\n')
-        {
-            line++;
-            character = 0;
-        }
-
-        current++;
-        character++;
     }
 
     double Tokenizer::getFrequency(const double note) const

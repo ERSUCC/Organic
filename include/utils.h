@@ -17,8 +17,8 @@
 #include <random>
 #include <string>
 
+#include "exception.h"
 #include "location.h"
-#include "path.h"
 
 struct Utils
 {
@@ -49,48 +49,6 @@ private:
 
     bool firstWarning = true;
 
-};
-
-struct OrganicException : public std::exception
-{
-    OrganicException(const std::string message);
-
-    const char* what() const noexcept override;
-
-    bool operator==(const OrganicException& other) const;
-
-private:
-    const std::string message;
-
-};
-
-struct OrganicArgumentException : public OrganicException
-{
-    OrganicArgumentException(const std::string message);
-};
-
-struct OrganicFileException : public OrganicException
-{
-    OrganicFileException(const std::string message);
-};
-
-struct OrganicParseException : public OrganicException
-{
-    OrganicParseException(const std::string message, const SourceLocation& location);
-
-    const SourceLocation location;
-};
-
-struct OrganicIncludeException : public OrganicException
-{
-    OrganicIncludeException(const std::string message, const SourceLocation& location);
-
-    const SourceLocation location;
-};
-
-struct OrganicAudioException : public OrganicException
-{
-    OrganicAudioException(const std::string message);
 };
 
 struct Profiler

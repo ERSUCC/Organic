@@ -203,7 +203,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 {
     const Parser::String* str = static_cast<const Parser::String*>(token->arguments->get("file"));
 
-    const Path* path = Path::beside(Path::formatPath(str->value), sourcePath);
+    const Path* path = Path::beside(Path::formatPath(str->str), sourcePath);
 
     Engine::Resource* resource = new Engine::Resource(path, str->location);
 
@@ -214,7 +214,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 {
     const Parser::String* str = static_cast<const Parser::String*>(token->arguments->get("sample"));
 
-    const Path* path = Path::beside(Path::formatPath(str->value), sourcePath);
+    const Path* path = Path::beside(Path::formatPath(str->str), sourcePath);
 
     Engine::Resource* resource = new Engine::Resource(path, str->location);
 
@@ -265,7 +265,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
 {
     for (Parser::InputDef* input : token->function->definition->inputs)
     {
-        inputs[input] = transformArgument(token->arguments, input->str);
+        inputs[input] = transformArgument(token->arguments, input->string());
     }
 
     const Parser::Define* function = functions[token->function->definition];

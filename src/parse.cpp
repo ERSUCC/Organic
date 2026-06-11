@@ -7,7 +7,7 @@ namespace Parser
     {
         for (InputDef* input : inputs)
         {
-            this->inputs[input->str] = input;
+            this->inputs[input->string()] = input;
         }
     }
 
@@ -15,9 +15,9 @@ namespace Parser
     {
         checkNameConflicts(token);
 
-        VariableDef* variable = new VariableDef(token->location, token->str);
+        VariableDef* variable = new VariableDef(token->location);
 
-        variables[token->str] = variable;
+        variables[token->string()] = variable;
 
         return variable;
     }
@@ -31,28 +31,28 @@ namespace Parser
 
         checkNameConflicts(token);
 
-        FunctionDef* lambda = new FunctionDef(token->location, token->str, inputs);
+        FunctionDef* lambda = new FunctionDef(token->location, inputs);
 
-        functions[token->str] = lambda;
+        functions[token->string()] = lambda;
 
         return lambda;
     }
 
     Identifier* ParserContext::findIdentifier(const Identifier* token)
     {
-        if (inputs.count(token->str))
+        if (inputs.count(token->string()))
         {
-            return new InputRef(token->location, inputs[token->str]);
+            return new InputRef(token->location, inputs[token->string()]);
         }
 
-        if (variables.count(token->str))
+        if (variables.count(token->string()))
         {
-            return new VariableRef(token->location, variables[token->str]);
+            return new VariableRef(token->location, variables[token->string()]);
         }
 
-        if (functions.count(token->str))
+        if (functions.count(token->string()))
         {
-            return new FunctionRef(token->location, functions[token->str]);
+            return new FunctionRef(token->location, functions[token->string()]);
         }
 
         if (parent)
@@ -63,7 +63,7 @@ namespace Parser
             }
         }
 
-        throw OrganicParseException("No variable, input, or function exists with the name \"" + token->str + "\".", token->location);
+        throw OrganicParseException("No variable, input, or function exists with the name \"" + token->string() + "\".", token->location);
     }
 
     FunctionRef* ParserContext::findFunction(const Identifier* token)
@@ -73,9 +73,9 @@ namespace Parser
             throw OrganicParseException("Calling a function in its own definition is not allowed.", token->location);
         }
 
-        if (functions.count(token->str))
+        if (functions.count(token->string()))
         {
-            return new FunctionRef(token->location, functions[token->str]);
+            return new FunctionRef(token->location, functions[token->string()]);
         }
 
         if (parent)
@@ -86,7 +86,7 @@ namespace Parser
             }
         }
 
-        throw OrganicParseException("No function exists with the name \"" + token->str + "\".", token->location);
+        throw OrganicParseException("No function exists with the name \"" + token->string() + "\".", token->location);
     }
 
     void ParserContext::merge(const ParserContext* context)
@@ -115,25 +115,25 @@ namespace Parser
 
     void ParserContext::checkNameConflicts(const Identifier* token) const
     {
-        if (inputs.count(token->str))
+        if (inputs.count(token->string()))
         {
-            throw OrganicParseException("An input already exists with the name \"" + token->str + "\".", token->location);
+            throw OrganicParseException("An input already exists with the name \"" + token->string() + "\".", token->location);
         }
 
-        if (variables.count(token->str))
+        if (variables.count(token->string()))
         {
-            throw OrganicParseException("A variable already exists with the name \"" + token->str + "\".", token->location);
+            throw OrganicParseException("A variable already exists with the name \"" + token->string() + "\".", token->location);
         }
 
-        if (functions.count(token->str))
+        if (functions.count(token->string()))
         {
-            throw OrganicParseException("A function already exists with the name \"" + token->str + "\".", token->location);
+            throw OrganicParseException("A function already exists with the name \"" + token->string() + "\".", token->location);
         }
     }
 
     bool ParserContext::checkRecursive(const Identifier* token) const
     {
-        return name == token->str || (parent && parent->checkRecursive(token));
+        return name == token->string() || (parent && parent->checkRecursive(token));
     }
 
     Parser::Parser(const Path* path, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
@@ -141,7 +141,14 @@ namespace Parser
 
     Program* Parser::parse()
     {
-        tokens = (new Tokenizer(path))->tokenize();
+        const SourceFile* source = SourceFile::create(path);
+
+        if (!source)
+        {
+            throw OrganicFileException("Could not open \"" + path->string() + "\".");
+        }
+
+        tokens = (new Tokenizer(source))->tokenize();
 
         TokenListNode* current = tokens->head->next;
 
@@ -166,7 +173,7 @@ namespace Parser
             current = current->next;
         }
 
-        return new Program(SourceLocation(path, 1, 1), instructions);
+        return new Program(SourceLocation(source, 0, source->length()), instructions);
     }
 
     void Parser::tokenError(const Token* token, const std::string expected) const
@@ -318,7 +325,7 @@ namespace Parser
 
                 current = parseExpression(current->next);
 
-                inputs.push_back(new InputDef(input->location, input->str, current->prev->token));
+                inputs.push_back(new InputDef(input->location, current->prev->token));
             } while (current->getToken<Comma>());
 
             if (!current->getToken<CloseParenthesis>())
@@ -329,44 +336,44 @@ namespace Parser
 
         FunctionDef* function = context->addFunction(start->getToken<Identifier>(), inputs);
 
-        if (function->str == "time" ||
-            function->str == "hold" ||
-            function->str == "lfo" ||
-            function->str == "sweep" ||
-            function->str == "sequence" ||
-            function->str == "repeat" ||
-            function->str == "random" ||
-            function->str == "limit" ||
-            function->str == "trigger" ||
-            function->str == "if" ||
-            function->str == "all" ||
-            function->str == "any" ||
-            function->str == "none" ||
-            function->str == "min" ||
-            function->str == "max" ||
-            function->str == "round" ||
-            function->str == "absolute" ||
-            function->str == "sine" ||
-            function->str == "square" ||
-            function->str == "triangle" ||
-            function->str == "saw" ||
-            function->str == "noise" ||
-            function->str == "sample" ||
-            function->str == "oscillator" ||
-            function->str == "granulate" ||
-            function->str == "group" ||
-            function->str == "effect-group" ||
-            function->str == "delay" ||
-            function->str == "comb" ||
-            function->str == "all-pass" ||
-            function->str == "low-pass" ||
-            function->str == "reverb" ||
-            function->str == "include")
+        if (function->string() == "time" ||
+            function->string() == "hold" ||
+            function->string() == "lfo" ||
+            function->string() == "sweep" ||
+            function->string() == "sequence" ||
+            function->string() == "repeat" ||
+            function->string() == "random" ||
+            function->string() == "limit" ||
+            function->string() == "trigger" ||
+            function->string() == "if" ||
+            function->string() == "all" ||
+            function->string() == "any" ||
+            function->string() == "none" ||
+            function->string() == "min" ||
+            function->string() == "max" ||
+            function->string() == "round" ||
+            function->string() == "absolute" ||
+            function->string() == "sine" ||
+            function->string() == "square" ||
+            function->string() == "triangle" ||
+            function->string() == "saw" ||
+            function->string() == "noise" ||
+            function->string() == "sample" ||
+            function->string() == "oscillator" ||
+            function->string() == "granulate" ||
+            function->string() == "group" ||
+            function->string() == "effect-group" ||
+            function->string() == "delay" ||
+            function->string() == "comb" ||
+            function->string() == "all-pass" ||
+            function->string() == "low-pass" ||
+            function->string() == "reverb" ||
+            function->string() == "include")
         {
-            throw OrganicParseException("A function already exists with the name \"" + function->str + "\".", function->location);
+            throw OrganicParseException("A function already exists with the name \"" + function->string() + "\".", function->location);
         }
 
-        context = new ParserContext(context, function->str, inputs);
+        context = new ParserContext(context, function->string(), inputs);
 
         current = current->next->next;
 
@@ -435,7 +442,7 @@ namespace Parser
                 {
                     if (arg->name == argument->name)
                     {
-                        throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + name->str + "\".", argument->location);
+                        throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + name->string() + "\".", argument->location);
                     }
                 }
 
@@ -450,169 +457,169 @@ namespace Parser
 
         current = current->next;
 
-        ArgumentList* argumentList = new ArgumentList(name->location, arguments, name->str);
+        ArgumentList* argumentList = new ArgumentList(name->location, arguments, name->string());
 
-        if (name->str == "time")
+        if (name->string() == "time")
         {
             return tokens->patch(start, current, new Time(name->location, argumentList));
         }
 
-        if (name->str == "hold")
+        if (name->string() == "hold")
         {
             return tokens->patch(start, current, new Hold(name->location, argumentList));
         }
 
-        if (name->str == "lfo")
+        if (name->string() == "lfo")
         {
             return tokens->patch(start, current, new LFO(name->location, argumentList));
         }
 
-        if (name->str == "sweep")
+        if (name->string() == "sweep")
         {
             return tokens->patch(start, current, new Sweep(name->location, argumentList));
         }
 
-        if (name->str == "sequence")
+        if (name->string() == "sequence")
         {
             return tokens->patch(start, current, new Sequence(name->location, argumentList));
         }
 
-        if (name->str == "repeat")
+        if (name->string() == "repeat")
         {
             return tokens->patch(start, current, new Repeat(name->location, argumentList));
         }
 
-        if (name->str == "random")
+        if (name->string() == "random")
         {
             return tokens->patch(start, current, new Random(name->location, argumentList));
         }
 
-        if (name->str == "limit")
+        if (name->string() == "limit")
         {
             return tokens->patch(start, current, new Limit(name->location, argumentList));
         }
 
-        if (name->str == "trigger")
+        if (name->string() == "trigger")
         {
             return tokens->patch(start, current, new Trigger(name->location, argumentList));
         }
 
-        if (name->str == "if")
+        if (name->string() == "if")
         {
             return tokens->patch(start, current, new If(name->location, argumentList));
         }
 
-        if (name->str == "all")
+        if (name->string() == "all")
         {
             return tokens->patch(start, current, new All(name->location, argumentList));
         }
 
-        if (name->str == "any")
+        if (name->string() == "any")
         {
             return tokens->patch(start, current, new Any(name->location, argumentList));
         }
 
-        if (name->str == "none")
+        if (name->string() == "none")
         {
             return tokens->patch(start, current, new None(name->location, argumentList));
         }
 
-        if (name->str == "min")
+        if (name->string() == "min")
         {
             return tokens->patch(start, current, new Min(name->location, argumentList));
         }
 
-        if (name->str == "max")
+        if (name->string() == "max")
         {
             return tokens->patch(start, current, new Max(name->location, argumentList));
         }
 
-        if (name->str == "round")
+        if (name->string() == "round")
         {
             return tokens->patch(start, current, new Round(name->location, argumentList));
         }
 
-        if (name->str == "absolute")
+        if (name->string() == "absolute")
         {
             return tokens->patch(start, current, new Absolute(name->location, argumentList));
         }
 
-        if (name->str == "sine")
+        if (name->string() == "sine")
         {
             return tokens->patch(start, current, new Sine(name->location, argumentList));
         }
 
-        if (name->str == "square")
+        if (name->string() == "square")
         {
             return tokens->patch(start, current, new Square(name->location, argumentList));
         }
 
-        if (name->str == "triangle")
+        if (name->string() == "triangle")
         {
             return tokens->patch(start, current, new Triangle(name->location, argumentList));
         }
 
-        if (name->str == "saw")
+        if (name->string() == "saw")
         {
             return tokens->patch(start, current, new Saw(name->location, argumentList));
         }
 
-        if (name->str == "noise")
+        if (name->string() == "noise")
         {
             return tokens->patch(start, current, new Noise(name->location, argumentList));
         }
 
-        if (name->str == "sample")
+        if (name->string() == "sample")
         {
             return tokens->patch(start, current, new Sample(name->location, argumentList));
         }
 
-        if (name->str == "oscillator")
+        if (name->string() == "oscillator")
         {
             return tokens->patch(start, current, new Oscillator(name->location, argumentList));
         }
 
-        if (name->str == "granulate")
+        if (name->string() == "granulate")
         {
             return tokens->patch(start, current, new Granulate(name->location, argumentList));
         }
 
-        if (name->str == "group")
+        if (name->string() == "group")
         {
             return tokens->patch(start, current, new Group(name->location, argumentList));
         }
 
-        if (name->str == "effect-group")
+        if (name->string() == "effect-group")
         {
             return tokens->patch(start, current, new EffectGroup(name->location, argumentList));
         }
 
-        if (name->str == "delay")
+        if (name->string() == "delay")
         {
             return tokens->patch(start, current, new Delay(name->location, argumentList));
         }
 
-        if (name->str == "comb")
+        if (name->string() == "comb")
         {
             return tokens->patch(start, current, new Comb(name->location, argumentList));
         }
 
-        if (name->str == "all-pass")
+        if (name->string() == "all-pass")
         {
             return tokens->patch(start, current, new AllPass(name->location, argumentList));
         }
 
-        if (name->str == "low-pass")
+        if (name->string() == "low-pass")
         {
             return tokens->patch(start, current, new LowPass(name->location, argumentList));
         }
 
-        if (name->str == "reverb")
+        if (name->string() == "reverb")
         {
             return tokens->patch(start, current, new Reverb(name->location, argumentList));
         }
 
-        if (name->str == "include")
+        if (name->string() == "include")
         {
             throw OrganicIncludeException("Includes must come before all other instructions.", name->location);
         }
@@ -640,7 +647,7 @@ namespace Parser
 
         current = parseExpression(current->next);
 
-        return tokens->patch(start, current, new Argument(name->location, name->str, current->prev->token));
+        return tokens->patch(start, current, new Argument(name->location, name->string(), current->prev->token));
     }
 
     TokenListNode* Parser::parseExpression(TokenListNode* start)

@@ -48,7 +48,7 @@ Resource::Resource(const Path* path, const SourceLocation location)
 
         if (result)
         {
-            throw OrganicException(std::string("Failed to convert sample rate of audio file \"" + path->string() + "\": ") + src_strerror(result));
+            throw OrganicFileException(std::string("Failed to convert sample rate of audio file \"" + path->string() + "\": ") + src_strerror(result));
         }
 
         free(floatSamples);

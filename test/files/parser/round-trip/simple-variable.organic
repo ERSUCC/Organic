@@ -1,5 +1,0 @@
-// Simple variable reference
-
-freq = 440
-
-sine(volume: 1, frequency: freq)

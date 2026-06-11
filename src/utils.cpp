@@ -35,7 +35,7 @@ void Utils::parseWarning(const std::string message, const SourceLocation& locati
         Utils::get()->firstWarning = false;
     }
 
-    std::cout << "Parse warning in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
+    std::cout << "Parse warning in \"" + location.source->path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
 }
 
 void Utils::includeWarning(const std::string message, const SourceLocation& location)
@@ -50,7 +50,7 @@ void Utils::includeWarning(const std::string message, const SourceLocation& loca
         Utils::get()->firstWarning = false;
     }
 
-    std::cout << "Include warning in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
+    std::cout << "Include warning in \"" + location.source->path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
 }
 
 void Utils::setSeed(const std::optional<unsigned int>& seed)
@@ -59,34 +59,6 @@ void Utils::setSeed(const std::optional<unsigned int>& seed)
 
     rng = std::mt19937(this->seed);
 }
-
-OrganicException::OrganicException(const std::string message) :
-    message(message) {}
-
-const char* OrganicException::what() const noexcept
-{
-    return message.c_str();
-}
-
-bool OrganicException::operator==(const OrganicException& other) const
-{
-    return message == other.message;
-}
-
-OrganicArgumentException::OrganicArgumentException(const std::string message) :
-    OrganicException("Argument error:\n\t" + message) {}
-
-OrganicFileException::OrganicFileException(const std::string message) :
-    OrganicException("File error:\n\t" + message) {}
-
-OrganicParseException::OrganicParseException(const std::string message, const SourceLocation& location) :
-    OrganicException("Parse error in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message), location(location) {}
-
-OrganicIncludeException::OrganicIncludeException(const std::string message, const SourceLocation& location) :
-    OrganicException("Include error in \"" + location.path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message), location(location) {}
-
-OrganicAudioException::OrganicAudioException(const std::string message) :
-    OrganicException("Audio error:\n\t" + message) {}
 
 Profiler::Profiler(const double frequency) :
     frequency(frequency)

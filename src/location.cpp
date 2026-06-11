@@ -1,11 +1,11 @@
 #include "../include/location.h"
 
-SourceLocation::SourceLocation(const Path* path, const unsigned int line, const unsigned int character) :
-    path(path), line(line), character(character) {}
+SourceLocation::SourceLocation(const SourceFile* source, const size_t start, const size_t end) :
+    source(source), start(start), end(end), line(source->line(start)), character(source->character(start)) {}
 
 bool SourceLocation::operator==(const SourceLocation& other) const
 {
-    return path == other.path && line == other.line && character == other.character;
+    return source->path == other.source->path && start == other.start && end == other.end;
 }
 
 bool SourceLocation::operator!=(const SourceLocation& other) const

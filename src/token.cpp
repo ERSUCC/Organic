@@ -12,81 +12,73 @@ Engine::ValueObject* Token::transform(TokenTransformer* visitor) const
     return nullptr;
 }
 
-std::string Token::string() const
+const std::string Token::string() const
 {
-    return "";
-}
-
-BasicToken::BasicToken(const SourceLocation location, const std::string str) :
-    Token(location), str(str) {}
-
-std::string BasicToken::string() const
-{
-    return str;
+    return location.string();
 }
 
 OpenParenthesis::OpenParenthesis(const SourceLocation location) :
-    BasicToken(location, "(") {}
+    Token(location) {}
 
 CloseParenthesis::CloseParenthesis(const SourceLocation location) :
-    BasicToken(location, ")") {}
+    Token(location) {}
 
 OpenSquareBracket::OpenSquareBracket(const SourceLocation location) :
-    BasicToken(location, "[") {}
+    Token(location) {}
 
 CloseSquareBracket::CloseSquareBracket(const SourceLocation location) :
-    BasicToken(location, "]") {}
+    Token(location) {}
 
 OpenCurlyBracket::OpenCurlyBracket(const SourceLocation location) :
-    BasicToken(location, "{") {}
+    Token(location) {}
 
 CloseCurlyBracket::CloseCurlyBracket(const SourceLocation location) :
-    BasicToken(location, "}") {}
+    Token(location) {}
 
 Colon::Colon(const SourceLocation location) :
-    BasicToken(location, ":") {}
+    Token(location) {}
 
 Comma::Comma(const SourceLocation location) :
-    BasicToken(location, ",") {}
+    Token(location) {}
 
 Equals::Equals(const SourceLocation location) :
-    BasicToken(location, "=") {}
+    Token(location) {}
 
-Operator::Operator(const SourceLocation location, const std::string str) :
-    BasicToken(location, str) {}
+Operator::Operator(const SourceLocation location) :
+    Token(location) {}
 
 Add::Add(const SourceLocation location) :
-    Operator(location, "+") {}
+    Operator(location) {}
 
 Subtract::Subtract(const SourceLocation location) :
-    Operator(location, "-") {}
+    Operator(location) {}
 
 Multiply::Multiply(const SourceLocation location) :
-    Operator(location, "*") {}
+    Operator(location) {}
 
 Divide::Divide(const SourceLocation location) :
-    Operator(location, "/") {}
+    Operator(location) {}
 
 Power::Power(const SourceLocation location) :
-    Operator(location, "^") {}
+    Operator(location) {}
 
 DoubleEquals::DoubleEquals(const SourceLocation location) :
-    Operator(location, "==") {}
+    Operator(location) {}
 
 Less::Less(const SourceLocation location) :
-    Operator(location, "<") {}
+    Operator(location) {}
 
 Greater::Greater(const SourceLocation location) :
-    Operator(location, ">") {}
+    Operator(location) {}
 
 LessEqual::LessEqual(const SourceLocation location) :
-    Operator(location, "<=") {}
+    Operator(location) {}
 
 GreaterEqual::GreaterEqual(const SourceLocation location) :
-    Operator(location, ">=") {}
+    Operator(location) {}
 
-Identifier::Identifier(const SourceLocation location, const std::string str) :
-    BasicToken(location, str) {}
+Identifier::Identifier(const SourceLocation location) :
+    Token(location) {}
 
 EmptyLambda::EmptyLambda(const SourceLocation location, Token* value) :
     Token(location), value(value) {}
@@ -96,8 +88,8 @@ Engine::ValueObject* EmptyLambda::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-Value::Value(const SourceLocation location, const std::string str, const double value) :
-    BasicToken(location, str), value(value)
+Value::Value(const SourceLocation location, const double value) :
+    Token(location), value(value)
 {
     type = new NumberType();
 }
@@ -107,8 +99,8 @@ Engine::ValueObject* Value::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-Constant::Constant(const SourceLocation location, const std::string str, const unsigned char value) :
-    BasicToken(location, str), value(value) {}
+Constant::Constant(const SourceLocation location, const unsigned char value) :
+    Token(location), value(value) {}
 
 Engine::ValueObject* Constant::transform(TokenTransformer* visitor) const
 {
@@ -116,70 +108,70 @@ Engine::ValueObject* Constant::transform(TokenTransformer* visitor) const
 }
 
 SequenceForward::SequenceForward(const SourceLocation location) :
-    Constant(location, "sequence-forward", Constants::Sequence::Forward)
+    Constant(location, Constants::Sequence::Forward)
 {
     type = new SequenceOrderType();
 }
 
 SequenceBackward::SequenceBackward(const SourceLocation location) :
-    Constant(location, "sequence-backward", Constants::Sequence::Backward)
+    Constant(location, Constants::Sequence::Backward)
 {
     type = new SequenceOrderType();
 }
 
 SequencePingPong::SequencePingPong(const SourceLocation location) :
-    Constant(location, "sequence-ping-pong", Constants::Sequence::PingPong)
+    Constant(location, Constants::Sequence::PingPong)
 {
     type = new SequenceOrderType();
 }
 
 SequenceRandom::SequenceRandom(const SourceLocation location) :
-    Constant(location, "sequence-random", Constants::Sequence::Random)
+    Constant(location, Constants::Sequence::Random)
 {
     type = new SequenceOrderType();
 }
 
 RandomStep::RandomStep(const SourceLocation location) :
-    Constant(location, "random-step", Constants::Random::Step)
+    Constant(location, Constants::Random::Step)
 {
     type = new RandomTypeType();
 }
 
 RandomLinear::RandomLinear(const SourceLocation location) :
-    Constant(location, "random-linear", Constants::Random::Linear)
+    Constant(location, Constants::Random::Linear)
 {
     type = new RandomTypeType();
 }
 
 RoundNearest::RoundNearest(const SourceLocation location) :
-    Constant(location, "round-nearest", Constants::Round::Nearest)
+    Constant(location, Constants::Round::Nearest)
 {
     type = new RoundDirectionType();
 }
 
 RoundUp::RoundUp(const SourceLocation location) :
-    Constant(location, "round-up", Constants::Round::Up)
+    Constant(location, Constants::Round::Up)
 {
     type = new RoundDirectionType();
 }
 
 RoundDown::RoundDown(const SourceLocation location) :
-    Constant(location, "round-down", Constants::Round::Down)
+    Constant(location, Constants::Round::Down)
 {
     type = new RoundDirectionType();
 }
 
 String::String(const SourceLocation location, const std::string str) :
-    BasicToken(location, "\"" + str + "\""), value(str)
+    Token(location), str(str)
 {
     type = new StringType();
 }
 
-VariableDef::VariableDef(const SourceLocation location, const std::string str) :
-    Identifier(location, str) {}
+VariableDef::VariableDef(const SourceLocation location) :
+    Identifier(location) {}
 
 VariableRef::VariableRef(const SourceLocation location, VariableDef* definition) :
-    Identifier(location, definition->str), definition(definition) {}
+    Identifier(location), definition(definition) {}
 
 void VariableRef::resolveTypes(TypeResolver* visitor)
 {
@@ -191,8 +183,8 @@ Engine::ValueObject* VariableRef::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-InputDef::InputDef(const SourceLocation location, const std::string str, Token* defaultValue) :
-    Identifier(location, str), defaultValue(defaultValue) {}
+InputDef::InputDef(const SourceLocation location, Token* defaultValue) :
+    Identifier(location), defaultValue(defaultValue) {}
 
 void InputDef::resolveTypes(TypeResolver* visitor)
 {
@@ -200,7 +192,7 @@ void InputDef::resolveTypes(TypeResolver* visitor)
 }
 
 InputRef::InputRef(const SourceLocation location, InputDef* definition) :
-    Identifier(location, definition->str), definition(definition) {}
+    Identifier(location), definition(definition) {}
 
 void InputRef::resolveTypes(TypeResolver* visitor)
 {
@@ -212,11 +204,11 @@ Engine::ValueObject* InputRef::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-FunctionDef::FunctionDef(const SourceLocation location, const std::string str, const std::vector<InputDef*>& inputs) :
-    Identifier(location, str), inputs(inputs) {}
+FunctionDef::FunctionDef(const SourceLocation location, const std::vector<InputDef*>& inputs) :
+    Identifier(location), inputs(inputs) {}
 
 FunctionRef::FunctionRef(const SourceLocation location, FunctionDef* definition) :
-    Identifier(location, definition->str), definition(definition) {}
+    Identifier(location), definition(definition) {}
 
 void FunctionRef::resolveTypes(TypeResolver* visitor)
 {
@@ -231,30 +223,8 @@ Engine::ValueObject* FunctionRef::transform(TokenTransformer* visitor) const
 Argument::Argument(const SourceLocation location, const std::string name, Token* value) :
     Token(location), name(name), value(value) {}
 
-std::string Argument::string() const
-{
-    return name + ": " + value->string();
-}
-
 ArgumentList::ArgumentList(const SourceLocation location, const std::vector<Argument*>& arguments, const std::string name) :
     Token(location), arguments(arguments), name(name) {}
-
-std::string ArgumentList::string() const
-{
-    if (arguments.empty())
-    {
-        return "";
-    }
-
-    std::string result = arguments[0]->string();
-
-    for (unsigned int i = 1; i < arguments.size(); i++)
-    {
-        result += ", " + arguments[i]->string();
-    }
-
-    return result;
-}
 
 Token* ArgumentList::get(const std::string name) const
 {
@@ -302,18 +272,6 @@ Engine::ValueObject* List::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-std::string List::string() const
-{
-    std::string result = "[ " + values[0]->string();
-
-    for (unsigned int i = 1; i < values.size(); i++)
-    {
-        result += ", " + values[i]->string();
-    }
-
-    return result + " ]";
-}
-
 ParenthesizedExpression::ParenthesizedExpression(const SourceLocation location, Token* value) :
     Token(location), value(value) {}
 
@@ -325,11 +283,6 @@ void ParenthesizedExpression::resolveTypes(TypeResolver* visitor)
 Engine::ValueObject* ParenthesizedExpression::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
-}
-
-std::string ParenthesizedExpression::string() const
-{
-    return "(" + value->string() + ")";
 }
 
 Assign::Assign(const SourceLocation location, VariableDef* variable, Token* value) :
@@ -348,18 +301,8 @@ Engine::ValueObject* Assign::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-std::string Assign::string() const
-{
-    return variable->string() + " = " + value->string();
-}
-
 Call::Call(const SourceLocation location, ArgumentList* arguments) :
     Token(location), arguments(arguments) {}
-
-std::string Call::string() const
-{
-    return arguments->name + '(' + arguments->string() + ')';
-}
 
 Time::Time(const SourceLocation location, ArgumentList* arguments) :
     Call(location, arguments)
@@ -877,11 +820,6 @@ void CallAlias::resolveTypes(TypeResolver* visitor)
     visitor->resolveTypes(this);
 }
 
-std::string CallAlias::string() const
-{
-    return arguments->get("a")->string() + " " + op + " " + arguments->get("b")->string();
-}
-
 AddAlias::AddAlias(const SourceLocation location, Token* a, Token* b) :
     CallAlias(location, a, b, "+")
 {
@@ -1008,35 +946,6 @@ Engine::ValueObject* Define::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-std::string Define::string() const
-{
-    std::string result = function->str + '(';
-
-    if (!function->inputs.empty())
-    {
-        result += function->inputs[0]->string();
-
-        for (unsigned int i = 1; i < function->inputs.size(); i++)
-        {
-            result += ", " + function->inputs[i]->string();
-        }
-    }
-
-    result += ") = {";
-
-    if (!instructions.empty())
-    {
-        result += '\n' + instructions[0]->string();
-
-        for (unsigned int i = 1; i < instructions.size(); i++)
-        {
-            result += '\n' + instructions[i]->string();
-        }
-    }
-
-    return result + "\n}";
-}
-
 Program::Program(const SourceLocation location, const std::vector<Token*> instructions) :
     Token(location), instructions(instructions)
 {
@@ -1051,18 +960,6 @@ void Program::resolveTypes(TypeResolver* visitor)
 Engine::ValueObject* Program::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
-}
-
-std::string Program::string() const
-{
-    std::string result;
-
-    for (const Token* instruction : instructions)
-    {
-        result += instruction->string() + '\n';
-    }
-
-    return result;
 }
 
 }

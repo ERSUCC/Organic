@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "exception.h"
 #include "constants.h"
 #include "location.h"
 #include "path.h"
@@ -26,70 +27,61 @@ struct Token
 
     virtual Engine::ValueObject* transform(TokenTransformer* visitor) const;
 
-    virtual std::string string() const;
+    const std::string string() const;
 
     const SourceLocation location;
 
     Type* type = nullptr;
 };
 
-struct BasicToken : public Token
-{
-    BasicToken(const SourceLocation location, const std::string str);
-
-    std::string string() const override;
-
-    const std::string str;
-};
-
-struct OpenParenthesis : public BasicToken
+struct OpenParenthesis : public Token
 {
     OpenParenthesis(const SourceLocation location);
 };
 
-struct CloseParenthesis : public BasicToken
+struct CloseParenthesis : public Token
 {
     CloseParenthesis(const SourceLocation location);
 };
 
-struct OpenSquareBracket : public BasicToken
+struct OpenSquareBracket : public Token
 {
     OpenSquareBracket(const SourceLocation location);
 };
 
-struct CloseSquareBracket : public BasicToken
+struct CloseSquareBracket : public Token
 {
     CloseSquareBracket(const SourceLocation location);
 };
 
-struct OpenCurlyBracket : public BasicToken
+struct OpenCurlyBracket : public Token
 {
     OpenCurlyBracket(const SourceLocation location);
 };
 
-struct CloseCurlyBracket : public BasicToken
+struct CloseCurlyBracket : public Token
 {
     CloseCurlyBracket(const SourceLocation location);
 };
 
-struct Colon : public BasicToken
+struct Colon : public Token
 {
     Colon(const SourceLocation location);
 };
 
-struct Comma : public BasicToken
+struct Comma : public Token
 {
     Comma(const SourceLocation location);
 };
 
-struct Equals : public BasicToken
+struct Equals : public Token
 {
     Equals(const SourceLocation location);
 };
 
-struct Operator : public BasicToken
+struct Operator : public Token
 {
-    Operator(const SourceLocation location, const std::string str);
+    Operator(const SourceLocation location);
 };
 
 struct Add : public Operator
@@ -142,9 +134,9 @@ struct GreaterEqual : public Operator
     GreaterEqual(const SourceLocation location);
 };
 
-struct Identifier : public BasicToken
+struct Identifier : public Token
 {
-    Identifier(const SourceLocation location, const std::string str);
+    Identifier(const SourceLocation location);
 };
 
 struct EmptyLambda : public Token
@@ -156,18 +148,18 @@ struct EmptyLambda : public Token
     Token* value;
 };
 
-struct Value : public BasicToken
+struct Value : public Token
 {
-    Value(const SourceLocation location, const std::string str, const double value);
+    Value(const SourceLocation location, const double value);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
     const double value;
 };
 
-struct Constant : public BasicToken
+struct Constant : public Token
 {
-    Constant(const SourceLocation location, const std::string str, const unsigned char value);
+    Constant(const SourceLocation location, const unsigned char value);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
@@ -219,16 +211,16 @@ struct RoundDown : public Constant
     RoundDown(const SourceLocation location);
 };
 
-struct String : public BasicToken
+struct String : public Token
 {
     String(const SourceLocation location, const std::string str);
 
-    const std::string value;
+    const std::string str;
 };
 
 struct VariableDef : public Identifier
 {
-    VariableDef(const SourceLocation location, const std::string str);
+    VariableDef(const SourceLocation location);
 
     bool used = false;
 };
@@ -246,7 +238,7 @@ struct VariableRef : public Identifier
 
 struct InputDef : public Identifier
 {
-    InputDef(const SourceLocation location, const std::string str, Token* defaultValue);
+    InputDef(const SourceLocation location, Token* defaultValue);
 
     void resolveTypes(TypeResolver* visitor) override;
 
@@ -268,7 +260,7 @@ struct InputRef : public Identifier
 
 struct FunctionDef : public Identifier
 {
-    FunctionDef(const SourceLocation location, const std::string str, const std::vector<InputDef*>& inputs);
+    FunctionDef(const SourceLocation location, const std::vector<InputDef*>& inputs);
 
     const std::vector<InputDef*> inputs;
 
@@ -292,8 +284,6 @@ struct Argument : public Token
 {
     Argument(const SourceLocation location, const std::string name, Token* value);
 
-    std::string string() const override;
-
     const std::string name;
 
     Token* value;
@@ -304,8 +294,6 @@ struct Argument : public Token
 struct ArgumentList : public Token
 {
     ArgumentList(const SourceLocation location, const std::vector<Argument*>& arguments, const std::string name);
-
-    std::string string() const override;
 
     Token* get(const std::string name) const;
 
@@ -326,8 +314,6 @@ struct List : public Token
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    std::string string() const override;
-
     const std::vector<Token*> values;
 };
 
@@ -338,8 +324,6 @@ struct ParenthesizedExpression : public Token
     void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
-
-    std::string string() const override;
 
     Token* value;
 };
@@ -352,8 +336,6 @@ struct Assign : public Token
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    std::string string() const override;
-
     VariableDef* variable;
 
     Token* value;
@@ -362,8 +344,6 @@ struct Assign : public Token
 struct Call : public Token
 {
     Call(const SourceLocation location, ArgumentList* arguments);
-
-    std::string string() const override;
 
     ArgumentList* arguments;
 };
@@ -697,8 +677,6 @@ struct CallAlias : public Call
 
     void resolveTypes(TypeResolver* visitor) override;
 
-    std::string string() const override;
-
 private:
     const std::string op;
 
@@ -782,8 +760,6 @@ struct Define : public Token
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    std::string string() const override;
-
     const std::vector<Token*> instructions;
 
     FunctionDef* function;
@@ -796,8 +772,6 @@ struct Program : public Token
     void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
-
-    std::string string() const override;
 
     const std::vector<Token*> instructions;
 };
