@@ -136,6 +136,13 @@ namespace Parser
         return name == token->string() || (parent && parent->checkRecursive(token));
     }
 
+    Program* Parser::parseSource(const Path* path)
+    {
+        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
+
+        return (new Parser(path, new ParserContext(nullptr, "", {}), includedPaths))->parse();
+    }
+
     Parser::Parser(const Path* path, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
         path(path), context(context), includedPaths(includedPaths) {}
 

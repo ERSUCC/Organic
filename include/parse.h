@@ -43,11 +43,13 @@ namespace Parser
 
     struct Parser
     {
+        static Program* parseSource(const Path* path);
+
+    private:
         Parser(const Path* path, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
 
         Program* parse();
 
-    private:
         void tokenError(const Token* token, const std::string message) const;
 
         TokenListNode* parseInclude(TokenListNode* start);
