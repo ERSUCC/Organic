@@ -15,9 +15,7 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
         Utils::printInfo();
     }
 
-    std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
-
-    Parser::Program* program = (new Parser::Parser(path, new Parser::ParserContext(nullptr, "", {}), includedPaths))->parse();
+    Parser::Program* program = Parser::Parser::parseSource(path);
 
     program->resolveTypes(new Parser::TypeResolver(path));
 

@@ -1,77 +1,79 @@
 #pragma once
 
 #include <iostream>
+#include <stack>
 #include <string>
-#include <unordered_set>
+#include <vector>
 
 #include "exception.h"
-#include "location.h"
-#include "parse.h"
 #include "path.h"
-#include "token.h"
-#include "tokenize.h"
 
 struct TestInfo
 {
     TestInfo(const Path* path);
 
+    std::string name() const;
+
+protected:
     std::vector<std::vector<std::string>> data;
+
+};
+
+struct TestErrorInfo : public TestInfo
+{
+    TestErrorInfo(const Path* path);
+
+    bool matches(const OrganicParseException& error) const;
+
+private:
+    const size_t line;
+    const size_t character;
+
+    const std::string& message;
+
+};
+
+struct TestTokenizerInfo : public TestInfo
+{
+    TestTokenizerInfo(const Path* path);
+
+    const std::vector<std::string>& tokens() const;
+};
+
+struct TestTracker
+{
+    void beginSection();
+    void fail();
+
+    size_t endSection();
+
+private:
+    std::stack<size_t> failures;
+
 };
 
 struct Test
 {
-    virtual unsigned int test() = 0;
+    Test(TestTracker* tracker);
+
+    virtual void test() = 0;
 
 protected:
     const Path* sourcePath(const std::string file) const;
 
-    Parser::Program* parseSource(const Path* path) const;
-
     void print(const std::string text);
 
-    void beginSection(const std::string name);
-    void endSection();
+    void beginSuite(const std::string name);
+    void endSuite();
 
-    void beginTest(const std::string name);
+    void beginTest(const TestInfo* info);
     void endTest();
 
     void assert(const std::string name, const bool result);
     void fail(const std::string message);
 
-    bool parseErrorMatches(const std::vector<std::string>& expected, const OrganicParseException& error);
+    TestTracker* tracker;
 
-    unsigned int indents = 0;
-
-    unsigned int suiteFailures;
-    unsigned int sectionFailures;
-    unsigned int testFailures;
-
-};
-
-struct TokenizerTests : public Test
-{
-    unsigned int test() override;
-
-private:
-    void checkList(const Path* path);
-
-};
-
-struct ParserTests : public Test
-{
-    unsigned int test() override;
-
-private:
-    void expectError(const Path* path);
-
-};
-
-struct TypeResolverTests : public Test
-{
-    unsigned int test() override;
-
-private:
-    void expectSuccess(const Path* path);
-    void expectError(const Path* path);
+    size_t indents = 0;
 
 };

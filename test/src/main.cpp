@@ -1,30 +1,37 @@
 #include <iostream>
 
 #include "../include/test.h"
+#include "../include/test_parser.h"
+#include "../include/test_resolver.h"
+#include "../include/test_tokenizer.h"
 
 int main(int argc, char** argv)
 {
-    unsigned int suiteFailures = 0;
+    TestTracker* tracker = new TestTracker();
 
-    suiteFailures += (new TokenizerTests())->test();
-    suiteFailures += (new ParserTests())->test();
-    suiteFailures += (new TypeResolverTests())->test();
+    tracker->beginSection();
+
+    (new TestTokenizer(tracker))->test();
+    (new TestParser(tracker))->test();
+    (new TestResolver(tracker))->test();
+
+    const size_t failures = tracker->endSection();
 
     std::cout << "\n~~~ Test Summary ~~~\n\n";
 
-    if (suiteFailures == 0)
+    if (failures == 0)
     {
         std::cout << "All tests passed.\n";
     }
 
-    else if (suiteFailures == 1)
+    else if (failures == 1)
     {
         std::cout << "1 failing suite.\n";
     }
 
-    else if (suiteFailures)
+    else if (failures)
     {
-        std::cout << std::to_string(suiteFailures) + " failing suites.\n";
+        std::cout << failures << " failing suites.\n";
     }
 
     return 0;
