@@ -24,8 +24,8 @@
       "extensions": [".organic"],
       "configuration": "./language-configuration.json",
       "icon": {
-        "light": "icon.png",
-        "dark": "icon.png"
+        "light": "./icons/icon-padded.png",
+        "dark": "./icons/icon-padded.png"
       }
     }],
     "grammars": [{
@@ -38,5 +38,5 @@
   	"type": "git",
   	"url": "https://github.com/ERSUCC/Organic-Syntax-Highlighting"
   },
-  "icon": "icon.png"
+  "icon": "./icons/icon-full.png"
 }
