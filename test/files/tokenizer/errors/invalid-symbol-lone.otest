@@ -1,0 +1,8 @@
+name = "Lone invalid symbol"
+line = 2
+character = 1
+error = 'Unrecognized symbol "$".'
+
+---
+
+$

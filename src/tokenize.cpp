@@ -258,7 +258,7 @@ namespace Parser
 
         std::string str;
 
-        while (current < source->length() && source->get(current) != '"')
+        while (current < source->length() && source->get(current) != '"' && source->get(current) != '\n')
         {
             str += source->get(current);
 
@@ -267,7 +267,7 @@ namespace Parser
 
         if (current >= source->length() || source->get(current) != '"')
         {
-            throw OrganicParseException("Unexpected end of file.", SourceLocation(source, current, current));
+            throw OrganicParseException("Expected closing double quotation mark.", SourceLocation(source, current, current));
         }
 
         current++;
@@ -305,6 +305,11 @@ namespace Parser
             constant += source->get(current);
 
             current++;
+        }
+
+        if (constant[constant.size() - 1] == '.')
+        {
+            throw OrganicParseException("Expected digits after decimal point.", SourceLocation(source, current, current));
         }
 
         return new Value(SourceLocation(source, start, current), std::stod(constant));

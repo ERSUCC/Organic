@@ -1,0 +1,20 @@
+name = "Complex nested values"
+tokens = [
+    'one', '(', 'two', ':', '[',
+    'three', '(', 'four', ':', 'five', '(', 'six', ':', '[',
+    'seven', ',',
+    '8', ',',
+    '"nine"',
+    ']', ')', ')',
+    ']', ')'
+]
+
+---
+
+one(two: [
+    three(four: five(six: [
+        seven,
+        8,
+        "nine"
+    ]))
+])

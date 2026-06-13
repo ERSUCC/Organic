@@ -1,0 +1,8 @@
+name = "Invalid symbol in parentheses"
+line = 2
+character = 2
+error = 'Unrecognized symbol "$".'
+
+---
+
+($)

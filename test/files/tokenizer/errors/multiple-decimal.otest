@@ -1,0 +1,8 @@
+name = "Multiple decimal points in number"
+line = 2
+character = 6
+error = "Numbers cannot contain more than one decimal point."
+
+---
+
+12.34.56
