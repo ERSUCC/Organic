@@ -138,23 +138,30 @@ namespace Parser
 
     Program* Parser::parseSource(const Path* path)
     {
-        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
-
-        return (new Parser(path, new ParserContext(nullptr, "", {}), includedPaths))->parse();
-    }
-
-    Parser::Parser(const Path* path, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
-        path(path), context(context), includedPaths(includedPaths) {}
-
-    Program* Parser::parse()
-    {
-        const SourceFile* source = SourceFile::create(path);
+        const FileProvider* source = FileProvider::create(path);
 
         if (!source)
         {
-            throw OrganicFileException("Could not open \"" + path->string() + "\".");
+            throw OrganicFileException("Could not read \"" + path->string() + "\".");
         }
 
+        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
+
+        return (new Parser(source, new ParserContext(nullptr, "", {}), includedPaths))->parse();
+    }
+
+    Program* Parser::parseSource(const std::string& source)
+    {
+        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths;
+
+        return (new Parser(new SourceProvider(source), new ParserContext(nullptr, "", {}), includedPaths))->parse();
+    }
+
+    Parser::Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
+        source(source), context(context), includedPaths(includedPaths) {}
+
+    Program* Parser::parse()
+    {
         tokens = (new Tokenizer(source))->tokenize();
 
         TokenListNode* current = tokens->head->next;
@@ -219,7 +226,8 @@ namespace Parser
             return tokens->stitch(start, current);
         }
 
-        const Path* includePath = Path::beside(file, path);
+        const Path* sourcePath = source->path();
+        const Path* includePath = Path::beside(file, sourcePath);
 
         if (!includePath->exists())
         {
@@ -231,7 +239,7 @@ namespace Parser
             throw OrganicIncludeException("\"" + includePath->string() + "\" is not a file.", location);
         }
 
-        if (path->string() == includePath->string())
+        if (sourcePath->string() == includePath->string())
         {
             Utils::includeWarning("Source file \"" + includePath->string() + "\" is the current file, this include will be ignored.", location);
 
@@ -247,9 +255,11 @@ namespace Parser
 
         includedPaths.insert(includePath);
 
+        const FileProvider* includeSource = FileProvider::create(includePath);
+
         ParserContext* includeContext = new ParserContext(nullptr, "", {});
 
-        Program* program = (new Parser(includePath, includeContext, includedPaths))->parse();
+        Program* program = (new Parser(includeSource, includeContext, includedPaths))->parse();
 
         context->merge(includeContext);
 

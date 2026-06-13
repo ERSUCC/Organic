@@ -1,0 +1,8 @@
+name = "Call input specified twice"
+line = 2
+character = 17
+error = 'Input "volume" specified more than once for function "sine".'
+
+---
+
+sine(volume: 1, volume: 1)

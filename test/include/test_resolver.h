@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exception.h"
+#include "otest.h"
 #include "parse.h"
 #include "path.h"
 #include "test.h"

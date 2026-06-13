@@ -1,0 +1,8 @@
+name = "Undefined variable"
+line = 2
+character = 14
+error = 'No variable, input, or function exists with the name "test".'
+
+---
+
+sine(volume: test)

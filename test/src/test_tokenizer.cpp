@@ -15,33 +15,25 @@ void TestTokenizer::test()
 
 void TestTokenizer::checkList(const Path* path)
 {
-    const TestTokenizerInfo* info = new TestTokenizerInfo(path);
+    const OTest* info = new OTest(path);
 
     beginTest(info);
 
-    if (const SourceFile* source = SourceFile::create(path))
+    const Parser::TokenList* list = (new Parser::Tokenizer(new SourceProvider(info->getSource())))->tokenize();
+
+    Parser::TokenListNode* current = list->head->next;
+
+    for (const TOMLValue* token : info->getValue("tokens")->asArray()->values)
     {
-        const Parser::TokenList* list = (new Parser::Tokenizer(source))->tokenize();
-
-        Parser::TokenListNode* current = list->head->next;
-
-        for (const std::string& token : info->tokens())
+        if (current->token->string() != token->asString()->str)
         {
-            if (current->token->string() != token)
-            {
-                break;
-            }
-
-            current = current->next;
+            break;
         }
 
-        assert("Tokenized list matches expected list", current->end);
+        current = current->next;
     }
 
-    else
-    {
-        fail("Could not read file \"" + path->string() + "\".");
-    }
+    assert("Tokenized list matches expected list", current->end);
 
     endTest();
 }

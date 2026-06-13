@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "exception.h"
+#include "otest.h"
 #include "path.h"
 #include "test_utils.h"
 
@@ -18,7 +19,7 @@ protected:
 
     void beginSuite(const std::string name) const;
 
-    void beginTest(const TestInfo* info);
+    void beginTest(const OTest* info);
     void endTest();
 
     void assert(const std::string name, const bool result);
@@ -29,7 +30,7 @@ private:
 
     TestTracker* tracker;
 
-    const TestInfo* current;
+    const OTest* current;
 
     std::vector<std::string> errors;
 

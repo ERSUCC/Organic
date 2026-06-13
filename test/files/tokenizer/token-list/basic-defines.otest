@@ -1,0 +1,12 @@
+name = "Basic defines"
+tokens = [
+    'test', '(', ')', '=', '{', '}',
+    'test', '(', 'input', ')', '=', '{', '}',
+    'test', '(', 'input', ')', '=', '{', 'sine', '(', 'volume', ':', 'input', ')', '}'
+]
+
+---
+
+test() = {}
+test(input) = {}
+test(input) = { sine(volume: input) }

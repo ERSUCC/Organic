@@ -1,0 +1,8 @@
+name = "Assign to string"
+line = 2
+character = 1
+error = 'Expected variable name, received ""test"".'
+
+---
+
+"test" = 0

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://github.com/martinring/tmlanguage/raw/refs/heads/master/tmlanguage.json",
+  "name": "OTest",
+  "scopeName": "source.otest",
+  "patterns": [{
+    "name": "comment.line.otest",
+    "begin": "#",
+    "end": "\n"
+  }, {
+    "begin": "([\\w-]+)\\s*=\\s*",
+    "end": "\n",
+    "patterns": [{
+      "include": "#value"
+    }],
+    "beginCaptures": {
+      "1": {
+        "name": "variable.name.otest"
+      }
+    }
+  }, {
+    "name": "meta.embedded.section.organic",
+    "begin": "---",
+    "end": "\\z",
+    "patterns": [{
+      "include": "source.organic"
+    }],
+    "beginCaptures": {
+      "0": {
+        "name": "keyword.control.otest"
+      }
+    }
+  }],
+  "repository": {
+    "value": {
+      "patterns": [{
+        "begin": "\\[\\s*",
+        "end": "\\s*\\]",
+        "patterns": [{
+          "include": "#value"
+        }, {
+          "match": ",\\s*"
+        }]
+      }, {
+        "name": "string.quoted.double.otest",
+        "begin": "(?<!\\\\)\"",
+        "end": "(?<!\\\\)\"|\n"
+      }, {
+        "name": "string.quoted.single.otest",
+        "begin": "'",
+        "end": "'|\n"
+      }, {
+        "name": "constant.numeric.otest",
+        "match": "(\\+|-)?(\\d*\\.)?\\d+"
+      }, {
+        "name": "constant.language.boolean.otest",
+        "match": "\\b(true|false)\\b"
+      }]
+    }
+  }
+}

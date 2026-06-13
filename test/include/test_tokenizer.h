@@ -1,6 +1,8 @@
 #pragma once
 
+#include "otest.h"
 #include "path.h"
+#include "source.h"
 #include "test.h"
 #include "tokenize.h"
 

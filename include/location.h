@@ -2,11 +2,11 @@
 
 #include <string>
 
-#include "path.h"
+#include "source.h"
 
 struct SourceLocation
 {
-    SourceLocation(const SourceFile* source, const size_t start, const size_t end);
+    SourceLocation(const SourceProvider* source, const size_t start, const size_t end);
 
     inline std::string string() const
     {
@@ -16,7 +16,7 @@ struct SourceLocation
     inline bool operator==(const SourceLocation& other) const;
     inline bool operator!=(const SourceLocation& other) const;
 
-    const SourceFile* source;
+    const SourceProvider* source;
 
     const size_t start;
     const size_t end;

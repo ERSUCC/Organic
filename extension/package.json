@@ -20,18 +20,45 @@
   "contributes": {
     "languages": [{
       "id": "organic",
-      "aliases": ["Organic", "organic"],
-      "extensions": [".organic"],
-      "configuration": "./language-configuration.json",
+      "aliases": [
+        "Organic",
+        "organic"
+      ],
+      "extensions": [
+        ".organic"
+      ],
+      "configuration": "./configs/organic-configuration.json",
       "icon": {
         "light": "./icons/icon-padded.png",
         "dark": "./icons/icon-padded.png"
+      }
+    }, {
+      "id": "otest",
+      "aliases": [
+        "Organic Test",
+        "OTest",
+        "otest"
+      ],
+      "extensions": [
+        ".otest"
+      ],
+      "configuration": "./configs/otest-configuration.json",
+      "icon": {
+        "light": "./icons/test-icon-padded.png",
+        "dark": "./icons/test-icon-padded.png"
       }
     }],
     "grammars": [{
       "language": "organic",
       "scopeName": "source.organic",
       "path": "./syntaxes/organic.tmLanguage.json"
+    }, {
+      "language": "otest",
+      "scopeName": "source.otest",
+      "path": "./syntaxes/otest.tmLanguage.json",
+      "embeddedLanguages": {
+        "meta.embedded.section.organic": "organic"
+      }
     }]
   },
   "repository": {

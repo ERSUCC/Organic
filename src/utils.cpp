@@ -35,7 +35,7 @@ void Utils::parseWarning(const std::string message, const SourceLocation& locati
         Utils::get()->firstWarning = false;
     }
 
-    std::cout << "Parse warning in \"" + location.source->path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
+    std::cout << "Parse warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
 }
 
 void Utils::includeWarning(const std::string message, const SourceLocation& location)
@@ -50,7 +50,7 @@ void Utils::includeWarning(const std::string message, const SourceLocation& loca
         Utils::get()->firstWarning = false;
     }
 
-    std::cout << "Include warning in \"" + location.source->path->string() + "\" at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
+    std::cout << "Include warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
 }
 
 void Utils::setSeed(const std::optional<unsigned int>& seed)

@@ -1,6 +1,0 @@
-// Basic defines
-// test ~ ( ~ ) ~ = ~ { ~ } ~ test ~ ( ~ input ~ ) ~ = ~ { ~ } ~ test ~ ( ~ input ~ ) ~ = ~ { ~ sine ~ ( ~ volume ~ : ~ input ~ ) ~ }
-
-test() = {}
-test(input) = {}
-test(input) = { sine(volume: input) }
