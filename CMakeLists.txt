@@ -19,6 +19,7 @@ add_library(organic_lib STATIC src/audiosource.cpp
                                src/path.cpp
                                src/program.cpp
                                src/resource.cpp
+                               src/source.cpp
                                src/token.cpp
                                src/tokenize.cpp
                                src/transform.cpp
@@ -52,6 +53,7 @@ target_link_libraries(organic organic_lib)
 # build test suite
 
 add_executable(organic_test test/src/main.cpp
+                            test/src/otest.cpp
                             test/src/test.cpp
                             test/src/test_parser.cpp
                             test/src/test_resolver.cpp

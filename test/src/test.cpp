@@ -13,7 +13,7 @@ void Test::beginSuite(const std::string name) const
     TestUtils::printSuccess("[ " + name + " ]");
 }
 
-void Test::beginTest(const TestInfo* info)
+void Test::beginTest(const OTest* info)
 {
     current = info;
 
@@ -24,16 +24,18 @@ void Test::beginTest(const TestInfo* info)
 
 void Test::endTest()
 {
+    const std::string& name = current->getValue("name")->asString()->str;
+
     const size_t failures = tracker->endSection();
 
     if (failures == 0)
     {
-        TestUtils::printSuccess(current->name(), 1);
+        TestUtils::printSuccess(name, 1);
     }
 
     else
     {
-        TestUtils::printError(current->name(), 1);
+        TestUtils::printError(name, 1);
 
         for (const std::string& error : errors)
         {

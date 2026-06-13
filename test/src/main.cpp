@@ -11,9 +11,19 @@ int main(int argc, char** argv)
 
     tracker->beginSection();
 
-    (new TestTokenizer(tracker))->test();
-    (new TestParser(tracker))->test();
-    (new TestResolver(tracker))->test();
+    try
+    {
+        (new TestTokenizer(tracker))->test();
+        (new TestParser(tracker))->test();
+        (new TestResolver(tracker))->test();
+    }
+
+    catch (const OrganicException& e)
+    {
+        TestUtils::printError(e.what());
+
+        return 1;
+    }
 
     const size_t failures = tracker->endSection();
 

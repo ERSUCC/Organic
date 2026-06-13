@@ -1,0 +1,8 @@
+name = "Assign to language constant"
+line = 2
+character = 1
+error = 'Expected variable name, received "sequence-forward".'
+
+---
+
+sequence-forward = 0

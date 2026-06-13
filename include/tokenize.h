@@ -4,7 +4,7 @@
 
 #include "exception.h"
 #include "location.h"
-#include "path.h"
+#include "source.h"
 #include "token.h"
 #include "utils.h"
 
@@ -29,7 +29,7 @@ namespace Parser
 
     struct TokenList
     {
-        TokenList(const SourceFile* source);
+        TokenList(const SourceProvider* source);
 
         void add(Token* token);
 
@@ -42,7 +42,7 @@ namespace Parser
 
     struct Tokenizer
     {
-        Tokenizer(const SourceFile* source);
+        Tokenizer(const SourceProvider* source);
 
         TokenList* tokenize();
 
@@ -55,7 +55,7 @@ namespace Parser
 
         double getFrequency(const double note) const;
 
-        const SourceFile* source;
+        const SourceProvider* source;
 
         const Utils* utils;
 

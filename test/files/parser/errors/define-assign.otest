@@ -1,0 +1,8 @@
+name = "Define with no curly braces"
+line = 2
+character = 10
+error = 'Expected "{", received "0".'
+
+---
+
+sine() = 0

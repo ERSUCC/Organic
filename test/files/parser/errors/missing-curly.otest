@@ -1,0 +1,8 @@
+name = "Missing closing curly brace"
+line = 3
+character = 1
+error = 'Expected "}", received "".'
+
+---
+
+test() = {

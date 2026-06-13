@@ -9,6 +9,7 @@
 #include "exception.h"
 #include "location.h"
 #include "path.h"
+#include "source.h"
 #include "token.h"
 #include "tokenize.h"
 #include "utils.h"
@@ -44,9 +45,10 @@ namespace Parser
     struct Parser
     {
         static Program* parseSource(const Path* path);
+        static Program* parseSource(const std::string& source);
 
     private:
-        Parser(const Path* path, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
+        Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
 
         Program* parse();
 
@@ -63,7 +65,7 @@ namespace Parser
         TokenListNode* parseTerms(TokenListNode* start);
         TokenListNode* parseTerm(TokenListNode* start);
 
-        const Path* path;
+        const SourceProvider* source;
 
         ParserContext* context;
 

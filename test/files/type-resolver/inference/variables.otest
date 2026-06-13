@@ -1,4 +1,6 @@
-// Types transfer through multiple variables
+name = "Types transfer through multiple variables"
+
+---
 
 test = 1
 
