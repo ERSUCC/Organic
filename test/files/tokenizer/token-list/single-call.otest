@@ -1,0 +1,8 @@
+name = "Single function call"
+tokens = [
+    'sine', '(', ')'
+]
+
+---
+
+sine()

@@ -14,5 +14,6 @@ struct TestTokenizer : public Test
 
 private:
     void checkList(const Path* path);
+    void expectError(const Path* path);
 
 };

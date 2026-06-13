@@ -59,6 +59,16 @@ void Test::fail(const std::string message)
     addError("Error: " + message);
 }
 
+bool Test::matchParseError(const OTest* info, const OrganicParseException& error) const
+{
+    const std::string& message = info->getValue("error")->asString()->str;
+
+    const int line = info->getValue("line")->asInteger()->value;
+    const int character = info->getValue("character")->asInteger()->value;
+
+    return error.message == message && error.location.line == line && error.location.character == character;
+}
+
 void Test::addError(const std::string text)
 {
     errors.push_back(text);

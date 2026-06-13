@@ -54,12 +54,7 @@ void TestResolver::expectError(const Path* path)
 
     catch (const OrganicParseException& e)
     {
-        const std::string& message = info->getValue("error")->asString()->str;
-
-        const int line = info->getValue("line")->asInteger()->value;
-        const int character = info->getValue("character")->asInteger()->value;
-
-        assert("Type resolver throws expected error", e.message == message && e.location.line == line && e.location.character == character);
+        assert("Type resolver throws expected error", matchParseError(info, e));
     }
 
     catch (const OrganicException& e)

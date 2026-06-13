@@ -11,6 +11,13 @@ void TestTokenizer::test()
     {
         checkList(path);
     }
+
+    beginSuite("Tokenizer errors");
+
+    for (const Path* path : sourcePath("tokenizer/errors")->children())
+    {
+        expectError(path);
+    }
 }
 
 void TestTokenizer::checkList(const Path* path)
@@ -34,6 +41,32 @@ void TestTokenizer::checkList(const Path* path)
     }
 
     assert("Tokenized list matches expected list", current->end);
+
+    endTest();
+}
+
+void TestTokenizer::expectError(const Path* path)
+{
+    const OTest* info = new OTest(path);
+
+    beginTest(info);
+
+    try
+    {
+        (new Parser::Tokenizer(new SourceProvider(info->getSource())))->tokenize();
+
+        fail("Tokenizer did not throw any errors.");
+    }
+
+    catch (const OrganicParseException& e)
+    {
+        assert("Tokenizer throws expected error", matchParseError(info, e));
+    }
+
+    catch (const OrganicException& e)
+    {
+        fail("Tokenizer did not throw the expected error.");
+    }
 
     endTest();
 }

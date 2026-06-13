@@ -25,6 +25,8 @@ protected:
     void assert(const std::string name, const bool result);
     void fail(const std::string message);
 
+    bool matchParseError(const OTest* info, const OrganicParseException& error) const;
+
 private:
     void addError(const std::string text);
 
