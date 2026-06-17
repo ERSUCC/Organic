@@ -1,8 +1,0 @@
-name = "End of file after list element"
-line = 3
-character = 1
-error = 'Expected "]" at end of list.'
-
----
-
-[ 1, 2, 3

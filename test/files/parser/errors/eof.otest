@@ -1,0 +1,85 @@
+name = "End of file after start of list"
+line = 4
+character = 1
+error = 'Expected value after "[".'
+
+---
+
+[
+
+---
+
+name = "End of file after list element"
+line = 4
+character = 1
+error = 'Expected "]" at end of list.'
+
+---
+
+[ 1, 2, 3
+
+---
+
+name = "End of file after list comma"
+line = 4
+character = 1
+error = 'Expected value after ",".'
+
+---
+
+[ 1, 2, 3,
+
+---
+
+name = "End of file after start of function call"
+line = 4
+character = 1
+error = 'Expected input name after "(".'
+
+---
+
+sine(
+
+---
+
+name = "End of file after function argument name"
+line = 4
+character = 1
+error = 'Expected ":" after input name.'
+
+---
+
+sine(volume
+
+---
+
+name = "End of file after function argument colon"
+line = 4
+character = 1
+error = 'Expected input value after ":".'
+
+---
+
+sine(volume:
+
+---
+
+name = "End of file after function argument value"
+line = 4
+character = 1
+error = 'Expected ")" after input value.'
+
+---
+
+sine(volume: 1
+
+---
+
+name = "End of file after function argument comma"
+line = 3
+character = 1
+error = 'Expected input name after ",".'
+
+---
+
+sine(volume: 1,

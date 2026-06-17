@@ -184,8 +184,6 @@ private:
 
 struct TypeResolver
 {
-    TypeResolver(const Path* sourcePath);
-
     void resolveTypes(VariableRef* token);
     void resolveTypes(InputDef* token);
     void resolveTypes(InputRef* token);
@@ -232,8 +230,6 @@ struct TypeResolver
 
 private:
     void resolveArgumentTypes(ArgumentList* arguments, const std::string name, const Type* expectedType, Token* defaultValue = nullptr);
-
-    const Path* sourcePath;
 
 };
 

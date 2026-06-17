@@ -1,0 +1,41 @@
+name = "Incomplete define"
+line = 4
+character = 1
+error = 'Function definitions must begin with "{".'
+
+---
+
+test() =
+
+---
+
+name = "Define with no curly braces"
+line = 2
+character = 10
+error = 'Function definitions must begin with "{".'
+
+---
+
+sine() = 0
+
+---
+
+name = "Missing closing curly brace"
+line = 4
+character = 1
+error = 'Expected "}" at end of function definition.'
+
+---
+
+test() = {
+
+---
+
+name = "Define with improper input format"
+line = 2
+character = 12
+error = 'Expected ":" after input name, but received ")".'
+
+---
+
+test(volume) = {}

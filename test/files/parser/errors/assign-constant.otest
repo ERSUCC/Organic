@@ -1,8 +1,0 @@
-name = "Assign to language constant"
-line = 2
-character = 1
-error = 'Cannot assign a value to "sequence-forward", it is a constant.'
-
----
-
-sequence-forward = 0

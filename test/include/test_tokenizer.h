@@ -13,7 +13,7 @@ struct TestTokenizer : public Test
     void test() override;
 
 private:
-    void checkList(const Path* path);
-    void expectError(const Path* path);
+    void checkList(const OTest* info);
+    void expectError(const OTest* info);
 
 };

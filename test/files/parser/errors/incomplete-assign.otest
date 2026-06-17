@@ -1,8 +1,0 @@
-name = "Incomplete assign"
-line = 3
-character = 1
-error = 'Expected value after "=".'
-
----
-
-test =

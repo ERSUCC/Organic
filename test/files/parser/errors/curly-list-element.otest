@@ -1,8 +1,0 @@
-name = "Curly bracket after list element"
-line = 2
-character = 11
-error = 'Expected "]" at end of list, but received "{".'
-
----
-
-[ 1, 2, 3 {

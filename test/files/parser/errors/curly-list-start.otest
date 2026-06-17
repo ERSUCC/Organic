@@ -1,8 +1,0 @@
-name = "Curly bracket after start of list"
-line = 2
-character = 2
-error = 'Expected value, but received "{".'
-
----
-
-[{

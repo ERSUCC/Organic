@@ -20,11 +20,11 @@
   }, {
     "name": "meta.embedded.section.organic",
     "begin": "---",
-    "end": "\\z",
+    "end": "---|\\z",
     "patterns": [{
       "include": "source.organic"
     }],
-    "beginCaptures": {
+    "captures": {
       "0": {
         "name": "keyword.control.otest"
       }

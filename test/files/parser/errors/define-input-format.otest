@@ -1,8 +1,0 @@
-name = "Define with improper input format"
-line = 2
-character = 12
-error = 'Expected ":" after input name, but received ")".'
-
----
-
-test(volume) = {}

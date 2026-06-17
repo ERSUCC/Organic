@@ -502,8 +502,13 @@ namespace Parser
 
                 catch (const TokenException& e)
                 {
-                    if (!arguments.empty() && e.expected == "input name")
+                    if (e.expected == "input name")
                     {
+                        if (arguments.empty())
+                        {
+                            throw TokenException(e.node, "input name after \"(\"");
+                        }
+
                         throw TokenException(e.node, "input name after \",\"");
                     }
 
@@ -762,8 +767,13 @@ namespace Parser
 
             catch (const TokenException& e)
             {
-                if (!items.empty() && e.expected == "value")
+                if (e.expected == "value")
                 {
+                    if (items.empty())
+                    {
+                        throw TokenException(e.node, "value after \"[\"");
+                    }
+
                     throw TokenException(e.node, "value after \",\"");
                 }
 

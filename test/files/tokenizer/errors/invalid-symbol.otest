@@ -1,0 +1,52 @@
+name = "Lone invalid symbol"
+line = 2
+character = 1
+error = 'Unrecognized symbol "$".'
+
+---
+
+$
+
+---
+
+name = "Invalid symbol in number"
+line = 2
+character = 3
+error = 'Unrecognized symbol "$".'
+
+---
+
+12$
+
+---
+
+name = "Invalid symbol after decimal"
+line = 2
+character = 6
+error = "Expected digits after decimal point."
+
+---
+
+1234.$
+
+---
+
+name = "Invalid symbol in parentheses"
+line = 2
+character = 2
+error = 'Unrecognized symbol "$".'
+
+---
+
+($)
+
+---
+
+name = "Invalid symbol in list"
+line = 2
+character = 9
+error = 'Unrecognized symbol "$".'
+
+---
+
+[ 1, 2, $, 4 ]

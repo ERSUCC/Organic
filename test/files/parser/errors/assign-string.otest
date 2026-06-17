@@ -1,8 +1,0 @@
-name = "Assign to string"
-line = 2
-character = 1
-error = "Cannot assign a value to a string."
-
----
-
-"test" = 0

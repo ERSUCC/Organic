@@ -1,8 +1,0 @@
-name = "End of file after function argument name"
-line = 3
-character = 1
-error = 'Expected ":" after input name.'
-
----
-
-sine(volume

@@ -313,9 +313,6 @@ std::string LambdaType::inputString(const std::unordered_map<std::string, const 
     return str + ") ";
 }
 
-TypeResolver::TypeResolver(const Path* sourcePath) :
-    sourcePath(sourcePath) {}
-
 void TypeResolver::resolveTypes(VariableRef* token)
 {
     token->type = token->definition->type;

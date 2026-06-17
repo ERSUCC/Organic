@@ -9,14 +9,15 @@ void TestParser::test()
 
     for (const Path* path : sourcePath("parser/errors")->children())
     {
-        expectError(path);
+        for (const OTest* info : OTest::read(path))
+        {
+            expectError(info);
+        }
     }
 }
 
-void TestParser::expectError(const Path* path)
+void TestParser::expectError(const OTest* info)
 {
-    const OTest* info = new OTest(path);
-
     beginTest(info);
 
     try

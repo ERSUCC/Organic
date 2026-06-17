@@ -17,7 +17,7 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
 
     Parser::Program* program = Parser::Parser::parseSource(path);
 
-    program->resolveTypes(new Parser::TypeResolver(path));
+    program->resolveTypes(new Parser::TypeResolver());
 
     this->program = program->transform(new TokenTransformer(path))->getLeafAs<Engine::Program>();
 }

@@ -1,0 +1,43 @@
+name = "Undefined variable in assign"
+line = 2
+character = 8
+error = 'No variable, input, or function exists with the name "test1".'
+
+---
+
+test = test1
+
+---
+
+name = "Undefined variable in list"
+line = 2
+character = 13
+error = 'No variable, input, or function exists with the name "test1".'
+
+---
+
+test = [ 1, test1, 3 ]
+
+---
+
+name = "Undefined variable in function call"
+line = 2
+character = 14
+error = 'No variable, input, or function exists with the name "test".'
+
+---
+
+sine(volume: test)
+
+---
+
+name = "Undefined variable in function definition"
+line = 3
+character = 5
+error = 'No variable, input, or function exists with the name "test1".'
+
+---
+
+test() = {
+    test1
+}

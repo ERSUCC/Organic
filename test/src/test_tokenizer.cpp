@@ -9,21 +9,25 @@ void TestTokenizer::test()
 
     for (const Path* path : sourcePath("tokenizer/token-list")->children())
     {
-        checkList(path);
+        for (const OTest* info : OTest::read(path))
+        {
+            checkList(info);
+        }
     }
 
     beginSuite("Tokenizer errors");
 
     for (const Path* path : sourcePath("tokenizer/errors")->children())
     {
-        expectError(path);
+        for (const OTest* info : OTest::read(path))
+        {
+            expectError(info);
+        }
     }
 }
 
-void TestTokenizer::checkList(const Path* path)
+void TestTokenizer::checkList(const OTest* info)
 {
-    const OTest* info = new OTest(path);
-
     beginTest(info);
 
     const Parser::TokenList* list = (new Parser::Tokenizer(new SourceProvider(info->getSource())))->tokenize();
@@ -45,10 +49,8 @@ void TestTokenizer::checkList(const Path* path)
     endTest();
 }
 
-void TestTokenizer::expectError(const Path* path)
+void TestTokenizer::expectError(const OTest* info)
 {
-    const OTest* info = new OTest(path);
-
     beginTest(info);
 
     try

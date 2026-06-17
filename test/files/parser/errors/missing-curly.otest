@@ -1,8 +1,0 @@
-name = "Missing closing curly brace"
-line = 3
-character = 1
-error = 'Expected "}" at end of function definition.'
-
----
-
-test() = {

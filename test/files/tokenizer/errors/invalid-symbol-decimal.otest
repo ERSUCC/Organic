@@ -1,8 +1,0 @@
-name = "Invalid symbol after decimal"
-line = 2
-character = 6
-error = "Expected digits after decimal point."
-
----
-
-1234.$

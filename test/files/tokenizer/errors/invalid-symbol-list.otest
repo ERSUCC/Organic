@@ -1,8 +1,0 @@
-name = "Invalid symbol in list"
-line = 2
-character = 9
-error = 'Unrecognized symbol "$".'
-
----
-
-[ 1, 2, $, 4 ]

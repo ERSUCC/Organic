@@ -1,8 +1,0 @@
-name = "Define with no curly braces"
-line = 2
-character = 10
-error = 'Function definitions must begin with "{".'
-
----
-
-sine() = 0

@@ -1,8 +1,0 @@
-name = "Incomplete number"
-line = 2
-character = 6
-error = "Expected digits after decimal point."
-
----
-
-1234.

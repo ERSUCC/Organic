@@ -1,0 +1,98 @@
+name = "Curly bracket after start of list"
+line = 2
+character = 2
+error = 'Expected value after "[", but received "{".'
+
+---
+
+[{
+
+---
+
+name = "Curly bracket after list element"
+line = 2
+character = 11
+error = 'Expected "]" at end of list, but received "{".'
+
+---
+
+[ 1, 2, 3 {
+
+---
+
+name = "Curly bracket after list comma"
+line = 2
+character = 12
+error = 'Expected value after ",", but received "{".'
+
+---
+
+[ 1, 2, 3, {
+
+---
+
+name = "Curly bracket after list"
+line = 2
+character = 13
+error = 'Expected value, but received "{".'
+
+---
+
+[ 1, 2, 3 ] {
+
+---
+
+name = "Curly bracket after start of function call"
+line = 2
+character = 6
+error = 'Expected input name after "(", but received "{".'
+
+---
+
+sine({
+
+---
+
+name = "Curly bracket after function argument"
+line = 2
+character = 13
+error = 'Expected ":" after input name, but received "{".'
+
+---
+
+sine(volume {
+
+---
+
+name = "Curly bracket after function argument colon"
+line = 2
+character = 14
+error = 'Expected input value after ":", but received "{".'
+
+---
+
+sine(volume: {
+
+---
+
+name = "Curly bracket after function argument value"
+line = 2
+character = 16
+error = 'Expected ")" after input value, but received "{".'
+
+---
+
+sine(volume: 1 {
+
+---
+
+name = "Curly bracket after function argument comma"
+line = 2
+character = 17
+error = 'Expected input name after ",", but received "{".'
+
+---
+
+sine(volume: 1, {
+
+---

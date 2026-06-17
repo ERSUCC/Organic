@@ -1,0 +1,19 @@
+name = "End of file in number"
+line = 2
+character = 6
+error = "Expected digits after decimal point."
+
+---
+
+1234.
+
+---
+
+name = "End of file in string"
+line = 2
+character = 14
+error = "Expected closing double quotation mark."
+
+---
+
+"this is a te

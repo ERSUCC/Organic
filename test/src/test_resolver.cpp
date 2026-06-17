@@ -9,26 +9,30 @@ void TestResolver::test()
 
     for (const Path* path : sourcePath("type-resolver/inference")->children())
     {
-        expectSuccess(path);
+        for (const OTest* info : OTest::read(path))
+        {
+            expectSuccess(info);
+        }
     }
 
     beginSuite("Type resolver errors");
 
     for (const Path* path : sourcePath("type-resolver/errors")->children())
     {
-        expectError(path);
+        for (const OTest* info : OTest::read(path))
+        {
+            expectError(info);
+        }
     }
 }
 
-void TestResolver::expectSuccess(const Path* path)
+void TestResolver::expectSuccess(const OTest* info)
 {
-    const OTest* info = new OTest(path);
-
     beginTest(info);
 
     try
     {
-        Parser::Parser::parseSource(info->getSource())->resolveTypes(new Parser::TypeResolver(path));
+        Parser::Parser::parseSource(info->getSource())->resolveTypes(new Parser::TypeResolver());
     }
 
     catch (const OrganicException& e)
@@ -39,15 +43,13 @@ void TestResolver::expectSuccess(const Path* path)
     endTest();
 }
 
-void TestResolver::expectError(const Path* path)
+void TestResolver::expectError(const OTest* info)
 {
-    const OTest* info = new OTest(path);
-
     beginTest(info);
 
     try
     {
-        Parser::Parser::parseSource(info->getSource())->resolveTypes(new Parser::TypeResolver(path));
+        Parser::Parser::parseSource(info->getSource())->resolveTypes(new Parser::TypeResolver());
 
         fail("Type resolver did not throw any errors.");
     }

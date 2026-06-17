@@ -1,8 +1,0 @@
-name = "Curly bracket after function argument"
-line = 2
-character = 13
-error = 'Expected ":" after input name, but received "{".'
-
----
-
-sine(volume {

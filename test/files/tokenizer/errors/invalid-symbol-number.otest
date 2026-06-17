@@ -1,8 +1,0 @@
-name = "Invalid symbol in number"
-line = 2
-character = 3
-error = 'Unrecognized symbol "$".'
-
----
-
-12$

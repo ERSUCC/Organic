@@ -1,8 +1,0 @@
-name = "Incomplete define"
-line = 3
-character = 1
-error = 'Function definitions must begin with "{".'
-
----
-
-test() =

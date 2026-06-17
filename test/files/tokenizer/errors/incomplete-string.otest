@@ -1,8 +1,0 @@
-name = "Incomplete string"
-line = 2
-character = 14
-error = "Expected closing double quotation mark."
-
----
-
-"this is a te

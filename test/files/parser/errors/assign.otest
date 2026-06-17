@@ -1,0 +1,75 @@
+name = "Assign to number"
+line = 2
+character = 1
+error = "Cannot assign a value to a number."
+
+---
+
+42 = 0
+
+---
+
+name = "Assign to note constant"
+line = 2
+character = 1
+error = "Cannot assign a value to a number."
+
+---
+
+a4 = 0
+
+---
+
+name = "Assign to language constant"
+line = 2
+character = 1
+error = 'Cannot assign a value to "sequence-forward", it is a constant.'
+
+---
+
+sequence-forward = 0
+
+---
+
+name = "Assign to string"
+line = 2
+character = 1
+error = "Cannot assign a value to a string."
+
+---
+
+"test" = 0
+
+---
+
+name = "Assign to list"
+line = 2
+character = 1
+error = 'Cannot assign a value to a list.'
+
+---
+
+[ 1, 2, 3 ] = 0
+
+---
+
+name = "Reassign to variable"
+line = 3
+character = 1
+error = 'A variable already exists with the name "test".'
+
+---
+
+test = 0
+test = 1
+
+---
+
+name = "Incomplete assign"
+line = 3
+character = 1
+error = 'Expected value after "=".'
+
+---
+
+test =

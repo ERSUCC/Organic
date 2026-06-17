@@ -283,7 +283,7 @@ bool TOMLEntry::keyChar(const char c)
 TOMLEntry::TOMLEntry(const std::string& key, const TOMLValue* value) :
     key(key), value(value) {}
 
-OTest::OTest(const Path* path)
+std::vector<OTest*> OTest::read(const Path* path)
 {
     std::string str;
 
@@ -292,8 +292,40 @@ OTest::OTest(const Path* path)
         throw OrganicFileException("Could not read \"" + path->string() + "\".");
     }
 
+    std::vector<OTest*> tests;
+
     std::istringstream stream(str);
 
+    while (isspace(stream.peek()))
+    {
+        stream.ignore();
+    }
+
+    while (!stream.eof())
+    {
+        tests.push_back(new OTest(path, stream));
+
+        while (isspace(stream.peek()))
+        {
+            stream.ignore();
+        }
+    }
+
+    return tests;
+}
+
+const TOMLValue* OTest::getValue(const std::string& key) const
+{
+    return entries.at(key);
+}
+
+const std::string& OTest::getSource() const
+{
+    return source;
+}
+
+OTest::OTest(const Path* path, std::istringstream& stream)
+{
     while (!stream.eof())
     {
         while (isspace(stream.peek()))
@@ -319,15 +351,14 @@ OTest::OTest(const Path* path)
         }
     }
 
-    source = stream.str().substr(stream.tellg());
-}
+    const std::streampos split = stream.tellg();
 
-const TOMLValue* OTest::getValue(const std::string& key) const
-{
-    return entries.at(key);
-}
+    while (!stream.eof() && stream.str().substr(stream.tellg(), 3) != "---")
+    {
+        stream.ignore();
+    }
 
-const std::string& OTest::getSource() const
-{
-    return source;
+    source = stream.str().substr(split, stream.tellg() - split);
+
+    stream.ignore(4);
 }

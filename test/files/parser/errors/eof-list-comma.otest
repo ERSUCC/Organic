@@ -1,8 +1,0 @@
-name = "End of file after list comma"
-line = 3
-character = 1
-error = 'Expected value after ",".'
-
----
-
-[ 1, 2, 3,

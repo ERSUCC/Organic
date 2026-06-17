@@ -14,7 +14,7 @@ struct TestResolver : public Test
     void test() override;
 
 private:
-    void expectSuccess(const Path* path);
-    void expectError(const Path* path);
+    void expectSuccess(const OTest* info);
+    void expectError(const OTest* info);
 
 };

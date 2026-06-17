@@ -1,8 +1,0 @@
-name = "Curly bracket after function argument colon"
-line = 2
-character = 14
-error = 'Expected input value after ":", but received "{".'
-
----
-
-sine(volume: {
