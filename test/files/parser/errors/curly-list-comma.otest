@@ -1,0 +1,8 @@
+name = "Curly bracket after list comma"
+line = 2
+character = 12
+error = 'Expected value after ",", but received "{".'
+
+---
+
+[ 1, 2, 3, {

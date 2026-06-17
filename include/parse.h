@@ -52,8 +52,6 @@ namespace Parser
 
         Program* parse();
 
-        void tokenError(const Token* token, const std::string message) const;
-
         TokenListNode* parseInclude(TokenListNode* start);
         TokenListNode* parseInstruction(TokenListNode* start);
         TokenListNode* parseDefine(TokenListNode* start);

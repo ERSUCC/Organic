@@ -1,7 +1,7 @@
 name = "Incomplete assign"
 line = 3
 character = 1
-error = 'Expected expression term, received "".'
+error = 'Expected value after "=".'
 
 ---
 

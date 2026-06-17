@@ -1,0 +1,8 @@
+name = "Curly bracket after list"
+line = 2
+character = 13
+error = 'Expected value, but received "{".'
+
+---
+
+[ 1, 2, 3 ] {

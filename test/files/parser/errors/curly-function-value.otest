@@ -1,0 +1,8 @@
+name = "Curly bracket after function argument value"
+line = 2
+character = 16
+error = 'Expected ")" after input value, but received "{".'
+
+---
+
+sine(volume: 1 {

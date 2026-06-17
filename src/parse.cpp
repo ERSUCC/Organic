@@ -2,6 +2,28 @@
 
 namespace Parser
 {
+    struct TokenException : public OrganicParseException
+    {
+        TokenException(const TokenListNode* node, const std::string& expected) :
+            OrganicParseException(getMessage(node, expected), node->token->location), node(node), expected(expected) {}
+
+        const TokenListNode* node;
+
+        const std::string expected;
+
+    private:
+        static std::string getMessage(const TokenListNode* node, const std::string& expected)
+        {
+            if (node->end)
+            {
+                return "Expected " + expected + ".";
+            }
+
+            return "Expected " + expected + ", but received \"" + node->token->string() + "\".";
+        }
+
+    };
+
     ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs) :
         parent(parent), name(name)
     {
@@ -190,11 +212,6 @@ namespace Parser
         return new Program(SourceLocation(source, 0, source->length()), instructions);
     }
 
-    void Parser::tokenError(const Token* token, const std::string expected) const
-    {
-        throw OrganicParseException("Expected " + expected + ", received \"" + token->string() + "\".", token->location);
-    }
-
     TokenListNode* Parser::parseInclude(TokenListNode* start)
     {
         const SourceLocation location = start->token->location;
@@ -205,14 +222,14 @@ namespace Parser
 
         if (!str)
         {
-            tokenError(current->token, "file path");
+            throw TokenException(current, "file path");
         }
 
         current = current->next;
 
         if (!current->getToken<CloseParenthesis>())
         {
-            tokenError(current->token, "\")\"");
+            throw TokenException(current, "\")\"");
         }
 
         current = current->next;
@@ -268,15 +285,15 @@ namespace Parser
 
     TokenListNode* Parser::parseInstruction(TokenListNode* start)
     {
-        TokenListNode* current = start;
-
-        if (current->next->getToken<Equals>())
+        if (start->next->getToken<Equals>())
         {
-            return parseAssign(current);
+            return parseAssign(start);
         }
 
-        if (current->next->getToken<OpenParenthesis>())
+        if (start->next->getToken<OpenParenthesis>())
         {
+            TokenListNode* current = start;
+
             unsigned int depth = 0;
 
             do
@@ -294,22 +311,33 @@ namespace Parser
                 }
             } while (depth > 0 && !current->end);
 
-            current = current->next;
-
-            if (current->getToken<Equals>())
+            if (current->next->getToken<Equals>())
             {
-                current = current->next;
-
-                if (current->getToken<OpenCurlyBracket>())
+                if (current->next->next->getToken<OpenCurlyBracket>())
                 {
                     return parseDefine(start);
                 }
 
-                tokenError(current->token, "\"{\"");
+                throw OrganicParseException("Function definitions must begin with \"{\".", current->next->next->token->location);
             }
         }
 
-        return parseExpression(start);
+        TokenListNode* next = parseExpression(start);
+
+        if (next->getToken<Equals>())
+        {
+            if (next->prev->getToken<List>())
+            {
+                throw OrganicParseException("Cannot assign a value to a list.", next->prev->token->location);
+            }
+
+            if (next->prev->getToken<Call>())
+            {
+                throw OrganicParseException("Function definitions must begin with \"{\".", next->token->location);
+            }
+        }
+
+        return next;
     }
 
     TokenListNode* Parser::parseDefine(TokenListNode* start)
@@ -330,14 +358,14 @@ namespace Parser
 
                 if (!input)
                 {
-                    tokenError(current->token, "input name");
+                    throw TokenException(current, "input name");
                 }
 
                 current = current->next;
 
                 if (!current->getToken<Colon>())
                 {
-                    tokenError(current->token, "\":\"");
+                    throw TokenException(current, "\":\" after input name");
                 }
 
                 current = parseExpression(current->next);
@@ -347,7 +375,7 @@ namespace Parser
 
             if (!current->getToken<CloseParenthesis>())
             {
-                tokenError(current->token, "\",\" or \")\"");
+                throw TokenException(current, "\",\" or \")\"");
             }
         }
 
@@ -409,7 +437,7 @@ namespace Parser
 
         if (!current->getToken<CloseCurlyBracket>())
         {
-            tokenError(current->token, "\"}\"");
+            throw TokenException(current, "\"}\" at end of function definition");
         }
 
         context = context->parent;
@@ -421,16 +449,32 @@ namespace Parser
     {
         TokenListNode* current = start;
 
-        const Identifier* name = current->getToken<Identifier>();
-
-        if (!name)
+        if (current->getToken<Constant>())
         {
-            tokenError(current->token, "variable name");
+            throw OrganicParseException("Cannot assign a value to \"" + current->token->string() + "\", it is a constant.", current->token->location);
         }
 
-        VariableDef* variable = context->addVariable(name);
+        if (current->getToken<Value>())
+        {
+            throw OrganicParseException("Cannot assign a value to a number.", current->token->location);
+        }
 
-        current = parseExpression(current->next->next);
+        if (current->getToken<String>())
+        {
+            throw OrganicParseException("Cannot assign a value to a string.", current->token->location);
+        }
+
+        VariableDef* variable = context->addVariable(current->getToken<Identifier>());
+
+        try
+        {
+            current = parseExpression(current->next->next);
+        }
+
+        catch (const TokenException& e)
+        {
+            throw TokenException(e.node, "value after \"=\"");
+        }
 
         return tokens->patch(start, current, new Assign(variable->location, variable, current->prev->token));
     }
@@ -451,7 +495,20 @@ namespace Parser
 
             do
             {
-                current = parseArgument(current->next);
+                try
+                {
+                    current = parseArgument(current->next);
+                }
+
+                catch (const TokenException& e)
+                {
+                    if (!arguments.empty() && e.expected == "input name")
+                    {
+                        throw TokenException(e.node, "input name after \",\"");
+                    }
+
+                    throw e;
+                }
 
                 Argument* argument = current->prev->getToken<Argument>();
 
@@ -468,7 +525,7 @@ namespace Parser
 
             if (!current->getToken<CloseParenthesis>())
             {
-                tokenError(current->token, "\")\"");
+                throw TokenException(current, "\")\" after input value");
             }
         }
 
@@ -652,17 +709,25 @@ namespace Parser
 
         if (!name)
         {
-            tokenError(current->token, "input name");
+            throw TokenException(current, "input name");
         }
 
         current = current->next;
 
         if (!current->getToken<Colon>())
         {
-            tokenError(current->token, "\":\"");
+            throw TokenException(current, "\":\" after input name");
         }
 
-        current = parseExpression(current->next);
+        try
+        {
+            current = parseExpression(current->next);
+        }
+
+        catch (const TokenException& e)
+        {
+            throw TokenException(e.node, "input value after \":\"");
+        }
 
         return tokens->patch(start, current, new Argument(name->location, name->string(), current->prev->token));
     }
@@ -690,14 +755,27 @@ namespace Parser
 
         do
         {
-            current = parseExpression(current->next);
+            try
+            {
+                current = parseExpression(current->next);
+            }
+
+            catch (const TokenException& e)
+            {
+                if (!items.empty() && e.expected == "value")
+                {
+                    throw TokenException(e.node, "value after \",\"");
+                }
+
+                throw e;
+            }
 
             items.push_back(current->prev->token);
         } while (current->getToken<Comma>());
 
         if (!current->getToken<CloseSquareBracket>())
         {
-            tokenError(current->token, "\"]\"");
+            throw TokenException(current, "\"]\" at end of list");
         }
 
         return tokens->patch(start, current->next, new List(start->token->location, items));
@@ -717,7 +795,7 @@ namespace Parser
 
                 if (!current->getToken<CloseParenthesis>())
                 {
-                    tokenError(current->token, "\")\"");
+                    throw TokenException(current, "\")\"");
                 }
 
                 current = tokens->patch(first, current->next, new ParenthesizedExpression(first->token->location, current->prev->token));
@@ -901,8 +979,6 @@ namespace Parser
             return start->next;
         }
 
-        tokenError(start->token, "expression term");
-
-        return nullptr;
+        throw TokenException(start, "value");
     }
 }

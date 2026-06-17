@@ -1,8 +1,8 @@
-name = "Assign to number"
+name = "Assign to note constant"
 line = 2
 character = 1
 error = "Cannot assign a value to a number."
 
 ---
 
-42 = 0
+a4 = 0

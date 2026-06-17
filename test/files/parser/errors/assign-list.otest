@@ -1,0 +1,8 @@
+name = "Assign to list"
+line = 2
+character = 1
+error = 'Cannot assign a value to a list.'
+
+---
+
+[ 1, 2, 3 ] = 0

@@ -1,7 +1,7 @@
 name = "Missing closing curly brace"
 line = 3
 character = 1
-error = 'Expected "}", received "".'
+error = 'Expected "}" at end of function definition.'
 
 ---
 

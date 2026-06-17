@@ -1,0 +1,8 @@
+name = "End of file after function argument colon"
+line = 3
+character = 1
+error = 'Expected input value after ":".'
+
+---
+
+sine(volume:

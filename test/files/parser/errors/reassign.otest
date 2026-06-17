@@ -1,0 +1,9 @@
+name = "Reassign to variable"
+line = 3
+character = 1
+error = 'A variable already exists with the name "test".'
+
+---
+
+test = 0
+test = 1

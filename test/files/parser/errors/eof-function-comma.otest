@@ -1,0 +1,8 @@
+name = "End of file after function argument comma"
+line = 3
+character = 1
+error = 'Expected input name after ",".'
+
+---
+
+sine(volume: 1,

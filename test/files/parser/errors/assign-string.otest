@@ -1,7 +1,7 @@
 name = "Assign to string"
 line = 2
 character = 1
-error = 'Expected variable name, received ""test"".'
+error = "Cannot assign a value to a string."
 
 ---
 
