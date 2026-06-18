@@ -1,0 +1,29 @@
+name: Run Tests
+
+on: [ push, pull_request ]
+
+jobs:
+  build_and_test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install CMake
+        uses: lukka/get-cmake@v4.3.3
+        with:
+          cmakeVersion: ~3.31.0
+
+      - name: Install ALSA
+        run: sudo apt install -y libasound2-dev
+
+      - name: Build
+        run: |
+          cmake -B build .
+          cmake --build build --config Release
+
+      - name: Test
+        run: ./build/organic_test
