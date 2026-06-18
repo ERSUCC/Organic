@@ -16,7 +16,7 @@ struct OrganicException : public std::exception
     const std::string message;
 
 private:
-    const std::string preamble;
+    const std::string error;
 
 };
 
