@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <random>
 #include <string>
 
