@@ -64,7 +64,7 @@
         "match": "\\b([a-g][sf]?[0-9])\\b"
       }, {
         "name": "constant.language.value.organic",
-        "match": "\\b(pi|e)\\b"
+        "match": "\\b(pi|tau|e)\\b"
       }]
 		},
 		"variable": {

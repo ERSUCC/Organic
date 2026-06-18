@@ -380,6 +380,11 @@ namespace Parser
             return new Value(location, utils->pi);
         }
 
+        if (name == "tau")
+        {
+            return new Value(location, utils->twoPi);
+        }
+
         if (name == "e")
         {
             return new Value(location, utils->e);
