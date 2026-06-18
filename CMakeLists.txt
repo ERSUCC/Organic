@@ -55,12 +55,14 @@ target_link_libraries(organic organic_lib)
 add_executable(organic_test test/src/main.cpp
                             test/src/otest.cpp
                             test/src/test.cpp
+                            test/src/test_examples.cpp
                             test/src/test_parser.cpp
                             test/src/test_resolver.cpp
                             test/src/test_tokenizer.cpp
                             test/src/test_utils.cpp)
 
-target_compile_definitions(organic_test PRIVATE ORGANIC_TEST_DIR="${CMAKE_SOURCE_DIR}/test/files")
+target_compile_definitions(organic_test PRIVATE ORGANIC_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+                                                ORGANIC_TEST_DIR="${CMAKE_SOURCE_DIR}/test/files")
 
 target_include_directories(organic_test PRIVATE include)
 

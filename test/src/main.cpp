@@ -1,5 +1,6 @@
 #include <string>
 
+#include "../include/test_examples.h"
 #include "../include/test_parser.h"
 #include "../include/test_resolver.h"
 #include "../include/test_tokenizer.h"
@@ -16,6 +17,7 @@ int main(int argc, char** argv)
         (new TestTokenizer(tracker))->test();
         (new TestParser(tracker))->test();
         (new TestResolver(tracker))->test();
+        (new TestExamples(tracker))->test();
     }
 
     catch (const OrganicException& e)

@@ -7,7 +7,7 @@ void TestResolver::test()
 {
     beginSuite("Type resolver success");
 
-    for (const Path* path : sourcePath("type-resolver/success")->children())
+    for (const Path* path : testPath("type-resolver/success")->children())
     {
         for (const OTest* info : OTest::read(path))
         {
@@ -17,7 +17,7 @@ void TestResolver::test()
 
     beginSuite("Type resolver errors");
 
-    for (const Path* path : sourcePath("type-resolver/errors")->children())
+    for (const Path* path : testPath("type-resolver/errors")->children())
     {
         for (const OTest* info : OTest::read(path))
         {
@@ -28,7 +28,7 @@ void TestResolver::test()
 
 void TestResolver::expectSuccess(const OTest* info)
 {
-    beginTest(info);
+    beginTest();
 
     try
     {
@@ -40,12 +40,12 @@ void TestResolver::expectSuccess(const OTest* info)
         fail("Expected success, received an error.");
     }
 
-    endTest();
+    endTest(info->getValue("name")->asString()->str);
 }
 
 void TestResolver::expectError(const OTest* info)
 {
-    beginTest(info);
+    beginTest();
 
     try
     {
@@ -64,5 +64,5 @@ void TestResolver::expectError(const OTest* info)
         fail("Parser did not throw the expected error.");
     }
 
-    endTest();
+    endTest(info->getValue("name")->asString()->str);
 }

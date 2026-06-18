@@ -7,7 +7,7 @@ void TestParser::test()
 {
     beginSuite("Parser success");
 
-    for (const Path* path : sourcePath("parser/success")->children())
+    for (const Path* path : testPath("parser/success")->children())
     {
         for (const OTest* info : OTest::read(path))
         {
@@ -17,7 +17,7 @@ void TestParser::test()
 
     beginSuite("Parser errors");
 
-    for (const Path* path : sourcePath("parser/errors")->children())
+    for (const Path* path : testPath("parser/errors")->children())
     {
         for (const OTest* info : OTest::read(path))
         {
@@ -28,7 +28,7 @@ void TestParser::test()
 
 void TestParser::expectSuccess(const OTest* info)
 {
-    beginTest(info);
+    beginTest();
 
     try
     {
@@ -40,12 +40,12 @@ void TestParser::expectSuccess(const OTest* info)
         fail("Source was not parsed successfully.");
     }
 
-    endTest();
+    endTest(info->getValue("name")->asString()->str);
 }
 
 void TestParser::expectError(const OTest* info)
 {
-    beginTest(info);
+    beginTest();
 
     try
     {
@@ -64,5 +64,5 @@ void TestParser::expectError(const OTest* info)
         fail("Parser did not throw the expected error.");
     }
 
-    endTest();
+    endTest(info->getValue("name")->asString()->str);
 }

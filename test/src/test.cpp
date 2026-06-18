@@ -5,6 +5,11 @@ Test::Test(TestTracker* tracker) :
 
 const Path* Test::sourcePath(const std::string file) const
 {
+    return Path::relative(file, ORGANIC_SOURCE_DIR);
+}
+
+const Path* Test::testPath(const std::string file) const
+{
     return Path::relative(file, ORGANIC_TEST_DIR);
 }
 
@@ -13,19 +18,15 @@ void Test::beginSuite(const std::string name) const
     TestUtils::printSuccess("[ " + name + " ]");
 }
 
-void Test::beginTest(const OTest* info)
+void Test::beginTest()
 {
-    current = info;
-
     errors.clear();
 
     tracker->beginSection();
 }
 
-void Test::endTest()
+void Test::endTest(const std::string name)
 {
-    const std::string& name = current->getValue("name")->asString()->str;
-
     const size_t failures = tracker->endSection();
 
     if (failures == 0)

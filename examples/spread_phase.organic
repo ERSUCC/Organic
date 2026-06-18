@@ -1,7 +1,7 @@
-spread-saw(volume, frequency, spread, effects) = {
-    saw(volume: volume / 3, frequency: frequency - spread, pan: -0.3, effects: effects)
-    saw(volume: volume / 3, frequency: frequency, effects: effects)
-    saw(volume: volume / 3, frequency: frequency + spread, pan: 0.3, effects: effects)
+spread-saw(volume: 1, frequency: 0, spread: 0) = {
+    saw(volume: volume / 3, frequency: frequency - spread, pan: -0.3)
+    saw(volume: volume / 3, frequency: frequency)
+    saw(volume: volume / 3, frequency: frequency + spread, pan: 0.3)
 }
 
 phase_length = 8000

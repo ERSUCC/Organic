@@ -7,7 +7,7 @@ void TestTokenizer::test()
 {
     beginSuite("Token list");
 
-    for (const Path* path : sourcePath("tokenizer/token-list")->children())
+    for (const Path* path : testPath("tokenizer/token-list")->children())
     {
         for (const OTest* info : OTest::read(path))
         {
@@ -17,7 +17,7 @@ void TestTokenizer::test()
 
     beginSuite("Tokenizer errors");
 
-    for (const Path* path : sourcePath("tokenizer/errors")->children())
+    for (const Path* path : testPath("tokenizer/errors")->children())
     {
         for (const OTest* info : OTest::read(path))
         {
@@ -28,7 +28,7 @@ void TestTokenizer::test()
 
 void TestTokenizer::checkList(const OTest* info)
 {
-    beginTest(info);
+    beginTest();
 
     const Parser::TokenList* list = (new Parser::Tokenizer(new SourceProvider(info->getSource())))->tokenize();
 
@@ -46,12 +46,12 @@ void TestTokenizer::checkList(const OTest* info)
 
     assert("Tokenized list matches expected list", current->end);
 
-    endTest();
+    endTest(info->getValue("name")->asString()->str);
 }
 
 void TestTokenizer::expectError(const OTest* info)
 {
-    beginTest(info);
+    beginTest();
 
     try
     {
@@ -70,5 +70,5 @@ void TestTokenizer::expectError(const OTest* info)
         fail("Tokenizer did not throw the expected error.");
     }
 
-    endTest();
+    endTest(info->getValue("name")->asString()->str);
 }
