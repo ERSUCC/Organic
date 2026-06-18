@@ -363,11 +363,6 @@ void TypeResolver::resolveTypes(Assign* token)
 {
     token->value->resolveTypes(this);
 
-    if (token->value->type->checkSpecifiedType(new NoneType()))
-    {
-        throw OrganicParseException("Functions that return nothing cannot be assigned to a variable.", token->value->location);
-    }
-
     token->variable->type = token->value->type;
 }
 
@@ -671,13 +666,22 @@ void TypeResolver::resolveTypes(CallAlias* token)
 
 void TypeResolver::resolveTypes(Define* token)
 {
+    const std::string name = token->function->string();
+
     std::unordered_map<std::string, const Type*> inputTypes;
 
     for (InputDef* input : token->function->inputs)
     {
+        const std::string inputName = input->string();
+
+        if (inputTypes.count(inputName))
+        {
+            throw OrganicParseException("Input \"" + inputName + "\" specified more than once for function \"" + name + "\".", input->location);
+        }
+
         input->resolveTypes(this);
 
-        inputTypes[input->string()] = input->type;
+        inputTypes[inputName] = input->type;
     }
 
     for (Token* instruction : token->instructions)
@@ -687,20 +691,10 @@ void TypeResolver::resolveTypes(Define* token)
 
     if (token->instructions.empty())
     {
-        Utils::parseWarning("This function contains no instructions.", token->location);
-
-        token->type = new NoneType();
+        throw OrganicParseException("The function \"" + name + "\" does not return a value.", token->location);
     }
 
-    else
-    {
-        token->type = token->instructions.back()->type;
-    }
-
-    if (!token->type)
-    {
-        throw OrganicParseException("This function has an ambiguous return type.", token->location);
-    }
+    token->type = token->instructions.back()->type;
 
     token->function->type = new LambdaType(inputTypes, token->type);
     token->function->returnType = token->type;
@@ -722,11 +716,6 @@ void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::stri
 
         if (argument->name == name)
         {
-            if (argument->used)
-            {
-                throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + arguments->name + "\".", argument->location);
-            }
-
             argument->used = true;
 
             argument->value->resolveTypes(this);
@@ -735,7 +724,7 @@ void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::stri
 
             if (!expectedType->checkType(argumentType))
             {
-                throw OrganicParseException("Expected \"" + expectedType->name() + "\", received \"" + argumentType->name() + "\".", argument->value->location);
+                throw OrganicParseException("Expected " + expectedType->name() + " for input \"" + name + "\", but received " + argumentType->name() + ".", argument->value->location);
             }
 
             return;

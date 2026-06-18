@@ -1,0 +1,51 @@
+name = "Return constant"
+
+---
+
+func() = {
+    1
+}
+
+sine(volume: func())
+
+---
+
+name = "Return variable"
+
+---
+
+test = 1
+
+func() = {
+    test
+}
+
+sine(volume: test)
+
+---
+
+name = "Return function"
+
+---
+
+func() = {
+    sweep(from: 0, to: 1, length: 1000)
+}
+
+sine(volume: func())
+
+---
+
+name = "Return user function"
+
+---
+
+func() = {
+    sweep(from: 0, to: 1, length: 1000)
+}
+
+func1() = {
+    func()
+}
+
+sine(volume: func1())

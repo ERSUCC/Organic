@@ -5,9 +5,9 @@ TestResolver::TestResolver(TestTracker* tracker) :
 
 void TestResolver::test()
 {
-    beginSuite("Type inference");
+    beginSuite("Type resolver success");
 
-    for (const Path* path : sourcePath("type-resolver/inference")->children())
+    for (const Path* path : sourcePath("type-resolver/success")->children())
     {
         for (const OTest* info : OTest::read(path))
         {

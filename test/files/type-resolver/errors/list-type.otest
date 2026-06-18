@@ -1,0 +1,19 @@
+name = "Mismatched types in list"
+line = 2
+character = 13
+error = 'All elements in a list must have the same type.'
+
+---
+
+test = [ 1, "test", 3 ]
+
+---
+
+name = "Mismatched types in nested list"
+line = 2
+character = 23
+error = 'All elements in a list must have the same type.'
+
+---
+
+test = [ [ 1, 2, 3 ], [ "test", "test1", "test2" ] ]

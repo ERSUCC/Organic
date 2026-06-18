@@ -1,0 +1,29 @@
+name = "Number in number input"
+
+---
+
+sine(volume: 1)
+
+---
+
+name = "Constant in constant input"
+
+---
+
+sequence(order: sequence-forward)
+
+---
+
+name = "String in string input"
+
+---
+
+sample(file: "test")
+
+---
+
+name = "List in list input"
+
+---
+
+sequence(values: [ 1, 2, 3 ])

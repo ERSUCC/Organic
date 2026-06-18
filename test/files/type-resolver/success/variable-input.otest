@@ -1,0 +1,37 @@
+name = "Number variable in number input"
+
+---
+
+test = 1
+
+sine(volume: test)
+
+---
+
+name = "Constant variable in constant input"
+
+---
+
+test = sequence-forward
+
+sequence(order: test)
+
+---
+
+name = "String variable in string input"
+
+---
+
+test = "test"
+
+sample(file: test)
+
+---
+
+name = "List variable in list input"
+
+---
+
+test = [ 1, 2, 3 ]
+
+sequence(values: test)

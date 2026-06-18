@@ -1,0 +1,128 @@
+name = "Constant in number input"
+line = 2
+character = 14
+error = 'Expected number for input "volume", but received sequence order constant.'
+
+---
+
+sine(volume: sequence-forward)
+
+---
+
+name = "String in number input"
+line = 2
+character = 14
+error = 'Expected number for input "volume", but received string.'
+
+---
+
+sine(volume: "test")
+
+---
+
+name = "List in number input"
+line = 2
+character = 14
+error = 'Expected number for input "volume", but received list of number.'
+
+---
+
+sine(volume: [ 1, 2, 3 ])
+
+---
+
+name = "Number in constant input"
+line = 2
+character = 17
+error = 'Expected sequence order constant for input "order", but received number.'
+
+---
+
+sequence(order: 0)
+
+---
+
+name = "String in constant input"
+line = 2
+character = 17
+error = 'Expected sequence order constant for input "order", but received string.'
+
+---
+
+sequence(order: "test")
+
+---
+
+name = "List in constant input"
+line = 2
+character = 17
+error = 'Expected sequence order constant for input "order", but received list of sequence order constant.'
+
+---
+
+sequence(order: [ sequence-forward, sequence-backward ])
+
+---
+
+name = "Number in string input"
+line = 2
+character = 14
+error = 'Expected string for input "file", but received number.'
+
+---
+
+sample(file: 0)
+
+---
+
+name = "Constant in string input"
+line = 2
+character = 14
+error = 'Expected string for input "file", but received sequence order constant.'
+
+---
+
+sample(file: sequence-forward)
+
+---
+
+name = "List in string input"
+line = 2
+character = 14
+error = 'Expected string for input "file", but received list of string.'
+
+---
+
+sample(file: [ "test", "test1" ])
+
+---
+
+name = "Number in list input"
+line = 2
+character = 18
+error = 'Expected list of number for input "values", but received number.'
+
+---
+
+sequence(values: 0)
+
+---
+name = "Constant in list input"
+line = 2
+character = 18
+error = 'Expected list of number for input "values", but received sequence order constant.'
+
+---
+
+sequence(values: sequence-forward)
+
+---
+
+name = "String in list input"
+line = 2
+character = 18
+error = 'Expected list of number for input "values", but received string.'
+
+---
+
+sequence(values: "test")

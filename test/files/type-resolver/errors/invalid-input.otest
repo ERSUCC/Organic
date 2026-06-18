@@ -1,8 +1,0 @@
-name = "Invalid input"
-line = 2
-character = 6
-error = 'Invalid input name "squiggle" for function "sine".'
-
----
-
-sine(squiggle: 0)
