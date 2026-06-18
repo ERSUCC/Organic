@@ -3,7 +3,7 @@
   "displayName": "Organic",
   "description": "Syntax highlighting for Organic",
   "version": "0.1.0",
-  "publisher": "Isaac Brown",
+  "publisher": "ERSUCC",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -63,7 +63,7 @@
   },
   "repository": {
   	"type": "git",
-  	"url": "https://github.com/ERSUCC/Organic-Syntax-Highlighting"
+  	"url": "https://github.com/ERSUCC/Organic"
   },
   "icon": "./icons/icon-full.png"
 }
