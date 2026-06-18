@@ -3,7 +3,7 @@
 #define ARG(name) transformArgument(token->arguments, name)
 
 TokenTransformer::TokenTransformer(const Path* sourcePath) :
-    sourcePath(sourcePath), utils(Utils::get()) {}
+    sourcePath(sourcePath) {}
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Value* token)
 {

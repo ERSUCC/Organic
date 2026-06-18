@@ -77,8 +77,6 @@ struct TokenTransformer
 private:
     const Path* sourcePath;
 
-    const Utils* utils;
-
     std::unordered_map<Parser::VariableDef*, Engine::ValueObject*> variables;
     std::unordered_map<Parser::InputDef*, Engine::ValueObject*> inputs;
     std::unordered_map<Parser::FunctionDef*, const Parser::Define*> functions;

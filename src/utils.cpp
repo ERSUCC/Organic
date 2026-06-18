@@ -23,21 +23,6 @@ void Utils::printInfo()
     std::cout << "Random Seed: " << utils->seed << "\n";
 }
 
-void Utils::parseWarning(const std::string message, const SourceLocation& location)
-{
-    if (!Utils::get()->firstWarning)
-    {
-        std::cout << "\n";
-    }
-
-    else
-    {
-        Utils::get()->firstWarning = false;
-    }
-
-    std::cout << "Parse warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
-}
-
 void Utils::includeWarning(const std::string message, const SourceLocation& location)
 {
     if (!Utils::get()->firstWarning)

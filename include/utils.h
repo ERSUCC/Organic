@@ -25,7 +25,6 @@ struct Utils
     static Utils* get();
 
     static void printInfo();
-    static void parseWarning(const std::string message, const SourceLocation& location);
     static void includeWarning(const std::string message, const SourceLocation& location);
 
     void setSeed(const std::optional<unsigned int>& seed);
