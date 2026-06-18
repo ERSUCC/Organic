@@ -1,0 +1,49 @@
+name = "Use variable as function input"
+
+---
+
+test = 1
+
+sine(volume: test)
+
+---
+
+name = "Use variable as user function input"
+
+---
+
+test = 1
+
+func(input: 0) = {
+    input
+}
+
+func(input: test)
+
+---
+
+name = "Use variable from outer scope"
+
+---
+
+test = 1
+
+func() = {
+    sine(volume: test)
+}
+
+---
+
+name = "Use variable from distant scope"
+
+---
+
+test = 1
+
+func() = {
+    func1() = {
+        func2() = {
+            sine(volume: test)
+        }
+    }
+}

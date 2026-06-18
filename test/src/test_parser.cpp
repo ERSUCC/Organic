@@ -5,6 +5,16 @@ TestParser::TestParser(TestTracker* tracker) :
 
 void TestParser::test()
 {
+    beginSuite("Parser success");
+
+    for (const Path* path : sourcePath("parser/success")->children())
+    {
+        for (const OTest* info : OTest::read(path))
+        {
+            expectSuccess(info);
+        }
+    }
+
     beginSuite("Parser errors");
 
     for (const Path* path : sourcePath("parser/errors")->children())
@@ -14,6 +24,23 @@ void TestParser::test()
             expectError(info);
         }
     }
+}
+
+void TestParser::expectSuccess(const OTest* info)
+{
+    beginTest(info);
+
+    try
+    {
+        Parser::Parser::parseSource(info->getSource());
+    }
+
+    catch (const OrganicException& e)
+    {
+        fail("Source was not parsed successfully.");
+    }
+
+    endTest();
 }
 
 void TestParser::expectError(const OTest* info)

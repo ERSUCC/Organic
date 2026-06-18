@@ -1,0 +1,49 @@
+name = "Use function as function input"
+
+---
+
+sine(volume: sweep(from: 0, to: 1, length: 500))
+
+---
+
+name = "Use user function as function input"
+
+---
+
+func() = {
+    sweep(from: 0, to: 1, length: 500)
+}
+
+sine(volume: func())
+
+---
+
+name = "Use user function from outer scope"
+
+---
+
+func() = {
+    0
+}
+
+func1() = {
+    func()
+}
+
+---
+
+name = "Use user function from distant scope"
+
+---
+
+func() = {
+    0
+}
+
+func1() = {
+    func2() = {
+        func3() = {
+            func()
+        }
+    }
+}

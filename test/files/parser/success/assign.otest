@@ -1,0 +1,46 @@
+name = "Assign number to variable"
+
+---
+
+test = 1
+
+---
+
+name = "Assign constant to variable"
+
+---
+
+test = random-linear
+
+---
+
+name = "Assign note to variable"
+
+---
+
+test = a4
+
+---
+
+name = "Assign string to variable"
+
+---
+
+test = "one"
+
+---
+
+name = "Assign list to variable"
+
+---
+
+test = [ 1, 2, 3 ]
+
+---
+
+name = "Assign variable to variable"
+
+---
+
+test = 1
+test1 = test

@@ -13,6 +13,7 @@ struct TestParser : public Test
     void test() override;
 
 private:
+    void expectSuccess(const OTest* info);
     void expectError(const OTest* info);
 
 };
