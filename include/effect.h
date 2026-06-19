@@ -3,6 +3,7 @@
 #include <cstring>
 #include <queue>
 #include <random>
+#include <stddef.h>
 
 #include "object.h"
 

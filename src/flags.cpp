@@ -1,8 +1,8 @@
 #include "../include/flags.h"
 
-FlagParser::FlagParser(char** flags, const unsigned int length)
+FlagParser::FlagParser(char** flags, const size_t length)
 {
-    for (unsigned int i = 0; i < length; i++)
+    for (size_t i = 0; i < length; i++)
     {
         this->flags.push(flags[i]);
     }
@@ -105,7 +105,7 @@ ProgramOptions FlagParser::getOptions()
                 throw OrganicArgumentException("The option \"--buffer-length\" was already set.");
             }
 
-            options.sampleRate = nextInt(flag);
+            options.bufferLength = nextInt(flag);
         }
 
         else if (flag == "--seed")
@@ -115,7 +115,7 @@ ProgramOptions FlagParser::getOptions()
                 throw OrganicArgumentException("The option \"--seed\" was already set.");
             }
 
-            options.seed = nextInt(flag);
+            options.seed = nextLong(flag);
         }
 
         else
@@ -172,6 +172,38 @@ unsigned int FlagParser::nextInt(const std::string flag)
     try
     {
         result = std::stoul(next, &end);
+    }
+
+    catch (const std::out_of_range& error)
+    {
+        throw OrganicArgumentException("The value provided for option \"" + flag + "\" is too large.");
+    }
+
+    catch (const std::invalid_argument& error) {}
+
+    if (end < next.size())
+    {
+        throw OrganicArgumentException("Expected a positive integer for option \"" + flag + "\", received \"" + next + "\".");
+    }
+
+    return result;
+}
+
+size_t FlagParser::nextLong(const std::string flag)
+{
+    const std::string next = nextOption(flag);
+
+    if (next[0] == '-')
+    {
+        throw OrganicArgumentException("The value provided for option \"" + flag + "\" cannot be negative.");
+    }
+
+    size_t result;
+    size_t end = 0;
+
+    try
+    {
+        result = std::stoull(next, &end);
     }
 
     catch (const std::out_of_range& error)

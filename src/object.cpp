@@ -97,7 +97,7 @@ double Lambda::getValue()
 
 void Lambda::setInputs(const std::vector<ValueObject*>& values)
 {
-    for (unsigned int i = 0; i < inputs.size(); i++)
+    for (size_t i = 0; i < inputs.size(); i++)
     {
         inputs[i]->value = values[i];
     }

@@ -5,9 +5,6 @@ using namespace Engine;
 ValueByte::ValueByte(const unsigned char value) :
     value(value) {}
 
-ValueInt::ValueInt(const unsigned int value) :
-    value(value) {}
-
 ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
     value1(value1), value2(value2) {}
 
@@ -361,7 +358,7 @@ double Sequence::syncLength() const
     {
         length += objects[0]->syncLength();
 
-        for (unsigned int i = 1; i < objects.size() - 1; i++)
+        for (size_t i = 1; i < objects.size() - 1; i++)
         {
             length += objects[i]->syncLength() * 2;
         }
@@ -425,7 +422,7 @@ void Sequence::init()
 
     chosen.clear();
 
-    udist = std::uniform_int_distribution<>(0, objects.size() - 1);
+    udist = std::uniform_int_distribution<size_t>(0, objects.size() - 1);
 
     const unsigned char orderNum = order->getLeafAs<ValueByte>()->value;
 
@@ -481,20 +478,20 @@ void Sequence::reinit()
             break;
 
         case Constants::Sequence::Backward:
-        {
-            current -= 1;
-
-            if (current < 0)
+            if (current == 0)
             {
                 current = objects.size() - 1;
             }
 
+            else
+            {
+                current--;
+            }
+
             break;
-        }
 
         case Constants::Sequence::PingPong:
-        {
-            if ((direction == -1 && current <= 0) || current >= objects.size() - 1)
+            if ((direction == -1 && current == 0) || current >= objects.size() - 1)
             {
                 direction *= -1;
             }
@@ -502,10 +499,8 @@ void Sequence::reinit()
             current += direction;
 
             break;
-        }
 
         case Constants::Sequence::Random:
-        {
             if (chosen.size() < objects.size())
             {
                 current = udist(utils->rng);
@@ -519,7 +514,6 @@ void Sequence::reinit()
             }
 
             break;
-        }
     }
 
     objects[current]->start(repeatTime);

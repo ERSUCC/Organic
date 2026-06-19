@@ -24,7 +24,7 @@ std::filesystem::path Path::formatPath(const std::string path)
 {
     std::string trimmed;
 
-    unsigned int i = 0;
+    size_t i = 0;
 
     while (i < path.size() && isspace(path[i]))
     {

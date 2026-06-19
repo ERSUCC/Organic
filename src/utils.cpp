@@ -38,11 +38,11 @@ void Utils::includeWarning(const std::string message, const SourceLocation& loca
     std::cout << "Include warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
 }
 
-void Utils::setSeed(const std::optional<unsigned int>& seed)
+void Utils::setSeed(const std::optional<size_t>& seed)
 {
     this->seed = seed.value_or(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 
-    rng = std::mt19937(this->seed);
+    rng = std::mt19937_64(this->seed);
 }
 
 Profiler::Profiler(const double frequency) :

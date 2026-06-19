@@ -2,6 +2,7 @@
 
 #include <iterator>
 #include <set>
+#include <stddef.h>
 #include <string>
 
 #include "path.h"

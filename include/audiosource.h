@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <random>
+#include <stddef.h>
 #include <string>
 
 #include "effect.h"
@@ -139,7 +140,7 @@ protected:
 private:
     ValueObject* resource;
 
-    unsigned int index;
+    size_t index;
 
 };
 
@@ -156,28 +157,28 @@ private:
 
 struct Grain : public Sync
 {
-    Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const unsigned int length);
+    Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const size_t length);
 
     void apply(double* buffer);
 
-    inline void setLength(const unsigned int length);
+    inline void setLength(const size_t length);
 
 protected:
     void init() override;
 
 private:
-    unsigned int clampLength(const unsigned int max) const;
-    unsigned int randomIndex(const unsigned int max) const;
+    size_t clampLength(const size_t max) const;
+    size_t randomIndex(const size_t max) const;
 
     ValueObject* resource;
     ValueObject* shape;
 
     ShapeCoordinator* coordinator;
 
-    unsigned int length;
+    size_t length;
 
-    unsigned int currentIndex;
-    unsigned int startIndex;
+    size_t currentIndex;
+    size_t startIndex;
 
     bool firstInit = true;
 
@@ -202,17 +203,17 @@ struct GrainList : public Sync
 
     void append(Grain* grain);
 
-    void apply(double* buffer, const unsigned int grainLength, const unsigned int maxGrains);
+    void apply(double* buffer, const size_t grainLength, const size_t maxGrains);
 
-    inline unsigned int getActiveLength() const;
-    inline unsigned int getTotalLength() const;
+    inline size_t getActiveLength() const;
+    inline size_t getTotalLength() const;
 
 private:
     GrainNode* head = new GrainNode(nullptr, nullptr, nullptr);
     GrainNode* tail = new GrainNode(nullptr, nullptr, nullptr);
 
-    unsigned int activeLength = 0;
-    unsigned int totalLength = 0;
+    size_t activeLength = 0;
+    size_t totalLength = 0;
 
 };
 

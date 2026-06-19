@@ -32,13 +32,13 @@ void EffectGroup::apply(double* buffer)
 
         static_cast<Effect*>(effect)->apply(applied);
 
-        for (unsigned int i = 0; i < utils->channels; i++)
+        for (size_t i = 0; i < utils->channels; i++)
         {
             buffer[i] += applied[i] / effectObjects.size();
         }
     }
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         buffer[i] = original[i] * (1 - mixValue) + buffer[i] * mixValue;
     }
@@ -65,7 +65,7 @@ void Delay::apply(double* buffer)
     const double mixValue = mix->getValue();
     const double feedbackValue = feedback->getValue();
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         if (delayFrames > 0 && delayBuffer.size() >= delayFrames)
         {
@@ -106,7 +106,7 @@ void Comb::apply(double* buffer)
     const double mixValue = mix->getValue();
     const double feedbackValue = feedback->getValue();
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         if (delayFrames > 0 && delayBuffer.size() >= delayFrames)
         {
@@ -147,7 +147,7 @@ void AllPass::apply(double* buffer)
     const double mixValue = mix->getValue();
     const double feedbackValue = feedback->getValue();
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         double value = buffer[i] * feedbackValue;
 
@@ -193,7 +193,7 @@ void LowPass::apply(double* buffer)
     const double b1 = 2 * (omega2 - 1) / c;
     const double b2 = (1 - sqrt(2) * omega + omega2) / c;
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         const double value = buffer[i];
 
@@ -283,13 +283,13 @@ DelayMatrix::DelayMatrix()
 
     lines = (DelayLine**)malloc(sizeof(DelayLine*) * 16 * utils->channels);
 
-    std::uniform_int_distribution udist(0U, 1000U);
+    std::uniform_int_distribution<size_t> udist(0, 1000);
 
     for (size_t i = 0; i < 16; i++)
     {
         const size_t length = 2000U + i * 1000U + udist(utils->rng);
 
-        for (unsigned int j = 0; j < utils->channels; j++)
+        for (size_t j = 0; j < utils->channels; j++)
         {
             lines[i * utils->channels + j] = new DelayLine(length);
         }
@@ -318,7 +318,7 @@ void DelayMatrix::apply(double* buffer, const double lengthValue, const double m
 {
     const double feedbackValue = exp(-3 * delayLength / lengthValue);
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         for (size_t j = 0; j < 16; j++)
         {

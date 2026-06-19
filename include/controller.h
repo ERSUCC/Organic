@@ -1,6 +1,7 @@
 #pragma once
 
 #include <random>
+#include <stddef.h>
 #include <unordered_set>
 #include <vector>
 
@@ -14,13 +15,6 @@ struct ValueByte : public ValueObject
     ValueByte(const unsigned char value);
 
     const unsigned char value;
-};
-
-struct ValueInt : public ValueObject
-{
-    ValueInt(const unsigned int value);
-
-    const unsigned int value;
 };
 
 struct ValueCombination : public ValueObject
@@ -247,15 +241,15 @@ private:
     ValueObject* controllers;
     ValueObject* order;
 
-    std::uniform_int_distribution<> udist;
+    std::uniform_int_distribution<size_t> udist;
 
-    std::unordered_set<unsigned int> chosen;
+    std::unordered_set<size_t> chosen;
 
-    int current = 0;
-    int direction = 1;
-    int last = -1;
-    int switches = 0;
-    int max_switches;
+    size_t current = 0;
+    size_t direction = 1;
+    size_t last = -1;
+    size_t switches = 0;
+    size_t max_switches;
 
 };
 
@@ -274,7 +268,7 @@ private:
     ValueObject* value;
     ValueObject* repeats;
 
-    unsigned int times = 0;
+    size_t times = 0;
 
 };
 

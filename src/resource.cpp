@@ -57,6 +57,8 @@ Resource::Resource(const Path* path, const SourceLocation location)
         scaledLength = data.output_frames_gen * utils->channels;
     }
 
+    this->length = scaledLength;
+
     samples = (double*)malloc(sizeof(double) * scaledLength);
 
     if (channels == utils->channels)

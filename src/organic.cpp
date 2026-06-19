@@ -110,7 +110,7 @@ void Organic::startPlayback()
 
 void Organic::startExport()
 {
-    const unsigned int steps = (options.time.value() / 1000) * utils->sampleRate;
+    const size_t steps = (options.time.value() / 1000) * utils->sampleRate;
 
     SndfileHandle* file = new SndfileHandle(options.exportPath.value()->string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_24, utils->channels, utils->sampleRate);
 
@@ -118,7 +118,7 @@ void Organic::startExport()
 
     program->start(0);
 
-    for (unsigned int i = 0; i < steps; i++)
+    for (size_t i = 0; i < steps; i++)
     {
         utils->time = i * 1000.0 / utils->sampleRate;
 
@@ -135,7 +135,7 @@ void Organic::startExport()
 
 int Organic::processAudio(void* output, unsigned int frames)
 {
-    for (unsigned int i = 0; i < frames; i++)
+    for (size_t i = 0; i < frames; i++)
     {
         program->processAudioSources((double*)output + i * utils->channels);
 

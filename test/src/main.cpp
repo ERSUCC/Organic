@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <string>
 
 #include "../include/test_examples.h"

@@ -710,7 +710,7 @@ void TypeResolver::resolveTypes(Program* token)
 
 void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, const Type* expectedType, Token* defaultValue)
 {
-    for (unsigned int i = 0; i < arguments->arguments.size(); i++)
+    for (size_t i = 0; i < arguments->arguments.size(); i++)
     {
         Argument* argument = arguments->arguments[i];
 

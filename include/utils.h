@@ -15,6 +15,7 @@
 #include <mutex>
 #include <optional>
 #include <random>
+#include <stddef.h>
 #include <string>
 
 #include "exception.h"
@@ -27,12 +28,13 @@ struct Utils
     static void printInfo();
     static void includeWarning(const std::string message, const SourceLocation& location);
 
-    void setSeed(const std::optional<unsigned int>& seed);
+    void setSeed(const std::optional<size_t>& seed);
 
     unsigned int channels;
     unsigned int sampleRate;
     unsigned int bufferLength;
-    unsigned int seed;
+
+    size_t seed;
 
     const double pi = M_PI;
     const double twoPi = M_PI * 2;
@@ -41,7 +43,7 @@ struct Utils
 
     double time = 0;
 
-    std::mt19937 rng;
+    std::mt19937_64 rng;
 
 private:
     static Utils* instance;

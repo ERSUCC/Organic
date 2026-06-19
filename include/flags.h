@@ -3,6 +3,7 @@
 #include <exception>
 #include <queue>
 #include <optional>
+#include <stddef.h>
 #include <string>
 
 #include "exception.h"
@@ -17,12 +18,12 @@ struct ProgramOptions
     std::optional<unsigned int> channels;
     std::optional<unsigned int> sampleRate;
     std::optional<unsigned int> bufferLength;
-    std::optional<unsigned int> seed;
+    std::optional<size_t> seed;
 };
 
 struct FlagParser
 {
-    FlagParser(char** flags, const unsigned int length);
+    FlagParser(char** flags, const size_t length);
 
     ProgramOptions getOptions();
 
@@ -30,6 +31,8 @@ private:
     std::string nextOption(const std::string flag);
 
     unsigned int nextInt(const std::string flag);
+
+    size_t nextLong(const std::string flag);
 
     double nextDouble(const std::string flag);
 

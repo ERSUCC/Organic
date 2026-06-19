@@ -16,7 +16,7 @@ struct Resource : public ValueObject
 
     double* samples;
 
-    unsigned int length;
+    size_t length;
 };
 
 }

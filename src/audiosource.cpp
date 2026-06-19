@@ -24,7 +24,7 @@ void SingleAudioSource::fillBuffer(double* buffer)
         effect->getLeafAs<Effect>()->apply(effectBuffer);
     }
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         buffer[i] += effectBuffer[i];
     }
@@ -239,20 +239,20 @@ void ShapeCoordinator::setValue(const double value)
     this->value = value;
 }
 
-Grain::Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const unsigned int length) :
+Grain::Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const size_t length) :
     resource(resource), shape(shape), coordinator(coordinator), length(length) {}
 
 void Grain::apply(double* buffer)
 {
     const Resource* resourceLeaf = resource->getLeafAs<Resource>();
 
-    const unsigned int clamped = clampLength(resourceLeaf->length);
+    const size_t clamped = clampLength(resourceLeaf->length);
 
     coordinator->setValue((double)(currentIndex - startIndex) / clamped);
 
     const double shapeValue = shape->getValue();
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         buffer[i] += resourceLeaf->samples[currentIndex++] * shapeValue;
     }
@@ -263,15 +263,15 @@ void Grain::apply(double* buffer)
     }
 }
 
-void Grain::setLength(const unsigned int length)
+void Grain::setLength(const size_t length)
 {
     this->length = length;
 }
 
 void Grain::init()
 {
-    const unsigned int maxLength = resource->getLeafAs<Resource>()->length;
-    const unsigned int clamped = clampLength(maxLength);
+    const size_t maxLength = resource->getLeafAs<Resource>()->length;
+    const size_t clamped = clampLength(maxLength);
 
     currentIndex = randomIndex(maxLength - clamped);
     startIndex = currentIndex;
@@ -284,7 +284,7 @@ void Grain::init()
     }
 }
 
-unsigned int Grain::clampLength(const unsigned int max) const
+size_t Grain::clampLength(const size_t max) const
 {
     if (length > max)
     {
@@ -294,9 +294,9 @@ unsigned int Grain::clampLength(const unsigned int max) const
     return length;
 }
 
-unsigned int Grain::randomIndex(const unsigned int max) const
+size_t Grain::randomIndex(const size_t max) const
 {
-    return (std::uniform_int_distribution(0U, max)(utils->rng) / utils->channels) * utils->channels;
+    return (std::uniform_int_distribution<size_t>(0, max)(utils->rng) / utils->channels) * utils->channels;
 }
 
 GrainNode::GrainNode(Grain* grain, GrainNode* prev, GrainNode* next) :
@@ -322,7 +322,7 @@ void GrainList::append(Grain* grain)
     totalLength++;
 }
 
-void GrainList::apply(double* buffer, const unsigned int grainLength, const unsigned int maxGrains)
+void GrainList::apply(double* buffer, const size_t grainLength, const size_t maxGrains)
 {
     GrainNode* current = head->next;
 
@@ -364,12 +364,12 @@ void GrainList::apply(double* buffer, const unsigned int grainLength, const unsi
     }
 }
 
-unsigned int GrainList::getActiveLength() const
+size_t GrainList::getActiveLength() const
 {
     return activeLength;
 }
 
-unsigned int GrainList::getTotalLength() const
+size_t GrainList::getTotalLength() const
 {
     return totalLength;
 }
@@ -395,14 +395,14 @@ void Granulate::prepareForEffects()
 {
     memset(effectBuffer, 0, sizeof(double) * utils->channels);
 
-    const unsigned int lengthValue = utils->sampleRate * utils->channels * length->getValue() / 1000;
-    const unsigned int grainsValue = grains->getValue();
+    const size_t lengthValue = utils->sampleRate * utils->channels * length->getValue() / 1000;
+    const size_t grainsValue = grains->getValue();
 
     if (grainList->getActiveLength() < grainsValue)
     {
-        const unsigned int count = grainsValue - grainList->getActiveLength();
+        const size_t count = grainsValue - grainList->getActiveLength();
 
-        for (unsigned int i = 0; i < count; i++)
+        for (size_t i = 0; i < count; i++)
         {
             Grain* grain = new Grain(resource, shape, coordinator, lengthValue);
 
@@ -416,7 +416,7 @@ void Granulate::prepareForEffects()
 
     const double volumeValue = volume->getValue() / fmax(1.3 * sqrt(grainList->getTotalLength()), 1);
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         effectBuffer[i] *= volumeValue;
     }
@@ -452,7 +452,7 @@ void Group::fillBuffer(double* buffer)
 
     const double volumeValue = volume->getValue();
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         effectBuffer[i] *= volumeValue;
     }
@@ -470,7 +470,7 @@ void Group::fillBuffer(double* buffer)
         effect->getLeafAs<Effect>()->apply(effectBuffer);
     }
 
-    for (unsigned int i = 0; i < utils->channels; i++)
+    for (size_t i = 0; i < utils->channels; i++)
     {
         buffer[i] += effectBuffer[i];
     }

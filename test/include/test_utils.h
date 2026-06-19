@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <stack>
+#include <stddef.h>
 #include <string>
 
 struct TestUtils

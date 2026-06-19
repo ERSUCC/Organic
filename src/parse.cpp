@@ -294,7 +294,7 @@ TokenListNode* Parser::parseInstruction(TokenListNode* start)
     {
         TokenListNode* current = start;
 
-        unsigned int depth = 0;
+        size_t depth = 0;
 
         do
         {
