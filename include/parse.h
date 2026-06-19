@@ -14,62 +14,63 @@
 #include "tokenize.h"
 #include "utils.h"
 
-namespace Parser
+namespace Parser {
+
+struct ParserContext
 {
-    struct ParserContext
-    {
-        ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs);
+    ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs);
 
-        VariableDef* addVariable(const Identifier* token);
-        FunctionDef* addFunction(const Identifier* token, const std::vector<InputDef*>& inputs);
+    VariableDef* addVariable(const Identifier* token);
+    FunctionDef* addFunction(const Identifier* token, const std::vector<InputDef*>& inputs);
 
-        Identifier* findIdentifier(const Identifier* token);
-        FunctionRef* findFunction(const Identifier* token);
+    Identifier* findIdentifier(const Identifier* token);
+    FunctionRef* findFunction(const Identifier* token);
 
-        void merge(const ParserContext* context);
+    void merge(const ParserContext* context);
 
-        ParserContext* parent;
+    ParserContext* parent;
 
-    private:
-        void checkNameConflicts(const Identifier* token) const;
-        bool checkRecursive(const Identifier* token) const;
+private:
+    void checkNameConflicts(const Identifier* token) const;
+    bool checkRecursive(const Identifier* token) const;
 
-        const std::string name;
+    const std::string name;
 
-        std::unordered_map<std::string, InputDef*> inputs;
-        std::unordered_map<std::string, VariableDef*> variables;
-        std::unordered_map<std::string, FunctionDef*> functions;
+    std::unordered_map<std::string, InputDef*> inputs;
+    std::unordered_map<std::string, VariableDef*> variables;
+    std::unordered_map<std::string, FunctionDef*> functions;
 
-    };
+};
 
-    struct Parser
-    {
-        static Program* parseSource(const Path* path);
-        static Program* parseSource(const std::string& source);
+struct Parser
+{
+    static Program* parseSource(const Path* path);
+    static Program* parseSource(const std::string& source);
 
-    private:
-        Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
+private:
+    Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
 
-        Program* parse();
+    Program* parse();
 
-        TokenListNode* parseInclude(TokenListNode* start);
-        TokenListNode* parseInstruction(TokenListNode* start);
-        TokenListNode* parseDefine(TokenListNode* start);
-        TokenListNode* parseAssign(TokenListNode* start);
-        TokenListNode* parseCall(TokenListNode* start);
-        TokenListNode* parseArgument(TokenListNode* start);
-        TokenListNode* parseExpression(TokenListNode* start);
-        TokenListNode* parseList(TokenListNode* start);
-        TokenListNode* parseTerms(TokenListNode* start);
-        TokenListNode* parseTerm(TokenListNode* start);
+    TokenListNode* parseInclude(TokenListNode* start);
+    TokenListNode* parseInstruction(TokenListNode* start);
+    TokenListNode* parseDefine(TokenListNode* start);
+    TokenListNode* parseAssign(TokenListNode* start);
+    TokenListNode* parseCall(TokenListNode* start);
+    TokenListNode* parseArgument(TokenListNode* start);
+    TokenListNode* parseExpression(TokenListNode* start);
+    TokenListNode* parseList(TokenListNode* start);
+    TokenListNode* parseTerms(TokenListNode* start);
+    TokenListNode* parseTerm(TokenListNode* start);
 
-        const SourceProvider* source;
+    const SourceProvider* source;
 
-        ParserContext* context;
+    ParserContext* context;
 
-        std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths;
+    std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths;
 
-        TokenList* tokens;
+    TokenList* tokens;
 
-    };
+};
+
 }

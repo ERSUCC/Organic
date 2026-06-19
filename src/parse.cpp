@@ -1,729 +1,765 @@
 #include "../include/parse.h"
 
-namespace Parser
+namespace Parser {
+
+struct TokenException : public OrganicParseException
 {
-    struct TokenException : public OrganicParseException
+    TokenException(const TokenListNode* node, const std::string& expected) :
+        OrganicParseException(getMessage(node, expected), node->token->location), node(node), expected(expected) {}
+
+    const TokenListNode* node;
+
+    const std::string expected;
+
+private:
+    static std::string getMessage(const TokenListNode* node, const std::string& expected)
     {
-        TokenException(const TokenListNode* node, const std::string& expected) :
-            OrganicParseException(getMessage(node, expected), node->token->location), node(node), expected(expected) {}
-
-        const TokenListNode* node;
-
-        const std::string expected;
-
-    private:
-        static std::string getMessage(const TokenListNode* node, const std::string& expected)
+        if (node->end)
         {
-            if (node->end)
+            return "Expected " + expected + ".";
+        }
+
+        return "Expected " + expected + ", but received \"" + node->token->string() + "\".";
+    }
+
+};
+
+ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs) :
+    parent(parent), name(name)
+{
+    for (InputDef* input : inputs)
+    {
+        this->inputs[input->string()] = input;
+    }
+}
+
+VariableDef* ParserContext::addVariable(const Identifier* token)
+{
+    checkNameConflicts(token);
+
+    VariableDef* variable = new VariableDef(token->location);
+
+    variables[token->string()] = variable;
+
+    return variable;
+}
+
+FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vector<InputDef*>& inputs)
+{
+    if (checkRecursive(token))
+    {
+        throw OrganicParseException("Redefining a function in its own definition is not allowed.", token->location);
+    }
+
+    checkNameConflicts(token);
+
+    FunctionDef* lambda = new FunctionDef(token->location, inputs);
+
+    functions[token->string()] = lambda;
+
+    return lambda;
+}
+
+Identifier* ParserContext::findIdentifier(const Identifier* token)
+{
+    if (inputs.count(token->string()))
+    {
+        return new InputRef(token->location, inputs[token->string()]);
+    }
+
+    if (variables.count(token->string()))
+    {
+        return new VariableRef(token->location, variables[token->string()]);
+    }
+
+    if (functions.count(token->string()))
+    {
+        return new FunctionRef(token->location, functions[token->string()]);
+    }
+
+    if (parent)
+    {
+        if (Identifier* identifier = parent->findIdentifier(token))
+        {
+            return identifier;
+        }
+    }
+
+    throw OrganicParseException("No variable, input, or function exists with the name \"" + token->string() + "\".", token->location);
+}
+
+FunctionRef* ParserContext::findFunction(const Identifier* token)
+{
+    if (checkRecursive(token))
+    {
+        throw OrganicParseException("Calling a function in its own definition is not allowed.", token->location);
+    }
+
+    if (functions.count(token->string()))
+    {
+        return new FunctionRef(token->location, functions[token->string()]);
+    }
+
+    if (parent)
+    {
+        if (FunctionRef* function = parent->findFunction(token))
+        {
+            return function;
+        }
+    }
+
+    throw OrganicParseException("No function exists with the name \"" + token->string() + "\".", token->location);
+}
+
+void ParserContext::merge(const ParserContext* context)
+{
+    for (const std::pair<std::string, InputDef*> input : context->inputs)
+    {
+        checkNameConflicts(input.second);
+
+        inputs[input.first] = input.second;
+    }
+
+    for (const std::pair<std::string, VariableDef*> variable : context->variables)
+    {
+        checkNameConflicts(variable.second);
+
+        variables[variable.first] = variable.second;
+    }
+
+    for (const std::pair<std::string, FunctionDef*> function : context->functions)
+    {
+        checkNameConflicts(function.second);
+
+        functions[function.first] = function.second;
+    }
+}
+
+void ParserContext::checkNameConflicts(const Identifier* token) const
+{
+    if (inputs.count(token->string()))
+    {
+        throw OrganicParseException("An input already exists with the name \"" + token->string() + "\".", token->location);
+    }
+
+    if (variables.count(token->string()))
+    {
+        throw OrganicParseException("A variable already exists with the name \"" + token->string() + "\".", token->location);
+    }
+
+    if (functions.count(token->string()))
+    {
+        throw OrganicParseException("A function already exists with the name \"" + token->string() + "\".", token->location);
+    }
+}
+
+bool ParserContext::checkRecursive(const Identifier* token) const
+{
+    return name == token->string() || (parent && parent->checkRecursive(token));
+}
+
+Program* Parser::parseSource(const Path* path)
+{
+    const FileProvider* source = FileProvider::create(path);
+
+    if (!source)
+    {
+        throw OrganicFileException("Could not read \"" + path->string() + "\".");
+    }
+
+    std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
+
+    return (new Parser(source, new ParserContext(nullptr, "", {}), includedPaths))->parse();
+}
+
+Program* Parser::parseSource(const std::string& source)
+{
+    std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths;
+
+    return (new Parser(new SourceProvider(source), new ParserContext(nullptr, "", {}), includedPaths))->parse();
+}
+
+Parser::Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
+    source(source), context(context), includedPaths(includedPaths) {}
+
+Program* Parser::parse()
+{
+    tokens = (new Tokenizer(source))->tokenize();
+
+    TokenListNode* current = tokens->head->next;
+
+    while (current->token->string() == "include" && current->next->getToken<OpenParenthesis>())
+    {
+        current = parseInclude(current);
+    }
+
+    while (!current->end)
+    {
+        current = parseInstruction(current);
+    }
+
+    std::vector<Token*> instructions;
+
+    current = tokens->head->next;
+
+    while (!current->end)
+    {
+        instructions.push_back(current->token);
+
+        current = current->next;
+    }
+
+    return new Program(SourceLocation(source, 0, source->length()), instructions);
+}
+
+TokenListNode* Parser::parseInclude(TokenListNode* start)
+{
+    const SourceLocation location = start->token->location;
+
+    TokenListNode* current = start->next->next;
+
+    const String* str = current->getToken<String>();
+
+    if (!str)
+    {
+        throw TokenException(current, "file path");
+    }
+
+    current = current->next;
+
+    if (!current->getToken<CloseParenthesis>())
+    {
+        throw TokenException(current, "\")\"");
+    }
+
+    current = current->next;
+
+    const std::filesystem::path file = Path::formatPath(str->str);
+
+    if (file.empty())
+    {
+        Utils::includeWarning("This include does not specify a source file, it will have no effect.", location);
+
+        return tokens->stitch(start, current);
+    }
+
+    const Path* sourcePath = source->path();
+    const Path* includePath = Path::beside(file, sourcePath);
+
+    if (!includePath->exists())
+    {
+        throw OrganicIncludeException("Source file \"" + includePath->string() + "\" does not exist.", location);
+    }
+
+    if (!includePath->isFile())
+    {
+        throw OrganicIncludeException("\"" + includePath->string() + "\" is not a file.", location);
+    }
+
+    if (sourcePath->string() == includePath->string())
+    {
+        Utils::includeWarning("Source file \"" + includePath->string() + "\" is the current file, this include will be ignored.", location);
+
+        return tokens->stitch(start, current);
+    }
+
+    if (includedPaths.count(includePath))
+    {
+        Utils::includeWarning("Source file \"" + includePath->string() + "\" has already been included, this include will be ignored.", location);
+
+        return tokens->stitch(start, current);
+    }
+
+    includedPaths.insert(includePath);
+
+    const FileProvider* includeSource = FileProvider::create(includePath);
+
+    ParserContext* includeContext = new ParserContext(nullptr, "", {});
+
+    Program* program = (new Parser(includeSource, includeContext, includedPaths))->parse();
+
+    context->merge(includeContext);
+
+    return tokens->patch(start, current, program);
+}
+
+TokenListNode* Parser::parseInstruction(TokenListNode* start)
+{
+    if (start->next->getToken<Equals>())
+    {
+        return parseAssign(start);
+    }
+
+    if (start->next->getToken<OpenParenthesis>())
+    {
+        TokenListNode* current = start;
+
+        unsigned int depth = 0;
+
+        do
+        {
+            current = current->next;
+
+            if (current->getToken<OpenParenthesis>())
             {
-                return "Expected " + expected + ".";
+                depth++;
             }
 
-            return "Expected " + expected + ", but received \"" + node->token->string() + "\".";
-        }
-
-    };
-
-    ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs) :
-        parent(parent), name(name)
-    {
-        for (InputDef* input : inputs)
-        {
-            this->inputs[input->string()] = input;
-        }
-    }
-
-    VariableDef* ParserContext::addVariable(const Identifier* token)
-    {
-        checkNameConflicts(token);
-
-        VariableDef* variable = new VariableDef(token->location);
-
-        variables[token->string()] = variable;
-
-        return variable;
-    }
-
-    FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vector<InputDef*>& inputs)
-    {
-        if (checkRecursive(token))
-        {
-            throw OrganicParseException("Redefining a function in its own definition is not allowed.", token->location);
-        }
-
-        checkNameConflicts(token);
-
-        FunctionDef* lambda = new FunctionDef(token->location, inputs);
-
-        functions[token->string()] = lambda;
-
-        return lambda;
-    }
-
-    Identifier* ParserContext::findIdentifier(const Identifier* token)
-    {
-        if (inputs.count(token->string()))
-        {
-            return new InputRef(token->location, inputs[token->string()]);
-        }
-
-        if (variables.count(token->string()))
-        {
-            return new VariableRef(token->location, variables[token->string()]);
-        }
-
-        if (functions.count(token->string()))
-        {
-            return new FunctionRef(token->location, functions[token->string()]);
-        }
-
-        if (parent)
-        {
-            if (Identifier* identifier = parent->findIdentifier(token))
+            else if (current->getToken<CloseParenthesis>())
             {
-                return identifier;
+                depth--;
             }
-        }
+        } while (depth > 0 && !current->end);
 
-        throw OrganicParseException("No variable, input, or function exists with the name \"" + token->string() + "\".", token->location);
-    }
-
-    FunctionRef* ParserContext::findFunction(const Identifier* token)
-    {
-        if (checkRecursive(token))
+        if (current->next->getToken<Equals>())
         {
-            throw OrganicParseException("Calling a function in its own definition is not allowed.", token->location);
-        }
-
-        if (functions.count(token->string()))
-        {
-            return new FunctionRef(token->location, functions[token->string()]);
-        }
-
-        if (parent)
-        {
-            if (FunctionRef* function = parent->findFunction(token))
+            if (current->next->next->getToken<OpenCurlyBracket>())
             {
-                return function;
+                return parseDefine(start);
             }
-        }
 
-        throw OrganicParseException("No function exists with the name \"" + token->string() + "\".", token->location);
-    }
-
-    void ParserContext::merge(const ParserContext* context)
-    {
-        for (const std::pair<std::string, InputDef*> input : context->inputs)
-        {
-            checkNameConflicts(input.second);
-
-            inputs[input.first] = input.second;
-        }
-
-        for (const std::pair<std::string, VariableDef*> variable : context->variables)
-        {
-            checkNameConflicts(variable.second);
-
-            variables[variable.first] = variable.second;
-        }
-
-        for (const std::pair<std::string, FunctionDef*> function : context->functions)
-        {
-            checkNameConflicts(function.second);
-
-            functions[function.first] = function.second;
+            throw OrganicParseException("Function definitions must begin with \"{\".", current->next->next->token->location);
         }
     }
 
-    void ParserContext::checkNameConflicts(const Identifier* token) const
+    TokenListNode* next = parseExpression(start);
+
+    if (next->getToken<Equals>())
     {
-        if (inputs.count(token->string()))
+        if (next->prev->getToken<List>())
         {
-            throw OrganicParseException("An input already exists with the name \"" + token->string() + "\".", token->location);
+            throw OrganicParseException("Cannot assign a value to a list.", next->prev->token->location);
         }
 
-        if (variables.count(token->string()))
+        if (next->prev->getToken<Call>())
         {
-            throw OrganicParseException("A variable already exists with the name \"" + token->string() + "\".", token->location);
-        }
-
-        if (functions.count(token->string()))
-        {
-            throw OrganicParseException("A function already exists with the name \"" + token->string() + "\".", token->location);
+            throw OrganicParseException("Function definitions must begin with \"{\".", next->token->location);
         }
     }
 
-    bool ParserContext::checkRecursive(const Identifier* token) const
+    return next;
+}
+
+TokenListNode* Parser::parseDefine(TokenListNode* start)
+{
+    TokenListNode* current = start->next->next;
+
+    std::vector<InputDef*> inputs;
+
+    if (!current->getToken<CloseParenthesis>())
     {
-        return name == token->string() || (parent && parent->checkRecursive(token));
-    }
+        current = current->prev;
 
-    Program* Parser::parseSource(const Path* path)
-    {
-        const FileProvider* source = FileProvider::create(path);
-
-        if (!source)
+        do
         {
-            throw OrganicFileException("Could not read \"" + path->string() + "\".");
-        }
+            current = current->next;
 
-        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
+            const Identifier* input = current->getToken<Identifier>();
 
-        return (new Parser(source, new ParserContext(nullptr, "", {}), includedPaths))->parse();
-    }
-
-    Program* Parser::parseSource(const std::string& source)
-    {
-        std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths;
-
-        return (new Parser(new SourceProvider(source), new ParserContext(nullptr, "", {}), includedPaths))->parse();
-    }
-
-    Parser::Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
-        source(source), context(context), includedPaths(includedPaths) {}
-
-    Program* Parser::parse()
-    {
-        tokens = (new Tokenizer(source))->tokenize();
-
-        TokenListNode* current = tokens->head->next;
-
-        while (current->token->string() == "include" && current->next->getToken<OpenParenthesis>())
-        {
-            current = parseInclude(current);
-        }
-
-        while (!current->end)
-        {
-            current = parseInstruction(current);
-        }
-
-        std::vector<Token*> instructions;
-
-        current = tokens->head->next;
-
-        while (!current->end)
-        {
-            instructions.push_back(current->token);
+            if (!input)
+            {
+                throw TokenException(current, "input name");
+            }
 
             current = current->next;
-        }
 
-        return new Program(SourceLocation(source, 0, source->length()), instructions);
-    }
+            if (!current->getToken<Colon>())
+            {
+                throw TokenException(current, "\":\" after input name");
+            }
 
-    TokenListNode* Parser::parseInclude(TokenListNode* start)
-    {
-        const SourceLocation location = start->token->location;
+            current = parseExpression(current->next);
 
-        TokenListNode* current = start->next->next;
-
-        const String* str = current->getToken<String>();
-
-        if (!str)
-        {
-            throw TokenException(current, "file path");
-        }
-
-        current = current->next;
+            inputs.push_back(new InputDef(input->location, current->prev->token));
+        } while (current->getToken<Comma>());
 
         if (!current->getToken<CloseParenthesis>())
         {
-            throw TokenException(current, "\")\"");
+            throw TokenException(current, "\",\" or \")\"");
         }
-
-        current = current->next;
-
-        const std::filesystem::path file = Path::formatPath(str->str);
-
-        if (file.empty())
-        {
-            Utils::includeWarning("This include does not specify a source file, it will have no effect.", location);
-
-            return tokens->stitch(start, current);
-        }
-
-        const Path* sourcePath = source->path();
-        const Path* includePath = Path::beside(file, sourcePath);
-
-        if (!includePath->exists())
-        {
-            throw OrganicIncludeException("Source file \"" + includePath->string() + "\" does not exist.", location);
-        }
-
-        if (!includePath->isFile())
-        {
-            throw OrganicIncludeException("\"" + includePath->string() + "\" is not a file.", location);
-        }
-
-        if (sourcePath->string() == includePath->string())
-        {
-            Utils::includeWarning("Source file \"" + includePath->string() + "\" is the current file, this include will be ignored.", location);
-
-            return tokens->stitch(start, current);
-        }
-
-        if (includedPaths.count(includePath))
-        {
-            Utils::includeWarning("Source file \"" + includePath->string() + "\" has already been included, this include will be ignored.", location);
-
-            return tokens->stitch(start, current);
-        }
-
-        includedPaths.insert(includePath);
-
-        const FileProvider* includeSource = FileProvider::create(includePath);
-
-        ParserContext* includeContext = new ParserContext(nullptr, "", {});
-
-        Program* program = (new Parser(includeSource, includeContext, includedPaths))->parse();
-
-        context->merge(includeContext);
-
-        return tokens->patch(start, current, program);
     }
 
-    TokenListNode* Parser::parseInstruction(TokenListNode* start)
+    FunctionDef* function = context->addFunction(start->getToken<Identifier>(), inputs);
+
+    if (function->string() == "time" ||
+        function->string() == "hold" ||
+        function->string() == "lfo" ||
+        function->string() == "sweep" ||
+        function->string() == "sequence" ||
+        function->string() == "repeat" ||
+        function->string() == "random" ||
+        function->string() == "limit" ||
+        function->string() == "trigger" ||
+        function->string() == "if" ||
+        function->string() == "all" ||
+        function->string() == "any" ||
+        function->string() == "none" ||
+        function->string() == "min" ||
+        function->string() == "max" ||
+        function->string() == "round" ||
+        function->string() == "absolute" ||
+        function->string() == "sine" ||
+        function->string() == "square" ||
+        function->string() == "triangle" ||
+        function->string() == "saw" ||
+        function->string() == "noise" ||
+        function->string() == "sample" ||
+        function->string() == "oscillator" ||
+        function->string() == "granulate" ||
+        function->string() == "group" ||
+        function->string() == "effect-group" ||
+        function->string() == "delay" ||
+        function->string() == "comb" ||
+        function->string() == "all-pass" ||
+        function->string() == "low-pass" ||
+        function->string() == "reverb" ||
+        function->string() == "include")
     {
-        if (start->next->getToken<Equals>())
-        {
-            return parseAssign(start);
-        }
-
-        if (start->next->getToken<OpenParenthesis>())
-        {
-            TokenListNode* current = start;
-
-            unsigned int depth = 0;
-
-            do
-            {
-                current = current->next;
-
-                if (current->getToken<OpenParenthesis>())
-                {
-                    depth++;
-                }
-
-                else if (current->getToken<CloseParenthesis>())
-                {
-                    depth--;
-                }
-            } while (depth > 0 && !current->end);
-
-            if (current->next->getToken<Equals>())
-            {
-                if (current->next->next->getToken<OpenCurlyBracket>())
-                {
-                    return parseDefine(start);
-                }
-
-                throw OrganicParseException("Function definitions must begin with \"{\".", current->next->next->token->location);
-            }
-        }
-
-        TokenListNode* next = parseExpression(start);
-
-        if (next->getToken<Equals>())
-        {
-            if (next->prev->getToken<List>())
-            {
-                throw OrganicParseException("Cannot assign a value to a list.", next->prev->token->location);
-            }
-
-            if (next->prev->getToken<Call>())
-            {
-                throw OrganicParseException("Function definitions must begin with \"{\".", next->token->location);
-            }
-        }
-
-        return next;
+        throw OrganicParseException("A function already exists with the name \"" + function->string() + "\".", function->location);
     }
 
-    TokenListNode* Parser::parseDefine(TokenListNode* start)
+    context = new ParserContext(context, function->string(), inputs);
+
+    current = current->next->next;
+
+    const OpenCurlyBracket* open = current->getToken<OpenCurlyBracket>();
+
+    current = current->next;
+
+    std::vector<Token*> instructions;
+
+    while (!current->end && !current->getToken<CloseCurlyBracket>())
     {
-        TokenListNode* current = start->next->next;
+        current = parseInstruction(current);
 
-        std::vector<InputDef*> inputs;
+        instructions.push_back(current->prev->token);
+    }
 
-        if (!current->getToken<CloseParenthesis>())
+    if (!current->getToken<CloseCurlyBracket>())
+    {
+        throw TokenException(current, "\"}\" at end of function definition");
+    }
+
+    context = context->parent;
+
+    return tokens->patch(start, current->next, new Define(function->location, instructions, function));
+}
+
+TokenListNode* Parser::parseAssign(TokenListNode* start)
+{
+    TokenListNode* current = start;
+
+    if (current->getToken<Constant>())
+    {
+        throw OrganicParseException("Cannot assign a value to \"" + current->token->string() + "\", it is a constant.", current->token->location);
+    }
+
+    if (current->getToken<Value>())
+    {
+        throw OrganicParseException("Cannot assign a value to a number.", current->token->location);
+    }
+
+    if (current->getToken<String>())
+    {
+        throw OrganicParseException("Cannot assign a value to a string.", current->token->location);
+    }
+
+    VariableDef* variable = context->addVariable(current->getToken<Identifier>());
+
+    try
+    {
+        current = parseExpression(current->next->next);
+    }
+
+    catch (const TokenException& e)
+    {
+        throw TokenException(e.node, "value after \"=\"");
+    }
+
+    return tokens->patch(start, current, new Assign(variable->location, variable, current->prev->token));
+}
+
+TokenListNode* Parser::parseCall(TokenListNode* start)
+{
+    TokenListNode* current = start;
+
+    const Identifier* name = start->getToken<Identifier>();
+
+    current = current->next->next;
+
+    std::vector<Argument*> arguments;
+
+    if (!current->getToken<CloseParenthesis>())
+    {
+        current = current->prev;
+
+        do
         {
-            current = current->prev;
-
-            do
+            try
             {
-                current = current->next;
-
-                const Identifier* input = current->getToken<Identifier>();
-
-                if (!input)
-                {
-                    throw TokenException(current, "input name");
-                }
-
-                current = current->next;
-
-                if (!current->getToken<Colon>())
-                {
-                    throw TokenException(current, "\":\" after input name");
-                }
-
-                current = parseExpression(current->next);
-
-                inputs.push_back(new InputDef(input->location, current->prev->token));
-            } while (current->getToken<Comma>());
-
-            if (!current->getToken<CloseParenthesis>())
-            {
-                throw TokenException(current, "\",\" or \")\"");
+                current = parseArgument(current->next);
             }
-        }
 
-        FunctionDef* function = context->addFunction(start->getToken<Identifier>(), inputs);
-
-        if (function->string() == "time" ||
-            function->string() == "hold" ||
-            function->string() == "lfo" ||
-            function->string() == "sweep" ||
-            function->string() == "sequence" ||
-            function->string() == "repeat" ||
-            function->string() == "random" ||
-            function->string() == "limit" ||
-            function->string() == "trigger" ||
-            function->string() == "if" ||
-            function->string() == "all" ||
-            function->string() == "any" ||
-            function->string() == "none" ||
-            function->string() == "min" ||
-            function->string() == "max" ||
-            function->string() == "round" ||
-            function->string() == "absolute" ||
-            function->string() == "sine" ||
-            function->string() == "square" ||
-            function->string() == "triangle" ||
-            function->string() == "saw" ||
-            function->string() == "noise" ||
-            function->string() == "sample" ||
-            function->string() == "oscillator" ||
-            function->string() == "granulate" ||
-            function->string() == "group" ||
-            function->string() == "effect-group" ||
-            function->string() == "delay" ||
-            function->string() == "comb" ||
-            function->string() == "all-pass" ||
-            function->string() == "low-pass" ||
-            function->string() == "reverb" ||
-            function->string() == "include")
-        {
-            throw OrganicParseException("A function already exists with the name \"" + function->string() + "\".", function->location);
-        }
-
-        context = new ParserContext(context, function->string(), inputs);
-
-        current = current->next->next;
-
-        const OpenCurlyBracket* open = current->getToken<OpenCurlyBracket>();
-
-        current = current->next;
-
-        std::vector<Token*> instructions;
-
-        while (!current->end && !current->getToken<CloseCurlyBracket>())
-        {
-            current = parseInstruction(current);
-
-            instructions.push_back(current->prev->token);
-        }
-
-        if (!current->getToken<CloseCurlyBracket>())
-        {
-            throw TokenException(current, "\"}\" at end of function definition");
-        }
-
-        context = context->parent;
-
-        return tokens->patch(start, current->next, new Define(function->location, instructions, function));
-    }
-
-    TokenListNode* Parser::parseAssign(TokenListNode* start)
-    {
-        TokenListNode* current = start;
-
-        if (current->getToken<Constant>())
-        {
-            throw OrganicParseException("Cannot assign a value to \"" + current->token->string() + "\", it is a constant.", current->token->location);
-        }
-
-        if (current->getToken<Value>())
-        {
-            throw OrganicParseException("Cannot assign a value to a number.", current->token->location);
-        }
-
-        if (current->getToken<String>())
-        {
-            throw OrganicParseException("Cannot assign a value to a string.", current->token->location);
-        }
-
-        VariableDef* variable = context->addVariable(current->getToken<Identifier>());
-
-        try
-        {
-            current = parseExpression(current->next->next);
-        }
-
-        catch (const TokenException& e)
-        {
-            throw TokenException(e.node, "value after \"=\"");
-        }
-
-        return tokens->patch(start, current, new Assign(variable->location, variable, current->prev->token));
-    }
-
-    TokenListNode* Parser::parseCall(TokenListNode* start)
-    {
-        TokenListNode* current = start;
-
-        const Identifier* name = start->getToken<Identifier>();
-
-        current = current->next->next;
-
-        std::vector<Argument*> arguments;
-
-        if (!current->getToken<CloseParenthesis>())
-        {
-            current = current->prev;
-
-            do
+            catch (const TokenException& e)
             {
-                try
+                if (e.expected == "input name")
                 {
-                    current = parseArgument(current->next);
-                }
-
-                catch (const TokenException& e)
-                {
-                    if (e.expected == "input name")
+                    if (arguments.empty())
                     {
-                        if (arguments.empty())
-                        {
-                            throw TokenException(e.node, "input name after \"(\"");
-                        }
-
-                        throw TokenException(e.node, "input name after \",\"");
+                        throw TokenException(e.node, "input name after \"(\"");
                     }
 
-                    throw e;
+                    throw TokenException(e.node, "input name after \",\"");
                 }
 
-                Argument* argument = current->prev->getToken<Argument>();
-
-                for (const Argument* arg : arguments)
-                {
-                    if (arg->name == argument->name)
-                    {
-                        throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + name->string() + "\".", argument->location);
-                    }
-                }
-
-                arguments.push_back(argument);
-            } while (current->getToken<Comma>());
-
-            if (!current->getToken<CloseParenthesis>())
-            {
-                throw TokenException(current, "\")\" after input value");
+                throw e;
             }
-        }
 
-        current = current->next;
+            Argument* argument = current->prev->getToken<Argument>();
 
-        ArgumentList* argumentList = new ArgumentList(name->location, arguments, name->string());
+            for (const Argument* arg : arguments)
+            {
+                if (arg->name == argument->name)
+                {
+                    throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + name->string() + "\".", argument->location);
+                }
+            }
 
-        if (name->string() == "time")
+            arguments.push_back(argument);
+        } while (current->getToken<Comma>());
+
+        if (!current->getToken<CloseParenthesis>())
         {
-            return tokens->patch(start, current, new Time(name->location, argumentList));
+            throw TokenException(current, "\")\" after input value");
         }
-
-        if (name->string() == "hold")
-        {
-            return tokens->patch(start, current, new Hold(name->location, argumentList));
-        }
-
-        if (name->string() == "lfo")
-        {
-            return tokens->patch(start, current, new LFO(name->location, argumentList));
-        }
-
-        if (name->string() == "sweep")
-        {
-            return tokens->patch(start, current, new Sweep(name->location, argumentList));
-        }
-
-        if (name->string() == "sequence")
-        {
-            return tokens->patch(start, current, new Sequence(name->location, argumentList));
-        }
-
-        if (name->string() == "repeat")
-        {
-            return tokens->patch(start, current, new Repeat(name->location, argumentList));
-        }
-
-        if (name->string() == "random")
-        {
-            return tokens->patch(start, current, new Random(name->location, argumentList));
-        }
-
-        if (name->string() == "limit")
-        {
-            return tokens->patch(start, current, new Limit(name->location, argumentList));
-        }
-
-        if (name->string() == "trigger")
-        {
-            return tokens->patch(start, current, new Trigger(name->location, argumentList));
-        }
-
-        if (name->string() == "if")
-        {
-            return tokens->patch(start, current, new If(name->location, argumentList));
-        }
-
-        if (name->string() == "all")
-        {
-            return tokens->patch(start, current, new All(name->location, argumentList));
-        }
-
-        if (name->string() == "any")
-        {
-            return tokens->patch(start, current, new Any(name->location, argumentList));
-        }
-
-        if (name->string() == "none")
-        {
-            return tokens->patch(start, current, new None(name->location, argumentList));
-        }
-
-        if (name->string() == "min")
-        {
-            return tokens->patch(start, current, new Min(name->location, argumentList));
-        }
-
-        if (name->string() == "max")
-        {
-            return tokens->patch(start, current, new Max(name->location, argumentList));
-        }
-
-        if (name->string() == "round")
-        {
-            return tokens->patch(start, current, new Round(name->location, argumentList));
-        }
-
-        if (name->string() == "absolute")
-        {
-            return tokens->patch(start, current, new Absolute(name->location, argumentList));
-        }
-
-        if (name->string() == "sine")
-        {
-            return tokens->patch(start, current, new Sine(name->location, argumentList));
-        }
-
-        if (name->string() == "square")
-        {
-            return tokens->patch(start, current, new Square(name->location, argumentList));
-        }
-
-        if (name->string() == "triangle")
-        {
-            return tokens->patch(start, current, new Triangle(name->location, argumentList));
-        }
-
-        if (name->string() == "saw")
-        {
-            return tokens->patch(start, current, new Saw(name->location, argumentList));
-        }
-
-        if (name->string() == "noise")
-        {
-            return tokens->patch(start, current, new Noise(name->location, argumentList));
-        }
-
-        if (name->string() == "sample")
-        {
-            return tokens->patch(start, current, new Sample(name->location, argumentList));
-        }
-
-        if (name->string() == "oscillator")
-        {
-            return tokens->patch(start, current, new Oscillator(name->location, argumentList));
-        }
-
-        if (name->string() == "granulate")
-        {
-            return tokens->patch(start, current, new Granulate(name->location, argumentList));
-        }
-
-        if (name->string() == "group")
-        {
-            return tokens->patch(start, current, new Group(name->location, argumentList));
-        }
-
-        if (name->string() == "effect-group")
-        {
-            return tokens->patch(start, current, new EffectGroup(name->location, argumentList));
-        }
-
-        if (name->string() == "delay")
-        {
-            return tokens->patch(start, current, new Delay(name->location, argumentList));
-        }
-
-        if (name->string() == "comb")
-        {
-            return tokens->patch(start, current, new Comb(name->location, argumentList));
-        }
-
-        if (name->string() == "all-pass")
-        {
-            return tokens->patch(start, current, new AllPass(name->location, argumentList));
-        }
-
-        if (name->string() == "low-pass")
-        {
-            return tokens->patch(start, current, new LowPass(name->location, argumentList));
-        }
-
-        if (name->string() == "reverb")
-        {
-            return tokens->patch(start, current, new Reverb(name->location, argumentList));
-        }
-
-        if (name->string() == "include")
-        {
-            throw OrganicIncludeException("Includes must come before all other instructions.", name->location);
-        }
-
-        return tokens->patch(start, current, new CallUser(name->location, argumentList, context->findFunction(name)));
     }
 
-    TokenListNode* Parser::parseArgument(TokenListNode* start)
+    current = current->next;
+
+    ArgumentList* argumentList = new ArgumentList(name->location, arguments, name->string());
+
+    if (name->string() == "time")
     {
-        TokenListNode* current = start;
+        return tokens->patch(start, current, new Time(name->location, argumentList));
+    }
 
-        const Identifier* name = current->getToken<Identifier>();
+    if (name->string() == "hold")
+    {
+        return tokens->patch(start, current, new Hold(name->location, argumentList));
+    }
 
-        if (!name)
-        {
-            throw TokenException(current, "input name");
-        }
+    if (name->string() == "lfo")
+    {
+        return tokens->patch(start, current, new LFO(name->location, argumentList));
+    }
 
-        current = current->next;
+    if (name->string() == "sweep")
+    {
+        return tokens->patch(start, current, new Sweep(name->location, argumentList));
+    }
 
-        if (!current->getToken<Colon>())
-        {
-            throw TokenException(current, "\":\" after input name");
-        }
+    if (name->string() == "sequence")
+    {
+        return tokens->patch(start, current, new Sequence(name->location, argumentList));
+    }
 
+    if (name->string() == "repeat")
+    {
+        return tokens->patch(start, current, new Repeat(name->location, argumentList));
+    }
+
+    if (name->string() == "random")
+    {
+        return tokens->patch(start, current, new Random(name->location, argumentList));
+    }
+
+    if (name->string() == "limit")
+    {
+        return tokens->patch(start, current, new Limit(name->location, argumentList));
+    }
+
+    if (name->string() == "trigger")
+    {
+        return tokens->patch(start, current, new Trigger(name->location, argumentList));
+    }
+
+    if (name->string() == "if")
+    {
+        return tokens->patch(start, current, new If(name->location, argumentList));
+    }
+
+    if (name->string() == "all")
+    {
+        return tokens->patch(start, current, new All(name->location, argumentList));
+    }
+
+    if (name->string() == "any")
+    {
+        return tokens->patch(start, current, new Any(name->location, argumentList));
+    }
+
+    if (name->string() == "none")
+    {
+        return tokens->patch(start, current, new None(name->location, argumentList));
+    }
+
+    if (name->string() == "min")
+    {
+        return tokens->patch(start, current, new Min(name->location, argumentList));
+    }
+
+    if (name->string() == "max")
+    {
+        return tokens->patch(start, current, new Max(name->location, argumentList));
+    }
+
+    if (name->string() == "round")
+    {
+        return tokens->patch(start, current, new Round(name->location, argumentList));
+    }
+
+    if (name->string() == "absolute")
+    {
+        return tokens->patch(start, current, new Absolute(name->location, argumentList));
+    }
+
+    if (name->string() == "sine")
+    {
+        return tokens->patch(start, current, new Sine(name->location, argumentList));
+    }
+
+    if (name->string() == "square")
+    {
+        return tokens->patch(start, current, new Square(name->location, argumentList));
+    }
+
+    if (name->string() == "triangle")
+    {
+        return tokens->patch(start, current, new Triangle(name->location, argumentList));
+    }
+
+    if (name->string() == "saw")
+    {
+        return tokens->patch(start, current, new Saw(name->location, argumentList));
+    }
+
+    if (name->string() == "noise")
+    {
+        return tokens->patch(start, current, new Noise(name->location, argumentList));
+    }
+
+    if (name->string() == "sample")
+    {
+        return tokens->patch(start, current, new Sample(name->location, argumentList));
+    }
+
+    if (name->string() == "oscillator")
+    {
+        return tokens->patch(start, current, new Oscillator(name->location, argumentList));
+    }
+
+    if (name->string() == "granulate")
+    {
+        return tokens->patch(start, current, new Granulate(name->location, argumentList));
+    }
+
+    if (name->string() == "group")
+    {
+        return tokens->patch(start, current, new Group(name->location, argumentList));
+    }
+
+    if (name->string() == "effect-group")
+    {
+        return tokens->patch(start, current, new EffectGroup(name->location, argumentList));
+    }
+
+    if (name->string() == "delay")
+    {
+        return tokens->patch(start, current, new Delay(name->location, argumentList));
+    }
+
+    if (name->string() == "comb")
+    {
+        return tokens->patch(start, current, new Comb(name->location, argumentList));
+    }
+
+    if (name->string() == "all-pass")
+    {
+        return tokens->patch(start, current, new AllPass(name->location, argumentList));
+    }
+
+    if (name->string() == "low-pass")
+    {
+        return tokens->patch(start, current, new LowPass(name->location, argumentList));
+    }
+
+    if (name->string() == "reverb")
+    {
+        return tokens->patch(start, current, new Reverb(name->location, argumentList));
+    }
+
+    if (name->string() == "include")
+    {
+        throw OrganicIncludeException("Includes must come before all other instructions.", name->location);
+    }
+
+    return tokens->patch(start, current, new CallUser(name->location, argumentList, context->findFunction(name)));
+}
+
+TokenListNode* Parser::parseArgument(TokenListNode* start)
+{
+    TokenListNode* current = start;
+
+    const Identifier* name = current->getToken<Identifier>();
+
+    if (!name)
+    {
+        throw TokenException(current, "input name");
+    }
+
+    current = current->next;
+
+    if (!current->getToken<Colon>())
+    {
+        throw TokenException(current, "\":\" after input name");
+    }
+
+    try
+    {
+        current = parseExpression(current->next);
+    }
+
+    catch (const TokenException& e)
+    {
+        throw TokenException(e.node, "input value after \":\"");
+    }
+
+    return tokens->patch(start, current, new Argument(name->location, name->string(), current->prev->token));
+}
+
+TokenListNode* Parser::parseExpression(TokenListNode* start)
+{
+    if (start->getToken<OpenSquareBracket>())
+    {
+        return parseList(start);
+    }
+
+    return parseTerms(start);
+}
+
+TokenListNode* Parser::parseList(TokenListNode* start)
+{
+    TokenListNode* current = start;
+
+    if (current->next->getToken<CloseSquareBracket>())
+    {
+        throw OrganicParseException("Empty lists are not allowed.", start->token->location);
+    }
+
+    std::vector<Token*> items;
+
+    do
+    {
         try
         {
             current = parseExpression(current->next);
@@ -731,264 +767,229 @@ namespace Parser
 
         catch (const TokenException& e)
         {
-            throw TokenException(e.node, "input value after \":\"");
+            if (e.expected == "value")
+            {
+                if (items.empty())
+                {
+                    throw TokenException(e.node, "value after \"[\"");
+                }
+
+                throw TokenException(e.node, "value after \",\"");
+            }
+
+            throw e;
         }
 
-        return tokens->patch(start, current, new Argument(name->location, name->string(), current->prev->token));
-    }
+        items.push_back(current->prev->token);
+    } while (current->getToken<Comma>());
 
-    TokenListNode* Parser::parseExpression(TokenListNode* start)
+    if (!current->getToken<CloseSquareBracket>())
     {
-        if (start->getToken<OpenSquareBracket>())
-        {
-            return parseList(start);
-        }
-
-        return parseTerms(start);
+        throw TokenException(current, "\"]\" at end of list");
     }
 
-    TokenListNode* Parser::parseList(TokenListNode* start)
+    return tokens->patch(start, current->next, new List(start->token->location, items));
+}
+
+TokenListNode* Parser::parseTerms(TokenListNode* start)
+{
+    TokenListNode* current = start;
+
+    while (true)
     {
-        TokenListNode* current = start;
-
-        if (current->next->getToken<CloseSquareBracket>())
+        if (current->getToken<OpenParenthesis>())
         {
-            throw OrganicParseException("Empty lists are not allowed.", start->token->location);
-        }
+            TokenListNode* first = current;
 
-        std::vector<Token*> items;
+            current = parseTerms(current->next);
 
-        do
-        {
-            try
+            if (!current->getToken<CloseParenthesis>())
             {
-                current = parseExpression(current->next);
+                throw TokenException(current, "\")\"");
             }
 
-            catch (const TokenException& e)
-            {
-                if (e.expected == "value")
-                {
-                    if (items.empty())
-                    {
-                        throw TokenException(e.node, "value after \"[\"");
-                    }
-
-                    throw TokenException(e.node, "value after \",\"");
-                }
-
-                throw e;
-            }
-
-            items.push_back(current->prev->token);
-        } while (current->getToken<Comma>());
-
-        if (!current->getToken<CloseSquareBracket>())
-        {
-            throw TokenException(current, "\"]\" at end of list");
+            current = tokens->patch(first, current->next, new ParenthesizedExpression(first->token->location, current->prev->token));
         }
 
-        return tokens->patch(start, current->next, new List(start->token->location, items));
+        else
+        {
+            current = parseTerm(current);
+        }
+
+        if (current->getToken<Operator>())
+        {
+            current = current->next;
+        }
+
+        else
+        {
+            break;
+        }
     }
 
-    TokenListNode* Parser::parseTerms(TokenListNode* start)
+    TokenListNode* pStart = start->prev;
+
+    TokenListNode* term = pStart->next->next;
+
+    bool comparison = false;
+
+    while (!term->next->end && term != current)
     {
-        TokenListNode* current = start;
+        const SourceLocation location = term->prev->token->location;
 
-        while (true)
+        if (term->getToken<DoubleEquals>())
         {
-            if (current->getToken<OpenParenthesis>())
+            if (comparison)
             {
-                TokenListNode* first = current;
-
-                current = parseTerms(current->next);
-
-                if (!current->getToken<CloseParenthesis>())
-                {
-                    throw TokenException(current, "\")\"");
-                }
-
-                current = tokens->patch(first, current->next, new ParenthesizedExpression(first->token->location, current->prev->token));
+                throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
             }
 
-            else
-            {
-                current = parseTerm(current);
-            }
+            comparison = true;
 
-            if (current->getToken<Operator>())
-            {
-                current = current->next;
-            }
-
-            else
-            {
-                break;
-            }
+            term = tokens->patch(term->prev, term->next->next, new EqualAlias(location, term->prev->token, term->next->token));
         }
 
-        TokenListNode* pStart = start->prev;
-
-        TokenListNode* term = pStart->next->next;
-
-        bool comparison = false;
-
-        while (!term->next->end && term != current)
+        else if (term->getToken<Less>())
         {
-            const SourceLocation location = term->prev->token->location;
-
-            if (term->getToken<DoubleEquals>())
+            if (comparison)
             {
-                if (comparison)
-                {
-                    throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
-                }
-
-                comparison = true;
-
-                term = tokens->patch(term->prev, term->next->next, new EqualAlias(location, term->prev->token, term->next->token));
+                throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
             }
 
-            else if (term->getToken<Less>())
-            {
-                if (comparison)
-                {
-                    throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
-                }
+            comparison = true;
 
-                comparison = true;
-
-                term = tokens->patch(term->prev, term->next->next, new LessAlias(location, term->prev->token, term->next->token));
-            }
-
-            else if (term->getToken<Greater>())
-            {
-                if (comparison)
-                {
-                    throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
-                }
-
-                comparison = true;
-
-                term = tokens->patch(term->prev, term->next->next, new GreaterAlias(location, term->prev->token, term->next->token));
-            }
-
-            else if (term->getToken<LessEqual>())
-            {
-                if (comparison)
-                {
-                    throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
-                }
-
-                comparison = true;
-
-                term = tokens->patch(term->prev, term->next->next, new LessEqualAlias(location, term->prev->token, term->next->token));
-            }
-
-            else if (term->getToken<GreaterEqual>())
-            {
-                if (comparison)
-                {
-                    throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
-                }
-
-                comparison = true;
-
-                term = tokens->patch(term->prev, term->next->next, new GreaterEqualAlias(location, term->prev->token, term->next->token));
-            }
-
-            else
-            {
-                term = term->next;
-            }
+            term = tokens->patch(term->prev, term->next->next, new LessAlias(location, term->prev->token, term->next->token));
         }
 
-        term = pStart->next->next;
-
-        while (!term->next->end && term != current)
+        else if (term->getToken<Greater>())
         {
-            if (term->getToken<Power>())
+            if (comparison)
             {
-                term = tokens->patch(term->prev, term->next->next, new PowerAlias(term->prev->token->location, term->prev->token, term->next->token));
+                throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
             }
 
-            else
-            {
-                term = term->next;
-            }
+            comparison = true;
+
+            term = tokens->patch(term->prev, term->next->next, new GreaterAlias(location, term->prev->token, term->next->token));
         }
 
-        term = pStart->next->next;
-
-        while (!term->next->end && term != current)
+        else if (term->getToken<LessEqual>())
         {
-            const SourceLocation location = term->prev->token->location;
-
-            if (term->getToken<Multiply>())
+            if (comparison)
             {
-                term = tokens->patch(term->prev, term->next->next, new MultiplyAlias(location, term->prev->token, term->next->token));
+                throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
             }
 
-            else if (term->getToken<Divide>())
-            {
-                term = tokens->patch(term->prev, term->next->next, new DivideAlias(location, term->prev->token, term->next->token));
-            }
+            comparison = true;
 
-            else
-            {
-                term = term->next;
-            }
+            term = tokens->patch(term->prev, term->next->next, new LessEqualAlias(location, term->prev->token, term->next->token));
         }
 
-        term = pStart->next->next;
-
-        while (!term->next->end && term != current)
+        else if (term->getToken<GreaterEqual>())
         {
-            const SourceLocation location = term->prev->token->location;
-
-            if (term->getToken<Add>())
+            if (comparison)
             {
-                term = tokens->patch(term->prev, term->next->next, new AddAlias(location, term->prev->token, term->next->token));
+                throw OrganicParseException("Chaining comparison operators is not allowed.", term->token->location);
             }
 
-            else if (term->getToken<Subtract>())
-            {
-                term = tokens->patch(term->prev, term->next->next, new SubtractAlias(location, term->prev->token, term->next->token));
-            }
+            comparison = true;
 
-            else
-            {
-                term = term->next;
-            }
+            term = tokens->patch(term->prev, term->next->next, new GreaterEqualAlias(location, term->prev->token, term->next->token));
         }
 
-        if (pStart->next->next != current)
+        else
         {
-            throw OrganicParseException("Invalid expression.", pStart->next->token->location);
+            term = term->next;
         }
-
-        return current;
     }
 
-    TokenListNode* Parser::parseTerm(TokenListNode* start)
+    term = pStart->next->next;
+
+    while (!term->next->end && term != current)
     {
-        if (start->getToken<Value>() || start->getToken<Constant>() || start->getToken<String>())
+        if (term->getToken<Power>())
         {
-            return start->next;
+            term = tokens->patch(term->prev, term->next->next, new PowerAlias(term->prev->token->location, term->prev->token, term->next->token));
         }
 
-        if (const Identifier* name = start->getToken<Identifier>())
+        else
         {
-            if (start->next->getToken<OpenParenthesis>())
-            {
-                return parseCall(start);
-            }
-
-            start->token = context->findIdentifier(name);
-
-            return start->next;
+            term = term->next;
         }
-
-        throw TokenException(start, "value");
     }
+
+    term = pStart->next->next;
+
+    while (!term->next->end && term != current)
+    {
+        const SourceLocation location = term->prev->token->location;
+
+        if (term->getToken<Multiply>())
+        {
+            term = tokens->patch(term->prev, term->next->next, new MultiplyAlias(location, term->prev->token, term->next->token));
+        }
+
+        else if (term->getToken<Divide>())
+        {
+            term = tokens->patch(term->prev, term->next->next, new DivideAlias(location, term->prev->token, term->next->token));
+        }
+
+        else
+        {
+            term = term->next;
+        }
+    }
+
+    term = pStart->next->next;
+
+    while (!term->next->end && term != current)
+    {
+        const SourceLocation location = term->prev->token->location;
+
+        if (term->getToken<Add>())
+        {
+            term = tokens->patch(term->prev, term->next->next, new AddAlias(location, term->prev->token, term->next->token));
+        }
+
+        else if (term->getToken<Subtract>())
+        {
+            term = tokens->patch(term->prev, term->next->next, new SubtractAlias(location, term->prev->token, term->next->token));
+        }
+
+        else
+        {
+            term = term->next;
+        }
+    }
+
+    if (pStart->next->next != current)
+    {
+        throw OrganicParseException("Invalid expression.", pStart->next->token->location);
+    }
+
+    return current;
+}
+
+TokenListNode* Parser::parseTerm(TokenListNode* start)
+{
+    if (start->getToken<Value>() || start->getToken<Constant>() || start->getToken<String>())
+    {
+        return start->next;
+    }
+
+    if (const Identifier* name = start->getToken<Identifier>())
+    {
+        if (start->next->getToken<OpenParenthesis>())
+        {
+            return parseCall(start);
+        }
+
+        start->token = context->findIdentifier(name);
+
+        return start->next;
+    }
+
+    throw TokenException(start, "value");
+}
+
 }

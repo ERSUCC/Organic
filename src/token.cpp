@@ -1,6 +1,6 @@
 #include "../include/token.h"
 
-namespace Parser {
+using namespace Parser;
 
 Token::Token(const SourceLocation location) :
     location(location) {}
@@ -960,6 +960,4 @@ void Program::resolveTypes(TypeResolver* visitor)
 Engine::ValueObject* Program::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
-}
-
 }

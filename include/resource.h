@@ -7,8 +7,7 @@
 #include "object.h"
 #include "path.h"
 
-namespace Engine
-{
+namespace Engine {
 
 struct Resource : public ValueObject
 {

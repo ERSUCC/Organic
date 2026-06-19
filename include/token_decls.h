@@ -1,7 +1,6 @@
 #pragma once
 
-namespace Parser
-{
+namespace Parser {
 
 struct Token;
 struct Value;
