@@ -24,6 +24,44 @@ private:
 
 };
 
+#define CALL(func) [](const SourceLocation& location, ArgumentList* arguments) { return new func(location, arguments); }
+
+static std::unordered_map<std::string, std::function<Call* (const SourceLocation&, ArgumentList*)>> libraryFunctions =
+{
+    { "time", CALL(Time) },
+    { "hold", CALL(Hold) },
+    { "lfo", CALL(LFO) },
+    { "sweep", CALL(Sweep) },
+    { "sequence", CALL(Sequence) },
+    { "repeat", CALL(Repeat) },
+    { "random", CALL(Random) },
+    { "limit", CALL(Limit) },
+    { "trigger", CALL(Trigger) },
+    { "if", CALL(If) },
+    { "all", CALL(All) },
+    { "any", CALL(Any) },
+    { "none", CALL(None) },
+    { "min", CALL(Min) },
+    { "max", CALL(Max) },
+    { "round", CALL(Round) },
+    { "absolute", CALL(Absolute) },
+    { "sine", CALL(Sine) },
+    { "square", CALL(Square) },
+    { "triangle", CALL(Triangle) },
+    { "saw", CALL(Saw) },
+    { "noise", CALL(Noise) },
+    { "sample", CALL(Sample) },
+    { "oscillator", CALL(Oscillator) },
+    { "granulate", CALL(Granulate) },
+    { "group", CALL(Group) },
+    { "effect-group", CALL(EffectGroup) },
+    { "delay", CALL(Delay) },
+    { "comb", CALL(Comb) },
+    { "all-pass", CALL(AllPass) },
+    { "low-pass", CALL(LowPass) },
+    { "reverb", CALL(Reverb) }
+};
+
 ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs) :
     parent(parent), name(name)
 {
@@ -381,39 +419,7 @@ TokenListNode* Parser::parseDefine(TokenListNode* start)
 
     FunctionDef* function = context->addFunction(start->getToken<Identifier>(), inputs);
 
-    if (function->string() == "time" ||
-        function->string() == "hold" ||
-        function->string() == "lfo" ||
-        function->string() == "sweep" ||
-        function->string() == "sequence" ||
-        function->string() == "repeat" ||
-        function->string() == "random" ||
-        function->string() == "limit" ||
-        function->string() == "trigger" ||
-        function->string() == "if" ||
-        function->string() == "all" ||
-        function->string() == "any" ||
-        function->string() == "none" ||
-        function->string() == "min" ||
-        function->string() == "max" ||
-        function->string() == "round" ||
-        function->string() == "absolute" ||
-        function->string() == "sine" ||
-        function->string() == "square" ||
-        function->string() == "triangle" ||
-        function->string() == "saw" ||
-        function->string() == "noise" ||
-        function->string() == "sample" ||
-        function->string() == "oscillator" ||
-        function->string() == "granulate" ||
-        function->string() == "group" ||
-        function->string() == "effect-group" ||
-        function->string() == "delay" ||
-        function->string() == "comb" ||
-        function->string() == "all-pass" ||
-        function->string() == "low-pass" ||
-        function->string() == "reverb" ||
-        function->string() == "include")
+    if (libraryFunctions.count(function->string()) || function->string() == "include")
     {
         throw OrganicParseException("A function already exists with the name \"" + function->string() + "\".", function->location);
     }
@@ -481,11 +487,14 @@ TokenListNode* Parser::parseAssign(TokenListNode* start)
 
 TokenListNode* Parser::parseCall(TokenListNode* start)
 {
-    TokenListNode* current = start;
-
     const Identifier* name = start->getToken<Identifier>();
 
-    current = current->next->next;
+    if (name->string() == "include")
+    {
+        throw OrganicIncludeException("Includes must come before all other instructions.", name->location);
+    }
+
+    TokenListNode* current = start->next->next;
 
     std::vector<Argument*> arguments;
 
@@ -538,169 +547,9 @@ TokenListNode* Parser::parseCall(TokenListNode* start)
 
     ArgumentList* argumentList = new ArgumentList(name->location, arguments, name->string());
 
-    if (name->string() == "time")
+    if (libraryFunctions.count(name->string()))
     {
-        return tokens->patch(start, current, new Time(name->location, argumentList));
-    }
-
-    if (name->string() == "hold")
-    {
-        return tokens->patch(start, current, new Hold(name->location, argumentList));
-    }
-
-    if (name->string() == "lfo")
-    {
-        return tokens->patch(start, current, new LFO(name->location, argumentList));
-    }
-
-    if (name->string() == "sweep")
-    {
-        return tokens->patch(start, current, new Sweep(name->location, argumentList));
-    }
-
-    if (name->string() == "sequence")
-    {
-        return tokens->patch(start, current, new Sequence(name->location, argumentList));
-    }
-
-    if (name->string() == "repeat")
-    {
-        return tokens->patch(start, current, new Repeat(name->location, argumentList));
-    }
-
-    if (name->string() == "random")
-    {
-        return tokens->patch(start, current, new Random(name->location, argumentList));
-    }
-
-    if (name->string() == "limit")
-    {
-        return tokens->patch(start, current, new Limit(name->location, argumentList));
-    }
-
-    if (name->string() == "trigger")
-    {
-        return tokens->patch(start, current, new Trigger(name->location, argumentList));
-    }
-
-    if (name->string() == "if")
-    {
-        return tokens->patch(start, current, new If(name->location, argumentList));
-    }
-
-    if (name->string() == "all")
-    {
-        return tokens->patch(start, current, new All(name->location, argumentList));
-    }
-
-    if (name->string() == "any")
-    {
-        return tokens->patch(start, current, new Any(name->location, argumentList));
-    }
-
-    if (name->string() == "none")
-    {
-        return tokens->patch(start, current, new None(name->location, argumentList));
-    }
-
-    if (name->string() == "min")
-    {
-        return tokens->patch(start, current, new Min(name->location, argumentList));
-    }
-
-    if (name->string() == "max")
-    {
-        return tokens->patch(start, current, new Max(name->location, argumentList));
-    }
-
-    if (name->string() == "round")
-    {
-        return tokens->patch(start, current, new Round(name->location, argumentList));
-    }
-
-    if (name->string() == "absolute")
-    {
-        return tokens->patch(start, current, new Absolute(name->location, argumentList));
-    }
-
-    if (name->string() == "sine")
-    {
-        return tokens->patch(start, current, new Sine(name->location, argumentList));
-    }
-
-    if (name->string() == "square")
-    {
-        return tokens->patch(start, current, new Square(name->location, argumentList));
-    }
-
-    if (name->string() == "triangle")
-    {
-        return tokens->patch(start, current, new Triangle(name->location, argumentList));
-    }
-
-    if (name->string() == "saw")
-    {
-        return tokens->patch(start, current, new Saw(name->location, argumentList));
-    }
-
-    if (name->string() == "noise")
-    {
-        return tokens->patch(start, current, new Noise(name->location, argumentList));
-    }
-
-    if (name->string() == "sample")
-    {
-        return tokens->patch(start, current, new Sample(name->location, argumentList));
-    }
-
-    if (name->string() == "oscillator")
-    {
-        return tokens->patch(start, current, new Oscillator(name->location, argumentList));
-    }
-
-    if (name->string() == "granulate")
-    {
-        return tokens->patch(start, current, new Granulate(name->location, argumentList));
-    }
-
-    if (name->string() == "group")
-    {
-        return tokens->patch(start, current, new Group(name->location, argumentList));
-    }
-
-    if (name->string() == "effect-group")
-    {
-        return tokens->patch(start, current, new EffectGroup(name->location, argumentList));
-    }
-
-    if (name->string() == "delay")
-    {
-        return tokens->patch(start, current, new Delay(name->location, argumentList));
-    }
-
-    if (name->string() == "comb")
-    {
-        return tokens->patch(start, current, new Comb(name->location, argumentList));
-    }
-
-    if (name->string() == "all-pass")
-    {
-        return tokens->patch(start, current, new AllPass(name->location, argumentList));
-    }
-
-    if (name->string() == "low-pass")
-    {
-        return tokens->patch(start, current, new LowPass(name->location, argumentList));
-    }
-
-    if (name->string() == "reverb")
-    {
-        return tokens->patch(start, current, new Reverb(name->location, argumentList));
-    }
-
-    if (name->string() == "include")
-    {
-        throw OrganicIncludeException("Includes must come before all other instructions.", name->location);
+        return tokens->patch(start, current, libraryFunctions[name->string()](name->location, argumentList));
     }
 
     return tokens->patch(start, current, new CallUser(name->location, argumentList, context->findFunction(name)));
