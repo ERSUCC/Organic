@@ -228,11 +228,11 @@ ArgumentList::ArgumentList(const SourceLocation location, const std::vector<Argu
 
 Token* ArgumentList::get(const std::string name) const
 {
-    for (size_t i = 0; i < arguments.size(); i++)
+    for (const Argument* argument : arguments)
     {
-        if (arguments[i]->name == name)
+        if (argument->name == name)
         {
-            return arguments[i]->value;
+            return argument->value;
         }
     }
 
