@@ -1,0 +1,57 @@
+name = "Unused variable"
+line = 2
+character = 1
+error = 'Unused variable "test".'
+warn = true
+
+---
+
+test = 0
+
+---
+
+name = "Unused input"
+line = 2
+character = 6
+error = 'Unused input "test".'
+warn = true
+
+---
+
+func(test: 0) = {
+    1
+}
+
+func()
+
+---
+
+name = "Unused function"
+line = 2
+character = 1
+error = 'Unused function "func".'
+warn = true
+
+---
+
+func() = {
+    0
+}
+
+---
+
+name = "Unused nested function"
+line = 3
+character = 5
+error = 'Unused function "func2".'
+warn = true
+
+---
+
+func() = {
+    func2() = {
+        0
+    }
+}
+
+func()

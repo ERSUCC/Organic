@@ -2,24 +2,9 @@
 
 using namespace Parser;
 
-void TypeResolver::resolveTypes(VariableRef* token)
-{
-    token->definition->used = true;
-}
-
 void TypeResolver::resolveTypes(InputDef* token)
 {
     token->defaultValue->resolveTypes(this);
-}
-
-void TypeResolver::resolveTypes(InputRef* token)
-{
-    token->definition->used = true;
-}
-
-void TypeResolver::resolveTypes(FunctionRef* token)
-{
-    token->definition->used = true;
 }
 
 void TypeResolver::resolveTypes(List* token)
@@ -332,8 +317,6 @@ void TypeResolver::resolveTypes(CallUser* token)
     }
 
     token->arguments->check();
-
-    token->function->definition->used = true;
 }
 
 void TypeResolver::resolveTypes(CallAlias* token)

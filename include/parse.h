@@ -28,6 +28,7 @@ struct ParserContext
     Identifier* findIdentifier(const Identifier* token);
     FunctionRef* findFunction(const Identifier* token);
 
+    void checkUsage() const;
     void merge(const ParserContext* context);
 
     ParserContext* parent;
@@ -41,6 +42,8 @@ private:
     std::unordered_map<std::string, InputDef*> inputs;
     std::unordered_map<std::string, VariableDef*> variables;
     std::unordered_map<std::string, FunctionDef*> functions;
+
+    std::unordered_set<const Identifier*> used;
 
 };
 

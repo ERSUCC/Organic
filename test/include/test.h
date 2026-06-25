@@ -8,6 +8,7 @@
 #include "otest.h"
 #include "path.h"
 #include "test_utils.h"
+#include "utils.h"
 
 struct Test
 {
@@ -21,7 +22,7 @@ protected:
 
     void beginSuite(const std::string name) const;
 
-    void beginTest();
+    void beginTest(const bool warn);
     void endTest(const std::string name);
 
     void assert(const std::string name, const bool result);

@@ -28,7 +28,7 @@ void TestParser::test()
 
 void TestParser::expectSuccess(const OTest* info)
 {
-    beginTest();
+    beginTest(info->getValue("warn")->asBoolean()->value);
 
     try
     {
@@ -45,7 +45,7 @@ void TestParser::expectSuccess(const OTest* info)
 
 void TestParser::expectError(const OTest* info)
 {
-    beginTest();
+    beginTest(info->getValue("warn")->asBoolean()->value);
 
     try
     {

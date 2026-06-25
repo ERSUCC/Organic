@@ -316,7 +316,12 @@ std::vector<OTest*> OTest::read(const Path* path)
 
 const TOMLValue* OTest::getValue(const std::string& key) const
 {
-    return entries.at(key);
+    if (entries.count(key))
+    {
+        return entries.at(key);
+    }
+
+    return new TOMLValue();
 }
 
 const std::string& OTest::getSource() const

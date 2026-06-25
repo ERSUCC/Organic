@@ -183,8 +183,6 @@ struct VariableDef : public Identifier
     VariableDef(const SourceLocation location, Token* value);
 
     Token* value;
-
-    bool used = false;
 };
 
 struct VariableRef : public Identifier
@@ -192,8 +190,6 @@ struct VariableRef : public Identifier
     VariableRef(const SourceLocation location, VariableDef* definition);
 
     const SharedType type() const override;
-
-    void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
@@ -209,8 +205,6 @@ struct InputDef : public Identifier
     void resolveTypes(TypeResolver* visitor) override;
 
     Token* defaultValue;
-
-    bool used = false;
 };
 
 struct InputRef : public Identifier
@@ -218,8 +212,6 @@ struct InputRef : public Identifier
     InputRef(const SourceLocation location, InputDef* definition);
 
     const SharedType type() const override;
-
-    void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
@@ -235,8 +227,6 @@ struct FunctionDef : public Identifier
 
     const std::vector<InputDef*> inputs;
     const std::vector<Token*> instructions;
-
-    bool used = false;
 };
 
 struct FunctionRef : public Identifier
@@ -244,8 +234,6 @@ struct FunctionRef : public Identifier
     FunctionRef(const SourceLocation location, FunctionDef* definition);
 
     const SharedType type() const override;
-
-    void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 

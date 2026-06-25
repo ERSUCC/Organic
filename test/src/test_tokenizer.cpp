@@ -28,7 +28,7 @@ void TestTokenizer::test()
 
 void TestTokenizer::checkList(const OTest* info)
 {
-    beginTest();
+    beginTest(info->getValue("warn")->asBoolean()->value);
 
     const Parser::TokenList* list = (new Parser::Tokenizer(new SourceProvider(info->getSource())))->tokenize();
 
@@ -51,7 +51,7 @@ void TestTokenizer::checkList(const OTest* info)
 
 void TestTokenizer::expectError(const OTest* info)
 {
-    beginTest();
+    beginTest(info->getValue("warn")->asBoolean()->value);
 
     try
     {

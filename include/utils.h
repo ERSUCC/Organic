@@ -21,12 +21,21 @@
 #include "exception.h"
 #include "location.h"
 
+enum struct WarnLevel
+{
+    Suppress,
+    Display,
+    Error
+};
+
 struct Utils
 {
     static Utils* get();
 
     static void printInfo();
+    static void setWarnLevel(const WarnLevel level);
     static void includeWarning(const std::string message, const SourceLocation& location);
+    static void parseWarning(const std::string message, const SourceLocation& location);
 
     void setSeed(const std::optional<size_t>& seed);
 
@@ -47,6 +56,8 @@ struct Utils
 
 private:
     static Utils* instance;
+
+    WarnLevel warnLevel = WarnLevel::Display;
 
     bool firstWarning = true;
 

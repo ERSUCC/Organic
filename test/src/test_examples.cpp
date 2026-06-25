@@ -15,7 +15,7 @@ void TestExamples::test()
 
 void TestExamples::expectSuccess(const Path* path)
 {
-    beginTest();
+    beginTest(false);
 
     try
     {

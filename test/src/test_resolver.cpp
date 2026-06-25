@@ -28,7 +28,7 @@ void TestResolver::test()
 
 void TestResolver::expectSuccess(const OTest* info)
 {
-    beginTest();
+    beginTest(info->getValue("warn")->asBoolean()->value);
 
     try
     {
@@ -45,7 +45,7 @@ void TestResolver::expectSuccess(const OTest* info)
 
 void TestResolver::expectError(const OTest* info)
 {
-    beginTest();
+    beginTest(info->getValue("warn")->asBoolean()->value);
 
     try
     {

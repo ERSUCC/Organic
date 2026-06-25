@@ -18,11 +18,13 @@ void Test::beginSuite(const std::string name) const
     TestUtils::printSuccess("[ " + name + " ]");
 }
 
-void Test::beginTest()
+void Test::beginTest(const bool warn)
 {
     errors.clear();
 
     tracker->beginSection();
+
+    Utils::setWarnLevel(warn ? WarnLevel::Error : WarnLevel::Suppress);
 }
 
 void Test::endTest(const std::string name)

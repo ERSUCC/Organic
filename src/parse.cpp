@@ -102,17 +102,29 @@ Identifier* ParserContext::findIdentifier(const Identifier* token)
 {
     if (inputs.count(token->string()))
     {
-        return new InputRef(token->location, inputs[token->string()]);
+        InputDef* input = inputs[token->string()];
+
+        used.insert(input);
+
+        return new InputRef(token->location, input);
     }
 
     if (variables.count(token->string()))
     {
-        return new VariableRef(token->location, variables[token->string()]);
+        VariableDef* variable = variables[token->string()];
+
+        used.insert(variable);
+
+        return new VariableRef(token->location, variable);
     }
 
     if (functions.count(token->string()))
     {
-        return new FunctionRef(token->location, functions[token->string()]);
+        FunctionDef* function = functions[token->string()];
+
+        used.insert(function);
+
+        return new FunctionRef(token->location, function);
     }
 
     if (parent)
@@ -147,6 +159,33 @@ FunctionRef* ParserContext::findFunction(const Identifier* token)
     }
 
     throw OrganicParseException("No function exists with the name \"" + token->string() + "\".", token->location);
+}
+
+void ParserContext::checkUsage() const
+{
+    for (const std::pair<std::string, InputDef*>& pair : inputs)
+    {
+        if (!used.count(pair.second))
+        {
+            Utils::parseWarning("Unused input \"" + pair.first + "\".", pair.second->location);
+        }
+    }
+
+    for (const std::pair<std::string, VariableDef*>& pair : variables)
+    {
+        if (!used.count(pair.second))
+        {
+            Utils::parseWarning("Unused variable \"" + pair.first + "\".", pair.second->location);
+        }
+    }
+
+    for (const std::pair<std::string, FunctionDef*>& pair : functions)
+    {
+        if (!used.count(pair.second))
+        {
+            Utils::parseWarning("Unused function \"" + pair.first + "\".", pair.second->location);
+        }
+    }
 }
 
 void ParserContext::merge(const ParserContext* context)
@@ -246,6 +285,8 @@ Program* Parser::parse()
 
         current = current->next;
     }
+
+    context->checkUsage();
 
     return new Program(SourceLocation(source, 0, source->length()), instructions);
 }
@@ -455,6 +496,8 @@ TokenListNode* Parser::parseDefine(TokenListNode* start)
     {
         throw OrganicParseException("The function \"" + name->string() + "\" does not return a value.", name->location);
     }
+
+    context->checkUsage();
 
     context = context->parent;
 

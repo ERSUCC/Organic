@@ -123,11 +123,6 @@ const SharedType VariableRef::type() const
     return definition->value->type();
 }
 
-void VariableRef::resolveTypes(TypeResolver* visitor)
-{
-    visitor->resolveTypes(this);
-}
-
 Engine::ValueObject* VariableRef::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
@@ -152,11 +147,6 @@ InputRef::InputRef(const SourceLocation location, InputDef* definition) :
 const SharedType InputRef::type() const
 {
     return definition->type();
-}
-
-void InputRef::resolveTypes(TypeResolver* visitor)
-{
-    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* InputRef::transform(TokenTransformer* visitor) const
@@ -190,11 +180,6 @@ FunctionRef::FunctionRef(const SourceLocation location, FunctionDef* definition)
 const SharedType FunctionRef::type() const
 {
     return definition->returnType();
-}
-
-void FunctionRef::resolveTypes(TypeResolver* visitor)
-{
-    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* FunctionRef::transform(TokenTransformer* visitor) const

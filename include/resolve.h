@@ -10,10 +10,7 @@ namespace Parser {
 
 struct TypeResolver
 {
-    void resolveTypes(VariableRef* token);
     void resolveTypes(InputDef* token);
-    void resolveTypes(InputRef* token);
-    void resolveTypes(FunctionRef* token);
     void resolveTypes(List* token);
     void resolveTypes(ParenthesizedExpression* token);
     void resolveTypes(Assign* token);
