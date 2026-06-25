@@ -39,3 +39,27 @@ error = 'Expected ":" after input name, but received ")".'
 ---
 
 test(volume) = {}
+
+---
+
+name = "Duplicate input name in function definition"
+line = 2
+character = 15
+error = 'Input "test" specified more than once for function "func".'
+
+---
+
+func(test: 0, test: 1) = {
+    2
+}
+
+---
+
+name = "Define with no instructions"
+line = 2
+character = 1
+error = 'The function "func" does not return a value.'
+
+---
+
+func() = {}

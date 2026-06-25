@@ -2,7 +2,7 @@ name = "Number in number input"
 
 ---
 
-sine(volume: 1)
+sine(frequency: 440)
 
 ---
 
@@ -10,7 +10,7 @@ name = "Constant in constant input"
 
 ---
 
-sequence(order: sequence-forward)
+sequence(values: [ 0 ], order: sequence-forward)
 
 ---
 

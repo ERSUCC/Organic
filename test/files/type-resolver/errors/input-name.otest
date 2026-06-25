@@ -1,11 +1,11 @@
 name = "Invalid input name in function"
 line = 2
-character = 6
+character = 22
 error = 'Invalid input name "squiggle" for function "sine".'
 
 ---
 
-sine(squiggle: 0)
+sine(frequency: 440, squiggle: 0)
 
 ---
 

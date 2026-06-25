@@ -1,66 +1,66 @@
 name = "Constant in number input"
 line = 2
-character = 14
-error = 'Expected number for input "volume", but received sequence order constant.'
+character = 17
+error = 'Expected number for input "frequency", but received sequence order constant.'
 
 ---
 
-sine(volume: sequence-forward)
+sine(frequency: sequence-forward)
 
 ---
 
 name = "String in number input"
 line = 2
-character = 14
-error = 'Expected number for input "volume", but received string.'
+character = 17
+error = 'Expected number for input "frequency", but received string.'
 
 ---
 
-sine(volume: "test")
+sine(frequency: "test")
 
 ---
 
 name = "List in number input"
 line = 2
-character = 14
-error = 'Expected number for input "volume", but received list of number.'
+character = 17
+error = 'Expected number for input "frequency", but received list of number.'
 
 ---
 
-sine(volume: [ 1, 2, 3 ])
+sine(frequency: [ 1, 2, 3 ])
 
 ---
 
 name = "Number in constant input"
 line = 2
-character = 17
+character = 32
 error = 'Expected sequence order constant for input "order", but received number.'
 
 ---
 
-sequence(order: 0)
+sequence(values: [ 0 ], order: 0)
 
 ---
 
 name = "String in constant input"
 line = 2
-character = 17
+character = 32
 error = 'Expected sequence order constant for input "order", but received string.'
 
 ---
 
-sequence(order: "test")
+sequence(values: [ 0 ], order: "test")
 
 ---
 
 name = "List in constant input"
 line = 2
-character = 17
+character = 32
 error = 'Expected sequence order constant for input "order", but received list of sequence order constant.'
 
 ---
 
-sequence(order: [ sequence-forward, sequence-backward ])
+sequence(values: [ 0 ], order: [ sequence-forward, sequence-backward ])
 
 ---
 

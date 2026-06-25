@@ -332,47 +332,47 @@ Token* Tokenizer::tokenizeIdentifier()
 
     if (name == "sequence-forward")
     {
-        return new SequenceForward(location);
+        return new Constant(location, new SequenceOrderType(), Constants::Sequence::Forward);
     }
 
     if (name == "sequence-backward")
     {
-        return new SequenceBackward(location);
+        return new Constant(location, new SequenceOrderType(), Constants::Sequence::Backward);
     }
 
     if (name == "sequence-ping-pong")
     {
-        return new SequencePingPong(location);
+        return new Constant(location, new SequenceOrderType(), Constants::Sequence::PingPong);
     }
 
     if (name == "sequence-random")
     {
-        return new SequenceRandom(location);
+        return new Constant(location, new SequenceOrderType(), Constants::Sequence::Random);
     }
 
     if (name == "random-step")
     {
-        return new RandomStep(location);
+        return new Constant(location, new RandomTypeType(), Constants::Random::Step);
     }
 
     if (name == "random-linear")
     {
-        return new RandomLinear(location);
+        return new Constant(location, new RandomTypeType(), Constants::Random::Linear);
     }
 
     if (name == "round-nearest")
     {
-        return new RoundNearest(location);
+        return new Constant(location, new RoundDirectionType(), Constants::Round::Nearest);
     }
 
     if (name == "round-up")
     {
-        return new RoundUp(location);
+        return new Constant(location, new RoundDirectionType(), Constants::Round::Up);
     }
 
     if (name == "round-down")
     {
-        return new RoundDown(location);
+        return new Constant(location, new RoundDirectionType(), Constants::Round::Down);
     }
 
     if (name == "pi")

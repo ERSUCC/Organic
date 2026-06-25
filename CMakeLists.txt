@@ -18,6 +18,7 @@ add_library(organic_lib STATIC src/audiosource.cpp
                                src/parse.cpp
                                src/path.cpp
                                src/program.cpp
+                               src/resolve.cpp
                                src/resource.cpp
                                src/source.cpp
                                src/token.cpp

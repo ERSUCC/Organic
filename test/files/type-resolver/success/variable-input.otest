@@ -2,9 +2,9 @@ name = "Number variable in number input"
 
 ---
 
-test = 1
+test = 440
 
-sine(volume: test)
+sine(frequency: test)
 
 ---
 
@@ -14,7 +14,7 @@ name = "Constant variable in constant input"
 
 test = sequence-forward
 
-sequence(order: test)
+sequence(values: [ 0 ], order: test)
 
 ---
 

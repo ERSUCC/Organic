@@ -4,8 +4,8 @@
 #include "otest.h"
 #include "parse.h"
 #include "path.h"
+#include "resolve.h"
 #include "test.h"
-#include "types.h"
 
 struct TestResolver : public Test
 {

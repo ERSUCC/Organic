@@ -3,10 +3,10 @@ name = "Return constant"
 ---
 
 func() = {
-    1
+    440
 }
 
-sine(volume: func())
+sine(frequency: func())
 
 ---
 
@@ -14,13 +14,13 @@ name = "Return variable"
 
 ---
 
-test = 1
+test = 440
 
 func() = {
     test
 }
 
-sine(volume: test)
+sine(frequency: test)
 
 ---
 
@@ -29,10 +29,10 @@ name = "Return function"
 ---
 
 func() = {
-    sweep(from: 0, to: 1, length: 1000)
+    sweep(from: 330, to: 550, length: 1000)
 }
 
-sine(volume: func())
+sine(frequency: func())
 
 ---
 
@@ -41,11 +41,11 @@ name = "Return user function"
 ---
 
 func() = {
-    sweep(from: 0, to: 1, length: 1000)
+    sweep(from: 330, to: 550, length: 1000)
 }
 
 func1() = {
     func()
 }
 
-sine(volume: func1())
+sine(frequency: func1())

@@ -72,7 +72,6 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::GreaterAlias* token);
     Engine::ValueObject* transform(const Parser::LessEqualAlias* token);
     Engine::ValueObject* transform(const Parser::GreaterEqualAlias* token);
-    Engine::ValueObject* transform(const Parser::Define* token);
     Engine::ValueObject* transform(const Parser::Program* token);
 
 private:
@@ -80,7 +79,6 @@ private:
 
     std::unordered_map<Parser::VariableDef*, Engine::ValueObject*> variables;
     std::unordered_map<Parser::InputDef*, Engine::ValueObject*> inputs;
-    std::unordered_map<Parser::FunctionDef*, const Parser::Define*> functions;
 
     Engine::ValueObject* transformArgument(const Parser::ArgumentList* arguments, const std::string name);
 

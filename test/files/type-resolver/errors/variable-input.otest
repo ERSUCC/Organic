@@ -1,38 +1,38 @@
 name = "Invalid variable type in function input"
 line = 4
-character = 14
-error = 'Expected number for input "volume", but received sequence order constant.'
+character = 17
+error = 'Expected number for input "frequency", but received sequence order constant.'
 
 ---
 
 test = sequence-forward
 
-sine(volume: test)
+sine(frequency: test)
 
 ---
 
 name = "Invalid variable type from outer scope in function input"
 line = 5
-character = 18
-error = 'Expected number for input "volume", but received string.'
+character = 21
+error = 'Expected number for input "frequency", but received string.'
 
 ---
 
 test = "test"
 
 func() = {
-    sine(volume: test)
+    sine(frequency: test)
 }
 
 ---
 
 name = "Invalid input type in function input"
 line = 3
-character = 18
-error = 'Expected number for input "volume", but received list of number.'
+character = 21
+error = 'Expected number for input "frequency", but received list of number.'
 
 ---
 
 func(test: [ 1, 2, 3 ]) = {
-    sine(volume: test)
+    sine(frequency: test)
 }

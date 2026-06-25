@@ -71,18 +71,18 @@ ParserContext::ParserContext(ParserContext* parent, const std::string name, cons
     }
 }
 
-VariableDef* ParserContext::addVariable(const Identifier* token)
+VariableDef* ParserContext::addVariable(const Identifier* token, Token* value)
 {
     checkNameConflicts(token);
 
-    VariableDef* variable = new VariableDef(token->location);
+    VariableDef* variable = new VariableDef(token->location, value);
 
     variables[token->string()] = variable;
 
     return variable;
 }
 
-FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vector<InputDef*>& inputs)
+FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vector<InputDef*>& inputs, const std::vector<Token*>& instructions)
 {
     if (checkRecursive(token))
     {
@@ -91,11 +91,11 @@ FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vect
 
     checkNameConflicts(token);
 
-    FunctionDef* lambda = new FunctionDef(token->location, inputs);
+    FunctionDef* function = new FunctionDef(token->location, inputs, instructions);
 
-    functions[token->string()] = lambda;
+    functions[token->string()] = function;
 
-    return lambda;
+    return function;
 }
 
 Identifier* ParserContext::findIdentifier(const Identifier* token)
@@ -399,6 +399,11 @@ TokenListNode* Parser::parseDefine(TokenListNode* start)
                 throw TokenException(current, "input name");
             }
 
+            if (std::find_if(inputs.begin(), inputs.end(), [=](const InputDef* def) { return input->string() == def->string(); }) != inputs.end())
+            {
+                throw OrganicParseException("Input \"" + input->string() + "\" specified more than once for function \"" + start->token->string() + "\".", input->location);
+            }
+
             current = current->next;
 
             if (!current->getToken<Colon>())
@@ -417,14 +422,14 @@ TokenListNode* Parser::parseDefine(TokenListNode* start)
         }
     }
 
-    FunctionDef* function = context->addFunction(start->getToken<Identifier>(), inputs);
+    const Identifier* name = start->getToken<Identifier>();
 
-    if (libraryFunctions.count(function->string()) || function->string() == "include")
+    if (libraryFunctions.count(name->string()) || name->string() == "include")
     {
-        throw OrganicParseException("A function already exists with the name \"" + function->string() + "\".", function->location);
+        throw OrganicParseException("A function already exists with the name \"" + name->string() + "\".", name->location);
     }
 
-    context = new ParserContext(context, function->string(), inputs);
+    context = new ParserContext(context, name->string(), inputs);
 
     current = current->next->next;
 
@@ -446,9 +451,16 @@ TokenListNode* Parser::parseDefine(TokenListNode* start)
         throw TokenException(current, "\"}\" at end of function definition");
     }
 
+    if (instructions.empty())
+    {
+        throw OrganicParseException("The function \"" + name->string() + "\" does not return a value.", name->location);
+    }
+
     context = context->parent;
 
-    return tokens->patch(start, current->next, new Define(function->location, instructions, function));
+    FunctionDef* function = context->addFunction(name, inputs, instructions);
+
+    return tokens->patch(start, current->next, new Define(function->location, function));
 }
 
 TokenListNode* Parser::parseAssign(TokenListNode* start)
@@ -470,7 +482,7 @@ TokenListNode* Parser::parseAssign(TokenListNode* start)
         throw OrganicParseException("Cannot assign a value to a string.", current->token->location);
     }
 
-    VariableDef* variable = context->addVariable(current->getToken<Identifier>());
+    const Identifier* name = current->getToken<Identifier>();
 
     try
     {
@@ -482,7 +494,9 @@ TokenListNode* Parser::parseAssign(TokenListNode* start)
         throw TokenException(e.node, "value after \"=\"");
     }
 
-    return tokens->patch(start, current, new Assign(variable->location, variable, current->prev->token));
+    VariableDef* variable = context->addVariable(name, current->prev->token);
+
+    return tokens->patch(start, current, new Assign(variable->location, variable));
 }
 
 TokenListNode* Parser::parseCall(TokenListNode* start)

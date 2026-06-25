@@ -38,14 +38,12 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::FunctionRef* toke
         inputs[input] = variable;
     }
 
-    const Parser::Define* function = functions[token->definition];
-
-    for (size_t i = 0; i < function->instructions.size() - 1; i++)
+    for (size_t i = 0; i < token->definition->instructions.size() - 1; i++)
     {
-        function->instructions[i]->transform(this);
+        token->definition->instructions[i]->transform(this);
     }
 
-    Engine::ValueObject* value = function->instructions.back()->transform(this);
+    Engine::ValueObject* value = token->definition->instructions.back()->transform(this);
 
     return new Engine::Lambda(placeholders, value);
 }
@@ -74,7 +72,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::ParenthesizedExpr
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Assign* token)
 {
-    variables[token->variable] = token->value->transform(this);
+    variables[token->variable] = token->variable->value->transform(this);
 
     return nullptr;
 }
@@ -268,14 +266,12 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
         inputs[input] = transformArgument(token->arguments, input->string());
     }
 
-    const Parser::Define* function = functions[token->function->definition];
-
-    for (size_t i = 0; i < function->instructions.size() - 1; i++)
+    for (size_t i = 0; i < token->function->definition->instructions.size() - 1; i++)
     {
-        function->instructions[i]->transform(this);
+        token->function->definition->instructions[i]->transform(this);
     }
 
-    return function->instructions.back()->transform(this);
+    return token->function->definition->instructions.back()->transform(this);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::AddAlias* token)
@@ -326,13 +322,6 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::LessEqualAlias* t
 Engine::ValueObject* TokenTransformer::transform(const Parser::GreaterEqualAlias* token)
 {
     return new Engine::ValueGreaterEqual(ARG("a"), ARG("b"));
-}
-
-Engine::ValueObject* TokenTransformer::transform(const Parser::Define* token)
-{
-    functions[token->function] = token;
-
-    return nullptr;
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Program* token)

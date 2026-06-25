@@ -3,11 +3,11 @@
 #include "exception.h"
 #include "parse.h"
 #include "path.h"
+#include "resolve.h"
 #include "test.h"
 #include "test_utils.h"
 #include "token.h"
 #include "transform.h"
-#include "types.h"
 
 struct TestExamples : public Test
 {

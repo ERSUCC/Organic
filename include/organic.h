@@ -18,9 +18,9 @@
 #include "parse.h"
 #include "path.h"
 #include "program.h"
+#include "resolve.h"
 #include "token.h"
 #include "transform.h"
-#include "types.h"
 #include "utils.h"
 
 struct Organic

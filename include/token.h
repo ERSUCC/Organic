@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "exception.h"
@@ -8,6 +9,7 @@
 #include "location.h"
 #include "path.h"
 #include "program.h"
+#include "resolve.h"
 #include "transform.h"
 #include "types.h"
 #include "utils.h"
@@ -16,22 +18,25 @@ struct TokenTransformer;
 
 namespace Parser {
 
-struct Type;
 struct TypeResolver;
 
 struct Token
 {
-    Token(const SourceLocation location);
+    Token(const SourceLocation location, const Type* type = new NoneType());
+
+    virtual const SharedType type() const;
+
+    const std::string string() const;
 
     virtual void resolveTypes(TypeResolver* visitor);
 
     virtual Engine::ValueObject* transform(TokenTransformer* visitor) const;
 
-    const std::string string() const;
-
     const SourceLocation location;
 
-    Type* type = nullptr;
+private:
+    const SharedType staticType;
+
 };
 
 struct OpenParenthesis : public Token
@@ -159,56 +164,11 @@ struct Value : public Token
 
 struct Constant : public Token
 {
-    Constant(const SourceLocation location, const unsigned char value);
+    Constant(const SourceLocation location, const Type* type, const unsigned char value);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
     const unsigned char value;
-};
-
-struct SequenceForward : public Constant
-{
-    SequenceForward(const SourceLocation location);
-};
-
-struct SequenceBackward : public Constant
-{
-    SequenceBackward(const SourceLocation location);
-};
-
-struct SequencePingPong : public Constant
-{
-    SequencePingPong(const SourceLocation location);
-};
-
-struct SequenceRandom : public Constant
-{
-    SequenceRandom(const SourceLocation location);
-};
-
-struct RandomStep : public Constant
-{
-    RandomStep(const SourceLocation location);
-};
-
-struct RandomLinear : public Constant
-{
-    RandomLinear(const SourceLocation location);
-};
-
-struct RoundNearest : public Constant
-{
-    RoundNearest(const SourceLocation location);
-};
-
-struct RoundUp : public Constant
-{
-    RoundUp(const SourceLocation location);
-};
-
-struct RoundDown : public Constant
-{
-    RoundDown(const SourceLocation location);
 };
 
 struct String : public Token
@@ -220,7 +180,9 @@ struct String : public Token
 
 struct VariableDef : public Identifier
 {
-    VariableDef(const SourceLocation location);
+    VariableDef(const SourceLocation location, Token* value);
+
+    Token* value;
 
     bool used = false;
 };
@@ -228,6 +190,8 @@ struct VariableDef : public Identifier
 struct VariableRef : public Identifier
 {
     VariableRef(const SourceLocation location, VariableDef* definition);
+
+    const SharedType type() const override;
 
     void resolveTypes(TypeResolver* visitor) override;
 
@@ -240,6 +204,8 @@ struct InputDef : public Identifier
 {
     InputDef(const SourceLocation location, Token* defaultValue);
 
+    const SharedType type() const override;
+
     void resolveTypes(TypeResolver* visitor) override;
 
     Token* defaultValue;
@@ -251,6 +217,8 @@ struct InputRef : public Identifier
 {
     InputRef(const SourceLocation location, InputDef* definition);
 
+    const SharedType type() const override;
+
     void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
@@ -260,11 +228,13 @@ struct InputRef : public Identifier
 
 struct FunctionDef : public Identifier
 {
-    FunctionDef(const SourceLocation location, const std::vector<InputDef*>& inputs);
+    FunctionDef(const SourceLocation location, const std::vector<InputDef*>& inputs, const std::vector<Token*>& instructions);
+
+    const SharedType type() const override;
+    const SharedType returnType() const;
 
     const std::vector<InputDef*> inputs;
-
-    Type* returnType;
+    const std::vector<Token*> instructions;
 
     bool used = false;
 };
@@ -272,6 +242,8 @@ struct FunctionDef : public Identifier
 struct FunctionRef : public Identifier
 {
     FunctionRef(const SourceLocation location, FunctionDef* definition);
+
+    const SharedType type() const override;
 
     void resolveTypes(TypeResolver* visitor) override;
 
@@ -310,6 +282,8 @@ struct List : public Token
 {
     List(const SourceLocation location, const std::vector<Token*> values);
 
+    const SharedType type() const override;
+
     void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
@@ -321,6 +295,8 @@ struct ParenthesizedExpression : public Token
 {
     ParenthesizedExpression(const SourceLocation location, Token* value);
 
+    const SharedType type() const override;
+
     void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
@@ -330,20 +306,18 @@ struct ParenthesizedExpression : public Token
 
 struct Assign : public Token
 {
-    Assign(const SourceLocation location, VariableDef* variable, Token* value);
+    Assign(const SourceLocation location, VariableDef* variable);
 
     void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
     VariableDef* variable;
-
-    Token* value;
 };
 
 struct Call : public Token
 {
-    Call(const SourceLocation location, ArgumentList* arguments);
+    Call(const SourceLocation location, ArgumentList* arguments, const Type* type = new NoneType());
 
     ArgumentList* arguments;
 };
@@ -664,6 +638,8 @@ struct CallUser : public Call
 {
     CallUser(const SourceLocation location, ArgumentList* arguments, FunctionRef* function);
 
+    const SharedType type() const override;
+
     void resolveTypes(TypeResolver* visitor) override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
@@ -673,7 +649,7 @@ struct CallUser : public Call
 
 struct CallAlias : public Call
 {
-    CallAlias(const SourceLocation location, Token* a, Token* b, const std::string op);
+    CallAlias(const SourceLocation location, Token* a, Token* b, const std::string op, const Type* type);
 
     void resolveTypes(TypeResolver* visitor) override;
 
@@ -754,13 +730,9 @@ struct GreaterEqualAlias : public CallAlias
 
 struct Define : public Token
 {
-    Define(const SourceLocation location, const std::vector<Token*> instructions, FunctionDef* function);
+    Define(const SourceLocation location, FunctionDef* function);
 
     void resolveTypes(TypeResolver* visitor) override;
-
-    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
-
-    const std::vector<Token*> instructions;
 
     FunctionDef* function;
 };

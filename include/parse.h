@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <filesystem>
 #include <functional>
 #include <string>
@@ -21,8 +22,8 @@ struct ParserContext
 {
     ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs);
 
-    VariableDef* addVariable(const Identifier* token);
-    FunctionDef* addFunction(const Identifier* token, const std::vector<InputDef*>& inputs);
+    VariableDef* addVariable(const Identifier* token, Token* value);
+    FunctionDef* addFunction(const Identifier* token, const std::vector<InputDef*>& inputs, const std::vector<Token*>& instructions);
 
     Identifier* findIdentifier(const Identifier* token);
     FunctionRef* findFunction(const Identifier* token);

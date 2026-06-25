@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <string>
 
+#include "constants.h"
 #include "exception.h"
 #include "location.h"
 #include "source.h"
