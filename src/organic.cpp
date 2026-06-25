@@ -15,7 +15,7 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
         Utils::printInfo();
     }
 
-    Parser::Program* program = Parser::Parser::parseSource(path);
+    const Parser::Program* program = Parser::Parser::parseSource(path);
 
     program->resolveTypes(new Parser::TypeResolver());
 

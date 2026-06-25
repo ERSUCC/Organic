@@ -19,7 +19,7 @@ void TestExamples::expectSuccess(const Path* path)
 
     try
     {
-        Parser::Program* program = Parser::Parser::parseSource(path);
+        const Parser::Program* program = Parser::Parser::parseSource(path);
 
         program->resolveTypes(new Parser::TypeResolver());
         program->transform(new TokenTransformer(path));

@@ -2,7 +2,7 @@
 
 using namespace Parser;
 
-TokenListNode::TokenListNode(Token* token, TokenListNode* prev, TokenListNode* next, const bool end) :
+TokenListNode::TokenListNode(const Token* token, TokenListNode* prev, TokenListNode* next, const bool end) :
     token(token), prev(prev), next(next), end(end) {}
 
 TokenList::TokenList(const SourceProvider* source)
@@ -31,7 +31,7 @@ TokenListNode* TokenList::stitch(TokenListNode* start, TokenListNode* end)
     return end;
 }
 
-TokenListNode* TokenList::patch(TokenListNode* start, TokenListNode* end, Token* token)
+TokenListNode* TokenList::patch(TokenListNode* start, TokenListNode* end, const Token* token)
 {
     start->prev->next = new TokenListNode(token, start->prev, end, false);
     end->prev = start->prev->next;

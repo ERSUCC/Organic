@@ -6,7 +6,6 @@
 #include <utility>
 
 #include "location.h"
-#include "token_decls.h"
 
 namespace Parser {
 

@@ -29,7 +29,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::FunctionRef* toke
 {
     std::vector<Engine::Variable*> placeholders;
 
-    for (Parser::InputDef* input : token->definition->inputs)
+    for (const Parser::InputDef* input : token->definition->inputs)
     {
         Engine::Variable* variable = new Engine::Variable(input->defaultValue->transform(this));
 
@@ -261,7 +261,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Reverb* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
 {
-    for (Parser::InputDef* input : token->function->definition->inputs)
+    for (const Parser::InputDef* input : token->function->definition->inputs)
     {
         inputs[input] = transformArgument(token->arguments, input->string());
     }

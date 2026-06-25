@@ -62,27 +62,27 @@ static std::unordered_map<std::string, std::function<Call* (const SourceLocation
     { "reverb", CALL(Reverb) }
 };
 
-ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs) :
+ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<const InputDef*>& inputs) :
     parent(parent), name(name)
 {
-    for (InputDef* input : inputs)
+    for (const InputDef* input : inputs)
     {
         this->inputs[input->string()] = input;
     }
 }
 
-VariableDef* ParserContext::addVariable(const Identifier* token, Token* value)
+const VariableDef* ParserContext::addVariable(const Identifier* token, const Token* value)
 {
     checkNameConflicts(token);
 
-    VariableDef* variable = new VariableDef(token->location, value);
+    const VariableDef* variable = new VariableDef(token->location, value);
 
     variables[token->string()] = variable;
 
     return variable;
 }
 
-FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vector<InputDef*>& inputs, const std::vector<Token*>& instructions)
+const FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vector<const InputDef*>& inputs, const std::vector<const Token*>& instructions)
 {
     if (checkRecursive(token))
     {
@@ -91,18 +91,18 @@ FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vect
 
     checkNameConflicts(token);
 
-    FunctionDef* function = new FunctionDef(token->location, inputs, instructions);
+    const FunctionDef* function = new FunctionDef(token->location, inputs, instructions);
 
     functions[token->string()] = function;
 
     return function;
 }
 
-Identifier* ParserContext::findIdentifier(const Identifier* token)
+const Identifier* ParserContext::findIdentifier(const Identifier* token)
 {
     if (inputs.count(token->string()))
     {
-        InputDef* input = inputs[token->string()];
+        const InputDef* input = inputs[token->string()];
 
         used.insert(input);
 
@@ -111,7 +111,7 @@ Identifier* ParserContext::findIdentifier(const Identifier* token)
 
     if (variables.count(token->string()))
     {
-        VariableDef* variable = variables[token->string()];
+        const VariableDef* variable = variables[token->string()];
 
         used.insert(variable);
 
@@ -120,7 +120,7 @@ Identifier* ParserContext::findIdentifier(const Identifier* token)
 
     if (functions.count(token->string()))
     {
-        FunctionDef* function = functions[token->string()];
+        const FunctionDef* function = functions[token->string()];
 
         used.insert(function);
 
@@ -129,7 +129,7 @@ Identifier* ParserContext::findIdentifier(const Identifier* token)
 
     if (parent)
     {
-        if (Identifier* identifier = parent->findIdentifier(token))
+        if (const Identifier* identifier = parent->findIdentifier(token))
         {
             return identifier;
         }
@@ -138,7 +138,7 @@ Identifier* ParserContext::findIdentifier(const Identifier* token)
     throw OrganicParseException("No variable, input, or function exists with the name \"" + token->string() + "\".", token->location);
 }
 
-FunctionRef* ParserContext::findFunction(const Identifier* token)
+const FunctionRef* ParserContext::findFunction(const Identifier* token)
 {
     if (checkRecursive(token))
     {
@@ -152,7 +152,7 @@ FunctionRef* ParserContext::findFunction(const Identifier* token)
 
     if (parent)
     {
-        if (FunctionRef* function = parent->findFunction(token))
+        if (const FunctionRef* function = parent->findFunction(token))
         {
             return function;
         }
@@ -163,7 +163,7 @@ FunctionRef* ParserContext::findFunction(const Identifier* token)
 
 void ParserContext::checkUsage() const
 {
-    for (const std::pair<std::string, InputDef*>& pair : inputs)
+    for (const std::pair<std::string, const InputDef*>& pair : inputs)
     {
         if (!used.count(pair.second))
         {
@@ -171,7 +171,7 @@ void ParserContext::checkUsage() const
         }
     }
 
-    for (const std::pair<std::string, VariableDef*>& pair : variables)
+    for (const std::pair<std::string, const VariableDef*>& pair : variables)
     {
         if (!used.count(pair.second))
         {
@@ -179,7 +179,7 @@ void ParserContext::checkUsage() const
         }
     }
 
-    for (const std::pair<std::string, FunctionDef*>& pair : functions)
+    for (const std::pair<std::string, const FunctionDef*>& pair : functions)
     {
         if (!used.count(pair.second))
         {
@@ -190,21 +190,21 @@ void ParserContext::checkUsage() const
 
 void ParserContext::merge(const ParserContext* context)
 {
-    for (const std::pair<std::string, InputDef*> input : context->inputs)
+    for (const std::pair<std::string, const InputDef*> input : context->inputs)
     {
         checkNameConflicts(input.second);
 
         inputs[input.first] = input.second;
     }
 
-    for (const std::pair<std::string, VariableDef*> variable : context->variables)
+    for (const std::pair<std::string, const VariableDef*> variable : context->variables)
     {
         checkNameConflicts(variable.second);
 
         variables[variable.first] = variable.second;
     }
 
-    for (const std::pair<std::string, FunctionDef*> function : context->functions)
+    for (const std::pair<std::string, const FunctionDef*> function : context->functions)
     {
         checkNameConflicts(function.second);
 
@@ -235,7 +235,7 @@ bool ParserContext::checkRecursive(const Identifier* token) const
     return name == token->string() || (parent && parent->checkRecursive(token));
 }
 
-Program* Parser::parseSource(const Path* path)
+const Program* Parser::parseSource(const Path* path)
 {
     const FileProvider* source = FileProvider::create(path);
 
@@ -249,7 +249,7 @@ Program* Parser::parseSource(const Path* path)
     return (new Parser(source, new ParserContext(nullptr, "", {}), includedPaths))->parse();
 }
 
-Program* Parser::parseSource(const std::string& source)
+const Program* Parser::parseSource(const std::string& source)
 {
     std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths;
 
@@ -259,7 +259,7 @@ Program* Parser::parseSource(const std::string& source)
 Parser::Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
     source(source), context(context), includedPaths(includedPaths) {}
 
-Program* Parser::parse()
+const Program* Parser::parse()
 {
     tokens = (new Tokenizer(source))->tokenize();
 
@@ -275,7 +275,7 @@ Program* Parser::parse()
         current = parseInstruction(current);
     }
 
-    std::vector<Token*> instructions;
+    std::vector<const Token*> instructions;
 
     current = tokens->head->next;
 
@@ -355,7 +355,7 @@ TokenListNode* Parser::parseInclude(TokenListNode* start)
 
     ParserContext* includeContext = new ParserContext(nullptr, "", {});
 
-    Program* program = (new Parser(includeSource, includeContext, includedPaths))->parse();
+    const Program* program = (new Parser(includeSource, includeContext, includedPaths))->parse();
 
     context->merge(includeContext);
 
@@ -423,7 +423,7 @@ TokenListNode* Parser::parseDefine(TokenListNode* start)
 {
     TokenListNode* current = start->next->next;
 
-    std::vector<InputDef*> inputs;
+    std::vector<const InputDef*> inputs;
 
     if (!current->getToken<CloseParenthesis>())
     {
@@ -478,7 +478,7 @@ TokenListNode* Parser::parseDefine(TokenListNode* start)
 
     current = current->next;
 
-    std::vector<Token*> instructions;
+    std::vector<const Token*> instructions;
 
     while (!current->end && !current->getToken<CloseCurlyBracket>())
     {
@@ -501,7 +501,7 @@ TokenListNode* Parser::parseDefine(TokenListNode* start)
 
     context = context->parent;
 
-    FunctionDef* function = context->addFunction(name, inputs, instructions);
+    const FunctionDef* function = context->addFunction(name, inputs, instructions);
 
     return tokens->patch(start, current->next, new Define(function->location, function));
 }
@@ -537,7 +537,7 @@ TokenListNode* Parser::parseAssign(TokenListNode* start)
         throw TokenException(e.node, "value after \"=\"");
     }
 
-    VariableDef* variable = context->addVariable(name, current->prev->token);
+    const VariableDef* variable = context->addVariable(name, current->prev->token);
 
     return tokens->patch(start, current, new Assign(variable->location, variable));
 }
@@ -553,7 +553,7 @@ TokenListNode* Parser::parseCall(TokenListNode* start)
 
     TokenListNode* current = start->next->next;
 
-    std::vector<Argument*> arguments;
+    std::vector<const Argument*> arguments;
 
     if (!current->getToken<CloseParenthesis>())
     {
@@ -581,7 +581,7 @@ TokenListNode* Parser::parseCall(TokenListNode* start)
                 throw e;
             }
 
-            Argument* argument = current->prev->getToken<Argument>();
+            const Argument* argument = current->prev->getToken<Argument>();
 
             for (const Argument* arg : arguments)
             {
@@ -662,7 +662,7 @@ TokenListNode* Parser::parseList(TokenListNode* start)
         throw OrganicParseException("Empty lists are not allowed.", start->token->location);
     }
 
-    std::vector<Token*> items;
+    std::vector<const Token*> items;
 
     do
     {

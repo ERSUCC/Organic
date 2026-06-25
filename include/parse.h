@@ -20,13 +20,13 @@ namespace Parser {
 
 struct ParserContext
 {
-    ParserContext(ParserContext* parent, const std::string name, const std::vector<InputDef*>& inputs);
+    ParserContext(ParserContext* parent, const std::string name, const std::vector<const InputDef*>& inputs);
 
-    VariableDef* addVariable(const Identifier* token, Token* value);
-    FunctionDef* addFunction(const Identifier* token, const std::vector<InputDef*>& inputs, const std::vector<Token*>& instructions);
+    const VariableDef* addVariable(const Identifier* token, const Token* value);
+    const FunctionDef* addFunction(const Identifier* token, const std::vector<const InputDef*>& inputs, const std::vector<const Token*>& instructions);
 
-    Identifier* findIdentifier(const Identifier* token);
-    FunctionRef* findFunction(const Identifier* token);
+    const Identifier* findIdentifier(const Identifier* token);
+    const FunctionRef* findFunction(const Identifier* token);
 
     void checkUsage() const;
     void merge(const ParserContext* context);
@@ -39,9 +39,9 @@ private:
 
     const std::string name;
 
-    std::unordered_map<std::string, InputDef*> inputs;
-    std::unordered_map<std::string, VariableDef*> variables;
-    std::unordered_map<std::string, FunctionDef*> functions;
+    std::unordered_map<std::string, const InputDef*> inputs;
+    std::unordered_map<std::string, const VariableDef*> variables;
+    std::unordered_map<std::string, const FunctionDef*> functions;
 
     std::unordered_set<const Identifier*> used;
 
@@ -49,13 +49,13 @@ private:
 
 struct Parser
 {
-    static Program* parseSource(const Path* path);
-    static Program* parseSource(const std::string& source);
+    static const Program* parseSource(const Path* path);
+    static const Program* parseSource(const std::string& source);
 
 private:
     Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
 
-    Program* parse();
+    const Program* parse();
 
     TokenListNode* parseInclude(TokenListNode* start);
     TokenListNode* parseInstruction(TokenListNode* start);

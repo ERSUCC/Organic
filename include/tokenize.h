@@ -14,14 +14,14 @@ namespace Parser {
 
 struct TokenListNode
 {
-    TokenListNode(Token* token, TokenListNode* prev, TokenListNode* next, const bool end);
+    TokenListNode(const Token* token, TokenListNode* prev, TokenListNode* next, const bool end);
 
-    template <typename T> T* getToken() const
+    template <typename T> const T* getToken() const
     {
-        return dynamic_cast<T*>(token);
+        return dynamic_cast<const T*>(token);
     }
 
-    Token* token;
+    const Token* token;
 
     TokenListNode* prev;
     TokenListNode* next;
@@ -36,7 +36,7 @@ struct TokenList
     void add(Token* token);
 
     TokenListNode* stitch(TokenListNode* start, TokenListNode* end);
-    TokenListNode* patch(TokenListNode* start, TokenListNode* end, Token* token);
+    TokenListNode* patch(TokenListNode* start, TokenListNode* end, const Token* token);
 
     TokenListNode* head;
     TokenListNode* tail;
