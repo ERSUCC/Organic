@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <string>
+#include <vector>
 
 #include "constants.h"
 #include "exception.h"
@@ -12,46 +13,90 @@
 
 namespace Parser {
 
-struct TokenListNode
+struct OrganicTokenException : public OrganicParseException
 {
-    TokenListNode(const Token* token, TokenListNode* prev, TokenListNode* next, const bool end);
-
-    template <typename T> const T* getToken() const
-    {
-        return dynamic_cast<const T*>(token);
-    }
+    OrganicTokenException(const Token* token, const std::string& expected);
 
     const Token* token;
 
-    TokenListNode* prev;
-    TokenListNode* next;
+    const std::string expected;
 
-    const bool end;
+private:
+    static std::string getMessage(const Token* token, const std::string& expected);
+
 };
 
-struct TokenList
+struct TokenIterator
 {
-    TokenList(const SourceProvider* source);
+    TokenIterator(const std::vector<const Token*>& tokens);
 
-    void add(Token* token);
+    const Token* peek(const size_t offset = 0) const;
 
-    TokenListNode* stitch(TokenListNode* start, TokenListNode* end);
-    TokenListNode* patch(TokenListNode* start, TokenListNode* end, const Token* token);
+    template <typename T> const T* peek(const size_t offset = 0) const
+    {
+        if (current + offset < tokens.size())
+        {
+            return dynamic_cast<const T*>(tokens[current + offset]);
+        }
 
-    TokenListNode* head;
-    TokenListNode* tail;
+        return nullptr;
+    }
+
+    template <typename T> const T* require(const std::string& expected)
+    {
+        if (const T* token = dynamic_cast<const T*>(tokens[current]))
+        {
+            current++;
+
+            return token;
+        }
+
+        throw OrganicTokenException(tokens[current], expected);
+    }
+
+    template <typename T> TokenIterator* expect(const std::string& expected)
+    {
+        if (!dynamic_cast<const T*>(tokens[current]))
+        {
+            throw OrganicTokenException(tokens[current], expected);
+        }
+
+        current++;
+
+        return this;
+    }
+
+    template <typename T> const T* take()
+    {
+        if (current < tokens.size())
+        {
+            return dynamic_cast<const T*>(tokens[current++]);
+        }
+
+        return dynamic_cast<const T*>(tokens[current]);
+    }
+
+    const Token* take();
+
+    TokenIterator* drop(const size_t count = 1);
+
+private:
+    std::vector<const Token*> tokens;
+
+    size_t current = 0;
+
 };
 
 struct Tokenizer
 {
     Tokenizer(const SourceProvider* source);
 
-    TokenList* tokenize();
+    TokenIterator* tokenize();
 
 private:
-    Token* tokenizeString();
-    Token* tokenizeNumber();
-    Token* tokenizeIdentifier();
+    const Token* tokenizeString();
+    const Token* tokenizeNumber();
+    const Token* tokenizeIdentifier();
 
     void skipWhitespace();
 

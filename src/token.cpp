@@ -15,11 +15,24 @@ const std::string Token::string() const
     return location.string();
 }
 
+bool Token::eof() const
+{
+    return false;
+}
+
 void Token::resolveTypes(const TypeResolver* visitor) const {}
 
 Engine::ValueObject* Token::transform(TokenTransformer* visitor) const
 {
     return nullptr;
+}
+
+Eof::Eof(const SourceLocation location) :
+    Token(location) {}
+
+bool Eof::eof() const
+{
+    return true;
 }
 
 OpenParenthesis::OpenParenthesis(const SourceLocation location) :

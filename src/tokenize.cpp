@@ -2,49 +2,58 @@
 
 using namespace Parser;
 
-TokenListNode::TokenListNode(const Token* token, TokenListNode* prev, TokenListNode* next, const bool end) :
-    token(token), prev(prev), next(next), end(end) {}
+OrganicTokenException::OrganicTokenException(const Token* token, const std::string& expected) :
+    OrganicParseException(getMessage(token, expected), token->location), token(token), expected(expected) {}
 
-TokenList::TokenList(const SourceProvider* source)
+std::string OrganicTokenException::getMessage(const Token* token, const std::string& expected)
 {
-    head = new TokenListNode(new Token(SourceLocation(source, 0, 0)), nullptr, nullptr, true);
-    tail = new TokenListNode(new Token(SourceLocation(source, 0, 0)), nullptr, nullptr, true);
+    if (token->eof())
+    {
+        return "Expected " + expected + ".";
+    }
 
-    head->prev = head;
-    head->next = tail;
-
-    tail->prev = head;
-    tail->next = tail;
+    return "Expected " + expected + ", but received \"" + token->string() + "\".";
 }
 
-void TokenList::add(Token* token)
+TokenIterator::TokenIterator(const std::vector<const Token*>& tokens) :
+    tokens(tokens) {}
+
+const Token* TokenIterator::peek(const size_t offset) const
 {
-    tail->prev->next = new TokenListNode(token, tail->prev, tail, false);
-    tail->prev = tail->prev->next;
+    if (current + offset < tokens.size())
+    {
+        return tokens[current + offset];
+    }
+
+    return tokens.back();
 }
 
-TokenListNode* TokenList::stitch(TokenListNode* start, TokenListNode* end)
+const Token* TokenIterator::take()
 {
-    start->prev->next = end;
-    end->prev = start->prev;
+    if (current < tokens.size())
+    {
+        return tokens[current++];
+    }
 
-    return end;
+    return tokens[current];
 }
 
-TokenListNode* TokenList::patch(TokenListNode* start, TokenListNode* end, const Token* token)
+TokenIterator* TokenIterator::drop(const size_t count)
 {
-    start->prev->next = new TokenListNode(token, start->prev, end, false);
-    end->prev = start->prev->next;
+    for (size_t i = 0; i < count && current < tokens.size() - 1; i++)
+    {
+        current++;
+    }
 
-    return end;
+    return this;
 }
 
 Tokenizer::Tokenizer(const SourceProvider* source) :
     source(source), utils(Utils::get()) {}
 
-TokenList* Tokenizer::tokenize()
+TokenIterator* Tokenizer::tokenize()
 {
-    TokenList* tokens = new TokenList(source);
+    std::vector<const Token*> tokens;
 
     while (current < source->length())
     {
@@ -74,56 +83,56 @@ TokenList* Tokenizer::tokenize()
 
         else if (source->get(current) == '(')
         {
-            tokens->add(new OpenParenthesis(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new OpenParenthesis(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == ')')
         {
-            tokens->add(new CloseParenthesis(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new CloseParenthesis(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '[')
         {
-            tokens->add(new OpenSquareBracket(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new OpenSquareBracket(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == ']')
         {
-            tokens->add(new CloseSquareBracket(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new CloseSquareBracket(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '{')
         {
-            tokens->add(new OpenCurlyBracket(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new OpenCurlyBracket(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '}')
         {
-            tokens->add(new CloseCurlyBracket(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new CloseCurlyBracket(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == ':')
         {
-            tokens->add(new Colon(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new Colon(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == ',')
         {
-            tokens->add(new Comma(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new Comma(SourceLocation(source, current, current + 1)));
 
             current++;
         }
@@ -132,14 +141,14 @@ TokenList* Tokenizer::tokenize()
         {
             if (current < source->length() - 1 && source->get(current + 1) == '=')
             {
-                tokens->add(new DoubleEquals(SourceLocation(source, current, current + 2)));
+                tokens.push_back(new DoubleEquals(SourceLocation(source, current, current + 2)));
 
                 current++;
             }
 
             else
             {
-                tokens->add(new Equals(SourceLocation(source, current, current + 1)));
+                tokens.push_back(new Equals(SourceLocation(source, current, current + 1)));
             }
 
             current++;
@@ -147,21 +156,21 @@ TokenList* Tokenizer::tokenize()
 
         else if (source->get(current) == '+')
         {
-            tokens->add(new Add(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new Add(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '-')
         {
-            if (current < source->length() - 1 && isdigit(source->get(current + 1)) && !tokens->tail->prev->getToken<Identifier>() && !tokens->tail->prev->getToken<Value>())
+            if (current < source->length() - 1 && isdigit(source->get(current + 1)) && !tokens.empty() && !dynamic_cast<const Identifier*>(tokens.back()) && !dynamic_cast<const Value*>(tokens.back()))
             {
-                tokens->add(tokenizeNumber());
+                tokens.push_back(tokenizeNumber());
             }
 
             else
             {
-                tokens->add(new Subtract(SourceLocation(source, current, current + 1)));
+                tokens.push_back(new Subtract(SourceLocation(source, current, current + 1)));
 
                 current++;
             }
@@ -169,21 +178,21 @@ TokenList* Tokenizer::tokenize()
 
         else if (source->get(current) == '*')
         {
-            tokens->add(new Multiply(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new Multiply(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '/')
         {
-            tokens->add(new Divide(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new Divide(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '^')
         {
-            tokens->add(new Power(SourceLocation(source, current, current + 1)));
+            tokens.push_back(new Power(SourceLocation(source, current, current + 1)));
 
             current++;
         }
@@ -192,14 +201,14 @@ TokenList* Tokenizer::tokenize()
         {
             if (current < source->length() - 1 && source->get(current + 1) == '=')
             {
-                tokens->add(new LessEqual(SourceLocation(source, current, current + 2)));
+                tokens.push_back(new LessEqual(SourceLocation(source, current, current + 2)));
 
                 current++;
             }
 
             else
             {
-                tokens->add(new Less(SourceLocation(source, current, current + 1)));
+                tokens.push_back(new Less(SourceLocation(source, current, current + 1)));
             }
 
             current++;
@@ -209,14 +218,14 @@ TokenList* Tokenizer::tokenize()
         {
             if (current < source->length() - 1 && source->get(current + 1) == '=')
             {
-                tokens->add(new GreaterEqual(SourceLocation(source, current, current + 2)));
+                tokens.push_back(new GreaterEqual(SourceLocation(source, current, current + 2)));
 
                 current++;
             }
 
             else
             {
-                tokens->add(new Greater(SourceLocation(source, current, current + 1)));
+                tokens.push_back(new Greater(SourceLocation(source, current, current + 1)));
             }
 
             current++;
@@ -224,17 +233,17 @@ TokenList* Tokenizer::tokenize()
 
         else if (source->get(current) == '"')
         {
-            tokens->add(tokenizeString());
+            tokens.push_back(tokenizeString());
         }
 
         else if (isdigit(source->get(current)))
         {
-            tokens->add(tokenizeNumber());
+            tokens.push_back(tokenizeNumber());
         }
 
         else if (isalpha(source->get(current)) || source->get(current) == '_')
         {
-            tokens->add(tokenizeIdentifier());
+            tokens.push_back(tokenizeIdentifier());
         }
 
         else
@@ -245,12 +254,12 @@ TokenList* Tokenizer::tokenize()
         skipWhitespace();
     }
 
-    tokens->tail->token = new Token(SourceLocation(source, current, current));
+    tokens.push_back(new Eof(SourceLocation(source, source->length(), source->length())));
 
-    return tokens;
+    return new TokenIterator(tokens);
 }
 
-Token* Tokenizer::tokenizeString()
+const Token* Tokenizer::tokenizeString()
 {
     const size_t start = current;
 
@@ -275,7 +284,7 @@ Token* Tokenizer::tokenizeString()
     return new String(SourceLocation(source, start, current), str);
 }
 
-Token* Tokenizer::tokenizeNumber()
+const Token* Tokenizer::tokenizeNumber()
 {
     const size_t start = current;
 
@@ -315,7 +324,7 @@ Token* Tokenizer::tokenizeNumber()
     return new Value(SourceLocation(source, start, current), std::stod(constant));
 }
 
-Token* Tokenizer::tokenizeIdentifier()
+const Token* Tokenizer::tokenizeIdentifier()
 {
     const size_t start = current;
 

@@ -29,6 +29,8 @@ struct Token
 
     const std::string string() const;
 
+    virtual bool eof() const;
+
     virtual void resolveTypes(const TypeResolver* visitor) const;
 
     virtual Engine::ValueObject* transform(TokenTransformer* visitor) const;
@@ -38,6 +40,13 @@ struct Token
 private:
     const SharedType staticType;
 
+};
+
+struct Eof : public Token
+{
+    Eof(const SourceLocation location);
+
+    bool eof() const override;
 };
 
 struct OpenParenthesis : public Token

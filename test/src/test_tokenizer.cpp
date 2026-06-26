@@ -30,21 +30,17 @@ void TestTokenizer::checkList(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean()->value);
 
-    const Parser::TokenList* list = (new Parser::Tokenizer(new SourceProvider(info->getSource())))->tokenize();
-
-    Parser::TokenListNode* current = list->head->next;
+    Parser::TokenIterator* tokens = (new Parser::Tokenizer(new SourceProvider(info->getSource())))->tokenize();
 
     for (const TOMLValue* token : info->getValue("tokens")->asArray()->values)
     {
-        if (current->token->string() != token->asString()->str)
+        if (tokens->take()->string() != token->asString()->str)
         {
             break;
         }
-
-        current = current->next;
     }
 
-    assert("Tokenized list matches expected list", current->end);
+    assert("Tokenized list matches expected list", tokens->peek()->eof());
 
     endTest(info->getValue("name")->asString()->str);
 }

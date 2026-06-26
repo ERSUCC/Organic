@@ -56,17 +56,16 @@ private:
     Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
 
     const Program* parse();
-
-    TokenListNode* parseInclude(TokenListNode* start);
-    TokenListNode* parseInstruction(TokenListNode* start);
-    TokenListNode* parseDefine(TokenListNode* start);
-    TokenListNode* parseAssign(TokenListNode* start);
-    TokenListNode* parseCall(TokenListNode* start);
-    TokenListNode* parseArgument(TokenListNode* start);
-    TokenListNode* parseExpression(TokenListNode* start);
-    TokenListNode* parseList(TokenListNode* start);
-    TokenListNode* parseTerms(TokenListNode* start);
-    TokenListNode* parseTerm(TokenListNode* start);
+    const Program* parseInclude();
+    const Token* parseInstruction();
+    const FunctionDef* parseDefine();
+    const VariableDef* parseAssign();
+    const Call* parseCall();
+    const Argument* parseArgument();
+    const Token* parseExpression();
+    const List* parseList();
+    const Token* parseTerms();
+    const Token* parseTerm();
 
     const SourceProvider* source;
 
@@ -74,7 +73,7 @@ private:
 
     std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths;
 
-    TokenList* tokens;
+    TokenIterator* tokens;
 
 };
 
