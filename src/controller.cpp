@@ -8,6 +8,12 @@ ValueByte::ValueByte(const unsigned char value) :
 ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
     value1(value1), value2(value2) {}
 
+ValueCombination::~ValueCombination()
+{
+    delete value1;
+    delete value2;
+}
+
 double ValueCombination::syncLength() const
 {
     return fmin(value1->syncLength(), value2->syncLength());
@@ -139,6 +145,11 @@ double ValueGreaterEqual::getValueInternal()
 All::All(ValueObject* values) :
     values(values) {}
 
+All::~All()
+{
+    delete values;
+}
+
 double All::getValue()
 {
     for (ValueObject* object : values->getLeafAs<List>()->objects)
@@ -159,6 +170,11 @@ void All::init()
 
 Any::Any(ValueObject* values) :
     values(values) {}
+
+Any::~Any()
+{
+    delete values;
+}
 
 double Any::getValue()
 {
@@ -181,6 +197,11 @@ void Any::init()
 None::None(ValueObject* values) :
     values(values) {}
 
+None::~None()
+{
+    delete values;
+}
+
 double None::getValue()
 {
     for (ValueObject* object : values->getLeafAs<List>()->objects)
@@ -201,6 +222,11 @@ void None::init()
 
 Min::Min(ValueObject* values) :
     values(values) {}
+
+Min::~Min()
+{
+    delete values;
+}
 
 double Min::getValue()
 {
@@ -234,6 +260,11 @@ void Min::init()
 Max::Max(ValueObject* values) :
     values(values) {}
 
+Max::~Max()
+{
+    delete values;
+}
+
 double Max::getValue()
 {
     const std::vector<ValueObject*>& objects = values->getLeafAs<List>()->objects;
@@ -265,6 +296,13 @@ void Max::init()
 
 Round::Round(ValueObject* value, ValueObject* step, ValueObject* direction) :
     value(value), step(step), direction(direction) {}
+
+Round::~Round()
+{
+    delete value;
+    delete step;
+    delete direction;
+}
 
 double Round::syncLength() const
 {
@@ -318,6 +356,11 @@ void Round::init()
 Absolute::Absolute(ValueObject* value) :
     value(value) {}
 
+Absolute::~Absolute()
+{
+    delete value;
+}
+
 double Absolute::syncLength() const
 {
     return value->syncLength();
@@ -342,6 +385,12 @@ void Absolute::init()
 
 Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
     controllers(controllers), order(order) {}
+
+Sequence::~Sequence()
+{
+    delete controllers;
+    delete order;
+}
 
 double Sequence::syncLength() const
 {
@@ -522,6 +571,12 @@ void Sequence::reinit()
 Repeat::Repeat(ValueObject* value, ValueObject* repeats) :
     value(value), repeats(repeats) {}
 
+Repeat::~Repeat()
+{
+    delete value;
+    delete repeats;
+}
+
 double Repeat::syncLength() const
 {
     if (repeats->getValue() == 0)
@@ -578,6 +633,12 @@ double Value::getValue()
 Hold::Hold(ValueObject* value, ValueObject* length) :
     value(value), length(length) {}
 
+Hold::~Hold()
+{
+    delete value;
+    delete length;
+}
+
 double Hold::syncLength() const
 {
     return length->getValue();
@@ -601,6 +662,13 @@ void Hold::init()
 
 Sweep::Sweep(ValueObject* from, ValueObject* to, ValueObject* length) :
     from(from), to(to), length(length) {}
+
+Sweep::~Sweep()
+{
+    delete from;
+    delete to;
+    delete length;
+}
 
 double Sweep::syncLength() const
 {
@@ -634,6 +702,13 @@ void Sweep::init()
 LFO::LFO(ValueObject* from, ValueObject* to, ValueObject* length) :
     from(from), to(to), length(length) {}
 
+LFO::~LFO()
+{
+    delete from;
+    delete to;
+    delete length;
+}
+
 double LFO::syncLength() const
 {
     return length->getValue();
@@ -663,6 +738,14 @@ void LFO::init()
 
 Random::Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type) :
     from(from), to(to), length(length), type(type) {}
+
+Random::~Random()
+{
+    delete from;
+    delete to;
+    delete length;
+    delete type;
+}
 
 double Random::syncLength() const
 {
@@ -716,6 +799,13 @@ void Random::init()
 Limit::Limit(ValueObject* value, ValueObject* min, ValueObject* max) :
     value(value), min(min), max(max) {}
 
+Limit::~Limit()
+{
+    delete value;
+    delete min;
+    delete max;
+}
+
 double Limit::syncLength() const
 {
     return value->syncLength();
@@ -755,6 +845,12 @@ void Limit::init()
 Trigger::Trigger(ValueObject* condition, ValueObject* value) :
     condition(condition), value(value) {}
 
+Trigger::~Trigger()
+{
+    delete condition;
+    delete value;
+}
+
 double Trigger::syncLength() const
 {
     return value->syncLength();
@@ -789,6 +885,13 @@ void Trigger::init()
 
 If::If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue) :
     condition(condition), trueValue(trueValue), falseValue(falseValue) {}
+
+If::~If()
+{
+    delete condition;
+    delete trueValue;
+    delete falseValue;
+}
 
 double If::getValue()
 {

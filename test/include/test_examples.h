@@ -4,6 +4,7 @@
 #include "parse.h"
 #include "path.h"
 #include "resolve.h"
+#include "source.h"
 #include "test.h"
 #include "test_utils.h"
 #include "token.h"
@@ -11,11 +12,14 @@
 
 struct TestExamples : public Test
 {
-    TestExamples(TestTracker* tracker);
+    static void run(TestTracker* tracker);
 
+protected:
     void test() override;
 
 private:
+    TestExamples(TestTracker* tracker);
+
     void expectSuccess(const Path* path);
 
 };

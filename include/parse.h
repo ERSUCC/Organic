@@ -13,6 +13,7 @@
 #include "path.h"
 #include "source.h"
 #include "token.h"
+#include "token_decls.h"
 #include "tokenize.h"
 #include "utils.h"
 
@@ -49,11 +50,11 @@ private:
 
 struct Parser
 {
-    static const Program* parseSource(const Path* path);
-    static const Program* parseSource(const std::string& source);
+    static const Program* parseSource(const SourceProvider* source);
 
 private:
     Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
+    ~Parser();
 
     const Program* parse();
     const Program* parseInclude();

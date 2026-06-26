@@ -57,6 +57,7 @@ private:
 struct Oscillator : public SingleAudioSource
 {
     Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
+    ~Oscillator();
 
 protected:
     void init() override;
@@ -103,6 +104,7 @@ struct Triangle : public Oscillator
 struct CustomOscillator : public Oscillator
 {
     CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, ValueObject* waveform);
+    ~CustomOscillator();
 
     double getValue() override;
 
@@ -124,13 +126,14 @@ protected:
     void prepareForEffects() override;
 
 private:
-    std::uniform_real_distribution<> udist = std::uniform_real_distribution<>(-1, 1);
+    std::uniform_real_distribution<double> udist = std::uniform_real_distribution<double>(-1, 1);
 
 };
 
 struct Sample : public SingleAudioSource
 {
     Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource);
+    ~Sample();
 
 protected:
     void init() override;
@@ -158,6 +161,7 @@ private:
 struct Grain : public Sync
 {
     Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const size_t length);
+    ~Grain();
 
     void apply(double* buffer);
 
@@ -200,6 +204,7 @@ struct GrainNode
 struct GrainList : public Sync
 {
     GrainList();
+    ~GrainList();
 
     void append(Grain* grain);
 
@@ -220,6 +225,7 @@ private:
 struct Granulate : public SingleAudioSource
 {
     Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, ValueObject* shape);
+    ~Granulate();
 
 protected:
     void init() override;
@@ -249,12 +255,12 @@ protected:
     void init() override;
 
 private:
+    double* effectBuffer;
+
     ValueObject* volume;
     ValueObject* pan;
     ValueObject* effects;
     ValueObject* sources;
-
-    double* effectBuffer;
 
 };
 

@@ -1,5 +1,16 @@
 #include "../include/flags.h"
 
+ProgramOptions FlagParser::parseFlags(char** flags, const size_t length)
+{
+    FlagParser* parser = new FlagParser(flags, length);
+
+    ProgramOptions options = parser->getOptions();
+
+    delete parser;
+
+    return options;
+}
+
 FlagParser::FlagParser(char** flags, const size_t length)
 {
     for (size_t i = 0; i < length; i++)

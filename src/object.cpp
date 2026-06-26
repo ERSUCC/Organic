@@ -38,6 +38,8 @@ double Sync::syncLength() const
 void Sync::init() {}
 void Sync::reinit() {}
 
+ValueObject::~ValueObject() {}
+
 double ValueObject::getValue()
 {
     return 0;
@@ -51,6 +53,14 @@ ValueObject* ValueObject::getLeaf()
 List::List(const std::vector<ValueObject*> objects) :
     objects(objects) {}
 
+List::~List()
+{
+    for (ValueObject* object : objects)
+    {
+        delete object;
+    }
+}
+
 void List::init()
 {
     for (ValueObject* object : objects)
@@ -61,6 +71,11 @@ void List::init()
 
 Variable::Variable(ValueObject* value) :
     value(value) {}
+
+Variable::~Variable()
+{
+    delete value;
+}
 
 double Variable::syncLength() const
 {
@@ -89,6 +104,16 @@ void Variable::init()
 
 Lambda::Lambda(const std::vector<Variable*> inputs, ValueObject* value) :
     inputs(inputs), value(value) {}
+
+Lambda::~Lambda()
+{
+    for (Variable* input : inputs)
+    {
+        delete input;
+    }
+
+    delete value;
+}
 
 double Lambda::getValue()
 {

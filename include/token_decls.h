@@ -1,8 +1,13 @@
 #pragma once
 
+#include <memory>
+
 namespace Parser {
 
 struct Token;
+
+typedef std::shared_ptr<const Token> SharedToken;
+
 struct Value;
 struct Constant;
 struct VariableDef;

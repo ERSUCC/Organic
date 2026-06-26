@@ -11,6 +11,7 @@
 #include "path.h"
 #include "program.h"
 #include "resolve.h"
+#include "token_decls.h"
 #include "transform.h"
 #include "types.h"
 #include "utils.h"
@@ -24,6 +25,8 @@ struct TypeResolver;
 struct Token
 {
     Token(const SourceLocation location, const Type* type = new NoneType());
+
+    virtual ~Token();
 
     virtual const SharedType type() const;
 
@@ -157,6 +160,7 @@ struct Identifier : public Token
 struct EmptyLambda : public Token
 {
     EmptyLambda(const SourceLocation location, const Token* value);
+    ~EmptyLambda();
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
@@ -191,6 +195,7 @@ struct String : public Token
 struct VariableDef : public Identifier
 {
     VariableDef(const SourceLocation location, const Token* value);
+    ~VariableDef();
 
     void resolveTypes(const TypeResolver* visitor) const override;
 
@@ -212,13 +217,13 @@ struct VariableRef : public Identifier
 
 struct InputDef : public Identifier
 {
-    InputDef(const SourceLocation location, const Token* defaultValue);
+    InputDef(const SourceLocation location, const SharedToken defaultValue);
 
     const SharedType type() const override;
 
     void resolveTypes(const TypeResolver* visitor) const override;
 
-    const Token* defaultValue;
+    const SharedToken defaultValue;
 };
 
 struct InputRef : public Identifier
@@ -235,6 +240,7 @@ struct InputRef : public Identifier
 struct FunctionDef : public Identifier
 {
     FunctionDef(const SourceLocation location, const std::vector<const InputDef*>& inputs, const std::vector<const Token*>& instructions);
+    ~FunctionDef();
 
     const SharedType type() const override;
     const SharedType returnType() const;
@@ -258,22 +264,21 @@ struct FunctionRef : public Identifier
 
 struct Argument : public Token
 {
-    Argument(const SourceLocation location, const std::string name, const Token* value);
+    Argument(const SourceLocation location, const std::string name, const SharedToken value);
 
     const std::string name;
 
-    const Token* value;
+    const SharedToken value;
 };
 
 struct ArgumentList : public Token
 {
     ArgumentList(const SourceLocation location, const std::vector<const Argument*>& arguments, const std::string name);
+    ~ArgumentList();
 
     const Argument* findArgument(const std::string name);
 
-    const Token* get(const std::string name);
-
-    void addDefault(const std::string name, const Token* value);
+    void addDefault(const std::string name, const SharedToken value);
 
     void check() const;
 
@@ -287,6 +292,7 @@ struct ArgumentList : public Token
 struct List : public Token
 {
     List(const SourceLocation location, const std::vector<const Token*> values);
+    ~List();
 
     const SharedType type() const override;
 
@@ -300,6 +306,7 @@ struct List : public Token
 struct ParenthesizedExpression : public Token
 {
     ParenthesizedExpression(const SourceLocation location, const Token* value);
+    ~ParenthesizedExpression();
 
     const SharedType type() const override;
 
@@ -313,6 +320,7 @@ struct ParenthesizedExpression : public Token
 struct Call : public Token
 {
     Call(const SourceLocation location, ArgumentList* arguments, const Type* type = new NoneType());
+    ~Call();
 
     ArgumentList* arguments;
 };
@@ -632,6 +640,7 @@ struct Reverb : public Effect
 struct CallUser : public Call
 {
     CallUser(const SourceLocation location, ArgumentList* arguments, const FunctionRef* function);
+    ~CallUser();
 
     const SharedType type() const override;
 
@@ -726,6 +735,7 @@ struct GreaterEqualAlias : public CallAlias
 struct Program : public Token
 {
     Program(const SourceLocation location, const std::vector<const Token*> instructions);
+    ~Program();
 
     void resolveTypes(const TypeResolver* visitor) const override;
 

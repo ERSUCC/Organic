@@ -12,11 +12,12 @@
 
 struct Test
 {
+
+protected:
     Test(TestTracker* tracker);
 
     virtual void test() = 0;
 
-protected:
     const Path* sourcePath(const std::string file) const;
     const Path* testPath(const std::string file) const;
 

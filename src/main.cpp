@@ -26,7 +26,12 @@ int main(int argc, char** argv)
             throw OrganicArgumentException("Specified program is not a file.");
         }
 
-        (new Organic(path, (new FlagParser(argv + 2, argc - 2))->getOptions()))->start();
+        Organic* organic = new Organic(path, FlagParser::parseFlags(argv + 2, argc - 2));
+
+        organic->start();
+
+        delete organic;
+        delete path;
 
         return 0;
     }

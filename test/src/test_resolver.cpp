@@ -1,7 +1,13 @@
 #include "../include/test_resolver.h"
 
-TestResolver::TestResolver(TestTracker* tracker) :
-    Test(tracker) {}
+void TestResolver::run(TestTracker* tracker)
+{
+    TestResolver* test = new TestResolver(tracker);
+
+    test->test();
+
+    delete test;
+}
 
 void TestResolver::test()
 {
@@ -26,13 +32,23 @@ void TestResolver::test()
     }
 }
 
+TestResolver::TestResolver(TestTracker* tracker) :
+    Test(tracker) {}
+
 void TestResolver::expectSuccess(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean()->value);
 
     try
     {
-        Parser::Parser::parseSource(info->getSource())->resolveTypes(new Parser::TypeResolver());
+        const SourceProvider* source = new SourceProvider(info->getSource());
+
+        const Parser::Program* program = Parser::Parser::parseSource(source);
+
+        program->resolveTypes(new Parser::TypeResolver());
+
+        delete program;
+        delete source;
     }
 
     catch (const OrganicException& e)
@@ -49,7 +65,14 @@ void TestResolver::expectError(const OTest* info)
 
     try
     {
-        Parser::Parser::parseSource(info->getSource())->resolveTypes(new Parser::TypeResolver());
+        const SourceProvider* source = new SourceProvider(info->getSource());
+
+        const Parser::Program* program = Parser::Parser::parseSource(source);
+
+        program->resolveTypes(new Parser::TypeResolver());
+
+        delete program;
+        delete source;
 
         fail("Type resolver did not throw any errors.");
     }

@@ -18,6 +18,14 @@ std::string OrganicTokenException::getMessage(const Token* token, const std::str
 TokenIterator::TokenIterator(const std::vector<const Token*>& tokens) :
     tokens(tokens) {}
 
+TokenIterator::~TokenIterator()
+{
+    while (current < tokens.size())
+    {
+        delete tokens[current++];
+    }
+}
+
 const Token* TokenIterator::peek(const size_t offset) const
 {
     if (current + offset < tokens.size())
@@ -28,30 +36,33 @@ const Token* TokenIterator::peek(const size_t offset) const
     return tokens.back();
 }
 
-const Token* TokenIterator::take()
-{
-    if (current < tokens.size())
-    {
-        return tokens[current++];
-    }
-
-    return tokens[current];
-}
-
 TokenIterator* TokenIterator::drop(const size_t count)
 {
     for (size_t i = 0; i < count && current < tokens.size() - 1; i++)
     {
-        current++;
+        delete tokens[current];
+
+        tokens[current++] = nullptr;
     }
 
     return this;
 }
 
+TokenIterator* Tokenizer::tokenize(const SourceProvider* source)
+{
+    Tokenizer* tokenizer = new Tokenizer(source);
+
+    TokenIterator* tokens = tokenizer->tokenizeProgram();
+
+    delete tokenizer;
+
+    return tokens;
+}
+
 Tokenizer::Tokenizer(const SourceProvider* source) :
     source(source), utils(Utils::get()) {}
 
-TokenIterator* Tokenizer::tokenize()
+TokenIterator* Tokenizer::tokenizeProgram()
 {
     std::vector<const Token*> tokens;
 

@@ -1,7 +1,13 @@
 #include "../include/test_parser.h"
 
-TestParser::TestParser(TestTracker* tracker) :
-    Test(tracker) {}
+void TestParser::run(TestTracker* tracker)
+{
+    TestParser* test = new TestParser(tracker);
+
+    test->test();
+
+    delete test;
+}
 
 void TestParser::test()
 {
@@ -26,13 +32,20 @@ void TestParser::test()
     }
 }
 
+TestParser::TestParser(TestTracker* tracker) :
+    Test(tracker) {}
+
 void TestParser::expectSuccess(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean()->value);
 
     try
     {
-        Parser::Parser::parseSource(info->getSource());
+        const SourceProvider* source = new SourceProvider(info->getSource());
+
+        delete Parser::Parser::parseSource(source);
+
+        delete source;
     }
 
     catch (const OrganicException& e)
@@ -49,7 +62,11 @@ void TestParser::expectError(const OTest* info)
 
     try
     {
-        Parser::Parser::parseSource(info->getSource());
+        const SourceProvider* source = new SourceProvider(info->getSource());
+
+        delete Parser::Parser::parseSource(source);
+
+        delete source;
 
         fail("Parser did not throw any errors.");
     }

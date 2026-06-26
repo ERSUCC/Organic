@@ -1,7 +1,13 @@
 #include "../include/test_tokenizer.h"
 
-TestTokenizer::TestTokenizer(TestTracker* tracker) :
-    Test(tracker) {}
+void TestTokenizer::run(TestTracker* tracker)
+{
+    TestTokenizer* test = new TestTokenizer(tracker);
+
+    test->test();
+
+    delete test;
+}
 
 void TestTokenizer::test()
 {
@@ -26,21 +32,28 @@ void TestTokenizer::test()
     }
 }
 
+TestTokenizer::TestTokenizer(TestTracker* tracker) :
+    Test(tracker) {}
+
 void TestTokenizer::checkList(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean()->value);
 
-    Parser::TokenIterator* tokens = (new Parser::Tokenizer(new SourceProvider(info->getSource())))->tokenize();
+    Parser::TokenIterator* tokens = Parser::Tokenizer::tokenize(new SourceProvider(info->getSource()));
 
     for (const TOMLValue* token : info->getValue("tokens")->asArray()->values)
     {
-        if (tokens->take()->string() != token->asString()->str)
+        if (tokens->peek()->string() != token->asString()->str)
         {
             break;
         }
+
+        tokens->drop();
     }
 
     assert("Tokenized list matches expected list", tokens->peek()->eof());
+
+    delete tokens;
 
     endTest(info->getValue("name")->asString()->str);
 }
@@ -51,7 +64,7 @@ void TestTokenizer::expectError(const OTest* info)
 
     try
     {
-        (new Parser::Tokenizer(new SourceProvider(info->getSource())))->tokenize();
+        delete Parser::Tokenizer::tokenize(new SourceProvider(info->getSource()));
 
         fail("Tokenizer did not throw any errors.");
     }

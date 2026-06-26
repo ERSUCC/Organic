@@ -213,42 +213,44 @@ bool ParserContext::checkRecursive(const Identifier* token) const
     return name == token->string() || (parent && parent->checkRecursive(token));
 }
 
-const Program* Parser::parseSource(const Path* path)
+const Program* Parser::parseSource(const SourceProvider* source)
 {
-    const FileProvider* source = FileProvider::create(path);
+    std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { source->path() };
 
-    if (!source)
-    {
-        throw OrganicFileException("Could not read \"" + path->string() + "\".");
-    }
+    Parser* parser = new Parser(source, new ParserContext(nullptr, "", {}), includedPaths);
 
-    std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { path };
+    const Program* program = parser->parse();
 
-    return (new Parser(source, new ParserContext(nullptr, "", {}), includedPaths))->parse();
-}
+    delete parser;
 
-const Program* Parser::parseSource(const std::string& source)
-{
-    std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths;
-
-    return (new Parser(new SourceProvider(source), new ParserContext(nullptr, "", {}), includedPaths))->parse();
+    return program;
 }
 
 Parser::Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
     source(source), context(context), includedPaths(includedPaths) {}
 
+Parser::~Parser()
+{
+    delete context;
+    delete tokens;
+}
+
 const Program* Parser::parse()
 {
-    tokens = (new Tokenizer(source))->tokenize();
+    tokens = Tokenizer::tokenize(source);
 
     std::vector<const Token*> instructions;
 
     while (tokens->peek()->string() == "include" && tokens->peek<OpenParenthesis>(1))
     {
-        for (const Token* instruction : parseInclude()->instructions)
+        const Program* program = parseInclude();
+
+        for (const Token* instruction : program->instructions)
         {
             instructions.push_back(instruction);
         }
+
+        delete program;
     }
 
     while (!tokens->peek()->eof())
@@ -270,6 +272,8 @@ const Program* Parser::parseInclude()
     tokens->expect<CloseParenthesis>("\")\"");
 
     const std::filesystem::path file = Path::formatPath(str->str);
+
+    delete str;
 
     if (file.empty())
     {
@@ -295,12 +299,19 @@ const Program* Parser::parseInclude()
     {
         Utils::includeWarning("Source file \"" + includePath->string() + "\" is the current file, this include will be ignored.", location);
 
+        delete sourcePath;
+        delete includePath;
+
         return new Program(location, {});
     }
+
+    delete sourcePath;
 
     if (includedPaths.count(includePath))
     {
         Utils::includeWarning("Source file \"" + includePath->string() + "\" has already been included, this include will be ignored.", location);
+
+        delete includePath;
 
         return new Program(location, {});
     }
@@ -311,9 +322,15 @@ const Program* Parser::parseInclude()
 
     ParserContext* includeContext = new ParserContext(nullptr, "", {});
 
-    const Program* program = (new Parser(includeSource, includeContext, includedPaths))->parse();
+    Parser* parser = new Parser(includeSource, includeContext, includedPaths);
+
+    const Program* program = parser->parse();
 
     context->merge(includeContext);
+
+    delete parser;
+    delete includePath;
+    delete includeContext;
 
     return program;
 }
@@ -400,7 +417,9 @@ const FunctionDef* Parser::parseDefine()
 
             tokens->expect<Colon>("\":\" after input name");
 
-            inputs.push_back(new InputDef(input->location, parseExpression()));
+            inputs.push_back(new InputDef(input->location, SharedToken(parseExpression())));
+
+            delete input;
         } while (tokens->peek<Comma>());
 
         tokens->expect<CloseParenthesis>("\",\" or \")\"");
@@ -431,9 +450,17 @@ const FunctionDef* Parser::parseDefine()
 
     context->checkUsage();
 
+    ParserContext* inner = context;
+
     context = context->parent;
 
-    return context->addFunction(name, inputs, instructions);
+    delete inner;
+
+    const FunctionDef* function = context->addFunction(name, inputs, instructions);
+
+    delete name;
+
+    return function;
 }
 
 const VariableDef* Parser::parseAssign()
@@ -459,7 +486,11 @@ const VariableDef* Parser::parseAssign()
 
         tokens->drop();
 
-        return context->addVariable(name, parseExpression());
+        const VariableDef* variable = context->addVariable(name, parseExpression());
+
+        delete name;
+
+        return variable;
     }
 
     catch (const OrganicTokenException& e)
@@ -528,10 +559,18 @@ const Call* Parser::parseCall()
 
     if (libraryFunctions.count(name->string()))
     {
-        return libraryFunctions[name->string()](name->location, argumentList);
+        const Call* call = libraryFunctions[name->string()](name->location, argumentList);
+
+        delete name;
+
+        return call;
     }
 
-    return new CallUser(name->location, argumentList, context->findFunction(name));
+    const CallUser* call = new CallUser(name->location, argumentList, context->findFunction(name));
+
+    delete name;
+
+    return call;
 }
 
 const Argument* Parser::parseArgument()
@@ -542,7 +581,11 @@ const Argument* Parser::parseArgument()
 
     try
     {
-        return new Argument(name->location, name->string(), parseExpression());
+        const Argument* argument = new Argument(name->location, name->string(), SharedToken(parseExpression()));
+
+        delete name;
+
+        return argument;
     }
 
     catch (const OrganicTokenException& e)
@@ -650,6 +693,8 @@ const Token* Parser::parseTerms()
 
             comparison = true;
 
+            delete terms[i];
+
             terms[i - 1] = new EqualAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
             terms.erase(terms.begin() + i, terms.begin() + i + 2);
@@ -663,6 +708,8 @@ const Token* Parser::parseTerms()
             }
 
             comparison = true;
+
+            delete terms[i];
 
             terms[i - 1] = new LessAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
@@ -678,6 +725,8 @@ const Token* Parser::parseTerms()
 
             comparison = true;
 
+            delete terms[i];
+
             terms[i - 1] = new GreaterAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
             terms.erase(terms.begin() + i, terms.begin() + i + 2);
@@ -692,6 +741,8 @@ const Token* Parser::parseTerms()
 
             comparison = true;
 
+            delete terms[i];
+
             terms[i - 1] = new LessEqualAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
             terms.erase(terms.begin() + i, terms.begin() + i + 2);
@@ -705,6 +756,8 @@ const Token* Parser::parseTerms()
             }
 
             comparison = true;
+
+            delete terms[i];
 
             terms[i - 1] = new GreaterEqualAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
@@ -723,6 +776,8 @@ const Token* Parser::parseTerms()
     {
         if (dynamic_cast<const Power*>(terms[i]))
         {
+            delete terms[i];
+
             terms[i - 1] = new PowerAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
             terms.erase(terms.begin() + i, terms.begin() + i + 2);
@@ -740,6 +795,8 @@ const Token* Parser::parseTerms()
     {
         if (dynamic_cast<const Multiply*>(terms[i]))
         {
+            delete terms[i];
+
             terms[i - 1] = new MultiplyAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
             terms.erase(terms.begin() + i, terms.begin() + i + 2);
@@ -747,6 +804,8 @@ const Token* Parser::parseTerms()
 
         else if (dynamic_cast<const Divide*>(terms[i]))
         {
+            delete terms[i];
+
             terms[i - 1] = new DivideAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
             terms.erase(terms.begin() + i, terms.begin() + i + 2);
@@ -764,6 +823,8 @@ const Token* Parser::parseTerms()
     {
         if (dynamic_cast<const Add*>(terms[i]))
         {
+            delete terms[i];
+
             terms[i - 1] = new AddAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
             terms.erase(terms.begin() + i, terms.begin() + i + 2);
@@ -771,6 +832,8 @@ const Token* Parser::parseTerms()
 
         else if (dynamic_cast<const Subtract*>(terms[i]))
         {
+            delete terms[i];
+
             terms[i - 1] = new SubtractAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
 
             terms.erase(terms.begin() + i, terms.begin() + i + 2);

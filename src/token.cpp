@@ -5,6 +5,8 @@ using namespace Parser;
 Token::Token(const SourceLocation location, const Type* type) :
     location(location), staticType(type) {}
 
+Token::~Token() {}
+
 const SharedType Token::type() const
 {
     return staticType;
@@ -101,6 +103,11 @@ Identifier::Identifier(const SourceLocation location) :
 EmptyLambda::EmptyLambda(const SourceLocation location, const Token* value) :
     Token(location), value(value) {}
 
+EmptyLambda::~EmptyLambda()
+{
+    delete value;
+}
+
 Engine::ValueObject* EmptyLambda::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
@@ -128,6 +135,11 @@ String::String(const SourceLocation location, const std::string str) :
 VariableDef::VariableDef(const SourceLocation location, const Token* value) :
     Identifier(location), value(value) {}
 
+VariableDef::~VariableDef()
+{
+    delete value;
+}
+
 void VariableDef::resolveTypes(const TypeResolver* visitor) const
 {
     visitor->resolveTypes(this);
@@ -151,7 +163,7 @@ Engine::ValueObject* VariableRef::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-InputDef::InputDef(const SourceLocation location, const Token* defaultValue) :
+InputDef::InputDef(const SourceLocation location, const SharedToken defaultValue) :
     Identifier(location), defaultValue(defaultValue) {}
 
 const SharedType InputDef::type() const
@@ -179,6 +191,19 @@ Engine::ValueObject* InputRef::transform(TokenTransformer* visitor) const
 
 FunctionDef::FunctionDef(const SourceLocation location, const std::vector<const InputDef*>& inputs, const std::vector<const Token*>& instructions) :
     Identifier(location), inputs(inputs), instructions(instructions) {}
+
+FunctionDef::~FunctionDef()
+{
+    for (const InputDef* input : inputs)
+    {
+        delete input;
+    }
+
+    for (const Token* instruction : instructions)
+    {
+        delete instruction;
+    }
+}
 
 const SharedType FunctionDef::type() const
 {
@@ -215,11 +240,19 @@ Engine::ValueObject* FunctionRef::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-Argument::Argument(const SourceLocation location, const std::string name, const Token* value) :
+Argument::Argument(const SourceLocation location, const std::string name, const SharedToken value) :
     Token(location), name(name), value(value) {}
 
 ArgumentList::ArgumentList(const SourceLocation location, const std::vector<const Argument*>& arguments, const std::string name) :
     Token(location), arguments(arguments), name(name) {}
+
+ArgumentList::~ArgumentList()
+{
+    for (const Argument* argument : arguments)
+    {
+        delete argument;
+    }
+}
 
 const Argument* ArgumentList::findArgument(const std::string name)
 {
@@ -236,17 +269,7 @@ const Argument* ArgumentList::findArgument(const std::string name)
     return nullptr;
 }
 
-const Token* ArgumentList::get(const std::string name)
-{
-    if (const Argument* argument = findArgument(name))
-    {
-        return argument->value;
-    }
-
-    return nullptr;
-}
-
-void ArgumentList::addDefault(const std::string name, const Token* value)
+void ArgumentList::addDefault(const std::string name, const SharedToken value)
 {
     const Argument* argument = new Argument(location, name, value);
 
@@ -269,6 +292,14 @@ void ArgumentList::check() const
 List::List(const SourceLocation location, const std::vector<const Token*> values) :
     Token(location), values(values) {}
 
+List::~List()
+{
+    for (const Token* value : values)
+    {
+        delete value;
+    }
+}
+
 const SharedType List::type() const
 {
     return SharedType(new ListType(values[0]->type()));
@@ -287,6 +318,11 @@ Engine::ValueObject* List::transform(TokenTransformer* visitor) const
 ParenthesizedExpression::ParenthesizedExpression(const SourceLocation location, const Token* value) :
     Token(location), value(value) {}
 
+ParenthesizedExpression::~ParenthesizedExpression()
+{
+    delete value;
+}
+
 const SharedType ParenthesizedExpression::type() const
 {
     return value->type();
@@ -304,6 +340,11 @@ Engine::ValueObject* ParenthesizedExpression::transform(TokenTransformer* visito
 
 Call::Call(const SourceLocation location, ArgumentList* arguments, const Type* type) :
     Token(location, type), arguments(arguments) {}
+
+Call::~Call()
+{
+    delete arguments;
+}
 
 Time::Time(const SourceLocation location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
@@ -746,6 +787,11 @@ Engine::ValueObject* Reverb::transform(TokenTransformer* visitor) const
 CallUser::CallUser(const SourceLocation location, ArgumentList* arguments, const FunctionRef* function) :
     Call(location, arguments), function(function) {}
 
+CallUser::~CallUser()
+{
+    delete function;
+}
+
 const SharedType CallUser::type() const
 {
     return function->type();
@@ -762,7 +808,7 @@ Engine::ValueObject* CallUser::transform(TokenTransformer* visitor) const
 }
 
 CallAlias::CallAlias(const SourceLocation location, const Token* a, const Token* b, const std::string op, const Type* type) :
-    Call(location, new ArgumentList(location, { new Argument(a->location, "a", a), new Argument(b->location, "b", b) }, op), type), op(op) {}
+    Call(location, new ArgumentList(location, { new Argument(a->location, "a", SharedToken(a)), new Argument(b->location, "b", SharedToken(b)) }, op), type), op(op) {}
 
 void CallAlias::resolveTypes(const TypeResolver* visitor) const
 {
@@ -851,6 +897,14 @@ Engine::ValueObject* GreaterEqualAlias::transform(TokenTransformer* visitor) con
 
 Program::Program(const SourceLocation location, const std::vector<const Token*> instructions) :
     Token(location), instructions(instructions) {}
+
+Program::~Program()
+{
+    for (const Token* instruction : instructions)
+    {
+        delete instruction;
+    }
+}
 
 void Program::resolveTypes(const TypeResolver* visitor) const
 {

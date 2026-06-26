@@ -29,6 +29,7 @@ private:
 struct TokenIterator
 {
     TokenIterator(const std::vector<const Token*>& tokens);
+    ~TokenIterator();
 
     const Token* peek(const size_t offset = 0) const;
 
@@ -46,7 +47,7 @@ struct TokenIterator
     {
         if (const T* token = dynamic_cast<const T*>(tokens[current]))
         {
-            current++;
+            tokens[current++] = nullptr;
 
             return token;
         }
@@ -61,22 +62,26 @@ struct TokenIterator
             throw OrganicTokenException(tokens[current], expected);
         }
 
-        current++;
+        delete tokens[current];
+
+        tokens[current++] = nullptr;
 
         return this;
     }
 
-    template <typename T> const T* take()
+    template <typename T = Token> const T* take()
     {
-        if (current < tokens.size())
+        if (current < tokens.size() - 1)
         {
-            return dynamic_cast<const T*>(tokens[current++]);
+            const T* token = dynamic_cast<const T*>(tokens[current]);
+
+            tokens[current++] = nullptr;
+
+            return token;
         }
 
         return dynamic_cast<const T*>(tokens[current]);
     }
-
-    const Token* take();
 
     TokenIterator* drop(const size_t count = 1);
 
@@ -89,11 +94,13 @@ private:
 
 struct Tokenizer
 {
-    Tokenizer(const SourceProvider* source);
-
-    TokenIterator* tokenize();
+    static TokenIterator* tokenize(const SourceProvider* source);
 
 private:
+    Tokenizer(const SourceProvider* source);
+
+    TokenIterator* tokenizeProgram();
+
     const Token* tokenizeString();
     const Token* tokenizeNumber();
     const Token* tokenizeIdentifier();

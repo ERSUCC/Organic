@@ -15,11 +15,25 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
         Utils::printInfo();
     }
 
-    const Parser::Program* program = Parser::Parser::parseSource(path);
+    const FileProvider* source = FileProvider::create(path);
+
+    if (!source)
+    {
+        throw OrganicFileException("Could not read \"" + path->string() + "\".");
+    }
+
+    const Parser::Program* program = Parser::Parser::parseSource(source);
 
     program->resolveTypes(new Parser::TypeResolver());
 
     this->program = program->transform(new TokenTransformer(path))->getLeafAs<Engine::Program>();
+
+    delete source;
+}
+
+Organic::~Organic()
+{
+    delete program;
 }
 
 void Organic::start()

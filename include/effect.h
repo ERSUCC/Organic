@@ -36,6 +36,7 @@ private:
 struct Delay : public Effect
 {
     Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
+    ~Delay();
 
     void apply(double* buffer) override;
 
@@ -54,6 +55,7 @@ private:
 struct Comb : public Effect
 {
     Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
+    ~Comb();
 
     void apply(double* buffer) override;
 
@@ -72,6 +74,7 @@ private:
 struct AllPass : public Effect
 {
     AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
+    ~AllPass();
 
     void apply(double* buffer) override;
 
@@ -185,6 +188,7 @@ private:
 struct Reverb : public Effect
 {
     Reverb(ValueObject* mix, ValueObject* length);
+    ~Reverb();
 
     void apply(double* buffer) override;
 

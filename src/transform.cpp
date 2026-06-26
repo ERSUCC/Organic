@@ -199,22 +199,22 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Noise* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 {
-    const Parser::String* str = static_cast<const Parser::String*>(token->arguments->get("file"));
+    const Parser::Argument* file = token->arguments->findArgument("file");
 
-    const Path* path = Path::beside(Path::formatPath(str->str), sourcePath);
+    const Path* path = Path::beside(Path::formatPath(file->value->string()), sourcePath);
 
-    Engine::Resource* resource = new Engine::Resource(path, str->location);
+    Engine::Resource* resource = new Engine::Resource(path, file->location);
 
     return new Engine::Sample(ARG("volume"), ARG("pan"), ARG("effects"), resource);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 {
-    const Parser::String* str = static_cast<const Parser::String*>(token->arguments->get("sample"));
+    const Parser::Argument* file = token->arguments->findArgument("sample");
 
-    const Path* path = Path::beside(Path::formatPath(str->str), sourcePath);
+    const Path* path = Path::beside(Path::formatPath(file->value->string()), sourcePath);
 
-    Engine::Resource* resource = new Engine::Resource(path, str->location);
+    Engine::Resource* resource = new Engine::Resource(path, file->location);
 
     return new Engine::Granulate(ARG("volume"), ARG("pan"), ARG("effects"), resource, ARG("grains"), ARG("length"), ARG("shape"));
 }

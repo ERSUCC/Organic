@@ -23,11 +23,13 @@ struct ProgramOptions
 
 struct FlagParser
 {
+    static ProgramOptions parseFlags(char** flags, const size_t length);
+
+private:
     FlagParser(char** flags, const size_t length);
 
     ProgramOptions getOptions();
 
-private:
     std::string nextOption(const std::string flag);
 
     unsigned int nextInt(const std::string flag);

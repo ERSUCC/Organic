@@ -5,6 +5,14 @@ using namespace Engine;
 Program::Program(const std::vector<AudioSource*>& audioSources) :
     audioSources(audioSources) {}
 
+Program::~Program()
+{
+    for (AudioSource* audioSource : audioSources)
+    {
+        delete audioSource;
+    }
+}
+
 void Program::processAudioSources(double* buffer) const
 {
     memset(buffer, 0, sizeof(double) * utils->channels);

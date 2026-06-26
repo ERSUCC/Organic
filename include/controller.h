@@ -20,6 +20,7 @@ struct ValueByte : public ValueObject
 struct ValueCombination : public ValueObject
 {
     ValueCombination(ValueObject* value1, ValueObject* value2);
+    ~ValueCombination();
 
     double syncLength() const override;
     double getValue() override;
@@ -127,6 +128,7 @@ protected:
 struct All : public ValueObject
 {
     All(ValueObject* values);
+    ~All();
 
     double getValue() override;
 
@@ -141,6 +143,7 @@ private:
 struct Any : public ValueObject
 {
     Any(ValueObject* values);
+    ~Any();
 
     double getValue() override;
 
@@ -155,6 +158,7 @@ private:
 struct None : public ValueObject
 {
     None(ValueObject* values);
+    ~None();
 
     double getValue() override;
 
@@ -169,6 +173,7 @@ private:
 struct Min : public ValueObject
 {
     Min(ValueObject* values);
+    ~Min();
 
     double getValue() override;
 
@@ -183,6 +188,7 @@ private:
 struct Max : public ValueObject
 {
     Max(ValueObject* values);
+    ~Max();
 
     double getValue() override;
 
@@ -197,6 +203,7 @@ private:
 struct Round : public ValueObject
 {
     Round(ValueObject* value, ValueObject* step, ValueObject* direction);
+    ~Round();
 
     double syncLength() const override;
     double getValue() override;
@@ -214,6 +221,7 @@ private:
 struct Absolute : public ValueObject
 {
     Absolute(ValueObject* value);
+    ~Absolute();
 
     double syncLength() const override;
     double getValue() override;
@@ -229,6 +237,7 @@ private:
 struct Sequence : public ValueObject
 {
     Sequence(ValueObject* controllers, ValueObject* order);
+    ~Sequence();
 
     double syncLength() const override;
     double getValue() override;
@@ -256,6 +265,7 @@ private:
 struct Repeat : public ValueObject
 {
     Repeat(ValueObject* value, ValueObject* repeats);
+    ~Repeat();
 
     double syncLength() const override;
     double getValue() override;
@@ -286,6 +296,7 @@ private:
 struct Hold : public ValueObject
 {
     Hold(ValueObject* value, ValueObject* length);
+    ~Hold();
 
     double syncLength() const override;
     double getValue() override;
@@ -302,6 +313,7 @@ private:
 struct Sweep : public ValueObject
 {
     Sweep(ValueObject* from, ValueObject* to, ValueObject* length);
+    ~Sweep();
 
     double syncLength() const override;
     double getValue() override;
@@ -319,6 +331,7 @@ private:
 struct LFO : public ValueObject
 {
     LFO(ValueObject* from, ValueObject* to, ValueObject* length);
+    ~LFO();
 
     double syncLength() const override;
     double getValue() override;
@@ -336,6 +349,7 @@ private:
 struct Random : public ValueObject
 {
     Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type);
+    ~Random();
 
     double syncLength() const override;
     double getValue() override;
@@ -347,7 +361,6 @@ private:
     ValueObject* from;
     ValueObject* to;
     ValueObject* length;
-
     ValueObject* type;
 
     double current;
@@ -360,6 +373,7 @@ private:
 struct Limit : public ValueObject
 {
     Limit(ValueObject* value, ValueObject* min, ValueObject* max);
+    ~Limit();
 
     double syncLength() const override;
     double getValue() override;
@@ -377,6 +391,7 @@ private:
 struct Trigger : public ValueObject
 {
     Trigger(ValueObject* condition, ValueObject* value);
+    ~Trigger();
 
     double syncLength() const override;
     double getValue() override;
@@ -395,6 +410,7 @@ private:
 struct If : public ValueObject
 {
     If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue);
+    ~If();
 
     double getValue() override;
 

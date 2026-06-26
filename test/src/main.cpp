@@ -15,10 +15,10 @@ int main(int argc, char** argv)
 
     try
     {
-        (new TestTokenizer(tracker))->test();
-        (new TestParser(tracker))->test();
-        (new TestResolver(tracker))->test();
-        (new TestExamples(tracker))->test();
+        TestTokenizer::run(tracker);
+        TestParser::run(tracker);
+        TestResolver::run(tracker);
+        TestExamples::run(tracker);
     }
 
     catch (const OrganicException& e)
@@ -29,6 +29,8 @@ int main(int argc, char** argv)
     }
 
     const size_t failures = tracker->endSection();
+
+    delete tracker;
 
     if (failures == 0)
     {

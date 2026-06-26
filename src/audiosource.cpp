@@ -13,6 +13,10 @@ SingleAudioSource::SingleAudioSource(ValueObject* volume, ValueObject* pan, Valu
 SingleAudioSource::~SingleAudioSource()
 {
     free(effectBuffer);
+
+    delete volume;
+    delete pan;
+    delete effects;
 }
 
 void SingleAudioSource::fillBuffer(double* buffer)
@@ -62,6 +66,12 @@ void Phase::reinit()
 
 Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     SingleAudioSource(volume, pan, effects), frequency(frequency), phase(new Phase()) {}
+
+Oscillator::~Oscillator()
+{
+    delete frequency;
+    delete phase;
+}
 
 void Oscillator::init()
 {
@@ -146,6 +156,11 @@ CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, ValueO
     waveform->getLeafAs<Lambda>()->setInputs({ phase });
 }
 
+CustomOscillator::~CustomOscillator()
+{
+    delete waveform;
+}
+
 double CustomOscillator::getValue()
 {
     return waveform->getValue();
@@ -192,6 +207,11 @@ void Noise::prepareForEffects()
 
 Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource) :
     SingleAudioSource(volume, pan, effects), resource(resource) {}
+
+Sample::~Sample()
+{
+    delete resource;
+}
 
 void Sample::init()
 {
@@ -241,6 +261,13 @@ void ShapeCoordinator::setValue(const double value)
 
 Grain::Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const size_t length) :
     resource(resource), shape(shape), coordinator(coordinator), length(length) {}
+
+Grain::~Grain()
+{
+    delete resource;
+    delete shape;
+    delete coordinator;
+}
 
 void Grain::apply(double* buffer)
 {
@@ -304,13 +331,32 @@ GrainNode::GrainNode(Grain* grain, GrainNode* prev, GrainNode* next) :
 
 GrainNode::~GrainNode()
 {
-    delete grain;
+    if (grain)
+    {
+        delete grain;
+    }
 }
 
 GrainList::GrainList()
 {
     head->next = tail;
     tail->prev = head;
+}
+
+GrainList::~GrainList()
+{
+    GrainNode* current = head;
+
+    while (current != tail)
+    {
+        GrainNode* next = current->next;
+
+        delete current;
+
+        current = next;
+    }
+
+    delete tail;
 }
 
 void GrainList::append(Grain* grain)
@@ -380,6 +426,16 @@ Granulate::Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects
     shape->getLeafAs<Lambda>()->setInputs({ coordinator });
 }
 
+Granulate::~Granulate()
+{
+    delete resource;
+    delete grains;
+    delete length;
+    delete shape;
+    delete coordinator;
+    delete grainList;
+}
+
 void Granulate::init()
 {
     volume->start(startTime);
@@ -439,6 +495,11 @@ Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueO
 Group::~Group()
 {
     free(effectBuffer);
+
+    delete volume;
+    delete pan;
+    delete effects;
+    delete sources;
 }
 
 void Group::fillBuffer(double* buffer)

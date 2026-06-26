@@ -13,6 +13,9 @@ EffectGroup::EffectGroup(ValueObject* mix, ValueObject* effects) :
 
 EffectGroup::~EffectGroup()
 {
+    delete mix;
+    delete effects;
+
     free(original);
     free(applied);
 }
@@ -52,6 +55,13 @@ void EffectGroup::init()
 
 Delay::Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
+
+Delay::~Delay()
+{
+    delete mix;
+    delete delay;
+    delete feedback;
+}
 
 void Delay::apply(double* buffer)
 {
@@ -94,6 +104,13 @@ void Delay::init()
 Comb::Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
 
+Comb::~Comb()
+{
+    delete mix;
+    delete delay;
+    delete feedback;
+}
+
 void Comb::apply(double* buffer)
 {
     const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
@@ -134,6 +151,13 @@ void Comb::init()
 
 AllPass::AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
+
+AllPass::~AllPass()
+{
+    delete mix;
+    delete delay;
+    delete feedback;
+}
 
 void AllPass::apply(double* buffer)
 {
@@ -180,6 +204,8 @@ LowPass::LowPass(ValueObject* threshold) :
 
 LowPass::~LowPass()
 {
+    delete threshold;
+
     free(raw);
     free(filtered);
 }
@@ -349,6 +375,13 @@ void DelayMatrix::apply(double* buffer, const double lengthValue, const double m
 
 Reverb::Reverb(ValueObject* mix, ValueObject* length) :
     mix(mix), length(length) {}
+
+Reverb::~Reverb()
+{
+    delete mix;
+    delete length;
+    delete matrix;
+}
 
 void Reverb::apply(double* buffer)
 {
