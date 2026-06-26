@@ -501,9 +501,7 @@ TokenListNode* Parser::parseDefine(TokenListNode* start)
 
     context = context->parent;
 
-    const FunctionDef* function = context->addFunction(name, inputs, instructions);
-
-    return tokens->patch(start, current->next, new Define(function->location, function));
+    return tokens->patch(start, current->next, context->addFunction(name, inputs, instructions));
 }
 
 TokenListNode* Parser::parseAssign(TokenListNode* start)
@@ -537,9 +535,7 @@ TokenListNode* Parser::parseAssign(TokenListNode* start)
         throw TokenException(e.node, "value after \"=\"");
     }
 
-    const VariableDef* variable = context->addVariable(name, current->prev->token);
-
-    return tokens->patch(start, current, new Assign(variable->location, variable));
+    return tokens->patch(start, current, context->addVariable(name, current->prev->token));
 }
 
 TokenListNode* Parser::parseCall(TokenListNode* start)

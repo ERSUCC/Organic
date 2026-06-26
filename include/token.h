@@ -183,6 +183,10 @@ struct VariableDef : public Identifier
 {
     VariableDef(const SourceLocation location, const Token* value);
 
+    void resolveTypes(const TypeResolver* visitor) const override;
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+
     const Token* value;
 };
 
@@ -225,6 +229,8 @@ struct FunctionDef : public Identifier
 
     const SharedType type() const override;
     const SharedType returnType() const;
+
+    void resolveTypes(const TypeResolver* visitor) const override;
 
     const std::vector<const InputDef*> inputs;
     const std::vector<const Token*> instructions;
@@ -293,17 +299,6 @@ struct ParenthesizedExpression : public Token
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
     const Token* value;
-};
-
-struct Assign : public Token
-{
-    Assign(const SourceLocation location, const VariableDef* variable);
-
-    void resolveTypes(const TypeResolver* visitor) const override;
-
-    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
-
-    const VariableDef* variable;
 };
 
 struct Call : public Token
@@ -717,15 +712,6 @@ struct GreaterEqualAlias : public CallAlias
     GreaterEqualAlias(const SourceLocation location, const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
-};
-
-struct Define : public Token
-{
-    Define(const SourceLocation location, const FunctionDef* function);
-
-    void resolveTypes(const TypeResolver* visitor) const override;
-
-    const FunctionDef* function;
 };
 
 struct Program : public Token

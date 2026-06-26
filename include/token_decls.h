@@ -15,7 +15,6 @@ struct EmptyLambda;
 struct ArgumentList;
 struct List;
 struct ParenthesizedExpression;
-struct Assign;
 struct Time;
 struct Hold;
 struct LFO;
@@ -62,7 +61,6 @@ struct LessAlias;
 struct GreaterAlias;
 struct LessEqualAlias;
 struct GreaterEqualAlias;
-struct Define;
 struct Program;
 
 }

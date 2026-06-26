@@ -11,10 +11,11 @@ namespace Parser {
 
 struct TypeResolver
 {
+    void resolveTypes(const VariableDef* token) const;
     void resolveTypes(const InputDef* token) const;
+    void resolveTypes(const FunctionDef* token) const;
     void resolveTypes(const List* token) const;
     void resolveTypes(const ParenthesizedExpression* token) const;
-    void resolveTypes(const Assign* token) const;
     void resolveTypes(const Time* token) const;
     void resolveTypes(const Hold* token) const;
     void resolveTypes(const LFO* token) const;
@@ -49,7 +50,6 @@ struct TypeResolver
     void resolveTypes(const Reverb* token) const;
     void resolveTypes(const CallUser* token) const;
     void resolveTypes(const CallAlias* token) const;
-    void resolveTypes(const Define* token) const;
     void resolveTypes(const Program* token) const;
 
 private:

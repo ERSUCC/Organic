@@ -115,6 +115,16 @@ String::String(const SourceLocation location, const std::string str) :
 VariableDef::VariableDef(const SourceLocation location, const Token* value) :
     Identifier(location), value(value) {}
 
+void VariableDef::resolveTypes(const TypeResolver* visitor) const
+{
+    visitor->resolveTypes(this);
+}
+
+Engine::ValueObject* VariableDef::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
 VariableRef::VariableRef(const SourceLocation location, const VariableDef* definition) :
     Identifier(location), definition(definition) {}
 
@@ -172,6 +182,11 @@ const SharedType FunctionDef::type() const
 const SharedType FunctionDef::returnType() const
 {
     return instructions.back()->type();
+}
+
+void FunctionDef::resolveTypes(const TypeResolver* visitor) const
+{
+    visitor->resolveTypes(this);
 }
 
 FunctionRef::FunctionRef(const SourceLocation location, const FunctionDef* definition) :
@@ -270,19 +285,6 @@ void ParenthesizedExpression::resolveTypes(const TypeResolver* visitor) const
 }
 
 Engine::ValueObject* ParenthesizedExpression::transform(TokenTransformer* visitor) const
-{
-    return visitor->transform(this);
-}
-
-Assign::Assign(const SourceLocation location, const VariableDef* variable) :
-    Token(location), variable(variable) {}
-
-void Assign::resolveTypes(const TypeResolver* visitor) const
-{
-    visitor->resolveTypes(this);
-}
-
-Engine::ValueObject* Assign::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
@@ -832,14 +834,6 @@ GreaterEqualAlias::GreaterEqualAlias(const SourceLocation location, const Token*
 Engine::ValueObject* GreaterEqualAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
-}
-
-Define::Define(const SourceLocation location, const FunctionDef* function) :
-    Token(location), function(function) {}
-
-void Define::resolveTypes(const TypeResolver* visitor) const
-{
-    visitor->resolveTypes(this);
 }
 
 Program::Program(const SourceLocation location, const std::vector<const Token*> instructions) :

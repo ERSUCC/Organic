@@ -15,6 +15,13 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Constant* token)
     return new Engine::ValueByte(token->value);
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::VariableDef* token)
+{
+    variables[token] = token->value->transform(this);
+
+    return nullptr;
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::VariableRef* token)
 {
     return variables[token->definition];
@@ -68,13 +75,6 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::List* token)
 Engine::ValueObject* TokenTransformer::transform(const Parser::ParenthesizedExpression* token)
 {
     return token->value->transform(this);
-}
-
-Engine::ValueObject* TokenTransformer::transform(const Parser::Assign* token)
-{
-    variables[token->variable] = token->variable->value->transform(this);
-
-    return nullptr;
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Time* token)

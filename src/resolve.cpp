@@ -2,9 +2,27 @@
 
 using namespace Parser;
 
+void TypeResolver::resolveTypes(const VariableDef* token) const
+{
+    token->value->resolveTypes(this);
+}
+
 void TypeResolver::resolveTypes(const InputDef* token) const
 {
     token->defaultValue->resolveTypes(this);
+}
+
+void TypeResolver::resolveTypes(const FunctionDef* token) const
+{
+    for (const InputDef* input : token->inputs)
+    {
+        input->resolveTypes(this);
+    }
+
+    for (const Token* instruction : token->instructions)
+    {
+        instruction->resolveTypes(this);
+    }
 }
 
 void TypeResolver::resolveTypes(const List* token) const
@@ -23,11 +41,6 @@ void TypeResolver::resolveTypes(const List* token) const
 void TypeResolver::resolveTypes(const ParenthesizedExpression* token) const
 {
     token->value->resolveTypes(this);
-}
-
-void TypeResolver::resolveTypes(const Assign* token) const
-{
-    token->variable->value->resolveTypes(this);
 }
 
 void TypeResolver::resolveTypes(const Time* token) const
@@ -323,19 +336,6 @@ void TypeResolver::resolveTypes(const CallAlias* token) const
 {
     resolveArgumentTypes(token->arguments, "a", new NumberType());
     resolveArgumentTypes(token->arguments, "b", new NumberType());
-}
-
-void TypeResolver::resolveTypes(const Define* token) const
-{
-    for (const InputDef* input : token->function->inputs)
-    {
-        input->resolveTypes(this);
-    }
-
-    for (const Token* instruction : token->function->instructions)
-    {
-        instruction->resolveTypes(this);
-    }
 }
 
 void TypeResolver::resolveTypes(const Program* token) const

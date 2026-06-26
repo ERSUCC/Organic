@@ -20,13 +20,13 @@ struct TokenTransformer
 
     Engine::ValueObject* transform(const Parser::Value* token);
     Engine::ValueObject* transform(const Parser::Constant* token);
+    Engine::ValueObject* transform(const Parser::VariableDef* token);
     Engine::ValueObject* transform(const Parser::VariableRef* token);
     Engine::ValueObject* transform(const Parser::InputRef* token);
     Engine::ValueObject* transform(const Parser::FunctionRef* token);
     Engine::ValueObject* transform(const Parser::EmptyLambda* token);
     Engine::ValueObject* transform(const Parser::List* token);
     Engine::ValueObject* transform(const Parser::ParenthesizedExpression* token);
-    Engine::ValueObject* transform(const Parser::Assign* token);
     Engine::ValueObject* transform(const Parser::Time* token);
     Engine::ValueObject* transform(const Parser::Hold* token);
     Engine::ValueObject* transform(const Parser::LFO* token);
