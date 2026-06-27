@@ -13,7 +13,7 @@ void TestExamples::test()
 {
     beginSuite("Compile examples");
 
-    for (const Path* path : sourcePath("examples")->children())
+    for (const Path& path : sourcePath("examples").children())
     {
         expectSuccess(path);
     }
@@ -22,7 +22,7 @@ void TestExamples::test()
 TestExamples::TestExamples(TestTracker* tracker) :
     Test(tracker) {}
 
-void TestExamples::expectSuccess(const Path* path)
+void TestExamples::expectSuccess(const Path& path)
 {
     beginTest(false);
 
@@ -32,7 +32,7 @@ void TestExamples::expectSuccess(const Path* path)
 
         if (!source)
         {
-            throw OrganicFileException("Could not read \"" + path->string() + "\".");
+            throw OrganicFileException("Could not read \"" + path.string() + "\".");
         }
 
         const Parser::Program* program = Parser::Parser::parseSource(source);
@@ -55,5 +55,5 @@ void TestExamples::expectSuccess(const Path* path)
         fail("Expected success, received an error.");
     }
 
-    endTest(path->stem());
+    endTest(path.stem());
 }

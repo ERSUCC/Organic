@@ -16,7 +16,7 @@
 
 struct TokenTransformer
 {
-    TokenTransformer(const Path* sourcePath);
+    TokenTransformer(const Path& sourcePath);
 
     Engine::ValueObject* transform(const Parser::Value* token);
     Engine::ValueObject* transform(const Parser::Constant* token);
@@ -75,7 +75,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::Program* token);
 
 private:
-    const Path* sourcePath;
+    const Path sourcePath;
 
     std::unordered_map<const Parser::VariableDef*, Engine::ValueObject*> variables;
     std::unordered_map<const Parser::InputDef*, Engine::ValueObject*> inputs;

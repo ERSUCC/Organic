@@ -20,6 +20,6 @@ protected:
 private:
     TestExamples(TestTracker* tracker);
 
-    void expectSuccess(const Path* path);
+    void expectSuccess(const Path& path);
 
 };

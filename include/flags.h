@@ -14,7 +14,7 @@ struct ProgramOptions
     std::optional<bool> info;
     std::optional<double> time;
     std::optional<double> fastForward;
-    std::optional<Path*> exportPath;
+    std::optional<Path> exportPath;
     std::optional<unsigned int> channels;
     std::optional<unsigned int> sampleRate;
     std::optional<unsigned int> bufferLength;

@@ -2,19 +2,19 @@
 
 using namespace Engine;
 
-Resource::Resource(const Path* path, const SourceLocation location)
+Resource::Resource(const Path& path, const SourceLocation location)
 {
-    if (!path->exists())
+    if (!path.exists())
     {
-        throw OrganicIncludeException("Audio file \"" + path->string() + "\" does not exist.", location);
+        throw OrganicIncludeException("Audio file \"" + path.string() + "\" does not exist.", location);
     }
 
-    if (!path->isFile())
+    if (!path.isFile())
     {
-        throw OrganicIncludeException("\"" + path->string() + "\" is not a file.", location);
+        throw OrganicIncludeException("\"" + path.string() + "\" is not a file.", location);
     }
 
-    SndfileHandle* file = new SndfileHandle(path->string());
+    SndfileHandle* file = new SndfileHandle(path.string());
 
     const sf_count_t length = file->frames() * file->channels();
 
@@ -25,7 +25,7 @@ Resource::Resource(const Path* path, const SourceLocation location)
 
     if (file->read(floatSamples, length) != length)
     {
-        throw OrganicFileException("Could not read audio file \"" + path->string() + "\": " + std::string(file->strError()));
+        throw OrganicFileException("Could not read audio file \"" + path.string() + "\": " + std::string(file->strError()));
     }
 
     sf_count_t scaledLength = length;
@@ -48,7 +48,7 @@ Resource::Resource(const Path* path, const SourceLocation location)
 
         if (result)
         {
-            throw OrganicFileException(std::string("Failed to convert sample rate of audio file \"" + path->string() + "\": ") + src_strerror(result));
+            throw OrganicFileException(std::string("Failed to convert sample rate of audio file \"" + path.string() + "\": ") + src_strerror(result));
         }
 
         free(floatSamples);

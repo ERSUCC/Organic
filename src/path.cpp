@@ -1,23 +1,23 @@
 #include "../include/path.h"
 
-Path* Path::relative(const std::filesystem::path& path, const std::filesystem::path& base)
+const Path Path::relative(const std::filesystem::path& path, const std::filesystem::path& base)
 {
-    return new Path(base / path);
+    return Path(base / path);
 }
 
-Path* Path::relative(const std::filesystem::path& path)
+const Path Path::relative(const std::filesystem::path& path)
 {
-    return new Path(path);
+    return Path(path);
 }
 
-Path* Path::beside(const std::filesystem::path& path, const Path* other)
+const Path Path::beside(const std::filesystem::path& path, const Path& other)
 {
     if (path.is_absolute())
     {
-        return new Path(path);
+        return Path(path);
     }
 
-    return new Path(other->path.parent_path() / path);
+    return Path(other.path.parent_path() / path);
 }
 
 std::filesystem::path Path::formatPath(const std::string path)
@@ -61,20 +61,20 @@ bool Path::isDirectory() const
     return std::filesystem::is_directory(path);
 }
 
-const Path* Path::parent() const
+const Path Path::parent() const
 {
-    return new Path(path.parent_path());
+    return Path(path.parent_path());
 }
 
-std::vector<const Path*> Path::children() const
+std::vector<Path> Path::children() const
 {
     if (isDirectory())
     {
-        std::vector<const Path*> paths;
+        std::vector<Path> paths;
 
         for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path))
         {
-            paths.push_back(new Path(entry.path()));
+            paths.push_back(Path(entry.path()));
         }
 
         return paths;

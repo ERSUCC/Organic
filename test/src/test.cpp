@@ -3,12 +3,12 @@
 Test::Test(TestTracker* tracker) :
     tracker(tracker) {}
 
-const Path* Test::sourcePath(const std::string file) const
+const Path Test::sourcePath(const std::string file) const
 {
     return Path::relative(file, ORGANIC_SOURCE_DIR);
 }
 
-const Path* Test::testPath(const std::string file) const
+const Path Test::testPath(const std::string file) const
 {
     return Path::relative(file, ORGANIC_TEST_DIR);
 }

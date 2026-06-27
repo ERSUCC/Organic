@@ -10,23 +10,23 @@ struct Path
 {
     struct Hash
     {
-        std::size_t operator()(const Path* path) const
+        std::size_t operator()(const Path& path) const
         {
-            return std::hash<std::string>()(path->string());
+            return std::hash<std::string>()(path.string());
         }
     };
 
     struct Equals
     {
-        bool operator()(const Path* a, const Path* b) const
+        bool operator()(const Path& a, const Path& b) const
         {
-            return a->string() == b->string();
+            return a.string() == b.string();
         }
     };
 
-    static Path* relative(const std::filesystem::path& path, const std::filesystem::path& base);
-    static Path* relative(const std::filesystem::path& path);
-    static Path* beside(const std::filesystem::path&, const Path* other);
+    static const Path relative(const std::filesystem::path& path, const std::filesystem::path& base);
+    static const Path relative(const std::filesystem::path& path);
+    static const Path beside(const std::filesystem::path&, const Path& other);
 
     static std::filesystem::path formatPath(const std::string path);
 
@@ -34,12 +34,11 @@ struct Path
     bool isFile() const;
     bool isDirectory() const;
 
-    const Path* parent() const;
+    const Path parent() const;
 
-    std::vector<const Path*> children() const;
+    std::vector<Path> children() const;
 
     std::string string() const;
-
     std::string stem() const;
 
     bool readToString(std::string& dest) const;

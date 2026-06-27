@@ -99,14 +99,14 @@ private:
 
 struct OTest
 {
-    static std::vector<OTest*> read(const Path* path);
+    static std::vector<OTest*> read(const Path& path);
 
     const TOMLValue* getValue(const std::string& key) const;
 
     const std::string& getSource() const;
 
 private:
-    OTest(const Path* path, std::istringstream& stream);
+    OTest(const Path& path, std::istringstream& stream);
 
     std::unordered_map<std::string, const TOMLValue*> entries;
 

@@ -13,7 +13,7 @@ void TestResolver::test()
 {
     beginSuite("Type resolver success");
 
-    for (const Path* path : testPath("type-resolver/success")->children())
+    for (const Path& path : testPath("type-resolver/success").children())
     {
         for (const OTest* info : OTest::read(path))
         {
@@ -23,7 +23,7 @@ void TestResolver::test()
 
     beginSuite("Type resolver errors");
 
-    for (const Path* path : testPath("type-resolver/errors")->children())
+    for (const Path& path : testPath("type-resolver/errors").children())
     {
         for (const OTest* info : OTest::read(path))
         {

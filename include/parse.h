@@ -53,7 +53,7 @@ struct Parser
     static const Program* parseSource(const SourceProvider* source);
 
 private:
-    Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths);
+    Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<Path, Path::Hash, Path::Equals>& includedPaths);
     ~Parser();
 
     const Program* parse();
@@ -72,7 +72,7 @@ private:
 
     ParserContext* context;
 
-    std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths;
+    std::unordered_set<Path, Path::Hash, Path::Equals>& includedPaths;
 
     TokenIterator* tokens;
 

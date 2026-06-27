@@ -215,7 +215,7 @@ bool ParserContext::checkRecursive(const Identifier* token) const
 
 const Program* Parser::parseSource(const SourceProvider* source)
 {
-    std::unordered_set<const Path*, Path::Hash, Path::Equals> includedPaths = { source->path() };
+    std::unordered_set<Path, Path::Hash, Path::Equals> includedPaths = { source->path() };
 
     Parser* parser = new Parser(source, new ParserContext(nullptr, "", {}), includedPaths);
 
@@ -226,7 +226,7 @@ const Program* Parser::parseSource(const SourceProvider* source)
     return program;
 }
 
-Parser::Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<const Path*, Path::Hash, Path::Equals>& includedPaths) :
+Parser::Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<Path, Path::Hash, Path::Equals>& includedPaths) :
     source(source), context(context), includedPaths(includedPaths) {}
 
 Parser::~Parser()
@@ -282,36 +282,29 @@ const Program* Parser::parseInclude()
         return new Program(location, {});
     }
 
-    const Path* sourcePath = source->path();
-    const Path* includePath = Path::beside(file, sourcePath);
+    const Path sourcePath = source->path();
+    const Path includePath = Path::beside(file, sourcePath);
 
-    if (!includePath->exists())
+    if (!includePath.exists())
     {
-        throw OrganicIncludeException("Source file \"" + includePath->string() + "\" does not exist.", location);
+        throw OrganicIncludeException("Source file \"" + includePath.string() + "\" does not exist.", location);
     }
 
-    if (!includePath->isFile())
+    if (!includePath.isFile())
     {
-        throw OrganicIncludeException("\"" + includePath->string() + "\" is not a file.", location);
+        throw OrganicIncludeException("\"" + includePath.string() + "\" is not a file.", location);
     }
 
-    if (sourcePath->string() == includePath->string())
+    if (sourcePath.string() == includePath.string())
     {
-        Utils::includeWarning("Source file \"" + includePath->string() + "\" is the current file, this include will be ignored.", location);
-
-        delete sourcePath;
-        delete includePath;
+        Utils::includeWarning("Source file \"" + includePath.string() + "\" is the current file, this include will be ignored.", location);
 
         return new Program(location, {});
     }
 
-    delete sourcePath;
-
     if (includedPaths.count(includePath))
     {
-        Utils::includeWarning("Source file \"" + includePath->string() + "\" has already been included, this include will be ignored.", location);
-
-        delete includePath;
+        Utils::includeWarning("Source file \"" + includePath.string() + "\" has already been included, this include will be ignored.", location);
 
         return new Program(location, {});
     }
@@ -329,7 +322,6 @@ const Program* Parser::parseInclude()
     context->merge(includeContext);
 
     delete parser;
-    delete includePath;
     delete includeContext;
 
     return program;

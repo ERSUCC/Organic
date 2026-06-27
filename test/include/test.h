@@ -18,8 +18,8 @@ protected:
 
     virtual void test() = 0;
 
-    const Path* sourcePath(const std::string file) const;
-    const Path* testPath(const std::string file) const;
+    const Path sourcePath(const std::string file) const;
+    const Path testPath(const std::string file) const;
 
     void beginSuite(const std::string name) const;
 

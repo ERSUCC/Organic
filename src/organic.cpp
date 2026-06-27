@@ -1,6 +1,6 @@
 #include "../include/organic.h"
 
-Organic::Organic(const Path* path, const ProgramOptions options) :
+Organic::Organic(const Path& path, const ProgramOptions options) :
     options(options)
 {
     utils = Utils::get();
@@ -19,7 +19,7 @@ Organic::Organic(const Path* path, const ProgramOptions options) :
 
     if (!source)
     {
-        throw OrganicFileException("Could not read \"" + path->string() + "\".");
+        throw OrganicFileException("Could not read \"" + path.string() + "\".");
     }
 
     const Parser::Program* program = Parser::Parser::parseSource(source);
@@ -126,7 +126,7 @@ void Organic::startExport()
 {
     const size_t steps = (options.time.value() / 1000) * utils->sampleRate;
 
-    SndfileHandle* file = new SndfileHandle(options.exportPath.value()->string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_24, utils->channels, utils->sampleRate);
+    SndfileHandle* file = new SndfileHandle(options.exportPath.value().string(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_24, utils->channels, utils->sampleRate);
 
     double* samples = (double*)malloc(sizeof(double) * steps * utils->channels);
 

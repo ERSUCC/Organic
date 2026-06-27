@@ -14,14 +14,14 @@ int main(int argc, char** argv)
             throw OrganicArgumentException("Not enough arguments specified.");
         }
 
-        const Path* path = Path::relative(Path::formatPath(argv[1]));
+        const Path path = Path::relative(Path::formatPath(argv[1]));
 
-        if (!path->exists())
+        if (!path.exists())
         {
             throw OrganicArgumentException("Specified program file does not exist.");
         }
 
-        if (!path->isFile())
+        if (!path.isFile())
         {
             throw OrganicArgumentException("Specified program is not a file.");
         }
@@ -31,7 +31,6 @@ int main(int argc, char** argv)
         organic->start();
 
         delete organic;
-        delete path;
 
         return 0;
     }

@@ -2,7 +2,7 @@
 
 #define ARG(name) transformArgument(token->arguments, name)
 
-TokenTransformer::TokenTransformer(const Path* sourcePath) :
+TokenTransformer::TokenTransformer(const Path& sourcePath) :
     sourcePath(sourcePath) {}
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Value* token)
@@ -201,7 +201,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 {
     const Parser::Argument* file = token->arguments->findArgument("file");
 
-    const Path* path = Path::beside(Path::formatPath(file->value->string()), sourcePath);
+    const Path path = Path::beside(Path::formatPath(file->value->string()), sourcePath);
 
     Engine::Resource* resource = new Engine::Resource(path, file->location);
 
@@ -212,7 +212,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 {
     const Parser::Argument* file = token->arguments->findArgument("sample");
 
-    const Path* path = Path::beside(Path::formatPath(file->value->string()), sourcePath);
+    const Path path = Path::beside(Path::formatPath(file->value->string()), sourcePath);
 
     Engine::Resource* resource = new Engine::Resource(path, file->location);
 

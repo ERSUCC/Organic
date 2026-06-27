@@ -74,19 +74,19 @@ ProgramOptions FlagParser::getOptions()
                 throw OrganicArgumentException("The option \"--export\" was already set.");
             }
 
-            Path* path = Path::relative(Path::formatPath(nextOption(flag)));
+            const Path path = Path::relative(Path::formatPath(nextOption(flag)));
 
-            if (!path->parent()->exists())
+            if (!path.parent().exists())
             {
                 throw OrganicArgumentException("The specified output file is in a non-existent directory.");
             }
 
-            if (path->isDirectory())
+            if (path.isDirectory())
             {
                 throw OrganicArgumentException("The specified output path is a directory, it must be a file.");
             }
 
-            options.exportPath = path;
+            options.exportPath.emplace(path);
         }
 
         else if (flag == "--mono")

@@ -283,13 +283,13 @@ bool TOMLEntry::keyChar(const char c)
 TOMLEntry::TOMLEntry(const std::string& key, const TOMLValue* value) :
     key(key), value(value) {}
 
-std::vector<OTest*> OTest::read(const Path* path)
+std::vector<OTest*> OTest::read(const Path& path)
 {
     std::string str;
 
-    if (!path->readToString(str))
+    if (!path.readToString(str))
     {
-        throw OrganicFileException("Could not read \"" + path->string() + "\".");
+        throw OrganicFileException("Could not read \"" + path.string() + "\".");
     }
 
     std::vector<OTest*> tests;
@@ -329,7 +329,7 @@ const std::string& OTest::getSource() const
     return source;
 }
 
-OTest::OTest(const Path* path, std::istringstream& stream)
+OTest::OTest(const Path& path, std::istringstream& stream)
 {
     while (!stream.eof())
     {
@@ -352,7 +352,7 @@ OTest::OTest(const Path* path, std::istringstream& stream)
 
         else
         {
-            throw OrganicFileException("Invalid format in test file \"" + path->string() + "\".");
+            throw OrganicFileException("Invalid format in test file \"" + path.string() + "\".");
         }
     }
 

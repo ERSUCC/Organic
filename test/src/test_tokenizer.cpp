@@ -13,7 +13,7 @@ void TestTokenizer::test()
 {
     beginSuite("Token list");
 
-    for (const Path* path : testPath("tokenizer/token-list")->children())
+    for (const Path& path : testPath("tokenizer/token-list").children())
     {
         for (const OTest* info : OTest::read(path))
         {
@@ -23,7 +23,7 @@ void TestTokenizer::test()
 
     beginSuite("Tokenizer errors");
 
-    for (const Path* path : testPath("tokenizer/errors")->children())
+    for (const Path& path : testPath("tokenizer/errors").children())
     {
         for (const OTest* info : OTest::read(path))
         {

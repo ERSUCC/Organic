@@ -13,7 +13,7 @@ void TestParser::test()
 {
     beginSuite("Parser success");
 
-    for (const Path* path : testPath("parser/success")->children())
+    for (const Path& path : testPath("parser/success").children())
     {
         for (const OTest* info : OTest::read(path))
         {
@@ -23,7 +23,7 @@ void TestParser::test()
 
     beginSuite("Parser errors");
 
-    for (const Path* path : testPath("parser/errors")->children())
+    for (const Path& path : testPath("parser/errors").children())
     {
         for (const OTest* info : OTest::read(path))
         {

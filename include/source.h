@@ -13,7 +13,7 @@ struct SourceProvider
 
     virtual std::string description() const;
 
-    virtual const Path* path() const;
+    virtual const Path path() const;
 
     inline size_t length() const
     {
@@ -49,15 +49,15 @@ private:
 
 struct FileProvider : public SourceProvider
 {
-    static FileProvider* create(const Path* file);
+    static FileProvider* create(const Path& file);
 
     std::string description() const override;
 
-    const Path* path() const override;
+    const Path path() const override;
 
 private:
-    FileProvider(const Path* file, const std::string& source);
+    FileProvider(const Path& file, const std::string& source);
 
-    const Path* file;
+    const Path file;
 
 };
