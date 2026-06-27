@@ -64,10 +64,10 @@ void Test::fail(const std::string message)
 
 bool Test::matchParseError(const OTest* info, const OrganicParseException& error) const
 {
-    const std::string& message = info->getValue("error")->asString()->str;
+    const std::string& message = info->getValue("error")->asString();
 
-    const int line = info->getValue("line")->asInteger()->value;
-    const int character = info->getValue("character")->asInteger()->value;
+    const int line = info->getValue("line")->asInteger();
+    const int character = info->getValue("character")->asInteger();
 
     return error.message == message && error.location.line == line && error.location.character == character;
 }

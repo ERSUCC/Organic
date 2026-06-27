@@ -4,37 +4,41 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "exception.h"
 #include "path.h"
 
-struct TOMLArray;
-struct TOMLString;
-struct TOMLDouble;
-struct TOMLInteger;
-struct TOMLBoolean;
-
 struct TOMLValue
 {
     static TOMLValue* read(std::istringstream& stream);
 
-    virtual const TOMLArray* asArray() const;
-    virtual const TOMLString* asString() const;
-    virtual const TOMLDouble* asDouble() const;
-    virtual const TOMLInteger* asInteger() const;
-    virtual const TOMLBoolean* asBoolean() const;
+    virtual ~TOMLValue();
+
+    virtual const std::vector<const TOMLValue*> asArray() const;
+    virtual const std::string asString() const;
+    virtual double asDouble() const;
+    virtual int asInteger() const;
+    virtual bool asBoolean() const;
 };
 
 struct TOMLArray : public TOMLValue
 {
     static TOMLArray* read(std::istringstream& stream);
 
-    TOMLArray(const std::vector<TOMLValue*>& values);
+    ~TOMLArray();
 
-    const TOMLArray* asArray() const override;
+    const std::vector<const TOMLValue*> asArray() const override;
 
-    const std::vector<TOMLValue*> values;
+    inline void push(const TOMLValue* value)
+    {
+        values.push_back(value);
+    }
+
+private:
+    std::vector<const TOMLValue*> values;
+
 };
 
 struct TOMLString : public TOMLValue
@@ -43,9 +47,11 @@ struct TOMLString : public TOMLValue
 
     TOMLString(const std::string& str);
 
-    const TOMLString* asString() const override;
+    const std::string asString() const override;
 
+private:
     const std::string str;
+
 };
 
 struct TOMLNumber : public TOMLValue
@@ -57,18 +63,22 @@ struct TOMLDouble : public TOMLNumber
 {
     TOMLDouble(const double value);
 
-    const TOMLDouble* asDouble() const override;
+    double asDouble() const override;
 
+private:
     const double value;
+
 };
 
 struct TOMLInteger : public TOMLNumber
 {
     TOMLInteger(const int value);
 
-    const TOMLInteger* asInteger() const override;
+    int asInteger() const override;
 
+private:
     const int value;
+
 };
 
 struct TOMLBoolean : public TOMLValue
@@ -77,36 +87,31 @@ struct TOMLBoolean : public TOMLValue
 
     TOMLBoolean(const bool value);
 
-    const TOMLBoolean* asBoolean() const override;
-
-    const bool value;
-};
-
-struct TOMLEntry
-{
-    static TOMLEntry* read(std::istringstream& stream);
-
-    const std::string key;
-
-    const TOMLValue* value;
+    bool asBoolean() const override;
 
 private:
-    static bool keyChar(const char c);
-
-    TOMLEntry(const std::string& key, const TOMLValue* value);
+    const bool value;
 
 };
 
 struct OTest
 {
-    static std::vector<OTest*> read(const Path& path);
+    static std::vector<const OTest*> read(const Path& path);
+
+    ~OTest();
 
     const TOMLValue* getValue(const std::string& key) const;
 
     const std::string& getSource() const;
 
 private:
+    static bool keyChar(const char c);
+
+    static TOMLValue* dummyValue;
+
     OTest(const Path& path, std::istringstream& stream);
+
+    void readEntry(const Path& path, std::istringstream& stream);
 
     std::unordered_map<std::string, const TOMLValue*> entries;
 

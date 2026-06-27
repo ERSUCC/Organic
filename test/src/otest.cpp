@@ -25,29 +25,31 @@ TOMLValue* TOMLValue::read(std::istringstream& stream)
     }
 }
 
-const TOMLArray* TOMLValue::asArray() const
+TOMLValue::~TOMLValue() {}
+
+const std::vector<const TOMLValue*> TOMLValue::asArray() const
 {
-    return new TOMLArray({});
+    return {};
 }
 
-const TOMLString* TOMLValue::asString() const
+const std::string TOMLValue::asString() const
 {
-    return new TOMLString("");
+    return "";
 }
 
-const TOMLDouble* TOMLValue::asDouble() const
+double TOMLValue::asDouble() const
 {
-    return new TOMLDouble(0);
+    return 0;
 }
 
-const TOMLInteger* TOMLValue::asInteger() const
+int TOMLValue::asInteger() const
 {
-    return new TOMLInteger(0);
+    return 0;
 }
 
-const TOMLBoolean* TOMLValue::asBoolean() const
+bool TOMLValue::asBoolean() const
 {
-    return new TOMLBoolean(false);
+    return false;
 }
 
 TOMLArray* TOMLArray::read(std::istringstream& stream)
@@ -59,18 +61,20 @@ TOMLArray* TOMLArray::read(std::istringstream& stream)
         stream.ignore();
     }
 
-    std::vector<TOMLValue*> values;
+    TOMLArray* array = new TOMLArray();
 
     while (!stream.eof() && stream.peek() != ']')
     {
-        TOMLValue* value = TOMLValue::read(stream);
+        const TOMLValue* value = TOMLValue::read(stream);
 
         if (!value)
         {
+            delete array;
+
             return nullptr;
         }
 
-        values.push_back(value);
+        array->push(value);
 
         while (isspace(stream.peek()))
         {
@@ -97,18 +101,25 @@ TOMLArray* TOMLArray::read(std::istringstream& stream)
 
     if (stream.get() != ']')
     {
+        delete array;
+
         return nullptr;
     }
 
-    return new TOMLArray(values);
+    return array;
 }
 
-TOMLArray::TOMLArray(const std::vector<TOMLValue*>& values) :
-    values(values) {}
-
-const TOMLArray* TOMLArray::asArray() const
+TOMLArray::~TOMLArray()
 {
-    return this;
+    for (const TOMLValue* value : values)
+    {
+        delete value;
+    }
+}
+
+const std::vector<const TOMLValue*> TOMLArray::asArray() const
+{
+    return values;
 }
 
 TOMLString* TOMLString::read(std::istringstream& stream, const bool escape)
@@ -156,9 +167,9 @@ TOMLString* TOMLString::read(std::istringstream& stream, const bool escape)
 TOMLString::TOMLString(const std::string& str) :
     str(str) {}
 
-const TOMLString* TOMLString::asString() const
+const std::string TOMLString::asString() const
 {
-    return this;
+    return str;
 }
 
 TOMLNumber* TOMLNumber::read(std::istringstream& stream)
@@ -200,17 +211,17 @@ TOMLNumber* TOMLNumber::read(std::istringstream& stream)
 TOMLDouble::TOMLDouble(const double value) :
     value(value) {}
 
-const TOMLDouble* TOMLDouble::asDouble() const
+double TOMLDouble::asDouble() const
 {
-    return this;
+    return value;
 }
 
 TOMLInteger::TOMLInteger(const int value) :
     value(value) {}
 
-const TOMLInteger* TOMLInteger::asInteger() const
+int TOMLInteger::asInteger() const
 {
-    return this;
+    return value;
 }
 
 TOMLBoolean* TOMLBoolean::read(std::istringstream& stream)
@@ -238,52 +249,12 @@ TOMLBoolean* TOMLBoolean::read(std::istringstream& stream)
 TOMLBoolean::TOMLBoolean(const bool value) :
     value(value) {}
 
-const TOMLBoolean* TOMLBoolean::asBoolean() const
+bool TOMLBoolean::asBoolean() const
 {
-    return this;
+    return value;
 }
 
-TOMLEntry* TOMLEntry::read(std::istringstream& stream)
-{
-    std::string key;
-
-    while (keyChar(stream.peek()))
-    {
-        key += stream.get();
-    }
-
-    while (isspace(stream.peek()))
-    {
-        stream.ignore();
-    }
-
-    if (stream.get() != '=')
-    {
-        return nullptr;
-    }
-
-    while (isspace(stream.peek()))
-    {
-        stream.ignore();
-    }
-
-    if (const TOMLValue* value = TOMLValue::read(stream))
-    {
-        return new TOMLEntry(key, value);
-    }
-
-    return nullptr;
-}
-
-bool TOMLEntry::keyChar(const char c)
-{
-    return isalnum(c) || c == '-' || c == '_';
-}
-
-TOMLEntry::TOMLEntry(const std::string& key, const TOMLValue* value) :
-    key(key), value(value) {}
-
-std::vector<OTest*> OTest::read(const Path& path)
+std::vector<const OTest*> OTest::read(const Path& path)
 {
     std::string str;
 
@@ -292,7 +263,7 @@ std::vector<OTest*> OTest::read(const Path& path)
         throw OrganicFileException("Could not read \"" + path.string() + "\".");
     }
 
-    std::vector<OTest*> tests;
+    std::vector<const OTest*> tests;
 
     std::istringstream stream(str);
 
@@ -303,7 +274,20 @@ std::vector<OTest*> OTest::read(const Path& path)
 
     while (!stream.eof())
     {
-        tests.push_back(new OTest(path, stream));
+        try
+        {
+            tests.push_back(new OTest(path, stream));
+        }
+
+        catch (const OrganicException& e)
+        {
+            for (const OTest* info : tests)
+            {
+                delete info;
+            }
+
+            throw;
+        }
 
         while (isspace(stream.peek()))
         {
@@ -314,6 +298,14 @@ std::vector<OTest*> OTest::read(const Path& path)
     return tests;
 }
 
+OTest::~OTest()
+{
+    for (const std::pair<std::string, const TOMLValue*>& entry : entries)
+    {
+        delete entry.second;
+    }
+}
+
 const TOMLValue* OTest::getValue(const std::string& key) const
 {
     if (entries.count(key))
@@ -321,12 +313,24 @@ const TOMLValue* OTest::getValue(const std::string& key) const
         return entries.at(key);
     }
 
-    return new TOMLValue();
+    static TOMLValue* dummyValue;
+
+    if (!dummyValue)
+    {
+        dummyValue = new TOMLValue();
+    }
+
+    return dummyValue;
 }
 
 const std::string& OTest::getSource() const
 {
     return source;
+}
+
+bool OTest::keyChar(const char c)
+{
+    return isalnum(c) || c == '-' || c == '_';
 }
 
 OTest::OTest(const Path& path, std::istringstream& stream)
@@ -345,15 +349,7 @@ OTest::OTest(const Path& path, std::istringstream& stream)
             break;
         }
 
-        if (const TOMLEntry* entry = TOMLEntry::read(stream))
-        {
-            entries[entry->key] = entry->value;
-        }
-
-        else
-        {
-            throw OrganicFileException("Invalid format in test file \"" + path.string() + "\".");
-        }
+        readEntry(path, stream);
     }
 
     const std::streampos split = stream.tellg();
@@ -366,4 +362,39 @@ OTest::OTest(const Path& path, std::istringstream& stream)
     source = stream.str().substr(split, stream.tellg() - split);
 
     stream.ignore(4);
+}
+
+void OTest::readEntry(const Path& path, std::istringstream& stream)
+{
+    std::string key;
+
+    while (keyChar(stream.peek()))
+    {
+        key += stream.get();
+    }
+
+    while (isspace(stream.peek()))
+    {
+        stream.ignore();
+    }
+
+    if (stream.get() != '=')
+    {
+        throw OrganicFileException("Invalid format in test file \"" + path.string() + "\".");
+    }
+
+    while (isspace(stream.peek()))
+    {
+        stream.ignore();
+    }
+
+    if (const TOMLValue* value = TOMLValue::read(stream))
+    {
+        entries[key] = value;
+    }
+
+    else
+    {
+        throw OrganicFileException("Invalid format in test file \"" + path.string() + "\".");
+    }
 }

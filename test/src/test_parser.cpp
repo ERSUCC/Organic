@@ -18,6 +18,8 @@ void TestParser::test()
         for (const OTest* info : OTest::read(path))
         {
             expectSuccess(info);
+
+            delete info;
         }
     }
 
@@ -28,6 +30,8 @@ void TestParser::test()
         for (const OTest* info : OTest::read(path))
         {
             expectError(info);
+
+            delete info;
         }
     }
 }
@@ -37,7 +41,7 @@ TestParser::TestParser(TestTracker* tracker) :
 
 void TestParser::expectSuccess(const OTest* info)
 {
-    beginTest(info->getValue("warn")->asBoolean()->value);
+    beginTest(info->getValue("warn")->asBoolean());
 
     try
     {
@@ -53,12 +57,12 @@ void TestParser::expectSuccess(const OTest* info)
         fail("Source was not parsed successfully.");
     }
 
-    endTest(info->getValue("name")->asString()->str);
+    endTest(info->getValue("name")->asString());
 }
 
 void TestParser::expectError(const OTest* info)
 {
-    beginTest(info->getValue("warn")->asBoolean()->value);
+    beginTest(info->getValue("warn")->asBoolean());
 
     try
     {
@@ -81,5 +85,5 @@ void TestParser::expectError(const OTest* info)
         fail("Parser did not throw the expected error.");
     }
 
-    endTest(info->getValue("name")->asString()->str);
+    endTest(info->getValue("name")->asString());
 }

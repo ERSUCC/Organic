@@ -18,6 +18,8 @@ void TestTokenizer::test()
         for (const OTest* info : OTest::read(path))
         {
             checkList(info);
+
+            delete info;
         }
     }
 
@@ -28,6 +30,8 @@ void TestTokenizer::test()
         for (const OTest* info : OTest::read(path))
         {
             expectError(info);
+
+            delete info;
         }
     }
 }
@@ -37,13 +41,13 @@ TestTokenizer::TestTokenizer(TestTracker* tracker) :
 
 void TestTokenizer::checkList(const OTest* info)
 {
-    beginTest(info->getValue("warn")->asBoolean()->value);
+    beginTest(info->getValue("warn")->asBoolean());
 
     Parser::TokenIterator* tokens = Parser::Tokenizer::tokenize(new SourceProvider(info->getSource()));
 
-    for (const TOMLValue* token : info->getValue("tokens")->asArray()->values)
+    for (const TOMLValue* token : info->getValue("tokens")->asArray())
     {
-        if (tokens->peek()->string() != token->asString()->str)
+        if (tokens->peek()->string() != token->asString())
         {
             break;
         }
@@ -55,12 +59,12 @@ void TestTokenizer::checkList(const OTest* info)
 
     delete tokens;
 
-    endTest(info->getValue("name")->asString()->str);
+    endTest(info->getValue("name")->asString());
 }
 
 void TestTokenizer::expectError(const OTest* info)
 {
-    beginTest(info->getValue("warn")->asBoolean()->value);
+    beginTest(info->getValue("warn")->asBoolean());
 
     try
     {
@@ -79,5 +83,5 @@ void TestTokenizer::expectError(const OTest* info)
         fail("Tokenizer did not throw the expected error.");
     }
 
-    endTest(info->getValue("name")->asString()->str);
+    endTest(info->getValue("name")->asString());
 }
