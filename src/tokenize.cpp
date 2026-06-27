@@ -15,9 +15,6 @@ std::string OrganicTokenException::getMessage(const Token* token, const std::str
     return "Expected " + expected + ", but received \"" + token->string() + "\".";
 }
 
-TokenIterator::TokenIterator(const std::vector<const Token*>& tokens) :
-    tokens(tokens) {}
-
 TokenIterator::~TokenIterator()
 {
     while (current < tokens.size())
@@ -52,11 +49,21 @@ TokenIterator* Tokenizer::tokenize(const SourceProvider* source)
 {
     Tokenizer* tokenizer = new Tokenizer(source);
 
-    TokenIterator* tokens = tokenizer->tokenizeProgram();
+    try
+    {
+        TokenIterator* tokens = tokenizer->tokenizeProgram();
 
-    delete tokenizer;
+        delete tokenizer;
 
-    return tokens;
+        return tokens;
+    }
+
+    catch (const OrganicException& e)
+    {
+        delete tokenizer;
+
+        throw;
+    }
 }
 
 Tokenizer::Tokenizer(const SourceProvider* source) :
@@ -64,7 +71,7 @@ Tokenizer::Tokenizer(const SourceProvider* source) :
 
 TokenIterator* Tokenizer::tokenizeProgram()
 {
-    std::vector<const Token*> tokens;
+    TokenIterator* tokens = new TokenIterator();
 
     while (current < source->length())
     {
@@ -94,56 +101,56 @@ TokenIterator* Tokenizer::tokenizeProgram()
 
         else if (source->get(current) == '(')
         {
-            tokens.push_back(new OpenParenthesis(SourceLocation(source, current, current + 1)));
+            tokens->push(new OpenParenthesis(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == ')')
         {
-            tokens.push_back(new CloseParenthesis(SourceLocation(source, current, current + 1)));
+            tokens->push(new CloseParenthesis(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '[')
         {
-            tokens.push_back(new OpenSquareBracket(SourceLocation(source, current, current + 1)));
+            tokens->push(new OpenSquareBracket(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == ']')
         {
-            tokens.push_back(new CloseSquareBracket(SourceLocation(source, current, current + 1)));
+            tokens->push(new CloseSquareBracket(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '{')
         {
-            tokens.push_back(new OpenCurlyBracket(SourceLocation(source, current, current + 1)));
+            tokens->push(new OpenCurlyBracket(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '}')
         {
-            tokens.push_back(new CloseCurlyBracket(SourceLocation(source, current, current + 1)));
+            tokens->push(new CloseCurlyBracket(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == ':')
         {
-            tokens.push_back(new Colon(SourceLocation(source, current, current + 1)));
+            tokens->push(new Colon(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == ',')
         {
-            tokens.push_back(new Comma(SourceLocation(source, current, current + 1)));
+            tokens->push(new Comma(SourceLocation(source, current, current + 1)));
 
             current++;
         }
@@ -152,14 +159,14 @@ TokenIterator* Tokenizer::tokenizeProgram()
         {
             if (current < source->length() - 1 && source->get(current + 1) == '=')
             {
-                tokens.push_back(new DoubleEquals(SourceLocation(source, current, current + 2)));
+                tokens->push(new DoubleEquals(SourceLocation(source, current, current + 2)));
 
                 current++;
             }
 
             else
             {
-                tokens.push_back(new Equals(SourceLocation(source, current, current + 1)));
+                tokens->push(new Equals(SourceLocation(source, current, current + 1)));
             }
 
             current++;
@@ -167,21 +174,31 @@ TokenIterator* Tokenizer::tokenizeProgram()
 
         else if (source->get(current) == '+')
         {
-            tokens.push_back(new Add(SourceLocation(source, current, current + 1)));
+            tokens->push(new Add(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '-')
         {
-            if (current < source->length() - 1 && isdigit(source->get(current + 1)) && !tokens.empty() && !dynamic_cast<const Identifier*>(tokens.back()) && !dynamic_cast<const Value*>(tokens.back()))
+            if (current < source->length() - 1 && isdigit(source->get(current + 1)) && !tokens->last<Identifier>() && !tokens->last<Value>())
             {
-                tokens.push_back(tokenizeNumber());
+                try
+                {
+                    tokens->push(tokenizeNumber());
+                }
+
+                catch (const OrganicException& e)
+                {
+                    delete tokens;
+
+                    throw;
+                }
             }
 
             else
             {
-                tokens.push_back(new Subtract(SourceLocation(source, current, current + 1)));
+                tokens->push(new Subtract(SourceLocation(source, current, current + 1)));
 
                 current++;
             }
@@ -189,21 +206,21 @@ TokenIterator* Tokenizer::tokenizeProgram()
 
         else if (source->get(current) == '*')
         {
-            tokens.push_back(new Multiply(SourceLocation(source, current, current + 1)));
+            tokens->push(new Multiply(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '/')
         {
-            tokens.push_back(new Divide(SourceLocation(source, current, current + 1)));
+            tokens->push(new Divide(SourceLocation(source, current, current + 1)));
 
             current++;
         }
 
         else if (source->get(current) == '^')
         {
-            tokens.push_back(new Power(SourceLocation(source, current, current + 1)));
+            tokens->push(new Power(SourceLocation(source, current, current + 1)));
 
             current++;
         }
@@ -212,14 +229,14 @@ TokenIterator* Tokenizer::tokenizeProgram()
         {
             if (current < source->length() - 1 && source->get(current + 1) == '=')
             {
-                tokens.push_back(new LessEqual(SourceLocation(source, current, current + 2)));
+                tokens->push(new LessEqual(SourceLocation(source, current, current + 2)));
 
                 current++;
             }
 
             else
             {
-                tokens.push_back(new Less(SourceLocation(source, current, current + 1)));
+                tokens->push(new Less(SourceLocation(source, current, current + 1)));
             }
 
             current++;
@@ -229,14 +246,14 @@ TokenIterator* Tokenizer::tokenizeProgram()
         {
             if (current < source->length() - 1 && source->get(current + 1) == '=')
             {
-                tokens.push_back(new GreaterEqual(SourceLocation(source, current, current + 2)));
+                tokens->push(new GreaterEqual(SourceLocation(source, current, current + 2)));
 
                 current++;
             }
 
             else
             {
-                tokens.push_back(new Greater(SourceLocation(source, current, current + 1)));
+                tokens->push(new Greater(SourceLocation(source, current, current + 1)));
             }
 
             current++;
@@ -244,30 +261,52 @@ TokenIterator* Tokenizer::tokenizeProgram()
 
         else if (source->get(current) == '"')
         {
-            tokens.push_back(tokenizeString());
+            try
+            {
+                tokens->push(tokenizeString());
+            }
+
+            catch (const OrganicException& e)
+            {
+                delete tokens;
+
+                throw;
+            }
         }
 
         else if (isdigit(source->get(current)))
         {
-            tokens.push_back(tokenizeNumber());
+            try
+            {
+                tokens->push(tokenizeNumber());
+            }
+
+            catch (const OrganicException& e)
+            {
+                delete tokens;
+
+                throw;
+            }
         }
 
         else if (isalpha(source->get(current)) || source->get(current) == '_')
         {
-            tokens.push_back(tokenizeIdentifier());
+            tokens->push(tokenizeIdentifier());
         }
 
         else
         {
+            delete tokens;
+
             throw OrganicParseException("Unrecognized symbol \"" + source->get(current, 1) + "\".", SourceLocation(source, current, current + 1));
         }
 
         skipWhitespace();
     }
 
-    tokens.push_back(new Eof(SourceLocation(source, source->length(), source->length())));
+    tokens->push(new Eof(SourceLocation(source, source->length(), source->length())));
 
-    return new TokenIterator(tokens);
+    return tokens;
 }
 
 const Token* Tokenizer::tokenizeString()

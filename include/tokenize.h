@@ -28,8 +28,12 @@ private:
 
 struct TokenIterator
 {
-    TokenIterator(const std::vector<const Token*>& tokens);
     ~TokenIterator();
+
+    inline void push(const Token* token)
+    {
+        tokens.push_back(token);
+    }
 
     const Token* peek(const size_t offset = 0) const;
 
@@ -84,6 +88,16 @@ struct TokenIterator
     }
 
     TokenIterator* drop(const size_t count = 1);
+
+    template <typename T> const T* last()
+    {
+        if (tokens.empty())
+        {
+            return nullptr;
+        }
+
+        return dynamic_cast<const T*>(tokens.back());
+    }
 
 private:
     std::vector<const Token*> tokens;

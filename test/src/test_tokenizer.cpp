@@ -43,7 +43,9 @@ void TestTokenizer::checkList(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean());
 
-    Parser::TokenIterator* tokens = Parser::Tokenizer::tokenize(new SourceProvider(info->getSource()));
+    const SourceProvider* source = new SourceProvider(info->getSource());
+
+    Parser::TokenIterator* tokens = Parser::Tokenizer::tokenize(source);
 
     for (const TOMLValue* token : info->getValue("tokens")->asArray())
     {
@@ -58,6 +60,7 @@ void TestTokenizer::checkList(const OTest* info)
     assert("Tokenized list matches expected list", tokens->peek()->eof());
 
     delete tokens;
+    delete source;
 
     endTest(info->getValue("name")->asString());
 }
@@ -66,9 +69,11 @@ void TestTokenizer::expectError(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean());
 
+    const SourceProvider* source = new SourceProvider(info->getSource());
+
     try
     {
-        delete Parser::Tokenizer::tokenize(new SourceProvider(info->getSource()));
+        delete Parser::Tokenizer::tokenize(source);
 
         fail("Tokenizer did not throw any errors.");
     }
@@ -82,6 +87,8 @@ void TestTokenizer::expectError(const OTest* info)
     {
         fail("Tokenizer did not throw the expected error.");
     }
+
+    delete source;
 
     endTest(info->getValue("name")->asString());
 }
