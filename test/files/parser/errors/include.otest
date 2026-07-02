@@ -1,0 +1,106 @@
+name = "Include with no file name"
+line = 2
+character = 9
+error = 'Expected file path, but received ")".'
+
+---
+
+include()
+
+---
+
+name = "Include with empty file name"
+line = 2
+character = 1
+error = "This include does not specify a source file, it will have no effect."
+warn = true
+
+---
+
+include("")
+
+---
+
+name = "Include non-existent file"
+line = 2
+character = 1
+error = 'Source file "fileymcfileface.organic" does not exist.'
+
+---
+
+include("fileymcfileface.organic")
+
+---
+
+name = "Include directory"
+line = 2
+character = 1
+error = '"sources" is not a file.'
+
+---
+
+include("sources")
+
+---
+
+name = "Reassign included variable"
+line = 4
+character = 1
+error = 'A variable already exists with the name "test".'
+
+---
+
+include("sources/include.organic")
+
+test = 1
+
+---
+
+name = "Redefine included function"
+line = 4
+character = 1
+error = 'A function already exists with the name "func".'
+
+---
+
+include("sources/include.organic")
+
+func() = {}
+
+---
+
+name = "Include current file"
+line = 2
+character = 1
+error = 'Source file "include.otest" is the current file, this include will be ignored.'
+warn = true
+
+---
+
+include("include.otest")
+
+---
+
+name = "Include file twice"
+line = 3
+character = 1
+error = 'Source file "sources/include.organic" has already been included, this include will be ignored.'
+warn = true
+
+---
+
+include("sources/include.organic")
+include("sources/include.organic")
+
+---
+
+name = "Include after instruction"
+line = 4
+character = 1
+error = "Includes must come before all other instructions."
+
+---
+
+test = 0
+
+include("sources/include.organic")

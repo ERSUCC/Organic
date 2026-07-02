@@ -24,6 +24,19 @@ const Path SourceProvider::path() const
     return Path::relative(".");
 }
 
+NamedSourceProvider::NamedSourceProvider(const Path& file, const std::string& source) :
+    SourceProvider(source), file(file) {}
+
+std::string NamedSourceProvider::description() const
+{
+    return "\"" + file.string() + "\"";
+}
+
+const Path NamedSourceProvider::path() const
+{
+    return file;
+}
+
 FileProvider* FileProvider::create(const Path& file)
 {
     std::string source;

@@ -66,7 +66,7 @@ const Path Path::parent() const
     return Path(path.parent_path());
 }
 
-std::vector<Path> Path::children() const
+std::vector<Path> Path::children(const bool includeDirs) const
 {
     if (isDirectory())
     {
@@ -74,7 +74,10 @@ std::vector<Path> Path::children() const
 
         for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path))
         {
-            paths.push_back(Path(entry.path()));
+            if (!entry.is_directory() || includeDirs)
+            {
+                paths.push_back(Path(entry.path()));
+            }
         }
 
         return paths;

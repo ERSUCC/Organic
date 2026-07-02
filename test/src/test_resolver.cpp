@@ -43,22 +43,25 @@ void TestResolver::expectSuccess(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean());
 
+    const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
+
+    const Parser::Program* program = Parser::Parser::parseSource(source);
+
+    const Parser::TypeResolver* resolver = new Parser::TypeResolver();
+
     try
     {
-        const SourceProvider* source = new SourceProvider(info->getSource());
-
-        const Parser::Program* program = Parser::Parser::parseSource(source);
-
-        program->resolveTypes(new Parser::TypeResolver());
-
-        delete program;
-        delete source;
+        program->resolveTypes(resolver);
     }
 
     catch (const OrganicException& e)
     {
         fail("Expected success, received an error.");
     }
+
+    delete resolver;
+    delete program;
+    delete source;
 
     endTest(info->getValue("name")->asString());
 }
@@ -67,16 +70,15 @@ void TestResolver::expectError(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean());
 
+    const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
+
+    const Parser::Program* program = Parser::Parser::parseSource(source);
+
+    const Parser::TypeResolver* resolver = new Parser::TypeResolver();
+
     try
     {
-        const SourceProvider* source = new SourceProvider(info->getSource());
-
-        const Parser::Program* program = Parser::Parser::parseSource(source);
-
-        program->resolveTypes(new Parser::TypeResolver());
-
-        delete program;
-        delete source;
+        program->resolveTypes(resolver);
 
         fail("Type resolver did not throw any errors.");
     }
@@ -90,6 +92,10 @@ void TestResolver::expectError(const OTest* info)
     {
         fail("Parser did not throw the expected error.");
     }
+
+    delete resolver;
+    delete program;
+    delete source;
 
     endTest(info->getValue("name")->asString());
 }

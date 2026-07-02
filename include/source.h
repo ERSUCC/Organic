@@ -47,6 +47,19 @@ private:
 
 };
 
+struct NamedSourceProvider : public SourceProvider
+{
+    NamedSourceProvider(const Path& file, const std::string& source);
+
+    std::string description() const override;
+
+    const Path path() const override;
+
+private:
+    const Path file;
+
+};
+
 struct FileProvider : public SourceProvider
 {
     static FileProvider* create(const Path& file);

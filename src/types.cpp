@@ -5,6 +5,8 @@ using namespace Parser;
 Type::Type(const TypeConstant base, const std::string str) :
     base(base), str(str) {}
 
+Type::~Type() {}
+
 TypeConstant Type::baseType() const
 {
     return base;

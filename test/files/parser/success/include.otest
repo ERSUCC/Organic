@@ -1,0 +1,27 @@
+name = "Included variable in assignment"
+
+---
+
+include("sources/include.organic")
+
+test2 = test
+
+---
+
+name = "Included variable as function input"
+
+---
+
+include("sources/include.organic")
+
+sine(frequency: test)
+
+---
+
+name = "Included function as function input"
+
+---
+
+include("sources/include.organic")
+
+sine(frequency: func())

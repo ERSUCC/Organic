@@ -34,7 +34,6 @@ struct Utils
 
     static void printInfo();
     static void setWarnLevel(const WarnLevel level);
-    static void includeWarning(const std::string message, const SourceLocation& location);
     static void parseWarning(const std::string message, const SourceLocation& location);
 
     void setSeed(const std::optional<size_t>& seed);

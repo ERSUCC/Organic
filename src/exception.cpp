@@ -24,6 +24,3 @@ OrganicAudioException::OrganicAudioException(const std::string message) :
 
 OrganicParseException::OrganicParseException(const std::string message, const SourceLocation& location) :
     OrganicException("Parse error in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t", message), location(location) {}
-
-OrganicIncludeException::OrganicIncludeException(const std::string message, const SourceLocation& location) :
-    OrganicException("Include error in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t", message), location(location) {}

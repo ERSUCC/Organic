@@ -239,16 +239,16 @@ struct InputRef : public Identifier
 
 struct FunctionDef : public Identifier
 {
-    FunctionDef(const SourceLocation location, const std::vector<const InputDef*>& inputs, const std::vector<const Token*>& instructions);
+    FunctionDef(const SourceLocation location, const std::vector<const InputDef*>& inputs, const Program* program);
     ~FunctionDef();
 
-    const SharedType type() const override;
     const SharedType returnType() const;
 
     void resolveTypes(const TypeResolver* visitor) const override;
 
     const std::vector<const InputDef*> inputs;
-    const std::vector<const Token*> instructions;
+
+    const Program* program;
 };
 
 struct FunctionRef : public Identifier
@@ -291,7 +291,7 @@ struct ArgumentList : public Token
 
 struct List : public Token
 {
-    List(const SourceLocation location, const std::vector<const Token*> values);
+    List(const SourceLocation location, const std::vector<const Token*>& values);
     ~List();
 
     const SharedType type() const override;
@@ -734,7 +734,7 @@ struct GreaterEqualAlias : public CallAlias
 
 struct Program : public Token
 {
-    Program(const SourceLocation location, const std::vector<const Token*> instructions);
+    Program(const SourceLocation location, const std::vector<const Token*>& instructions);
     ~Program();
 
     void resolveTypes(const TypeResolver* visitor) const override;

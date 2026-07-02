@@ -96,25 +96,29 @@ private:
 
 struct OTest
 {
-    static std::vector<const OTest*> read(const Path& path);
+    static std::vector<const OTest*> read(const Path& file);
 
     ~OTest();
 
     const TOMLValue* getValue(const std::string& key) const;
+
+    const Path path() const;
 
     const std::string& getSource() const;
 
 private:
     static bool keyChar(const char c);
 
-    static TOMLValue* dummyValue;
+    OTest(const Path& file, std::istringstream& stream);
 
-    OTest(const Path& path, std::istringstream& stream);
+    void readEntry(std::istringstream& stream);
 
-    void readEntry(const Path& path, std::istringstream& stream);
+    const Path file;
 
     std::unordered_map<std::string, const TOMLValue*> entries;
 
     std::string source;
+
+    const TOMLValue* dummyValue = new TOMLValue();
 
 };

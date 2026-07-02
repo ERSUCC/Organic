@@ -41,10 +41,3 @@ struct OrganicParseException : public OrganicException
 
     const SourceLocation location;
 };
-
-struct OrganicIncludeException : public OrganicException
-{
-    OrganicIncludeException(const std::string message, const SourceLocation& location);
-
-    const SourceLocation location;
-};

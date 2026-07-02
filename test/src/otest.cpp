@@ -254,13 +254,13 @@ bool TOMLBoolean::asBoolean() const
     return value;
 }
 
-std::vector<const OTest*> OTest::read(const Path& path)
+std::vector<const OTest*> OTest::read(const Path& file)
 {
     std::string str;
 
-    if (!path.readToString(str))
+    if (!file.readToString(str))
     {
-        throw OrganicFileException("Could not read \"" + path.string() + "\".");
+        throw OrganicFileException("Could not read \"" + file.string() + "\".");
     }
 
     std::vector<const OTest*> tests;
@@ -276,7 +276,7 @@ std::vector<const OTest*> OTest::read(const Path& path)
     {
         try
         {
-            tests.push_back(new OTest(path, stream));
+            tests.push_back(new OTest(file, stream));
         }
 
         catch (const OrganicException& e)
@@ -304,6 +304,8 @@ OTest::~OTest()
     {
         delete entry.second;
     }
+
+    delete dummyValue;
 }
 
 const TOMLValue* OTest::getValue(const std::string& key) const
@@ -313,14 +315,12 @@ const TOMLValue* OTest::getValue(const std::string& key) const
         return entries.at(key);
     }
 
-    static TOMLValue* dummyValue;
-
-    if (!dummyValue)
-    {
-        dummyValue = new TOMLValue();
-    }
-
     return dummyValue;
+}
+
+const Path OTest::path() const
+{
+    return file;
 }
 
 const std::string& OTest::getSource() const
@@ -333,7 +333,8 @@ bool OTest::keyChar(const char c)
     return isalnum(c) || c == '-' || c == '_';
 }
 
-OTest::OTest(const Path& path, std::istringstream& stream)
+OTest::OTest(const Path& file, std::istringstream& stream) :
+    file(file)
 {
     while (!stream.eof())
     {
@@ -349,7 +350,7 @@ OTest::OTest(const Path& path, std::istringstream& stream)
             break;
         }
 
-        readEntry(path, stream);
+        readEntry(stream);
     }
 
     const std::streampos split = stream.tellg();
@@ -364,7 +365,7 @@ OTest::OTest(const Path& path, std::istringstream& stream)
     stream.ignore(4);
 }
 
-void OTest::readEntry(const Path& path, std::istringstream& stream)
+void OTest::readEntry(std::istringstream& stream)
 {
     std::string key;
 
@@ -380,7 +381,7 @@ void OTest::readEntry(const Path& path, std::istringstream& stream)
 
     if (stream.get() != '=')
     {
-        throw OrganicFileException("Invalid format in test file \"" + path.string() + "\".");
+        throw OrganicFileException("Invalid format in test file \"" + file.string() + "\".");
     }
 
     while (isspace(stream.peek()))
@@ -395,6 +396,6 @@ void OTest::readEntry(const Path& path, std::istringstream& stream)
 
     else
     {
-        throw OrganicFileException("Invalid format in test file \"" + path.string() + "\".");
+        throw OrganicFileException("Invalid format in test file \"" + file.string() + "\".");
     }
 }

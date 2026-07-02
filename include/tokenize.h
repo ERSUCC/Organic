@@ -8,6 +8,7 @@
 #include "exception.h"
 #include "location.h"
 #include "source.h"
+#include "token_decls.h"
 #include "token.h"
 #include "utils.h"
 
@@ -47,13 +48,13 @@ struct TokenIterator
         return nullptr;
     }
 
-    template <typename T> const T* require(const std::string& expected)
+    template <typename T> UniqueToken<T> require(const std::string& expected)
     {
         if (const T* token = dynamic_cast<const T*>(tokens[current]))
         {
             tokens[current++] = nullptr;
 
-            return token;
+            return UniqueToken<T>(token);
         }
 
         throw OrganicTokenException(tokens[current], expected);
@@ -73,7 +74,7 @@ struct TokenIterator
         return this;
     }
 
-    template <typename T = Token> const T* take()
+    template <typename T = Token> UniqueToken<T> take()
     {
         if (current < tokens.size() - 1)
         {
@@ -81,10 +82,10 @@ struct TokenIterator
 
             tokens[current++] = nullptr;
 
-            return token;
+            return UniqueToken<T>(token);
         }
 
-        return dynamic_cast<const T*>(tokens[current]);
+        return UniqueToken<T>(dynamic_cast<const T*>(tokens[current]));
     }
 
     TokenIterator* drop(const size_t count = 1);

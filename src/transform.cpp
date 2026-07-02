@@ -45,12 +45,12 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::FunctionRef* toke
         inputs[input] = variable;
     }
 
-    for (size_t i = 0; i < token->definition->instructions.size() - 1; i++)
+    for (size_t i = 0; i < token->definition->program->instructions.size() - 1; i++)
     {
-        token->definition->instructions[i]->transform(this);
+        token->definition->program->instructions[i]->transform(this);
     }
 
-    Engine::ValueObject* value = token->definition->instructions.back()->transform(this);
+    Engine::ValueObject* value = token->definition->program->instructions.back()->transform(this);
 
     return new Engine::Lambda(placeholders, value);
 }
@@ -266,12 +266,12 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
         inputs[input] = transformArgument(token->arguments, input->string());
     }
 
-    for (size_t i = 0; i < token->function->definition->instructions.size() - 1; i++)
+    for (size_t i = 0; i < token->function->definition->program->instructions.size() - 1; i++)
     {
-        token->function->definition->instructions[i]->transform(this);
+        token->function->definition->program->instructions[i]->transform(this);
     }
 
-    return token->function->definition->instructions.back()->transform(this);
+    return token->function->definition->program->instructions.back()->transform(this);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::AddAlias* token)
@@ -326,17 +326,17 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::GreaterEqualAlias
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Program* token)
 {
-    std::vector<Engine::AudioSource*> audioSources;
+    std::vector<Engine::AudioSource*> sources;
 
     for (const Parser::Token* instruction : token->instructions)
     {
-        if (Engine::AudioSource* audioSource = dynamic_cast<Engine::AudioSource*>(instruction->transform(this)))
+        if (Engine::AudioSource* source = dynamic_cast<Engine::AudioSource*>(instruction->transform(this)))
         {
-            audioSources.push_back(audioSource);
+            sources.push_back(source);
         }
     }
 
-    return new Engine::Program(audioSources);
+    return new Engine::Program(sources);
 }
 
 Engine::ValueObject* TokenTransformer::transformArgument(const Parser::ArgumentList* arguments, const std::string name)

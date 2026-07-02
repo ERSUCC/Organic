@@ -28,33 +28,6 @@ void Utils::setWarnLevel(const WarnLevel level)
     Utils::get()->warnLevel = level;
 }
 
-void Utils::includeWarning(const std::string message, const SourceLocation& location)
-{
-    Utils* utils = Utils::get();
-
-    if (utils->warnLevel == WarnLevel::Suppress)
-    {
-        return;
-    }
-
-    if (utils->warnLevel == WarnLevel::Error)
-    {
-        throw OrganicIncludeException(message, location);
-    }
-
-    if (!utils->firstWarning)
-    {
-        std::cout << "\n";
-    }
-
-    else
-    {
-        utils->firstWarning = false;
-    }
-
-    std::cout << "Include warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
-}
-
 void Utils::parseWarning(const std::string message, const SourceLocation& location)
 {
     Utils* utils = Utils::get();

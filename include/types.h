@@ -44,6 +44,8 @@ struct Type
 {
     Type(const TypeConstant base, const std::string str);
 
+    virtual ~Type();
+
     TypeConstant baseType() const;
 
     std::string name() const;

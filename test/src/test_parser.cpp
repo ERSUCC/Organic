@@ -43,19 +43,19 @@ void TestParser::expectSuccess(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean());
 
+    const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
+
     try
     {
-        const SourceProvider* source = new SourceProvider(info->getSource());
-
         delete Parser::Parser::parseSource(source);
-
-        delete source;
     }
 
     catch (const OrganicException& e)
     {
         fail("Source was not parsed successfully.");
     }
+
+    delete source;
 
     endTest(info->getValue("name")->asString());
 }
@@ -64,13 +64,11 @@ void TestParser::expectError(const OTest* info)
 {
     beginTest(info->getValue("warn")->asBoolean());
 
+    const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
+
     try
     {
-        const SourceProvider* source = new SourceProvider(info->getSource());
-
         delete Parser::Parser::parseSource(source);
-
-        delete source;
 
         fail("Parser did not throw any errors.");
     }
@@ -84,6 +82,8 @@ void TestParser::expectError(const OTest* info)
     {
         fail("Parser did not throw the expected error.");
     }
+
+    delete source;
 
     endTest(info->getValue("name")->asString());
 }

@@ -3,9 +3,11 @@
 #include <algorithm>
 #include <filesystem>
 #include <functional>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "exception.h"
@@ -21,23 +23,26 @@ namespace Parser {
 
 struct ParserContext
 {
-    ParserContext(ParserContext* parent, const std::string name, const std::vector<const InputDef*>& inputs);
+    ParserContext(ParserContext* parent, const std::string name, const std::vector<UniqueToken<InputDef>>& inputs);
+    ~ParserContext();
 
     const VariableDef* addVariable(const Identifier* token, const Token* value);
-    const FunctionDef* addFunction(const Identifier* token, const std::vector<const InputDef*>& inputs, const std::vector<const Token*>& instructions);
+    const FunctionDef* addFunction(const Identifier* token, std::vector<UniqueToken<InputDef>>& inputs, const Program* program);
 
     const Identifier* findIdentifier(const Identifier* token);
     const FunctionRef* findFunction(const Identifier* token);
 
+    void addInstruction(const Token* instruction);
+
+    void checkNameConflicts(const Identifier* token) const;
+    bool checkRecursive(const Identifier* token) const;
     void checkUsage() const;
-    void merge(const ParserContext* context);
+
+    const Program* buildProgram(const SourceProvider* source);
 
     ParserContext* parent;
 
 private:
-    void checkNameConflicts(const Identifier* token) const;
-    bool checkRecursive(const Identifier* token) const;
-
     const std::string name;
 
     std::unordered_map<std::string, const InputDef*> inputs;
@@ -45,6 +50,8 @@ private:
     std::unordered_map<std::string, const FunctionDef*> functions;
 
     std::unordered_set<const Identifier*> used;
+
+    std::vector<const Token*> instructions;
 
 };
 
@@ -56,11 +63,12 @@ private:
     Parser(const SourceProvider* source, ParserContext* context, std::unordered_set<Path, Path::Hash, Path::Equals>& includedPaths);
     ~Parser();
 
-    const Program* parse();
-    const Program* parseInclude();
-    const Token* parseInstruction();
-    const FunctionDef* parseDefine();
-    const VariableDef* parseAssign();
+    const void parseProgram();
+    const void parseInclude();
+    const void parseInstruction();
+    const void parseAssign();
+    const void parseDefine();
+
     const Call* parseCall();
     const Argument* parseArgument();
     const Token* parseExpression();

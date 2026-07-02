@@ -25,6 +25,8 @@ int main(int argc, char** argv)
     {
         TestUtils::printError(e.what());
 
+        delete Utils::get();
+
         return 1;
     }
 
@@ -35,6 +37,8 @@ int main(int argc, char** argv)
     if (failures == 0)
     {
         TestUtils::printSuccess("\nAll tests passed.");
+
+        delete Utils::get();
 
         return 0;
     }
@@ -48,6 +52,8 @@ int main(int argc, char** argv)
     {
         TestUtils::printError("\n" + std::to_string(failures) + " failing tests.");
     }
+
+    delete Utils::get();
 
     return 1;
 }

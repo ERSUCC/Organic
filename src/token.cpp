@@ -189,8 +189,8 @@ Engine::ValueObject* InputRef::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-FunctionDef::FunctionDef(const SourceLocation location, const std::vector<const InputDef*>& inputs, const std::vector<const Token*>& instructions) :
-    Identifier(location), inputs(inputs), instructions(instructions) {}
+FunctionDef::FunctionDef(const SourceLocation location, const std::vector<const InputDef*>& inputs, const Program* program) :
+    Identifier(location), inputs(inputs), program(program) {}
 
 FunctionDef::~FunctionDef()
 {
@@ -199,27 +199,12 @@ FunctionDef::~FunctionDef()
         delete input;
     }
 
-    for (const Token* instruction : instructions)
-    {
-        delete instruction;
-    }
-}
-
-const SharedType FunctionDef::type() const
-{
-    std::unordered_map<std::string, const SharedType> inputTypes;
-
-    for (const InputDef* input : inputs)
-    {
-        inputTypes.insert(std::make_pair(input->string(), input->type()));
-    }
-
-    return SharedType(new LambdaType(inputTypes, returnType()));
+    delete program;
 }
 
 const SharedType FunctionDef::returnType() const
 {
-    return instructions.back()->type();
+    return program->instructions.back()->type();
 }
 
 void FunctionDef::resolveTypes(const TypeResolver* visitor) const
@@ -232,7 +217,14 @@ FunctionRef::FunctionRef(const SourceLocation location, const FunctionDef* defin
 
 const SharedType FunctionRef::type() const
 {
-    return definition->returnType();
+    std::unordered_map<std::string, const SharedType> inputTypes;
+
+    for (const InputDef* input : definition->inputs)
+    {
+        inputTypes.insert(std::make_pair(input->string(), input->type()));
+    }
+
+    return SharedType(new LambdaType(inputTypes, definition->returnType()));
 }
 
 Engine::ValueObject* FunctionRef::transform(TokenTransformer* visitor) const
@@ -289,7 +281,7 @@ void ArgumentList::check() const
     }
 }
 
-List::List(const SourceLocation location, const std::vector<const Token*> values) :
+List::List(const SourceLocation location, const std::vector<const Token*>& values) :
     Token(location), values(values) {}
 
 List::~List()
@@ -571,7 +563,7 @@ AudioSource::AudioSource(const SourceLocation location, ArgumentList* arguments)
     Call(location, arguments, new AudioSourceType()) {}
 
 EmptyAudioSource::EmptyAudioSource(const SourceLocation location) :
-    AudioSource(location, {}) {}
+    AudioSource(location, new ArgumentList(location, {}, "")) {}
 
 Engine::ValueObject* EmptyAudioSource::transform(TokenTransformer* visitor) const
 {
@@ -699,7 +691,7 @@ Effect::Effect(const SourceLocation location, ArgumentList* arguments) :
     Call(location, arguments, new EffectType()) {}
 
 EmptyEffect::EmptyEffect(const SourceLocation location) :
-    Effect(location, {}) {}
+    Effect(location, new ArgumentList(location, {}, "")) {}
 
 Engine::ValueObject* EmptyEffect::transform(TokenTransformer* visitor) const
 {
@@ -794,7 +786,7 @@ CallUser::~CallUser()
 
 const SharedType CallUser::type() const
 {
-    return function->type();
+    return function->definition->returnType();
 }
 
 void CallUser::resolveTypes(const TypeResolver* visitor) const
@@ -895,7 +887,7 @@ Engine::ValueObject* GreaterEqualAlias::transform(TokenTransformer* visitor) con
     return visitor->transform(this);
 }
 
-Program::Program(const SourceLocation location, const std::vector<const Token*> instructions) :
+Program::Program(const SourceLocation location, const std::vector<const Token*>& instructions) :
     Token(location), instructions(instructions) {}
 
 Program::~Program()

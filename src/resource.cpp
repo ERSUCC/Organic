@@ -6,12 +6,12 @@ Resource::Resource(const Path& path, const SourceLocation location)
 {
     if (!path.exists())
     {
-        throw OrganicIncludeException("Audio file \"" + path.string() + "\" does not exist.", location);
+        throw OrganicParseException("Audio file \"" + path.string() + "\" does not exist.", location);
     }
 
     if (!path.isFile())
     {
-        throw OrganicIncludeException("\"" + path.string() + "\" is not a file.", location);
+        throw OrganicParseException("\"" + path.string() + "\" is not a file.", location);
     }
 
     SndfileHandle* file = new SndfileHandle(path.string());

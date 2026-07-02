@@ -19,9 +19,11 @@ void TypeResolver::resolveTypes(const FunctionDef* token) const
         input->resolveTypes(this);
     }
 
-    for (const Token* instruction : token->instructions)
+    token->program->resolveTypes(this);
+
+    if (token->program->instructions.empty() || token->returnType()->checkType(SharedType(new NoneType())))
     {
-        instruction->resolveTypes(this);
+        throw OrganicParseException("The function \"" + token->string() + "\" does not return a value.", token->location);
     }
 }
 
@@ -364,7 +366,7 @@ void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::stri
 
     if (defaultValue)
     {
-        arguments->addDefault(name, SharedToken(defaultValue));
+        arguments->addDefault(name, defaultValue);
     }
 
     else

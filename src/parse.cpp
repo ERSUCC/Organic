@@ -40,38 +40,48 @@ static std::unordered_map<std::string, std::function<const Call* (const SourceLo
     { "reverb", CALL(Reverb) }
 };
 
-ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<const InputDef*>& inputs) :
+ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<UniqueToken<InputDef>>& inputs) :
     parent(parent), name(name)
 {
-    for (const InputDef* input : inputs)
+    for (const UniqueToken<InputDef>& input : inputs)
     {
-        this->inputs[input->string()] = input;
+        this->inputs[input->string()] = input.get();
+    }
+}
+
+ParserContext::~ParserContext()
+{
+    for (const Token* instruction : instructions)
+    {
+        delete instruction;
     }
 }
 
 const VariableDef* ParserContext::addVariable(const Identifier* token, const Token* value)
 {
-    checkNameConflicts(token);
-
     const VariableDef* variable = new VariableDef(token->location, value);
 
     variables[token->string()] = variable;
 
+    instructions.push_back(variable);
+
     return variable;
 }
 
-const FunctionDef* ParserContext::addFunction(const Identifier* token, const std::vector<const InputDef*>& inputs, const std::vector<const Token*>& instructions)
+const FunctionDef* ParserContext::addFunction(const Identifier* token, std::vector<UniqueToken<InputDef>>& inputs, const Program* program)
 {
-    if (checkRecursive(token))
+    std::vector<const InputDef*> owned;
+
+    for (UniqueToken<InputDef>& input : inputs)
     {
-        throw OrganicParseException("Redefining a function in its own definition is not allowed.", token->location);
+        owned.push_back(input.release());
     }
 
-    checkNameConflicts(token);
-
-    const FunctionDef* function = new FunctionDef(token->location, inputs, instructions);
+    const FunctionDef* function = new FunctionDef(token->location, owned, program);
 
     functions[token->string()] = function;
+
+    instructions.push_back(function);
 
     return function;
 }
@@ -139,6 +149,36 @@ const FunctionRef* ParserContext::findFunction(const Identifier* token)
     throw OrganicParseException("No function exists with the name \"" + token->string() + "\".", token->location);
 }
 
+void ParserContext::addInstruction(const Token* instruction)
+{
+    instructions.push_back(instruction);
+}
+
+void ParserContext::checkNameConflicts(const Identifier* token) const
+{
+    const std::string name = token->string();
+
+    if (inputs.count(name))
+    {
+        throw OrganicParseException("An input already exists with the name \"" + name + "\".", token->location);
+    }
+
+    if (variables.count(name))
+    {
+        throw OrganicParseException("A variable already exists with the name \"" + name + "\".", token->location);
+    }
+
+    if (functions.count(name))
+    {
+        throw OrganicParseException("A function already exists with the name \"" + name + "\".", token->location);
+    }
+}
+
+bool ParserContext::checkRecursive(const Identifier* token) const
+{
+    return name == token->string() || (parent && parent->checkRecursive(token));
+}
+
 void ParserContext::checkUsage() const
 {
     for (const std::pair<std::string, const InputDef*>& pair : inputs)
@@ -166,62 +206,43 @@ void ParserContext::checkUsage() const
     }
 }
 
-void ParserContext::merge(const ParserContext* context)
+const Program* ParserContext::buildProgram(const SourceProvider* source)
 {
-    for (const std::pair<std::string, const InputDef*> input : context->inputs)
-    {
-        checkNameConflicts(input.second);
+    const Program* program = new Program(SourceLocation(source, 0, source->length()), instructions);
 
-        inputs[input.first] = input.second;
-    }
+    instructions.clear();
 
-    for (const std::pair<std::string, const VariableDef*> variable : context->variables)
-    {
-        checkNameConflicts(variable.second);
-
-        variables[variable.first] = variable.second;
-    }
-
-    for (const std::pair<std::string, const FunctionDef*> function : context->functions)
-    {
-        checkNameConflicts(function.second);
-
-        functions[function.first] = function.second;
-    }
-}
-
-void ParserContext::checkNameConflicts(const Identifier* token) const
-{
-    if (inputs.count(token->string()))
-    {
-        throw OrganicParseException("An input already exists with the name \"" + token->string() + "\".", token->location);
-    }
-
-    if (variables.count(token->string()))
-    {
-        throw OrganicParseException("A variable already exists with the name \"" + token->string() + "\".", token->location);
-    }
-
-    if (functions.count(token->string()))
-    {
-        throw OrganicParseException("A function already exists with the name \"" + token->string() + "\".", token->location);
-    }
-}
-
-bool ParserContext::checkRecursive(const Identifier* token) const
-{
-    return name == token->string() || (parent && parent->checkRecursive(token));
+    return program;
 }
 
 const Program* Parser::parseSource(const SourceProvider* source)
 {
+    ParserContext* context = new ParserContext(nullptr, "", {});
+
     std::unordered_set<Path, Path::Hash, Path::Equals> includedPaths = { source->path() };
 
-    Parser* parser = new Parser(source, new ParserContext(nullptr, "", {}), includedPaths);
+    Parser* parser = new Parser(source, context, includedPaths);
 
-    const Program* program = parser->parse();
+    try
+    {
+        parser->parseProgram();
+
+        context->checkUsage();
+    }
+
+    catch (const OrganicException& e)
+    {
+        delete parser;
+        delete context;
+
+        throw;
+    }
 
     delete parser;
+
+    const Program* program = context->buildProgram(source);
+
+    delete context;
 
     return program;
 }
@@ -231,55 +252,48 @@ Parser::Parser(const SourceProvider* source, ParserContext* context, std::unorde
 
 Parser::~Parser()
 {
-    delete context;
+    while (context->parent)
+    {
+        const ParserContext* inner = context;
+
+        context = context->parent;
+
+        delete inner;
+    }
+
     delete tokens;
 }
 
-const Program* Parser::parse()
+const void Parser::parseProgram()
 {
     tokens = Tokenizer::tokenize(source);
 
-    std::vector<const Token*> instructions;
-
     while (tokens->peek()->string() == "include" && tokens->peek<OpenParenthesis>(1))
     {
-        const Program* program = parseInclude();
-
-        for (const Token* instruction : program->instructions)
-        {
-            instructions.push_back(instruction);
-        }
-
-        delete program;
+        parseInclude();
     }
 
     while (!tokens->peek()->eof())
     {
-        instructions.push_back(parseInstruction());
+        parseInstruction();
     }
-
-    context->checkUsage();
-
-    return new Program(SourceLocation(source, 0, source->length()), instructions);
 }
 
-const Program* Parser::parseInclude()
+const void Parser::parseInclude()
 {
     const SourceLocation location = tokens->peek()->location;
 
-    const String* str = tokens->drop(2)->require<String>("file path");
+    const UniqueToken<String> str = tokens->drop(2)->require<String>("file path");
 
     tokens->expect<CloseParenthesis>("\")\"");
 
     const std::filesystem::path file = Path::formatPath(str->str);
 
-    delete str;
-
     if (file.empty())
     {
-        Utils::includeWarning("This include does not specify a source file, it will have no effect.", location);
+        Utils::parseWarning("This include does not specify a source file, it will have no effect.", location);
 
-        return new Program(location, {});
+        return;
     }
 
     const Path sourcePath = source->path();
@@ -287,51 +301,57 @@ const Program* Parser::parseInclude()
 
     if (!includePath.exists())
     {
-        throw OrganicIncludeException("Source file \"" + includePath.string() + "\" does not exist.", location);
+        throw OrganicParseException("Source file \"" + str->str + "\" does not exist.", location);
     }
 
     if (!includePath.isFile())
     {
-        throw OrganicIncludeException("\"" + includePath.string() + "\" is not a file.", location);
+        throw OrganicParseException("\"" + str->str + "\" is not a file.", location);
     }
 
     if (sourcePath.string() == includePath.string())
     {
-        Utils::includeWarning("Source file \"" + includePath.string() + "\" is the current file, this include will be ignored.", location);
+        Utils::parseWarning("Source file \"" + str->str + "\" is the current file, this include will be ignored.", location);
 
-        return new Program(location, {});
+        return;
     }
 
     if (includedPaths.count(includePath))
     {
-        Utils::includeWarning("Source file \"" + includePath.string() + "\" has already been included, this include will be ignored.", location);
+        Utils::parseWarning("Source file \"" + str->str + "\" has already been included, this include will be ignored.", location);
 
-        return new Program(location, {});
+        return;
     }
 
     includedPaths.insert(includePath);
 
     const FileProvider* includeSource = FileProvider::create(includePath);
 
-    ParserContext* includeContext = new ParserContext(nullptr, "", {});
+    Parser* parser = new Parser(includeSource, context, includedPaths);
 
-    Parser* parser = new Parser(includeSource, includeContext, includedPaths);
+    try
+    {
+        parser->parseProgram();
+    }
 
-    const Program* program = parser->parse();
+    catch (const OrganicException& e)
+    {
+        delete includeSource;
 
-    context->merge(includeContext);
+        throw;
+    }
 
     delete parser;
-    delete includeContext;
-
-    return program;
+    delete includeSource;
 }
 
-const Token* Parser::parseInstruction()
+const void Parser::parseInstruction()
 {
     if (tokens->peek<Equals>(1))
     {
-        return parseAssign();
+        parseAssign();
+
+        return;
     }
 
     if (tokens->peek<OpenParenthesis>(1))
@@ -358,7 +378,9 @@ const Token* Parser::parseInstruction()
         {
             if (tokens->peek<OpenCurlyBracket>(++current))
             {
-                return parseDefine();
+                parseDefine();
+
+                return;
             }
 
             throw OrganicParseException("Function definitions must begin with \"{\".", tokens->peek(current)->location);
@@ -369,93 +391,27 @@ const Token* Parser::parseInstruction()
 
     if (tokens->peek<Equals>())
     {
+        const SourceLocation location = expression->location;
+
         if (dynamic_cast<const List*>(expression))
         {
-            throw OrganicParseException("Cannot assign a value to a list.", expression->location);
+            delete expression;
+
+            throw OrganicParseException("Cannot assign a value to a list.", location);
         }
 
         if (dynamic_cast<const Call*>(expression))
         {
-            throw OrganicParseException("Function definitions must begin with \"{\".", expression->location);
+            delete expression;
+
+            throw OrganicParseException("Function definitions must begin with \"{\".", location);
         }
     }
 
-    return expression;
+    context->addInstruction(expression);
 }
 
-const FunctionDef* Parser::parseDefine()
-{
-    const Identifier* name = tokens->take<Identifier>();
-
-    std::vector<const InputDef*> inputs;
-
-    if (tokens->peek<CloseParenthesis>(1))
-    {
-        tokens->drop(2);
-    }
-
-    else
-    {
-        do
-        {
-            tokens->drop();
-
-            const Identifier* input = tokens->require<Identifier>("input name");
-
-            if (std::find_if(inputs.begin(), inputs.end(), [=](const InputDef* def) { return input->string() == def->string(); }) != inputs.end())
-            {
-                throw OrganicParseException("Input \"" + input->string() + "\" specified more than once for function \"" + name->string() + "\".", input->location);
-            }
-
-            tokens->expect<Colon>("\":\" after input name");
-
-            inputs.push_back(new InputDef(input->location, SharedToken(parseExpression())));
-
-            delete input;
-        } while (tokens->peek<Comma>());
-
-        tokens->expect<CloseParenthesis>("\",\" or \")\"");
-    }
-
-    if (libraryFunctions.count(name->string()) || name->string() == "include")
-    {
-        throw OrganicParseException("A function already exists with the name \"" + name->string() + "\".", name->location);
-    }
-
-    context = new ParserContext(context, name->string(), inputs);
-
-    tokens->drop(2);
-
-    std::vector<const Token*> instructions;
-
-    while (!tokens->peek()->eof() && !tokens->peek<CloseCurlyBracket>())
-    {
-        instructions.push_back(parseInstruction());
-    }
-
-    tokens->expect<CloseCurlyBracket>("\"}\" at end of function definition");
-
-    if (instructions.empty())
-    {
-        throw OrganicParseException("The function \"" + name->string() + "\" does not return a value.", name->location);
-    }
-
-    context->checkUsage();
-
-    ParserContext* inner = context;
-
-    context = context->parent;
-
-    delete inner;
-
-    const FunctionDef* function = context->addFunction(name, inputs, instructions);
-
-    delete name;
-
-    return function;
-}
-
-const VariableDef* Parser::parseAssign()
+const void Parser::parseAssign()
 {
     if (const Constant* token = tokens->peek<Constant>())
     {
@@ -472,17 +428,15 @@ const VariableDef* Parser::parseAssign()
         throw OrganicParseException("Cannot assign a value to a string.", token->location);
     }
 
+    const UniqueToken<Identifier> name = tokens->take<Identifier>();
+
+    tokens->drop();
+
+    context->checkNameConflicts(name.get());
+
     try
     {
-        const Identifier* name = tokens->take<Identifier>();
-
-        tokens->drop();
-
-        const VariableDef* variable = context->addVariable(name, parseExpression());
-
-        delete name;
-
-        return variable;
+        context->addVariable(name.get(), parseExpression());
     }
 
     catch (const OrganicTokenException& e)
@@ -491,16 +445,87 @@ const VariableDef* Parser::parseAssign()
     }
 }
 
+const void Parser::parseDefine()
+{
+    const UniqueToken<Identifier> name = tokens->take<Identifier>();
+
+    std::vector<UniqueToken<InputDef>> inputs;
+
+    if (tokens->peek<CloseParenthesis>(1))
+    {
+        tokens->drop(2);
+    }
+
+    else
+    {
+        do
+        {
+            tokens->drop();
+
+            const UniqueToken<Identifier> input = tokens->require<Identifier>("input name");
+
+            for (const UniqueToken<InputDef>& def : inputs)
+            {
+                if (input->string() == def->string())
+                {
+                    throw OrganicParseException("Input \"" + input->string() + "\" specified more than once for function \"" + name->string() + "\".", input->location);
+                }
+            }
+
+            tokens->expect<Colon>("\":\" after input name");
+
+            inputs.emplace_back(new InputDef(input->location, SharedToken(parseExpression())));
+        } while (tokens->peek<Comma>());
+
+        tokens->expect<CloseParenthesis>("\",\" or \")\"");
+    }
+
+    if (libraryFunctions.count(name->string()) || name->string() == "include")
+    {
+        throw OrganicParseException("A function already exists with the name \"" + name->string() + "\".", name->location);
+    }
+
+    context->checkNameConflicts(name.get());
+
+    if (context->checkRecursive(name.get()))
+    {
+        throw OrganicParseException("Redefining a function in its own definition is not allowed.", name->location);
+    }
+
+    context = new ParserContext(context, name->string(), inputs);
+
+    tokens->drop(2);
+
+    while (!tokens->peek()->eof() && !tokens->peek<CloseCurlyBracket>())
+    {
+        parseInstruction();
+    }
+
+    tokens->expect<CloseCurlyBracket>("\"}\" at end of function definition");
+
+    context->checkUsage();
+
+    const Program* program = context->buildProgram(source);
+
+    const ParserContext* inner = context;
+
+    context = context->parent;
+
+    delete inner;
+
+    context->addFunction(name.get(), inputs, program);
+}
+
 const Call* Parser::parseCall()
 {
-    const Identifier* name = tokens->take<Identifier>();
+    const UniqueToken<Identifier> name = tokens->take<Identifier>();
 
     if (name->string() == "include")
     {
-        throw OrganicIncludeException("Includes must come before all other instructions.", name->location);
+        throw OrganicParseException("Includes must come before all other instructions.", name->location);
     }
 
-    std::vector<const Argument*> arguments;
+    std::vector<UniqueToken<Argument>> arguments;
 
     if (tokens->peek<CloseParenthesis>(1))
     {
@@ -515,9 +540,9 @@ const Call* Parser::parseCall()
 
             try
             {
-                const Argument* argument = parseArgument();
+                UniqueToken<Argument> argument = UniqueToken<Argument>(parseArgument());
 
-                for (const Argument* arg : arguments)
+                for (const UniqueToken<Argument>& arg : arguments)
                 {
                     if (arg->name == argument->name)
                     {
@@ -525,7 +550,7 @@ const Call* Parser::parseCall()
                     }
                 }
 
-                arguments.push_back(argument);
+                arguments.push_back(std::move(argument));
             }
 
             catch (const OrganicTokenException& e)
@@ -540,44 +565,39 @@ const Call* Parser::parseCall()
                     throw OrganicTokenException(e.token, "input name after \",\"");
                 }
 
-                throw e;
+                throw;
             }
         } while (tokens->peek<Comma>());
 
         tokens->expect<CloseParenthesis>("\")\" after input value");
     }
 
-    ArgumentList* argumentList = new ArgumentList(name->location, arguments, name->string());
+    std::vector<const Argument*> owned;
+
+    for (UniqueToken<Argument>& argument : arguments)
+    {
+        owned.push_back(argument.release());
+    }
+
+    ArgumentList* argumentList = new ArgumentList(name->location, owned, name->string());
 
     if (libraryFunctions.count(name->string()))
     {
-        const Call* call = libraryFunctions[name->string()](name->location, argumentList);
-
-        delete name;
-
-        return call;
+        return libraryFunctions[name->string()](name->location, argumentList);
     }
 
-    const CallUser* call = new CallUser(name->location, argumentList, context->findFunction(name));
-
-    delete name;
-
-    return call;
+    return new CallUser(name->location, argumentList, context->findFunction(name.get()));
 }
 
 const Argument* Parser::parseArgument()
 {
-    const Identifier* name = tokens->require<Identifier>("input name");
+    const UniqueToken<Identifier> name = tokens->require<Identifier>("input name");
 
     tokens->expect<Colon>("\":\" after input name");
 
     try
     {
-        const Argument* argument = new Argument(name->location, name->string(), SharedToken(parseExpression()));
-
-        delete name;
-
-        return argument;
+        return new Argument(name->location, name->string(), SharedToken(parseExpression()));
     }
 
     catch (const OrganicTokenException& e)
@@ -605,7 +625,7 @@ const List* Parser::parseList()
         throw OrganicParseException("Empty lists are not allowed.", location);
     }
 
-    std::vector<const Token*> items;
+    std::vector<UniqueToken<>> items;
 
     do
     {
@@ -613,7 +633,7 @@ const List* Parser::parseList()
 
         try
         {
-            items.push_back(parseExpression());
+            items.push_back(UniqueToken<>(parseExpression()));
         }
 
         catch (const OrganicTokenException& e)
@@ -634,7 +654,14 @@ const List* Parser::parseList()
 
     tokens->expect<CloseSquareBracket>("\"]\" at end of list");
 
-    return new List(location, items);
+    std::vector<const Token*> owned;
+
+    for (UniqueToken<>& token : items)
+    {
+        owned.push_back(token.release());
+    }
+
+    return new List(location, owned);
 }
 
 const Token* Parser::parseTerms()
@@ -661,7 +688,7 @@ const Token* Parser::parseTerms()
 
         if (tokens->peek<Operator>())
         {
-            terms.push_back(tokens->take());
+            terms.push_back(tokens->take().release());
         }
 
         else
@@ -849,7 +876,7 @@ const Token* Parser::parseTerm()
 {
     if (tokens->peek<Value>() || tokens->peek<Constant>() || tokens->peek<String>())
     {
-        return tokens->take();
+        return tokens->take().release();
     }
 
     if (const Identifier* name = tokens->peek<Identifier>())

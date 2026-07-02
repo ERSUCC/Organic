@@ -1,0 +1,59 @@
+name = "Function definition with no instructions"
+line = 2
+character = 1
+error = 'The function "func" does not return a value.'
+
+---
+
+func() = {}
+
+---
+
+name = "Function definition with only assignment"
+line = 2
+character = 1
+error = 'The function "func" does not return a value.'
+
+---
+
+func() = {
+    test = 0
+}
+
+---
+
+name = "Function definition with only definition"
+line = 2
+character = 1
+error = 'The function "func" does not return a value.'
+
+---
+
+func() = {
+    func2() = {
+        0
+    }
+}
+
+---
+
+name = "Function definition with only assignments and definitions"
+line = 2
+character = 1
+error = 'The function "func" does not return a value.'
+
+---
+
+func() = {
+    test = 0
+
+    func2() = {
+        test
+    }
+
+    test2 = 5
+
+    func3() = {
+        test2
+    }
+}

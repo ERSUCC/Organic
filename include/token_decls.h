@@ -5,9 +5,6 @@
 namespace Parser {
 
 struct Token;
-
-typedef std::shared_ptr<const Token> SharedToken;
-
 struct Value;
 struct Constant;
 struct VariableDef;
@@ -67,5 +64,9 @@ struct GreaterAlias;
 struct LessEqualAlias;
 struct GreaterEqualAlias;
 struct Program;
+
+template <typename T = Token> using UniqueToken = std::unique_ptr<const T>;
+
+typedef std::shared_ptr<const Token> SharedToken;
 
 }
