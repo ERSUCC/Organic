@@ -24,16 +24,25 @@ Organic::Organic(const Path& path, const ProgramOptions options) :
 
     const Parser::Program* program = Parser::Parser::parseSource(source);
 
-    program->resolveTypes(new Parser::TypeResolver());
+    const Parser::TypeResolver* resolver = new Parser::TypeResolver();
 
-    this->program = program->transform(new TokenTransformer(path))->getLeafAs<Engine::Program>();
+    program->resolveTypes(resolver);
 
+    delete resolver;
+
+    TokenTransformer* transformer = new TokenTransformer(path);
+
+    this->program = program->transform(transformer)->getLeafAs<Engine::Program>();
+
+    delete transformer;
+    delete program;
     delete source;
 }
 
 Organic::~Organic()
 {
     delete program;
+    delete utils;
 }
 
 void Organic::start()
@@ -139,12 +148,20 @@ void Organic::startExport()
         program->processAudioSources(samples + i * utils->channels);
     }
 
-    if (file->write(samples, steps * utils->channels) != steps * utils->channels)
-    {
-        throw OrganicFileException("Could not write output file: " + std::string(file->strError()));
-    }
+    const sf_count_t written = file->write(samples, steps * utils->channels);
 
     free(samples);
+
+    if (written != steps * utils->channels)
+    {
+        const std::string error = file->strError();
+
+        delete file;
+
+        throw OrganicFileException("Could not write output file: " + error);
+    }
+
+    delete file;
 }
 
 int Organic::processAudio(void* output, unsigned int frames)
