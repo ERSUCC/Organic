@@ -5,6 +5,7 @@
 namespace Parser {
 
 struct Token;
+struct Identifier;
 struct Value;
 struct Constant;
 struct VariableDef;

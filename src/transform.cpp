@@ -17,19 +17,19 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Constant* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::VariableDef* token)
 {
-    variables[token] = token->value->transform(this);
+    setVariable(token, token->value->transform(this));
 
     return nullptr;
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::VariableRef* token)
 {
-    return variables[token->definition];
+    return new Engine::Variable(currentVariables[token->definition]);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::InputRef* token)
 {
-    return inputs[token->definition];
+    return new Engine::Variable(currentVariables[token->definition]);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::FunctionRef* token)
@@ -38,11 +38,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::FunctionRef* toke
 
     for (const Parser::InputDef* input : token->definition->inputs)
     {
-        Engine::Variable* variable = new Engine::Variable(input->defaultValue->transform(this));
+        Engine::ValueObject* value = input->defaultValue->transform(this);
 
-        placeholders.push_back(variable);
+        placeholders.push_back(new Engine::Variable(value));
 
-        inputs[input] = variable;
+        setVariable(input, value);
     }
 
     for (size_t i = 0; i < token->definition->program->instructions.size() - 1; i++)
@@ -263,12 +263,12 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
 {
     for (const Parser::InputDef* input : token->function->definition->inputs)
     {
-        inputs[input] = transformArgument(token->arguments, input->string());
+        setVariable(input, transformArgument(token->arguments, input->string()));
     }
 
     for (size_t i = 0; i < token->function->definition->program->instructions.size() - 1; i++)
     {
-        token->function->definition->program->instructions[i]->transform(this);
+        delete token->function->definition->program->instructions[i]->transform(this);
     }
 
     return token->function->definition->program->instructions.back()->transform(this);
@@ -330,13 +330,20 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Program* token)
 
     for (const Parser::Token* instruction : token->instructions)
     {
-        if (Engine::AudioSource* source = dynamic_cast<Engine::AudioSource*>(instruction->transform(this)))
+        Engine::ValueObject* object = instruction->transform(this);
+
+        if (Engine::AudioSource* source = dynamic_cast<Engine::AudioSource*>(object))
         {
             sources.push_back(source);
         }
+
+        else
+        {
+            delete object;
+        }
     }
 
-    return new Engine::Program(sources);
+    return new Engine::Program(allVariables, sources);
 }
 
 Engine::ValueObject* TokenTransformer::transformArgument(const Parser::ArgumentList* arguments, const std::string name)
@@ -350,4 +357,11 @@ Engine::ValueObject* TokenTransformer::transformArgument(const Parser::ArgumentL
     }
 
     return nullptr;
+}
+
+void TokenTransformer::setVariable(const Parser::Identifier* name, Engine::ValueObject* value)
+{
+    currentVariables[name] = value;
+
+    allVariables.push_back(value);
 }

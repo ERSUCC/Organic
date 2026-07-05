@@ -72,11 +72,6 @@ void List::init()
 Variable::Variable(ValueObject* value) :
     value(value) {}
 
-Variable::~Variable()
-{
-    delete value;
-}
-
 double Variable::syncLength() const
 {
     return value->syncLength();

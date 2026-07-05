@@ -59,7 +59,6 @@ protected:
 struct Variable : public ValueObject
 {
     Variable(ValueObject* value);
-    ~Variable();
 
     double syncLength() const override;
     double getValue() override;

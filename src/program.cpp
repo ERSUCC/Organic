@@ -2,12 +2,17 @@
 
 using namespace Engine;
 
-Program::Program(const std::vector<AudioSource*>& audioSources) :
-    audioSources(audioSources) {}
+Program::Program(const std::vector<ValueObject*>& variables, const std::vector<AudioSource*>& audioSources) :
+    variables(variables), audioSources(audioSources) {}
 
 Program::~Program()
 {
-    for (AudioSource* audioSource : audioSources)
+    for (const ValueObject* variable : variables)
+    {
+        delete variable;
+    }
+
+    for (const AudioSource* audioSource : audioSources)
     {
         delete audioSource;
     }

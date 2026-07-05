@@ -26,34 +26,35 @@ void TestExamples::expectSuccess(const Path& path)
 {
     beginTest(false);
 
+    const FileProvider* source = FileProvider::create(path);
+
+    if (!source)
+    {
+        throw OrganicFileException("Could not read \"" + path.string() + "\".");
+    }
+
+    const Parser::Program* program = Parser::Parser::parseSource(source);
+
+    const Parser::TypeResolver* resolver = new Parser::TypeResolver();
+
+    TokenTransformer* transformer = new TokenTransformer(path);
+
     try
     {
-        const FileProvider* source = FileProvider::create(path);
-
-        if (!source)
-        {
-            throw OrganicFileException("Could not read \"" + path.string() + "\".");
-        }
-
-        const Parser::Program* program = Parser::Parser::parseSource(source);
-
-        Parser::TypeResolver* resolver = new Parser::TypeResolver();
-
-        TokenTransformer* transformer = new TokenTransformer(path);
-
         program->resolveTypes(resolver);
-        program->transform(transformer);
 
-        delete program;
-        delete resolver;
-        delete transformer;
-        delete source;
+        delete program->transform(transformer);
     }
 
     catch (const OrganicException& e)
     {
         fail("Expected success, received an error.");
     }
+
+    delete transformer;
+    delete resolver;
+    delete program;
+    delete source;
 
     endTest(path.stem());
 }

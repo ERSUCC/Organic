@@ -75,11 +75,14 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::Program* token);
 
 private:
+    Engine::ValueObject* transformArgument(const Parser::ArgumentList* arguments, const std::string name);
+
+    void setVariable(const Parser::Identifier* name, Engine::ValueObject* value);
+
     const Path sourcePath;
 
-    std::unordered_map<const Parser::VariableDef*, Engine::ValueObject*> variables;
-    std::unordered_map<const Parser::InputDef*, Engine::ValueObject*> inputs;
+    std::unordered_map<const Parser::Identifier*, Engine::ValueObject*> currentVariables;
 
-    Engine::ValueObject* transformArgument(const Parser::ArgumentList* arguments, const std::string name);
+    std::vector<Engine::ValueObject*> allVariables;
 
 };
