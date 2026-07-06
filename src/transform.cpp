@@ -38,11 +38,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::FunctionRef* toke
 
     for (const Parser::InputDef* input : token->definition->inputs)
     {
-        Engine::ValueObject* value = input->defaultValue->transform(this);
+        Engine::Variable* placeholder = new Engine::Variable(input->defaultValue->transform(this));
 
-        placeholders.push_back(new Engine::Variable(value));
+        placeholders.push_back(placeholder);
 
-        setVariable(input, value);
+        setVariable(input, placeholder);
     }
 
     for (size_t i = 0; i < token->definition->program->instructions.size() - 1; i++)
