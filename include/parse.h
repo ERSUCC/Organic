@@ -72,7 +72,7 @@ private:
     const Token* parseExpression();
     const List* parseList();
     const Token* parseTerms();
-    const Token* collapseTerms(const SourceLocation& location, std::vector<UniqueToken<>>& terms, const size_t start, const size_t end, const bool comparison) const;
+    const Token* collapseTerms(const SourceLocation& location, std::vector<UniqueToken<>>& terms, const size_t start, const size_t end) const;
 
     UniqueToken<> parseTerm();
     UniqueToken<Call> parseCall();

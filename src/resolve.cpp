@@ -336,8 +336,31 @@ void TypeResolver::resolveTypes(const CallUser* token) const
 
 void TypeResolver::resolveTypes(const CallAlias* token) const
 {
-    resolveArgumentTypes(token->arguments, "a", new NumberType());
-    resolveArgumentTypes(token->arguments, "b", new NumberType());
+    const SharedType expected = SharedType(new NumberType());
+
+    if (const Argument* argument = token->arguments->findArgument("a"))
+    {
+        argument->value->resolveTypes(this);
+
+        const SharedType argumentType = argument->value->type();
+
+        if (!expected->checkType(argumentType))
+        {
+            throw OrganicParseException("Expected " + expected->name() + " on left-hand side, but received " + argumentType->name() + ".", argument->value->location);
+        }
+    }
+
+    if (const Argument* argument = token->arguments->findArgument("b"))
+    {
+        argument->value->resolveTypes(this);
+
+        const SharedType argumentType = argument->value->type();
+
+        if (!expected->checkType(argumentType))
+        {
+            throw OrganicParseException("Expected " + expected->name() + " on right-hand side, but received " + argumentType->name() + ".", argument->value->location);
+        }
+    }
 }
 
 void TypeResolver::resolveTypes(const Program* token) const

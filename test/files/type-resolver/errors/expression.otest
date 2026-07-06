@@ -1,0 +1,30 @@
+name = "Chained boolean expressions"
+line = 2
+character = 8
+error = "Expected number on left-hand side, but received boolean."
+
+---
+
+test = 1 == 2 == 3
+
+---
+
+name = "Chained parenthesized boolean expressions"
+line = 2
+character = 8
+error = "Expected number on left-hand side, but received boolean."
+
+---
+
+test = (1 == 2) == 3
+
+---
+
+name = "Add boolean expression to number"
+line = 2
+character = 12
+error = "Expected number on right-hand side, but received boolean."
+
+---
+
+test = 1 + (2 == 3)

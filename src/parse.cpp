@@ -441,7 +441,12 @@ const void Parser::parseAssign()
 
     catch (const OrganicTokenException& e)
     {
-        throw OrganicTokenException(e.token, "value after \"=\"");
+        if (e.expected == "value")
+        {
+            throw OrganicTokenException(e.token, "value after \"=\"");
+        }
+
+        throw;
     }
 }
 
@@ -576,14 +581,16 @@ const List* Parser::parseList()
 
 const Token* Parser::parseTerms()
 {
-    const SourceLocation location = tokens->peek()->location;
+    const SourceLocation start = tokens->peek()->location;
 
     std::vector<UniqueToken<>> terms;
 
     while (true)
     {
-        if (tokens->peek<OpenParenthesis>())
+        if (const OpenParenthesis* open = tokens->peek<OpenParenthesis>())
         {
+            const SourceLocation location = open->location;
+
             tokens->drop();
 
             terms.push_back(UniqueToken<>(new ParenthesizedExpression(location, parseTerms())));
@@ -593,7 +600,20 @@ const Token* Parser::parseTerms()
 
         else
         {
-            terms.push_back(parseTerm());
+            try
+            {
+                terms.push_back(parseTerm());
+            }
+
+            catch (const OrganicTokenException& e)
+            {
+                if (!terms.empty())
+                {
+                    throw OrganicTokenException(e.token, "value after \"" + terms.back()->string() + "\"");
+                }
+
+                throw;
+            }
         }
 
         if (tokens->peek<Operator>())
@@ -607,10 +627,10 @@ const Token* Parser::parseTerms()
         }
     }
 
-    return collapseTerms(location, terms, 0, terms.size(), false);
+    return collapseTerms(start, terms, 0, terms.size());
 }
 
-const Token* Parser::collapseTerms(const SourceLocation& location, std::vector<UniqueToken<>>& terms, const size_t start, const size_t end, const bool comparison) const
+const Token* Parser::collapseTerms(const SourceLocation& location, std::vector<UniqueToken<>>& terms, const size_t start, const size_t end) const
 {
     if (end <= start)
     {
@@ -624,15 +644,8 @@ const Token* Parser::collapseTerms(const SourceLocation& location, std::vector<U
 
     for (size_t i = end - 2; i > 0; i--)
     {
-        const bool nextCompare = dynamic_cast<const BooleanOperator*>(terms[i].get());
-
-        if (comparison && nextCompare)
-        {
-            throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
-        }
-
-        const Token* left = collapseTerms(location, terms, start, i, nextCompare);
-        const Token* right = collapseTerms(location, terms, i + 1, end, nextCompare);
+        const Token* left = collapseTerms(location, terms, start, i);
+        const Token* right = collapseTerms(location, terms, i + 1, end);
 
         if (dynamic_cast<const DoubleEquals*>(terms[i].get()))
         {
