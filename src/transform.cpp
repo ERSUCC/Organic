@@ -261,17 +261,17 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Reverb* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
 {
-    for (const Parser::InputDef* input : token->function->definition->inputs)
+    for (const Parser::InputDef* input : token->function->inputs)
     {
         setVariable(input, transformArgument(token->arguments, input->string()));
     }
 
-    for (size_t i = 0; i < token->function->definition->program->instructions.size() - 1; i++)
+    for (size_t i = 0; i < token->function->program->instructions.size() - 1; i++)
     {
-        delete token->function->definition->program->instructions[i]->transform(this);
+        delete token->function->program->instructions[i]->transform(this);
     }
 
-    return token->function->definition->program->instructions.back()->transform(this);
+    return token->function->program->instructions.back()->transform(this);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::AddAlias* token)

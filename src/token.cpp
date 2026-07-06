@@ -776,17 +776,12 @@ Engine::ValueObject* Reverb::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-CallUser::CallUser(const SourceLocation location, ArgumentList* arguments, const FunctionRef* function) :
+CallUser::CallUser(const SourceLocation location, ArgumentList* arguments, const FunctionDef* function) :
     Call(location, arguments), function(function) {}
-
-CallUser::~CallUser()
-{
-    delete function;
-}
 
 const SharedType CallUser::type() const
 {
-    return function->definition->returnType();
+    return function->returnType();
 }
 
 void CallUser::resolveTypes(const TypeResolver* visitor) const

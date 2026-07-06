@@ -30,7 +30,7 @@ struct ParserContext
     const FunctionDef* addFunction(const Identifier* token, std::vector<UniqueToken<InputDef>>& inputs, const Program* program);
 
     const Identifier* findIdentifier(const Identifier* token);
-    const FunctionRef* findFunction(const Identifier* token);
+    const FunctionDef* findFunction(const Identifier* token);
 
     void addInstruction(const Token* instruction);
 

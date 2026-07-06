@@ -126,7 +126,7 @@ const Identifier* ParserContext::findIdentifier(const Identifier* token)
     throw OrganicParseException("No variable, input, or function exists with the name \"" + token->string() + "\".", token->location);
 }
 
-const FunctionRef* ParserContext::findFunction(const Identifier* token)
+const FunctionDef* ParserContext::findFunction(const Identifier* token)
 {
     if (checkRecursive(token))
     {
@@ -135,12 +135,12 @@ const FunctionRef* ParserContext::findFunction(const Identifier* token)
 
     if (functions.count(token->string()))
     {
-        return new FunctionRef(token->location, functions[token->string()]);
+        return functions[token->string()];
     }
 
     if (parent)
     {
-        if (const FunctionRef* function = parent->findFunction(token))
+        if (const FunctionDef* function = parent->findFunction(token))
         {
             return function;
         }

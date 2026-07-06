@@ -326,7 +326,7 @@ void TypeResolver::resolveTypes(const Reverb* token) const
 
 void TypeResolver::resolveTypes(const CallUser* token) const
 {
-    for (const InputDef* input : token->function->definition->inputs)
+    for (const InputDef* input : token->function->inputs)
     {
         resolveArgumentTypes(token->arguments, input->string(), input->type(), input->defaultValue);
     }

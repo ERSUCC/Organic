@@ -639,8 +639,7 @@ struct Reverb : public Effect
 
 struct CallUser : public Call
 {
-    CallUser(const SourceLocation location, ArgumentList* arguments, const FunctionRef* function);
-    ~CallUser();
+    CallUser(const SourceLocation location, ArgumentList* arguments, const FunctionDef* function);
 
     const SharedType type() const override;
 
@@ -648,7 +647,7 @@ struct CallUser : public Call
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
-    const FunctionRef* function;
+    const FunctionDef* function;
 };
 
 struct CallAlias : public Call
