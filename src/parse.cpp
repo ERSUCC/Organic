@@ -648,7 +648,7 @@ const List* Parser::parseList()
                 throw OrganicTokenException(e.token, "value after \",\"");
             }
 
-            throw e;
+            throw;
         }
     } while (tokens->peek<Comma>());
 
