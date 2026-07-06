@@ -52,7 +52,7 @@ void Utils::parseWarning(const std::string message, const SourceLocation& locati
         utils->firstWarning = false;
     }
 
-    std::cout << "Parse warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n\t" + message << "\n";
+    std::cout << "Parse warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n    " + message << "\n";
 }
 
 void Utils::setSeed(const std::optional<size_t>& seed)
