@@ -387,7 +387,7 @@ const void Parser::parseInstruction()
         }
     }
 
-    const Token* expression = parseExpression();
+    const Token* expression = parseExpression("");
 
     if (tokens->peek<Equals>())
     {
@@ -433,21 +433,7 @@ const void Parser::parseAssign()
     tokens->drop();
 
     context->checkNameConflicts(name.get());
-
-    try
-    {
-        context->addVariable(name.get(), parseExpression());
-    }
-
-    catch (const OrganicTokenException& e)
-    {
-        if (e.expected == "value")
-        {
-            throw OrganicTokenException(e.token, "value after \"=\"");
-        }
-
-        throw;
-    }
+    context->addVariable(name.get(), parseExpression(" after \"=\""));
 }
 
 const void Parser::parseDefine()
@@ -479,7 +465,7 @@ const void Parser::parseDefine()
 
             tokens->expect<Colon>("\":\" after input name");
 
-            inputs.emplace_back(new InputDef(input->location, SharedToken(parseExpression())));
+            inputs.emplace_back(new InputDef(input->location, SharedToken(parseExpression(" after \":\""))));
         } while (tokens->peek<Comma>());
 
         tokens->expect<CloseParenthesis>("\",\" or \")\"");
@@ -521,14 +507,14 @@ const void Parser::parseDefine()
     context->addFunction(name.get(), inputs, program);
 }
 
-const Token* Parser::parseExpression()
+const Token* Parser::parseExpression(const std::string& errorContext)
 {
     if (tokens->peek<OpenSquareBracket>())
     {
         return parseList();
     }
 
-    return parseTerms();
+    return parseTerms(errorContext);
 }
 
 const List* Parser::parseList()
@@ -546,25 +532,7 @@ const List* Parser::parseList()
     {
         tokens->drop();
 
-        try
-        {
-            items.push_back(UniqueToken<>(parseExpression()));
-        }
-
-        catch (const OrganicTokenException& e)
-        {
-            if (e.expected == "value")
-            {
-                if (items.empty())
-                {
-                    throw OrganicTokenException(e.token, "value after \"[\"");
-                }
-
-                throw OrganicTokenException(e.token, "value after \",\"");
-            }
-
-            throw;
-        }
+        items.push_back(UniqueToken<>(parseExpression(items.empty() ? " after \"[\"" : " after \",\"")));
     } while (tokens->peek<Comma>());
 
     tokens->expect<CloseSquareBracket>("\"]\" at end of list");
@@ -579,7 +547,7 @@ const List* Parser::parseList()
     return new List(location, owned);
 }
 
-const Token* Parser::parseTerms()
+const Token* Parser::parseTerms(const std::string& errorContext)
 {
     const SourceLocation start = tokens->peek()->location;
 
@@ -593,27 +561,14 @@ const Token* Parser::parseTerms()
 
             tokens->drop();
 
-            terms.push_back(UniqueToken<>(new ParenthesizedExpression(location, parseTerms())));
+            terms.push_back(UniqueToken<>(new ParenthesizedExpression(location, parseTerms(errorContext))));
 
             tokens->expect<CloseParenthesis>("\")\"");
         }
 
         else
         {
-            try
-            {
-                terms.push_back(parseTerm());
-            }
-
-            catch (const OrganicTokenException& e)
-            {
-                if (!terms.empty())
-                {
-                    throw OrganicTokenException(e.token, "value after \"" + terms.back()->string() + "\"");
-                }
-
-                throw;
-            }
+            terms.push_back(parseTerm(terms.empty() ? errorContext : (" after \"" + terms.back()->string() + "\"")));
         }
 
         if (tokens->peek<Operator>())
@@ -701,7 +656,7 @@ const Token* Parser::collapseTerms(const SourceLocation& location, std::vector<U
     throw OrganicParseException("Invalid expression.", location);
 }
 
-UniqueToken<> Parser::parseTerm()
+UniqueToken<> Parser::parseTerm(const std::string& errorContext)
 {
     if (tokens->peek<Value>() || tokens->peek<Constant>() || tokens->peek<String>())
     {
@@ -722,7 +677,7 @@ UniqueToken<> Parser::parseTerm()
         return UniqueToken<>(value);
     }
 
-    throw OrganicTokenException(tokens->peek(), "value");
+    throw OrganicTokenException(tokens->peek(), "value" + errorContext);
 }
 
 UniqueToken<Call> Parser::parseCall()
@@ -747,35 +702,17 @@ UniqueToken<Call> Parser::parseCall()
         {
             tokens->drop();
 
-            try
+            UniqueToken<Argument> argument = parseArgument(arguments.empty() ? " after \"(\"" : " after \",\"");
+
+            for (const UniqueToken<Argument>& arg : arguments)
             {
-                UniqueToken<Argument> argument = parseArgument();
-
-                for (const UniqueToken<Argument>& arg : arguments)
+                if (arg->name == argument->name)
                 {
-                    if (arg->name == argument->name)
-                    {
-                        throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + name->string() + "\".", argument->location);
-                    }
+                    throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + name->string() + "\".", argument->location);
                 }
-
-                arguments.push_back(std::move(argument));
             }
 
-            catch (const OrganicTokenException& e)
-            {
-                if (e.expected == "input name")
-                {
-                    if (arguments.empty())
-                    {
-                        throw OrganicTokenException(e.token, "input name after \"(\"");
-                    }
-
-                    throw OrganicTokenException(e.token, "input name after \",\"");
-                }
-
-                throw;
-            }
+            arguments.push_back(std::move(argument));
         } while (tokens->peek<Comma>());
 
         tokens->expect<CloseParenthesis>("\")\" after input value");
@@ -798,21 +735,13 @@ UniqueToken<Call> Parser::parseCall()
     return UniqueToken<Call>(new CallUser(name->location, argumentList, context->findFunction(name.get())));
 }
 
-UniqueToken<Argument> Parser::parseArgument()
+UniqueToken<Argument> Parser::parseArgument(const std::string& errorContext)
 {
-    const UniqueToken<Identifier> name = tokens->require<Identifier>("input name");
+    const UniqueToken<Identifier> name = tokens->require<Identifier>("input name" + errorContext);
 
     tokens->expect<Colon>("\":\" after input name");
 
-    try
-    {
-        return UniqueToken<Argument>(new Argument(name->location, name->string(), SharedToken(parseExpression())));
-    }
-
-    catch (const OrganicTokenException& e)
-    {
-        throw OrganicTokenException(e.token, "input value after \":\"");
-    }
+    return UniqueToken<Argument>(new Argument(name->location, name->string(), SharedToken(parseExpression(" after \":\""))));
 }
 
 }

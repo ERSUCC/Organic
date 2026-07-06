@@ -67,7 +67,7 @@ sine(volume {
 name = "Curly bracket after function argument colon"
 line = 2
 character = 14
-error = 'Expected input value after ":", but received "{".'
+error = 'Expected value after ":", but received "{".'
 
 ---
 

@@ -18,10 +18,6 @@ struct OrganicTokenException : public OrganicParseException
 {
     OrganicTokenException(const Token* token, const std::string& expected);
 
-    const Token* token;
-
-    const std::string expected;
-
 private:
     static std::string getMessage(const Token* token, const std::string& expected);
 

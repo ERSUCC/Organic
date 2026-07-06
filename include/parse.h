@@ -69,14 +69,14 @@ private:
     const void parseAssign();
     const void parseDefine();
 
-    const Token* parseExpression();
+    const Token* parseExpression(const std::string& errorContext);
     const List* parseList();
-    const Token* parseTerms();
+    const Token* parseTerms(const std::string& errorContext);
     const Token* collapseTerms(const SourceLocation& location, std::vector<UniqueToken<>>& terms, const size_t start, const size_t end) const;
 
-    UniqueToken<> parseTerm();
+    UniqueToken<> parseTerm(const std::string& errorContext);
     UniqueToken<Call> parseCall();
-    UniqueToken<Argument> parseArgument();
+    UniqueToken<Argument> parseArgument(const std::string& errorContext);
 
     const SourceProvider* source;
 

@@ -56,7 +56,7 @@ sine(volume
 name = "End of file after function argument colon"
 line = 4
 character = 1
-error = 'Expected input value after ":".'
+error = 'Expected value after ":".'
 
 ---
 

@@ -3,7 +3,7 @@
 using namespace Parser;
 
 OrganicTokenException::OrganicTokenException(const Token* token, const std::string& expected) :
-    OrganicParseException(getMessage(token, expected), token->location), token(token), expected(expected) {}
+    OrganicParseException(getMessage(token, expected), token->location) {}
 
 std::string OrganicTokenException::getMessage(const Token* token, const std::string& expected)
 {
