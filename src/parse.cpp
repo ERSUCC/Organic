@@ -135,7 +135,11 @@ const FunctionDef* ParserContext::findFunction(const Identifier* token)
 
     if (functions.count(token->string()))
     {
-        return functions[token->string()];
+        const FunctionDef* function = functions[token->string()];
+
+        used.insert(function);
+
+        return function;
     }
 
     if (parent)
