@@ -12,11 +12,6 @@ const SharedType Token::type() const
     return staticType;
 }
 
-const std::string Token::string() const
-{
-    return location.string();
-}
-
 bool Token::eof() const
 {
     return false;
@@ -82,20 +77,23 @@ Divide::Divide(const SourceLocation location) :
 Power::Power(const SourceLocation location) :
     Operator(location) {}
 
-DoubleEquals::DoubleEquals(const SourceLocation location) :
+BooleanOperator::BooleanOperator(const SourceLocation location) :
     Operator(location) {}
+
+DoubleEquals::DoubleEquals(const SourceLocation location) :
+    BooleanOperator(location) {}
 
 Less::Less(const SourceLocation location) :
-    Operator(location) {}
+    BooleanOperator(location) {}
 
 Greater::Greater(const SourceLocation location) :
-    Operator(location) {}
+    BooleanOperator(location) {}
 
 LessEqual::LessEqual(const SourceLocation location) :
-    Operator(location) {}
+    BooleanOperator(location) {}
 
 GreaterEqual::GreaterEqual(const SourceLocation location) :
-    Operator(location) {}
+    BooleanOperator(location) {}
 
 Identifier::Identifier(const SourceLocation location) :
     Token(location) {}
@@ -794,88 +792,88 @@ Engine::ValueObject* CallUser::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-CallAlias::CallAlias(const SourceLocation location, const Token* a, const Token* b, const std::string op, const Type* type) :
-    Call(location, new ArgumentList(location, { new Argument(a->location, "a", SharedToken(a)), new Argument(b->location, "b", SharedToken(b)) }, op), type), op(op) {}
+CallAlias::CallAlias(const Token* a, const Token* b, const std::string op, const Type* type) :
+    Call(SourceLocation(a->source(), a->start(), b->end()), new ArgumentList(location, { new Argument(a->location, "a", SharedToken(a)), new Argument(b->location, "b", SharedToken(b)) }, op), type), op(op) {}
 
 void CallAlias::resolveTypes(const TypeResolver* visitor) const
 {
     visitor->resolveTypes(this);
 }
 
-AddAlias::AddAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, "+", new NumberType()) {}
+AddAlias::AddAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, "+", new NumberType()) {}
 
 Engine::ValueObject* AddAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
 
-SubtractAlias::SubtractAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, "-", new NumberType()) {}
+SubtractAlias::SubtractAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, "-", new NumberType()) {}
 
 Engine::ValueObject* SubtractAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
 
-MultiplyAlias::MultiplyAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, "*", new NumberType()) {}
+MultiplyAlias::MultiplyAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, "*", new NumberType()) {}
 
 Engine::ValueObject* MultiplyAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
 
-DivideAlias::DivideAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, "/", new NumberType()) {}
+DivideAlias::DivideAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, "/", new NumberType()) {}
 
 Engine::ValueObject* DivideAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
 
-PowerAlias::PowerAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, "^", new NumberType()) {}
+PowerAlias::PowerAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, "^", new NumberType()) {}
 
 Engine::ValueObject* PowerAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
 
-EqualAlias::EqualAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, "==", new BooleanType()) {}
+EqualAlias::EqualAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, "==", new BooleanType()) {}
 
 Engine::ValueObject* EqualAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
 
-LessAlias::LessAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, "<", new BooleanType()) {}
+LessAlias::LessAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, "<", new BooleanType()) {}
 
 Engine::ValueObject* LessAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
 
-GreaterAlias::GreaterAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, ">", new BooleanType()) {}
+GreaterAlias::GreaterAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, ">", new BooleanType()) {}
 
 Engine::ValueObject* GreaterAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
 
-LessEqualAlias::LessEqualAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, "<=", new BooleanType()) {}
+LessEqualAlias::LessEqualAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, "<=", new BooleanType()) {}
 
 Engine::ValueObject* LessEqualAlias::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
 
-GreaterEqualAlias::GreaterEqualAlias(const SourceLocation location, const Token* a, const Token* b) :
-    CallAlias(location, a, b, ">=", new BooleanType()) {}
+GreaterEqualAlias::GreaterEqualAlias(const Token* a, const Token* b) :
+    CallAlias(a, b, ">=", new BooleanType()) {}
 
 Engine::ValueObject* GreaterEqualAlias::transform(TokenTransformer* visitor) const
 {

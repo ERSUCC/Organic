@@ -2,9 +2,9 @@
 
 namespace Parser {
 
-#define CALL(func) [](const SourceLocation& location, ArgumentList* arguments) { return new func(location, arguments); }
+#define CALL(func) [](const SourceLocation& location, ArgumentList* arguments) { return UniqueToken<Call>(new func(location, arguments)); }
 
-static std::unordered_map<std::string, std::function<const Call* (const SourceLocation&, ArgumentList*)>> libraryFunctions =
+static std::unordered_map<std::string, std::function<UniqueToken<Call> (const SourceLocation&, ArgumentList*)>> libraryFunctions =
 {
     { "time", CALL(Time) },
     { "hold", CALL(Hold) },
@@ -516,96 +516,6 @@ const void Parser::parseDefine()
     context->addFunction(name.get(), inputs, program);
 }
 
-const Call* Parser::parseCall()
-{
-    const UniqueToken<Identifier> name = tokens->take<Identifier>();
-
-    if (name->string() == "include")
-    {
-        throw OrganicParseException("Includes must come before all other instructions.", name->location);
-    }
-
-    std::vector<UniqueToken<Argument>> arguments;
-
-    if (tokens->peek<CloseParenthesis>(1))
-    {
-        tokens->drop(2);
-    }
-
-    else
-    {
-        do
-        {
-            tokens->drop();
-
-            try
-            {
-                UniqueToken<Argument> argument = UniqueToken<Argument>(parseArgument());
-
-                for (const UniqueToken<Argument>& arg : arguments)
-                {
-                    if (arg->name == argument->name)
-                    {
-                        throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + name->string() + "\".", argument->location);
-                    }
-                }
-
-                arguments.push_back(std::move(argument));
-            }
-
-            catch (const OrganicTokenException& e)
-            {
-                if (e.expected == "input name")
-                {
-                    if (arguments.empty())
-                    {
-                        throw OrganicTokenException(e.token, "input name after \"(\"");
-                    }
-
-                    throw OrganicTokenException(e.token, "input name after \",\"");
-                }
-
-                throw;
-            }
-        } while (tokens->peek<Comma>());
-
-        tokens->expect<CloseParenthesis>("\")\" after input value");
-    }
-
-    std::vector<const Argument*> owned;
-
-    for (UniqueToken<Argument>& argument : arguments)
-    {
-        owned.push_back(argument.release());
-    }
-
-    ArgumentList* argumentList = new ArgumentList(name->location, owned, name->string());
-
-    if (libraryFunctions.count(name->string()))
-    {
-        return libraryFunctions[name->string()](name->location, argumentList);
-    }
-
-    return new CallUser(name->location, argumentList, context->findFunction(name.get()));
-}
-
-const Argument* Parser::parseArgument()
-{
-    const UniqueToken<Identifier> name = tokens->require<Identifier>("input name");
-
-    tokens->expect<Colon>("\":\" after input name");
-
-    try
-    {
-        return new Argument(name->location, name->string(), SharedToken(parseExpression()));
-    }
-
-    catch (const OrganicTokenException& e)
-    {
-        throw OrganicTokenException(e.token, "input value after \":\"");
-    }
-}
-
 const Token* Parser::parseExpression()
 {
     if (tokens->peek<OpenSquareBracket>())
@@ -668,7 +578,7 @@ const Token* Parser::parseTerms()
 {
     const SourceLocation location = tokens->peek()->location;
 
-    std::vector<const Token*> terms;
+    std::vector<UniqueToken<>> terms;
 
     while (true)
     {
@@ -676,7 +586,7 @@ const Token* Parser::parseTerms()
         {
             tokens->drop();
 
-            terms.push_back(new ParenthesizedExpression(location, parseTerms()));
+            terms.push_back(UniqueToken<>(new ParenthesizedExpression(location, parseTerms())));
 
             tokens->expect<CloseParenthesis>("\")\"");
         }
@@ -688,7 +598,7 @@ const Token* Parser::parseTerms()
 
         if (tokens->peek<Operator>())
         {
-            terms.push_back(tokens->take().release());
+            terms.push_back(tokens->take());
         }
 
         else
@@ -697,186 +607,92 @@ const Token* Parser::parseTerms()
         }
     }
 
-    size_t i = 1;
+    return collapseTerms(location, terms, 0, terms.size(), false);
+}
 
-    bool comparison = false;
-
-    while (i < terms.size() - 1)
-    {
-        if (dynamic_cast<const DoubleEquals*>(terms[i]))
-        {
-            if (comparison)
-            {
-                throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
-            }
-
-            comparison = true;
-
-            delete terms[i];
-
-            terms[i - 1] = new EqualAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else if (dynamic_cast<const Less*>(terms[i]))
-        {
-            if (comparison)
-            {
-                throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
-            }
-
-            comparison = true;
-
-            delete terms[i];
-
-            terms[i - 1] = new LessAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else if (dynamic_cast<const Greater*>(terms[i]))
-        {
-            if (comparison)
-            {
-                throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
-            }
-
-            comparison = true;
-
-            delete terms[i];
-
-            terms[i - 1] = new GreaterAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else if (dynamic_cast<const LessEqual*>(terms[i]))
-        {
-            if (comparison)
-            {
-                throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
-            }
-
-            comparison = true;
-
-            delete terms[i];
-
-            terms[i - 1] = new LessEqualAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else if (dynamic_cast<const GreaterEqual*>(terms[i]))
-        {
-            if (comparison)
-            {
-                throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
-            }
-
-            comparison = true;
-
-            delete terms[i];
-
-            terms[i - 1] = new GreaterEqualAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else
-        {
-            i++;
-        }
-    }
-
-    i = 1;
-
-    while (i < terms.size() - 1)
-    {
-        if (dynamic_cast<const Power*>(terms[i]))
-        {
-            delete terms[i];
-
-            terms[i - 1] = new PowerAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else
-        {
-            i++;
-        }
-    }
-
-    i = 1;
-
-    while (i < terms.size() - 1)
-    {
-        if (dynamic_cast<const Multiply*>(terms[i]))
-        {
-            delete terms[i];
-
-            terms[i - 1] = new MultiplyAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else if (dynamic_cast<const Divide*>(terms[i]))
-        {
-            delete terms[i];
-
-            terms[i - 1] = new DivideAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else
-        {
-            i++;
-        }
-    }
-
-    i = 1;
-
-    while (i < terms.size() - 1)
-    {
-        if (dynamic_cast<const Add*>(terms[i]))
-        {
-            delete terms[i];
-
-            terms[i - 1] = new AddAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else if (dynamic_cast<const Subtract*>(terms[i]))
-        {
-            delete terms[i];
-
-            terms[i - 1] = new SubtractAlias(terms[i - 1]->location, terms[i - 1], terms[i + 1]);
-
-            terms.erase(terms.begin() + i, terms.begin() + i + 2);
-        }
-
-        else
-        {
-            i++;
-        }
-    }
-
-    if (terms.size() != 1)
+const Token* Parser::collapseTerms(const SourceLocation& location, std::vector<UniqueToken<>>& terms, const size_t start, const size_t end, const bool comparison) const
+{
+    if (end <= start)
     {
         throw OrganicParseException("Invalid expression.", location);
     }
 
-    return terms[0];
+    if (end - start == 1)
+    {
+        return terms[start].release();
+    }
+
+    for (size_t i = end - 2; i > 0; i--)
+    {
+        const bool nextCompare = dynamic_cast<const BooleanOperator*>(terms[i].get());
+
+        if (comparison && nextCompare)
+        {
+            throw OrganicParseException("Chaining comparison operators is not allowed.", terms[i]->location);
+        }
+
+        const Token* left = collapseTerms(location, terms, start, i, nextCompare);
+        const Token* right = collapseTerms(location, terms, i + 1, end, nextCompare);
+
+        if (dynamic_cast<const DoubleEquals*>(terms[i].get()))
+        {
+            return new EqualAlias(left, right);
+        }
+
+        if (dynamic_cast<const Less*>(terms[i].get()))
+        {
+            return new LessAlias(left, right);
+        }
+
+        if (dynamic_cast<const Greater*>(terms[i].get()))
+        {
+            return new GreaterAlias(left, right);
+        }
+
+        if (dynamic_cast<const LessEqual*>(terms[i].get()))
+        {
+            return new LessEqualAlias(left, right);
+        }
+
+        if (dynamic_cast<const GreaterEqual*>(terms[i].get()))
+        {
+            return new GreaterEqualAlias(left, right);
+        }
+
+        if (dynamic_cast<const Power*>(terms[i].get()))
+        {
+            return new PowerAlias(left, right);
+        }
+
+        if (dynamic_cast<const Multiply*>(terms[i].get()))
+        {
+            return new MultiplyAlias(left, right);
+        }
+
+        if (dynamic_cast<const Divide*>(terms[i].get()))
+        {
+            return new DivideAlias(left, right);
+        }
+
+        if (dynamic_cast<const Add*>(terms[i].get()))
+        {
+            return new AddAlias(left, right);
+        }
+
+        if (dynamic_cast<const Subtract*>(terms[i].get()))
+        {
+            return new SubtractAlias(left, right);
+        }
+    }
+
+    throw OrganicParseException("Invalid expression.", location);
 }
 
-const Token* Parser::parseTerm()
+UniqueToken<> Parser::parseTerm()
 {
     if (tokens->peek<Value>() || tokens->peek<Constant>() || tokens->peek<String>())
     {
-        return tokens->take().release();
+        return tokens->take();
     }
 
     if (const Identifier* name = tokens->peek<Identifier>())
@@ -890,10 +706,100 @@ const Token* Parser::parseTerm()
 
         tokens->drop();
 
-        return value;
+        return UniqueToken<>(value);
     }
 
     throw OrganicTokenException(tokens->peek(), "value");
+}
+
+UniqueToken<Call> Parser::parseCall()
+{
+    const UniqueToken<Identifier> name = tokens->take<Identifier>();
+
+    if (name->string() == "include")
+    {
+        throw OrganicParseException("Includes must come before all other instructions.", name->location);
+    }
+
+    std::vector<UniqueToken<Argument>> arguments;
+
+    if (tokens->peek<CloseParenthesis>(1))
+    {
+        tokens->drop(2);
+    }
+
+    else
+    {
+        do
+        {
+            tokens->drop();
+
+            try
+            {
+                UniqueToken<Argument> argument = parseArgument();
+
+                for (const UniqueToken<Argument>& arg : arguments)
+                {
+                    if (arg->name == argument->name)
+                    {
+                        throw OrganicParseException("Input \"" + argument->name + "\" specified more than once for function \"" + name->string() + "\".", argument->location);
+                    }
+                }
+
+                arguments.push_back(std::move(argument));
+            }
+
+            catch (const OrganicTokenException& e)
+            {
+                if (e.expected == "input name")
+                {
+                    if (arguments.empty())
+                    {
+                        throw OrganicTokenException(e.token, "input name after \"(\"");
+                    }
+
+                    throw OrganicTokenException(e.token, "input name after \",\"");
+                }
+
+                throw;
+            }
+        } while (tokens->peek<Comma>());
+
+        tokens->expect<CloseParenthesis>("\")\" after input value");
+    }
+
+    std::vector<const Argument*> owned;
+
+    for (UniqueToken<Argument>& argument : arguments)
+    {
+        owned.push_back(argument.release());
+    }
+
+    ArgumentList* argumentList = new ArgumentList(name->location, owned, name->string());
+
+    if (libraryFunctions.count(name->string()))
+    {
+        return libraryFunctions[name->string()](name->location, argumentList);
+    }
+
+    return UniqueToken<Call>(new CallUser(name->location, argumentList, context->findFunction(name.get())));
+}
+
+UniqueToken<Argument> Parser::parseArgument()
+{
+    const UniqueToken<Identifier> name = tokens->require<Identifier>("input name");
+
+    tokens->expect<Colon>("\":\" after input name");
+
+    try
+    {
+        return UniqueToken<Argument>(new Argument(name->location, name->string(), SharedToken(parseExpression())));
+    }
+
+    catch (const OrganicTokenException& e)
+    {
+        throw OrganicTokenException(e.token, "input value after \":\"");
+    }
 }
 
 }

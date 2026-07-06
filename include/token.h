@@ -30,7 +30,25 @@ struct Token
 
     virtual const SharedType type() const;
 
-    const std::string string() const;
+    inline const std::string string() const
+    {
+        return location.string();
+    }
+
+    inline const SourceProvider* source() const
+    {
+        return location.source;
+    }
+
+    inline size_t start() const
+    {
+        return location.start;
+    }
+
+    inline size_t end() const
+    {
+        return location.end;
+    }
 
     virtual bool eof() const;
 
@@ -127,27 +145,32 @@ struct Power : public Operator
     Power(const SourceLocation location);
 };
 
-struct DoubleEquals : public Operator
+struct BooleanOperator : public Operator
+{
+    BooleanOperator(const SourceLocation location);
+};
+
+struct DoubleEquals : public BooleanOperator
 {
     DoubleEquals(const SourceLocation location);
 };
 
-struct Less : public Operator
+struct Less : public BooleanOperator
 {
     Less(const SourceLocation location);
 };
 
-struct Greater : public Operator
+struct Greater : public BooleanOperator
 {
     Greater(const SourceLocation location);
 };
 
-struct LessEqual : public Operator
+struct LessEqual : public BooleanOperator
 {
     LessEqual(const SourceLocation location);
 };
 
-struct GreaterEqual : public Operator
+struct GreaterEqual : public BooleanOperator
 {
     GreaterEqual(const SourceLocation location);
 };
@@ -652,7 +675,7 @@ struct CallUser : public Call
 
 struct CallAlias : public Call
 {
-    CallAlias(const SourceLocation location, const Token* a, const Token* b, const std::string op, const Type* type);
+    CallAlias(const Token* a, const Token* b, const std::string op, const Type* type);
 
     void resolveTypes(const TypeResolver* visitor) const override;
 
@@ -663,70 +686,70 @@ private:
 
 struct AddAlias : public CallAlias
 {
-    AddAlias(const SourceLocation location, const Token* a, const Token* b);
+    AddAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct SubtractAlias : public CallAlias
 {
-    SubtractAlias(const SourceLocation location, const Token* a, const Token* b);
+    SubtractAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct MultiplyAlias : public CallAlias
 {
-    MultiplyAlias(const SourceLocation location, const Token* a, const Token* b);
+    MultiplyAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct DivideAlias : public CallAlias
 {
-    DivideAlias(const SourceLocation location, const Token* a, const Token* b);
+    DivideAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct PowerAlias : public CallAlias
 {
-    PowerAlias(const SourceLocation location, const Token* a, const Token* b);
+    PowerAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct EqualAlias : public CallAlias
 {
-    EqualAlias(const SourceLocation location, const Token* a, const Token* b);
+    EqualAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct LessAlias : public CallAlias
 {
-    LessAlias(const SourceLocation location, const Token* a, const Token* b);
+    LessAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct GreaterAlias : public CallAlias
 {
-    GreaterAlias(const SourceLocation location, const Token* a, const Token* b);
+    GreaterAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct LessEqualAlias : public CallAlias
 {
-    LessEqualAlias(const SourceLocation location, const Token* a, const Token* b);
+    LessEqualAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct GreaterEqualAlias : public CallAlias
 {
-    GreaterEqualAlias(const SourceLocation location, const Token* a, const Token* b);
+    GreaterEqualAlias(const Token* a, const Token* b);
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
