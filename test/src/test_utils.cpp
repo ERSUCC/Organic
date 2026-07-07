@@ -13,9 +13,24 @@ void TestUtils::printError(const std::string& text, const size_t indents)
 {
     std::cout << "\x1b[38;2;255;128;128m";
 
-    printIndents(indents);
+    char* data = (char*)malloc(sizeof(char) * text.size() + 1);
 
-    std::cout << text << "\x1b[49;;m\n";
+    strncpy(data, text.c_str(), text.size() + 1);
+
+    char* next = strtok(data, "\n");
+
+    while (next)
+    {
+        printIndents(indents);
+
+        std::cout << next << "\n";
+
+        next = strtok(nullptr, "\n");
+    }
+
+    free(data);
+
+    std::cout << "\x1b[49;;m";
 }
 
 void TestUtils::printIndents(const size_t indents)
@@ -27,7 +42,7 @@ void TestUtils::printIndents(const size_t indents)
             std::cout << "  ";
         }
 
-        std::cout << "- ";
+        std::cout << "| ";
     }
 }
 

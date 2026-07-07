@@ -52,7 +52,7 @@ void TestParser::expectSuccess(const OTest* info)
 
     catch (const OrganicException& e)
     {
-        fail("Source was not parsed successfully.");
+        failWithError(e);
     }
 
     delete source;
@@ -70,17 +70,20 @@ void TestParser::expectError(const OTest* info)
     {
         delete Parser::Parser::parseSource(source);
 
-        fail("Parser did not throw any errors.");
+        fail("Expected error, but no error was thrown.");
     }
 
     catch (const OrganicParseException& e)
     {
-        assert("Parser throws expected error", matchParseError(info, e));
+        if (!matchParseError(info, e))
+        {
+            failAndCompare(info, e);
+        }
     }
 
     catch (const OrganicException& e)
     {
-        fail("Parser did not throw the expected error.");
+        failAndCompare(info, e);
     }
 
     delete source;

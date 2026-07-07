@@ -45,19 +45,32 @@ void TestTokenizer::checkList(const OTest* info)
 
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
-    Parser::TokenIterator* tokens = Parser::Tokenizer::tokenize(source);
+    Parser::TokenIterator* tokens = nullptr;
 
-    for (const TOMLValue* token : info->getValue("tokens")->asArray())
+    try
     {
-        if (tokens->peek()->string() != token->asString())
-        {
-            break;
-        }
+        tokens = Parser::Tokenizer::tokenize(source);
 
-        tokens->drop();
+        for (const TOMLValue* token : info->getValue("tokens")->asArray())
+        {
+            if (tokens->peek()->string() != token->asString())
+            {
+                break;
+            }
+
+            tokens->drop();
+        }
     }
 
-    assert("Tokenized list matches expected list", tokens->peek()->eof());
+    catch (const OrganicException& e)
+    {
+        failWithError(e);
+    }
+
+    if (!tokens->peek()->eof())
+    {
+        fail("Unexpected token in tokenized list: '" + tokens->peek()->string() + "'");
+    }
 
     delete tokens;
     delete source;
@@ -75,17 +88,20 @@ void TestTokenizer::expectError(const OTest* info)
     {
         delete Parser::Tokenizer::tokenize(source);
 
-        fail("Tokenizer did not throw any errors.");
+        fail("Expected error, but no error was thrown.");
     }
 
     catch (const OrganicParseException& e)
     {
-        assert("Tokenizer throws expected error", matchParseError(info, e));
+        if (!matchParseError(info, e))
+        {
+            failAndCompare(info, e);
+        }
     }
 
     catch (const OrganicException& e)
     {
-        fail("Tokenizer did not throw the expected error.");
+        failAndCompare(info, e);
     }
 
     delete source;

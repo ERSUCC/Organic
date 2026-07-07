@@ -49,17 +49,19 @@ void Test::endTest(const std::string name)
     }
 }
 
-void Test::assert(const std::string name, const bool result)
-{
-    if (!result)
-    {
-        addError("Failed assertion: " + name);
-    }
-}
-
 void Test::fail(const std::string message)
 {
-    addError("Error: " + message);
+    addError(message);
+}
+
+void Test::failWithError(const OrganicException& error)
+{
+    addError("Expected success, but received error:\n  " + error.message);
+}
+
+void Test::failAndCompare(const OTest* info, const OrganicException& error)
+{
+    addError("Expected error:\n  " + info->getValue("error")->asString() + "\nBut received:\n  " + error.message);
 }
 
 bool Test::matchParseError(const OTest* info, const OrganicParseException& error) const

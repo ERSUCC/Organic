@@ -26,8 +26,9 @@ protected:
     void beginTest(const bool warn);
     void endTest(const std::string name);
 
-    void assert(const std::string name, const bool result);
     void fail(const std::string message);
+    void failWithError(const OrganicException& error);
+    void failAndCompare(const OTest* info, const OrganicException& error);
 
     bool matchParseError(const OTest* info, const OrganicParseException& error) const;
 

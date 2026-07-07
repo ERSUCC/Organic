@@ -3,7 +3,9 @@
 #include <iostream>
 #include <stack>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string>
+#include <string.h>
 
 struct TestUtils
 {

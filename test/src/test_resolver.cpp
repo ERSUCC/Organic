@@ -45,18 +45,19 @@ void TestResolver::expectSuccess(const OTest* info)
 
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
-    const Parser::Program* program = Parser::Parser::parseSource(source);
-
+    const Parser::Program* program = nullptr;
     const Parser::TypeResolver* resolver = new Parser::TypeResolver();
 
     try
     {
+        program = Parser::Parser::parseSource(source);
+
         program->resolveTypes(resolver);
     }
 
     catch (const OrganicException& e)
     {
-        fail("Expected success, received an error.");
+        failWithError(e);
     }
 
     delete resolver;
@@ -72,25 +73,29 @@ void TestResolver::expectError(const OTest* info)
 
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
-    const Parser::Program* program = Parser::Parser::parseSource(source);
-
+    const Parser::Program* program = nullptr;
     const Parser::TypeResolver* resolver = new Parser::TypeResolver();
 
     try
     {
+        program = Parser::Parser::parseSource(source);
+
         program->resolveTypes(resolver);
 
-        fail("Type resolver did not throw any errors.");
+        fail("Expected error, but no error was thrown.");
     }
 
     catch (const OrganicParseException& e)
     {
-        assert("Type resolver throws expected error", matchParseError(info, e));
+        if (!matchParseError(info, e))
+        {
+            failAndCompare(info, e);
+        }
     }
 
     catch (const OrganicException& e)
     {
-        fail("Parser did not throw the expected error.");
+        failAndCompare(info, e);
     }
 
     delete resolver;
