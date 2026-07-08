@@ -24,7 +24,7 @@ TestExamples::TestExamples(TestTracker* tracker) :
 
 void TestExamples::expectSuccess(const Path& path)
 {
-    beginTest(true);
+    beginTest(path.stem(), true);
 
     const FileProvider* source = FileProvider::create(path);
 
@@ -32,7 +32,7 @@ void TestExamples::expectSuccess(const Path& path)
     {
         fail("Could not read \"" + path.string() + "\".");
 
-        endTest(path.stem());
+        endTest();
 
         return;
     }
@@ -61,5 +61,5 @@ void TestExamples::expectSuccess(const Path& path)
     delete program;
     delete source;
 
-    endTest(path.stem());
+    endTest();
 }

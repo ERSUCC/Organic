@@ -41,7 +41,7 @@ TestTokenizer::TestTokenizer(TestTracker* tracker) :
 
 void TestTokenizer::checkList(const OTest* info)
 {
-    beginTest(info->getValue("warn")->asBoolean());
+    beginTest(info);
 
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
@@ -75,12 +75,12 @@ void TestTokenizer::checkList(const OTest* info)
     delete tokens;
     delete source;
 
-    endTest(info->getValue("name")->asString());
+    endTest();
 }
 
 void TestTokenizer::expectError(const OTest* info)
 {
-    beginTest(info->getValue("warn")->asBoolean());
+    beginTest(info);
 
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
@@ -106,5 +106,5 @@ void TestTokenizer::expectError(const OTest* info)
 
     delete source;
 
-    endTest(info->getValue("name")->asString());
+    endTest();
 }

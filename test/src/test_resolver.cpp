@@ -41,7 +41,7 @@ TestResolver::TestResolver(TestTracker* tracker) :
 
 void TestResolver::expectSuccess(const OTest* info)
 {
-    beginTest(info->getValue("warn")->asBoolean());
+    beginTest(info);
 
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
@@ -64,12 +64,12 @@ void TestResolver::expectSuccess(const OTest* info)
     delete program;
     delete source;
 
-    endTest(info->getValue("name")->asString());
+    endTest();
 }
 
 void TestResolver::expectError(const OTest* info)
 {
-    beginTest(info->getValue("warn")->asBoolean());
+    beginTest(info);
 
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
@@ -102,5 +102,5 @@ void TestResolver::expectError(const OTest* info)
     delete program;
     delete source;
 
-    endTest(info->getValue("name")->asString());
+    endTest();
 }

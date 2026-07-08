@@ -23,8 +23,9 @@ protected:
 
     void beginSuite(const std::string name) const;
 
-    void beginTest(const bool warn);
-    void endTest(const std::string name);
+    void beginTest(const OTest* info);
+    void beginTest(const std::string& name, const bool warn);
+    void endTest();
 
     void fail(const std::string message);
     void failWithError(const OrganicException& error);
@@ -38,5 +39,7 @@ private:
     TestTracker* tracker;
 
     std::vector<std::string> errors;
+
+    std::string currentTest;
 
 };

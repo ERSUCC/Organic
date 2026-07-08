@@ -18,8 +18,15 @@ void Test::beginSuite(const std::string name) const
     TestUtils::printSuccess("[ " + name + " ]");
 }
 
-void Test::beginTest(const bool warn)
+void Test::beginTest(const OTest* info)
 {
+    beginTest(info->getValue("name")->asString(), info->getValue("warn")->asBoolean());
+}
+
+void Test::beginTest(const std::string& name, const bool warn)
+{
+    currentTest = name;
+
     errors.clear();
 
     tracker->beginSection();
@@ -27,18 +34,18 @@ void Test::beginTest(const bool warn)
     Utils::setWarnLevel(warn ? WarnLevel::Error : WarnLevel::Suppress);
 }
 
-void Test::endTest(const std::string name)
+void Test::endTest()
 {
     const size_t failures = tracker->endSection();
 
     if (failures == 0)
     {
-        TestUtils::printSuccess(name, 1);
+        TestUtils::printSuccess(currentTest, 1);
     }
 
     else
     {
-        TestUtils::printError(name, 1);
+        TestUtils::printError(currentTest, 1);
 
         for (const std::string& error : errors)
         {
