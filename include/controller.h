@@ -28,8 +28,9 @@ struct ValueCombination : public ValueObject
 protected:
     void init() override;
 
-    virtual double getValueInternal() = 0;
+    virtual double getValueInternal(const double value1, const double value2) const = 0;
 
+private:
     ValueObject* value1;
     ValueObject* value2;
 
@@ -40,7 +41,7 @@ struct ValueAdd : public ValueCombination
     ValueAdd(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 
@@ -49,7 +50,7 @@ struct ValueSubtract : public ValueCombination
     ValueSubtract(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 
@@ -58,7 +59,7 @@ struct ValueMultiply : public ValueCombination
     ValueMultiply(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 
@@ -67,7 +68,7 @@ struct ValueDivide : public ValueCombination
     ValueDivide(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 
@@ -76,7 +77,7 @@ struct ValuePower : public ValueCombination
     ValuePower(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 
@@ -85,7 +86,7 @@ struct ValueEquals : public ValueCombination
     ValueEquals(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 
@@ -94,7 +95,7 @@ struct ValueLess : public ValueCombination
     ValueLess(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 
@@ -103,7 +104,7 @@ struct ValueGreater : public ValueCombination
     ValueGreater(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 
@@ -112,7 +113,7 @@ struct ValueLessEqual : public ValueCombination
     ValueLessEqual(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 
@@ -121,7 +122,7 @@ struct ValueGreaterEqual : public ValueCombination
     ValueGreaterEqual(ValueObject* value1, ValueObject* value2);
 
 protected:
-    double getValueInternal() override;
+    double getValueInternal(const double value1, const double value2) const override;
 
 };
 

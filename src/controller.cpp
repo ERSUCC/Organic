@@ -21,14 +21,17 @@ double ValueCombination::syncLength() const
 
 double ValueCombination::getValue()
 {
-    const double value = getValueInternal();
+    const double val1 = value1->getValue();
+    const double val2 = value2->getValue();
 
-    if (!value1->enabled || !value2->enabled)
+    if (value1->enabled && value2->enabled)
     {
-        stop();
+        return getValueInternal(val1, val2);
     }
 
-    return value;
+    stop();
+
+    return 0;
 }
 
 void ValueCombination::init()
@@ -40,106 +43,81 @@ void ValueCombination::init()
 ValueAdd::ValueAdd(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueAdd::getValueInternal()
+double ValueAdd::getValueInternal(const double value1, const double value2) const
 {
-    return value1->getValue() + value2->getValue();
+    return value1 + value2;
 }
 
 ValueSubtract::ValueSubtract(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueSubtract::getValueInternal()
+double ValueSubtract::getValueInternal(const double value1, const double value2) const
 {
-    return value1->getValue() - value2->getValue();
+    return value1 - value2;
 }
 
 ValueMultiply::ValueMultiply(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueMultiply::getValueInternal()
+double ValueMultiply::getValueInternal(const double value1, const double value2) const
 {
-    return value1->getValue() * value2->getValue();
+    return value1 * value2;
 }
 
 ValueDivide::ValueDivide(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueDivide::getValueInternal()
+double ValueDivide::getValueInternal(const double value1, const double value2) const
 {
-    return value1->getValue() / value2->getValue();
+    return value1 / value2;
 }
 
 ValuePower::ValuePower(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValuePower::getValueInternal()
+double ValuePower::getValueInternal(const double value1, const double value2) const
 {
-    return pow(value1->getValue(), value2->getValue());
+    return pow(value1, value2);
 }
 
 ValueEquals::ValueEquals(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueEquals::getValueInternal()
+double ValueEquals::getValueInternal(const double value1, const double value2) const
 {
-    if (value1->getValue() == value2->getValue())
-    {
-        return 1;
-    }
-
-    return 0;
+    return value1 == value2;
 }
 
 ValueLess::ValueLess(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueLess::getValueInternal()
+double ValueLess::getValueInternal(const double value1, const double value2) const
 {
-    if (value1->getValue() < value2->getValue())
-    {
-        return 1;
-    }
-
-    return 0;
+    return value1 < value2;
 }
 
 ValueGreater::ValueGreater(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueGreater::getValueInternal()
+double ValueGreater::getValueInternal(const double value1, const double value2) const
 {
-    if (value1->getValue() > value2->getValue())
-    {
-        return 1;
-    }
-
-    return 0;
+    return value1 > value2;
 }
 
 ValueLessEqual::ValueLessEqual(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueLessEqual::getValueInternal()
+double ValueLessEqual::getValueInternal(const double value1, const double value2) const
 {
-    if (value1->getValue() <= value2->getValue())
-    {
-        return 1;
-    }
-
-    return 0;
+    return value1 <= value2;
 }
 
 ValueGreaterEqual::ValueGreaterEqual(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
-double ValueGreaterEqual::getValueInternal()
+double ValueGreaterEqual::getValueInternal(const double value1, const double value2) const
 {
-    if (value1->getValue() >= value2->getValue())
-    {
-        return 1;
-    }
-
-    return 0;
+    return value1 >= value2;
 }
 
 All::All(ValueObject* values) :
@@ -154,7 +132,16 @@ double All::getValue()
 {
     for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
-        if (object->getValue() == 0)
+        const double val = object->getValue();
+
+        if (!object->enabled)
+        {
+            stop();
+
+            return 0;
+        }
+
+        if (val == 0)
         {
             return 0;
         }
@@ -180,9 +167,16 @@ double Any::getValue()
 {
     for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
-        if (object->getValue() != 0)
+        if (object->getValue() != 0 && object->enabled)
         {
             return 1;
+        }
+
+        if (!object->enabled)
+        {
+            stop();
+
+            return 0;
         }
     }
 
@@ -206,8 +200,15 @@ double None::getValue()
 {
     for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
-        if (object->getValue() != 0)
+        if (object->getValue() != 0 && object->enabled)
         {
+            return 0;
+        }
+
+        if (!object->enabled)
+        {
+            stop();
+
             return 0;
         }
     }
@@ -232,16 +233,18 @@ double Min::getValue()
 {
     const std::vector<ValueObject*>& objects = values->getLeafAs<List>()->objects;
 
-    if (objects.empty())
-    {
-        return 0;
-    }
-
     double min = utils->infinity;
 
     for (ValueObject* object : objects)
     {
         const double value = object->getValue();
+
+        if (!object->enabled)
+        {
+            stop();
+
+            return 0;
+        }
 
         if (value < min)
         {
@@ -269,16 +272,18 @@ double Max::getValue()
 {
     const std::vector<ValueObject*>& objects = values->getLeafAs<List>()->objects;
 
-    if (objects.empty())
-    {
-        return 0;
-    }
-
     double max = -utils->infinity;
 
     for (ValueObject* object : objects)
     {
-        double value = object->getValue();
+        const double value = object->getValue();
+
+        if (!object->enabled)
+        {
+            stop();
+
+            return 0;
+        }
 
         if (value > max)
         {
@@ -316,13 +321,15 @@ double Round::getValue()
     if (!value->enabled)
     {
         stop();
+
+        return 0;
     }
 
     double st = step->getValue();
 
     if (st == 0)
     {
-        st = 1;
+        return val;
     }
 
     switch (direction->getLeafAs<ValueByte>()->value)
@@ -330,17 +337,11 @@ double Round::getValue()
         case Constants::Round::Nearest:
             return round(val / st) * st;
 
-            break;
-
         case Constants::Round::Up:
             return ceil(val / st) * st;
 
-            break;
-
         case Constants::Round::Down:
             return floor(val / st) * st;
-
-            break;
     }
 
     return 0;
@@ -373,6 +374,8 @@ double Absolute::getValue()
     if (!value->enabled)
     {
         stop();
+
+        return 0;
     }
 
     return val;
@@ -395,11 +398,6 @@ Sequence::~Sequence()
 double Sequence::syncLength() const
 {
     const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
-
-    if (objects.empty())
-    {
-        return 0;
-    }
 
     double length = 0;
 
@@ -433,11 +431,6 @@ double Sequence::getValue()
 {
     const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
 
-    if (objects.empty())
-    {
-        return 0;
-    }
-
     const double value = objects[current]->getValue();
 
     if (!objects[current]->enabled)
@@ -447,12 +440,13 @@ double Sequence::getValue()
         if (++switches <= max_switches)
         {
             repeat(repeatTime + objects[current]->syncLength());
+
+            return objects[current]->getValue();
         }
 
-        else
-        {
-            stop();
-        }
+        stop();
+
+        return 0;
     }
 
     return value;
@@ -461,11 +455,6 @@ double Sequence::getValue()
 void Sequence::init()
 {
     const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
-
-    if (objects.empty())
-    {
-        return;
-    }
 
     switches = 0;
 
@@ -477,7 +466,7 @@ void Sequence::init()
 
     if (orderNum == Constants::Sequence::PingPong)
     {
-        max_switches = objects.size() * 2 - 2;
+        max_switches = objects.size() * 2 - 3;
     }
 
     else
@@ -513,11 +502,6 @@ void Sequence::init()
 void Sequence::reinit()
 {
     const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
-
-    if (objects.empty())
-    {
-        return;
-    }
 
     switch (order->getLeafAs<ValueByte>()->value)
     {
@@ -598,11 +582,15 @@ double Repeat::getValue()
         if (repeatsValue == 0 || ++times < repeatsValue)
         {
             repeat(repeatTime + value->syncLength());
+
+            return value->getValue();
         }
 
         else
         {
             stop();
+
+            return 0;
         }
     }
 
@@ -649,6 +637,8 @@ double Hold::getValue()
     if (utils->time - startTime >= length->getValue())
     {
         stop();
+
+        return 0;
     }
 
     return value->getValue();
@@ -684,7 +674,7 @@ double Sweep::getValue()
     {
         stop();
 
-        return toValue;
+        return 0;
     }
 
     const double fromValue = from->getValue();
@@ -723,7 +713,7 @@ double LFO::getValue()
     {
         stop();
 
-        return fromValue;
+        return 0;
     }
 
     return fromValue + (to->getValue() - fromValue) * (-cos(utils->twoPi * (utils->time - startTime) / lengthValue) / 2 + 0.5);
@@ -759,6 +749,8 @@ double Random::getValue()
     if (utils->time - startTime >= lengthValue)
     {
         stop();
+
+        return 0;
     }
 
     switch (type->getLeafAs<ValueByte>()->value)
@@ -816,6 +808,8 @@ double Limit::getValue()
     if (!value->enabled)
     {
         stop();
+
+        return 0;
     }
 
     const double valueValue = value->getValue();
@@ -858,20 +852,35 @@ double Trigger::syncLength() const
 
 double Trigger::getValue()
 {
-    if (triggered && !value->enabled && condition->getValue() == 0)
+    if (triggered)
     {
-        triggered = false;
+        const double val = value->getValue();
+
+        if (value->enabled)
+        {
+            return val;
+        }
+
+        stop();
+
+        return 0;
     }
 
-    if (!triggered && condition->getValue() != 0)
+    const double cond = condition->getValue();
+
+    if (!condition->enabled)
+    {
+        stop();
+
+        return 0;
+    }
+
+    if (cond != 0)
     {
         triggered = true;
 
         value->start(utils->time);
-    }
 
-    if (value->enabled)
-    {
         return value->getValue();
     }
 
@@ -880,6 +889,8 @@ double Trigger::getValue()
 
 void Trigger::init()
 {
+    triggered = false;
+
     condition->start(startTime);
 }
 
@@ -895,7 +906,16 @@ If::~If()
 
 double If::getValue()
 {
-    if (condition->getValue() == 0)
+    const double cond = condition->getValue();
+
+    if (!condition->enabled)
+    {
+        stop();
+
+        return 0;
+    }
+
+    if (cond == 0)
     {
         return falseValue->getValue();
     }

@@ -50,6 +50,7 @@ struct Utils
     const double infinity = std::numeric_limits<double>::infinity();
 
     double time = 0;
+    double timeStep;
 
     std::mt19937_64 rng;
 

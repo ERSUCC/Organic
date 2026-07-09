@@ -6,9 +6,16 @@
 #include "../include/test_resolver.h"
 #include "../include/test_tokenizer.h"
 #include "../include/test_utils.h"
+#include "../include/engine/test_controllers.h"
 
 int main(int argc, char** argv)
 {
+    Utils* utils = Utils::get();
+
+    utils->channels = 2;
+    utils->sampleRate = 44100;
+    utils->timeStep = 1000.0 / utils->sampleRate;
+
     TestTracker* tracker = new TestTracker();
 
     tracker->beginSection();
@@ -18,6 +25,7 @@ int main(int argc, char** argv)
         TestTokenizer::run(tracker);
         TestParser::run(tracker);
         TestResolver::run(tracker);
+        TestControllers::run(tracker);
         TestExamples::run(tracker);
     }
 
@@ -25,7 +33,7 @@ int main(int argc, char** argv)
     {
         TestUtils::printError(e.what());
 
-        delete Utils::get();
+        delete utils;
 
         return 1;
     }
@@ -38,7 +46,7 @@ int main(int argc, char** argv)
     {
         TestUtils::printSuccess("\nAll tests passed.");
 
-        delete Utils::get();
+        delete utils;
 
         return 0;
     }
@@ -53,7 +61,7 @@ int main(int argc, char** argv)
         TestUtils::printError("\n" + std::to_string(failures) + " failing tests.");
     }
 
-    delete Utils::get();
+    delete utils;
 
     return 1;
 }

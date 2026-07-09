@@ -60,11 +60,40 @@ add_executable(organic_test test/src/main.cpp
                             test/src/test_parser.cpp
                             test/src/test_resolver.cpp
                             test/src/test_tokenizer.cpp
-                            test/src/test_utils.cpp)
+                            test/src/test_utils.cpp
+                            test/src/engine/test_controllers.cpp
+                            test/src/engine/controllers/absolute.cpp
+                            test/src/engine/controllers/add.cpp
+                            test/src/engine/controllers/all.cpp
+                            test/src/engine/controllers/any.cpp
+                            test/src/engine/controllers/divide.cpp
+                            test/src/engine/controllers/equals.cpp
+                            test/src/engine/controllers/geq.cpp
+                            test/src/engine/controllers/greater.cpp
+                            test/src/engine/controllers/hold.cpp
+                            test/src/engine/controllers/if.cpp
+                            test/src/engine/controllers/leq.cpp
+                            test/src/engine/controllers/less.cpp
+                            test/src/engine/controllers/lfo.cpp
+                            test/src/engine/controllers/limit.cpp
+                            test/src/engine/controllers/max.cpp
+                            test/src/engine/controllers/min.cpp
+                            test/src/engine/controllers/multiply.cpp
+                            test/src/engine/controllers/none.cpp
+                            test/src/engine/controllers/power.cpp
+                            test/src/engine/controllers/random.cpp
+                            test/src/engine/controllers/repeat.cpp
+                            test/src/engine/controllers/round.cpp
+                            test/src/engine/controllers/sequence.cpp
+                            test/src/engine/controllers/subtract.cpp
+                            test/src/engine/controllers/sweep.cpp
+                            test/src/engine/controllers/time.cpp
+                            test/src/engine/controllers/trigger.cpp
+                            test/src/engine/controllers/value.cpp)
 
 target_compile_definitions(organic_test PRIVATE ORGANIC_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
                                                 ORGANIC_TEST_DIR="${CMAKE_SOURCE_DIR}/test/files")
 
-target_include_directories(organic_test PRIVATE include)
+target_include_directories(organic_test PRIVATE include test/include)
 
 target_link_libraries(organic_test organic_lib)

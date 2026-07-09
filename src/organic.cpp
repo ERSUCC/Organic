@@ -8,6 +8,8 @@ Organic::Organic(const Path& path, const ProgramOptions options) :
     utils->channels = options.channels.value_or(2);
     utils->sampleRate = options.sampleRate.value_or(44100);
     utils->bufferLength = options.bufferLength.value_or(128);
+    utils->timeStep = 1000.0 / utils->sampleRate;
+
     utils->setSeed(options.seed);
 
     if (options.info.value_or(false))
@@ -89,7 +91,7 @@ void Organic::startPlayback()
 
         for (size_t i = 0; i < frames; i++)
         {
-            utils->time = i * 1000.0 / utils->sampleRate;
+            utils->time = i * utils->timeStep;
 
             program->processAudioSources(buffer);
         }
@@ -143,7 +145,7 @@ void Organic::startExport()
 
     for (size_t i = 0; i < steps; i++)
     {
-        utils->time = i * 1000.0 / utils->sampleRate;
+        utils->time = i * utils->timeStep;
 
         program->processAudioSources(samples + i * utils->channels);
     }
@@ -170,7 +172,7 @@ int Organic::processAudio(void* output, unsigned int frames)
     {
         program->processAudioSources((double*)output + i * utils->channels);
 
-        utils->time += 1000.0 / utils->sampleRate;
+        utils->time += utils->timeStep;
     }
 
     return 0;
