@@ -14,14 +14,33 @@ void TypeResolver::resolveTypes(const InputDef* token) const
 
 void TypeResolver::resolveTypes(const FunctionDef* token) const
 {
+    if (token->program->instructions.empty())
+    {
+        throw OrganicParseException("The function \"" + token->string() + "\" does not return a value.", token->location);
+    }
+
     for (const InputDef* input : token->inputs)
     {
         input->resolveTypes(this);
     }
 
-    token->program->resolveTypes(this);
+    const SharedType noneType(new NoneType());
 
-    if (token->program->instructions.empty() || token->returnType()->checkType(SharedType(new NoneType())))
+    for (size_t i = 0; i < token->program->instructions.size() - 1; i++)
+    {
+        const Token* instruction = token->program->instructions[i];
+
+        instruction->resolveTypes(this);
+
+        if (!noneType->checkType(instruction->type()))
+        {
+            Utils::parseWarning("This instruction has no effect, it will be ignored.", instruction->location);
+        }
+    }
+
+    token->program->instructions.back()->resolveTypes(this);
+
+    if (SharedType(new NoneType())->checkType(token->returnType()))
     {
         throw OrganicParseException("The function \"" + token->string() + "\" does not return a value.", token->location);
     }
@@ -365,9 +384,17 @@ void TypeResolver::resolveTypes(const CallAlias* token) const
 
 void TypeResolver::resolveTypes(const Program* token) const
 {
+    const SharedType noneType(new NoneType());
+    const SharedType sourceType(new AudioSourceType());
+
     for (const Token* instruction : token->instructions)
     {
         instruction->resolveTypes(this);
+
+        if (!noneType->checkType(instruction->type()) && !sourceType->checkType(instruction->type()))
+        {
+            Utils::parseWarning("This instruction has no effect, it will be ignored.", instruction->location);
+        }
     }
 }
 

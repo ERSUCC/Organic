@@ -1,0 +1,88 @@
+name = "Program with dangling controller at start"
+line = 2
+character = 1
+error = "This instruction has no effect, it will be ignored."
+warn = true
+
+---
+
+sweep(from: 0, to: 1, length: 1000)
+sine(frequency: 440)
+
+---
+
+name = "Program with dangling controller in middle"
+line = 3
+character = 1
+error = "This instruction has no effect, it will be ignored."
+warn = true
+
+---
+
+sine(frequency: 220)
+sweep(from: 0, to: 1, length: 1000)
+sine(frequency: 440)
+
+---
+
+name = "Define with dangling audio source"
+line = 3
+character = 5
+error = "This instruction has no effect, it will be ignored."
+warn = true
+
+---
+
+func() = {
+    sine(frequency: 220)
+    sine(frequency: 440)
+}
+
+func()
+
+---
+
+name = "Define with dangling controller"
+line = 3
+character = 5
+error = "This instruction has no effect, it will be ignored."
+warn = true
+
+---
+
+func() = {
+    sweep(from: 0, to: 1, length: 1000)
+    sine(frequency: 440)
+}
+
+func()
+
+---
+
+name = "Define with dangling audio source and no return"
+line = 2
+character = 1
+error = 'The function "func" does not return a value.'
+
+---
+
+func() = {
+    sine(frequency: 440)
+
+    test = 0
+}
+
+---
+
+name = "Define with dangling controller and no return"
+line = 2
+character = 1
+error = 'The function "func" does not return a value.'
+
+---
+
+func() = {
+    sweep(from: 0, to: 1, length: 1000)
+
+    test = 0
+}

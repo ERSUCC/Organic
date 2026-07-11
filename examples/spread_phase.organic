@@ -1,7 +1,9 @@
 spread-saw(volume: 1, frequency: 0, spread: 0) = {
-    saw(volume: volume / 3, frequency: frequency - spread, pan: -0.3)
-    saw(volume: volume / 3, frequency: frequency)
-    saw(volume: volume / 3, frequency: frequency + spread, pan: 0.3)
+    group(volume: volume / 3, sources: [
+        saw(frequency: frequency - spread, pan: -0.3),
+        saw(frequency: frequency),
+        saw(frequency: frequency + spread, pan: 0.3)
+    ])
 }
 
 phase_length = 8000
