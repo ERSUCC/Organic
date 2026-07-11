@@ -71,14 +71,25 @@ void Test::failAndCompare(const OTest* info, const OrganicException& error)
     addError("Expected error:\n  " + info->getValue("error")->asString() + "\nBut received:\n  " + error.message);
 }
 
-bool Test::matchParseError(const OTest* info, const OrganicParseException& error) const
+void Test::expectParseError(const OTest* info, const OrganicParseException& error)
 {
     const std::string& message = info->getValue("error")->asString();
 
     const int line = info->getValue("line")->asInteger();
     const int character = info->getValue("character")->asInteger();
 
-    return error.message == message && error.location.line == line && error.location.character == character;
+    if (error.message != message)
+    {
+        failAndCompare(info, error);
+    }
+
+    else if (error.location.line != line || error.location.character != character)
+    {
+        const std::string expected = "line " + std::to_string(line) + " character " + std::to_string(character);
+        const std::string received = "line " + std::to_string(error.location.line) + " character " + std::to_string(error.location.character);
+
+        fail("Expected error at " + expected + ", but received error at " + received);
+    }
 }
 
 void Test::addError(const std::string text)

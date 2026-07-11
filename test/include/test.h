@@ -30,8 +30,7 @@ protected:
     void fail(const std::string message);
     void failWithError(const OrganicException& error);
     void failAndCompare(const OTest* info, const OrganicException& error);
-
-    bool matchParseError(const OTest* info, const OrganicParseException& error) const;
+    void expectParseError(const OTest* info, const OrganicParseException& error);
 
 private:
     void addError(const std::string text);

@@ -75,10 +75,7 @@ void TestParser::expectError(const OTest* info)
 
     catch (const OrganicParseException& e)
     {
-        if (!matchParseError(info, e))
-        {
-            failAndCompare(info, e);
-        }
+        expectParseError(info, e);
     }
 
     catch (const OrganicException& e)
