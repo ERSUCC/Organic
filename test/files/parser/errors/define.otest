@@ -1,3 +1,14 @@
+name = "Define with comma before first input"
+line = 2
+character = 6
+error = 'Expected input name after "(", but received ",".'
+
+---
+
+test(,) = {}
+
+---
+
 name = "Incomplete define"
 line = 4
 character = 1
@@ -31,7 +42,7 @@ test() = {
 
 ---
 
-name = "Define with improper input format"
+name = "Define closed after first input"
 line = 2
 character = 12
 error = 'Expected ":" after input name, but received ")".'
@@ -42,7 +53,40 @@ test(volume) = {}
 
 ---
 
-name = "Duplicate input name in function definition"
+name = "Define closed after second input"
+line = 2
+character = 26
+error = 'Expected ":" after input name, but received ")".'
+
+---
+
+test(volume: 1, frequency) = {}
+
+---
+
+name = "Define closed after first comma"
+line = 2
+character = 17
+error = 'Expected input name after ",", but received ")".'
+
+---
+
+test(volume: 1, ) = {}
+
+---
+
+name = "Define closed after second comma"
+line = 2
+character = 33
+error = 'Expected input name after ",", but received ")".'
+
+---
+
+test(volume: 1, frequency: 440, ) = {}
+
+---
+
+name = "First define input specified twice"
 line = 2
 character = 15
 error = 'Input "test" specified more than once for function "func".'
@@ -50,5 +94,18 @@ error = 'Input "test" specified more than once for function "func".'
 ---
 
 func(test: 0, test: 1) = {
+    2
+}
+
+---
+
+name = "Second define input specified twice"
+line = 2
+character = 25
+error = 'Input "test1" specified more than once for function "func".'
+
+---
+
+func(test: 0, test1: 1, test1: 1) = {
     2
 }

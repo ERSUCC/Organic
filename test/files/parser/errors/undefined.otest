@@ -41,3 +41,77 @@ error = 'No variable, input, or function exists with the name "test1".'
 test() = {
     test1
 }
+
+---
+
+name = "Undefined variable from child scope"
+line = 7
+character = 1
+error = 'No variable, input, or function exists with the name "test1".'
+
+---
+
+test() = {
+    test1 = 0
+    test1
+}
+
+test1
+
+---
+
+name = "Undefined function from child scope"
+line = 10
+character = 1
+error = 'No function exists with the name "test1".'
+
+---
+
+test() = {
+    test1() = {
+        0
+    }
+
+    test1()
+}
+
+test1()
+
+---
+
+name = "Undefined variable from neighboring scope"
+line = 8
+character = 5
+error = 'No variable, input, or function exists with the name "test1".'
+
+---
+
+test() = {
+    test1 = 0
+    test1
+}
+
+test2() = {
+    test1
+}
+
+---
+
+name = "Undefined function from neighboring scope"
+line = 11
+character = 5
+error = 'No function exists with the name "test1".'
+
+---
+
+test() = {
+    test1() = {
+        0
+    }
+
+    test1()
+}
+
+test2() = {
+    test1()
+}

@@ -44,3 +44,23 @@ name = "Assign variable to variable"
 
 test = 1
 test1 = test
+
+---
+
+name = "Assign function call to variable"
+
+---
+
+test = sine(volume: 1, frequency: 440)
+
+---
+
+name = "Assign user function call to variable"
+
+---
+
+func() = {
+    sine(volume: 1, frequency: 440)
+}
+
+test = func()

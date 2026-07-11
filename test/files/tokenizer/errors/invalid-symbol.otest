@@ -50,3 +50,58 @@ error = 'Unrecognized symbol "$".'
 ---
 
 [ 1, 2, $, 4 ]
+
+---
+
+name = "Invalid symbol in identifier"
+line = 2
+character = 5
+error = 'Unrecognized symbol "$".'
+
+---
+
+test$
+
+---
+
+name = "Invalid symbol after identifier"
+line = 2
+character = 6
+error = 'Unrecognized symbol "$".'
+
+---
+
+test $
+
+---
+
+name = "Invalid symbol in assignment"
+line = 2
+character = 8
+error = 'Unrecognized symbol "$".'
+
+---
+
+test = $
+
+---
+
+name = "Invalid symbol as function input name"
+line = 2
+character = 6
+error = 'Unrecognized symbol "$".'
+
+---
+
+test($: 0)
+
+---
+
+name = "Invalid symbol as function input value"
+line = 2
+character = 13
+error = 'Unrecognized symbol "$".'
+
+---
+
+test(input: $)

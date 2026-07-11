@@ -457,7 +457,7 @@ const void Parser::parseDefine()
         {
             tokens->drop();
 
-            const UniqueToken<Identifier> input = tokens->require<Identifier>("input name");
+            const UniqueToken<Identifier> input = tokens->require<Identifier>(inputs.empty() ? "input name after \"(\"" : "input name after \",\"");
 
             for (const UniqueToken<InputDef>& def : inputs)
             {

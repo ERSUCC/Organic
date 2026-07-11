@@ -104,3 +104,27 @@ error = "Includes must come before all other instructions."
 test = 0
 
 include("sources/include.organic")
+
+---
+
+name = "Include in define"
+line = 3
+character = 5
+error = "Includes must come before all other instructions."
+
+---
+
+test() = {
+    include("sources/include.organic")
+}
+
+---
+
+name = "Include as function input"
+line = 2
+character = 14
+error = "Includes must come before all other instructions."
+
+---
+
+sine(volume: include("sources/include.organic"))
