@@ -128,11 +128,6 @@ const Identifier* ParserContext::findIdentifier(const Identifier* token)
 
 const FunctionDef* ParserContext::findFunction(const Identifier* token)
 {
-    if (checkRecursive(token))
-    {
-        throw OrganicParseException("Calling a function in its own definition is not allowed.", token->location);
-    }
-
     if (functions.count(token->string()))
     {
         const FunctionDef* function = functions[token->string()];
@@ -693,6 +688,11 @@ UniqueToken<Call> Parser::parseCall()
         throw OrganicParseException("Includes must come before all other instructions.", name->location);
     }
 
+    if (context->checkRecursive(name.get()))
+    {
+        throw OrganicParseException("Calling a function in its own definition is not allowed.", name->location);
+    }
+
     std::vector<UniqueToken<Argument>> arguments;
 
     if (tokens->peek<CloseParenthesis>(1))
@@ -736,7 +736,17 @@ UniqueToken<Call> Parser::parseCall()
         return libraryFunctions[name->string()](name->location, argumentList);
     }
 
-    return UniqueToken<Call>(new CallUser(name->location, argumentList, context->findFunction(name.get())));
+    try
+    {
+        return UniqueToken<Call>(new CallUser(name->location, argumentList, context->findFunction(name.get())));
+    }
+
+    catch (const OrganicException& e)
+    {
+        delete argumentList;
+
+        throw;
+    }
 }
 
 UniqueToken<Argument> Parser::parseArgument(const std::string& errorContext)
