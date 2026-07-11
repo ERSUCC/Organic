@@ -40,8 +40,8 @@ static std::unordered_map<std::string, std::function<UniqueToken<Call> (const So
     { "reverb", CALL(Reverb) }
 };
 
-ParserContext::ParserContext(ParserContext* parent, const std::string name, const std::vector<UniqueToken<InputDef>>& inputs) :
-    parent(parent), name(name)
+ParserContext::ParserContext(ParserContext* parent, const ContextType& type, const std::string name, const std::vector<UniqueToken<InputDef>>& inputs) :
+    parent(parent), type(type), name(name)
 {
     for (const UniqueToken<InputDef>& input : inputs)
     {
@@ -171,11 +171,16 @@ void ParserContext::checkNameConflicts(const Identifier* token) const
     {
         throw OrganicParseException("A function already exists with the name \"" + name + "\".", token->location);
     }
+
+    if (parent)
+    {
+        parent->checkNameConflicts(token);
+    }
 }
 
-bool ParserContext::checkRecursive(const Identifier* token) const
+bool ParserContext::checkRecursive(const ContextType& type, const Identifier* token) const
 {
-    return name == token->string() || (parent && parent->checkRecursive(token));
+    return (this->type == type && name == token->string()) || (parent && parent->checkRecursive(type, token));
 }
 
 void ParserContext::checkUsage() const
@@ -216,7 +221,7 @@ const Program* ParserContext::buildProgram(const SourceProvider* source)
 
 const Program* Parser::parseSource(const SourceProvider* source)
 {
-    ParserContext* context = new ParserContext(nullptr, "", {});
+    ParserContext* context = new ParserContext(nullptr, ContextType::Program, "", {});
 
     std::unordered_set<Path, Path::Hash, Path::Equals> includedPaths = { source->path() };
 
@@ -432,7 +437,18 @@ const void Parser::parseAssign()
     tokens->drop();
 
     context->checkNameConflicts(name.get());
-    context->addVariable(name.get(), parseExpression(" after \"=\""));
+
+    context = new ParserContext(context, ContextType::Assign, name->string(), {});
+
+    const Token* expression = parseExpression(" after \"=\"");
+
+    const ParserContext* inner = context;
+
+    context = context->parent;
+
+    delete inner;
+
+    context->addVariable(name.get(), expression);
 }
 
 const void Parser::parseDefine()
@@ -477,12 +493,12 @@ const void Parser::parseDefine()
 
     context->checkNameConflicts(name.get());
 
-    if (context->checkRecursive(name.get()))
+    if (context->checkRecursive(ContextType::Define, name.get()))
     {
         throw OrganicParseException("Redefining a function in its own definition is not allowed.", name->location);
     }
 
-    context = new ParserContext(context, name->string(), inputs);
+    context = new ParserContext(context, ContextType::Define, name->string(), inputs);
 
     tokens->drop(2);
 
@@ -669,6 +685,11 @@ UniqueToken<> Parser::parseTerm(const std::string& errorContext)
             return parseCall();
         }
 
+        if (context->checkRecursive(ContextType::Assign, name))
+        {
+            throw OrganicParseException("Using a variable in its own definition is not allowed.", name->location);
+        }
+
         const Identifier* value = context->findIdentifier(name);
 
         tokens->drop();
@@ -688,7 +709,7 @@ UniqueToken<Call> Parser::parseCall()
         throw OrganicParseException("Includes must come before all other instructions.", name->location);
     }
 
-    if (context->checkRecursive(name.get()))
+    if (context->checkRecursive(ContextType::Define, name.get()))
     {
         throw OrganicParseException("Calling a function in its own definition is not allowed.", name->location);
     }

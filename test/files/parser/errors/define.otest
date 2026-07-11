@@ -109,3 +109,59 @@ error = 'Input "test1" specified more than once for function "func".'
 func(test: 0, test1: 1, test1: 1) = {
     2
 }
+
+---
+
+name = "Call function directly in its definition"
+line = 3
+character = 5
+error = "Calling a function in its own definition is not allowed."
+
+---
+
+func() = {
+    func()
+}
+
+---
+
+name = "Call function nested in its definition"
+line = 4
+character = 9
+error = "Calling a function in its own definition is not allowed."
+
+---
+
+func() = {
+    func2() = {
+        func()
+    }
+}
+
+---
+
+name = "Redefine function directly in its definition"
+line = 3
+character = 5
+error = "Redefining a function in its own definition is not allowed."
+
+---
+
+func() = {
+    func() = {}
+}
+
+---
+
+name = "Redefine function nested in its definition"
+line = 4
+character = 9
+error = "Redefining a function in its own definition is not allowed."
+
+---
+
+func() = {
+    func2() = {
+        func() = {}
+    }
+}

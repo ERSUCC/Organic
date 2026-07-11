@@ -21,9 +21,16 @@
 
 namespace Parser {
 
+enum struct ContextType
+{
+    Program,
+    Assign,
+    Define
+};
+
 struct ParserContext
 {
-    ParserContext(ParserContext* parent, const std::string name, const std::vector<UniqueToken<InputDef>>& inputs);
+    ParserContext(ParserContext* parent, const ContextType& type, const std::string name, const std::vector<UniqueToken<InputDef>>& inputs);
     ~ParserContext();
 
     const VariableDef* addVariable(const Identifier* token, const Token* value);
@@ -35,7 +42,7 @@ struct ParserContext
     void addInstruction(const Token* instruction);
 
     void checkNameConflicts(const Identifier* token) const;
-    bool checkRecursive(const Identifier* token) const;
+    bool checkRecursive(const ContextType& type, const Identifier* token) const;
     void checkUsage() const;
 
     const Program* buildProgram(const SourceProvider* source);
@@ -43,6 +50,8 @@ struct ParserContext
     ParserContext* parent;
 
 private:
+    const ContextType type;
+
     const std::string name;
 
     std::unordered_map<std::string, const InputDef*> inputs;
