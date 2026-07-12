@@ -1,6 +1,6 @@
 #include "../include/organic.h"
 
-Organic::Organic(const Path& path, const ProgramOptions options) :
+Organic::Organic(const Path& path, const ProgramOptions& options) :
     options(options)
 {
     utils = Utils::get();
@@ -178,7 +178,7 @@ int Organic::processAudio(void* output, unsigned int frames)
     return 0;
 }
 
-void Organic::audioError(const std::string message) const
+void Organic::audioError(const std::string& message) const
 {
     throw OrganicAudioException(message);
 }

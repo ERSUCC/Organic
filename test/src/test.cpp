@@ -3,17 +3,17 @@
 Test::Test(TestTracker* tracker) :
     tracker(tracker) {}
 
-const Path Test::sourcePath(const std::string file) const
+const Path Test::sourcePath(const std::string& file) const
 {
     return Path::relative(file, ORGANIC_SOURCE_DIR);
 }
 
-const Path Test::testPath(const std::string file) const
+const Path Test::testPath(const std::string& file) const
 {
     return Path::relative(file, ORGANIC_TEST_DIR);
 }
 
-void Test::beginSuite(const std::string name) const
+void Test::beginSuite(const std::string& name) const
 {
     TestUtils::printSuccess("[ " + name + " ]");
 }
@@ -56,7 +56,7 @@ void Test::endTest()
     }
 }
 
-void Test::fail(const std::string message)
+void Test::fail(const std::string& message)
 {
     addError(message);
 }
@@ -92,7 +92,7 @@ void Test::expectParseError(const OTest* info, const OrganicParseException& erro
     }
 }
 
-void Test::addError(const std::string text)
+void Test::addError(const std::string& text)
 {
     errors.push_back(text);
 

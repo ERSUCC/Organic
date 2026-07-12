@@ -18,22 +18,22 @@ protected:
 
     virtual void test() = 0;
 
-    const Path sourcePath(const std::string file) const;
-    const Path testPath(const std::string file) const;
+    const Path sourcePath(const std::string& file) const;
+    const Path testPath(const std::string& file) const;
 
-    void beginSuite(const std::string name) const;
+    void beginSuite(const std::string& name) const;
 
     void beginTest(const OTest* info);
     void beginTest(const std::string& name, const bool warn);
     void endTest();
 
-    void fail(const std::string message);
+    void fail(const std::string& message);
     void failWithError(const OrganicException& error);
     void failAndCompare(const OTest* info, const OrganicException& error);
     void expectParseError(const OTest* info, const OrganicParseException& error);
 
 private:
-    void addError(const std::string text);
+    void addError(const std::string& text);
 
     TestTracker* tracker;
 

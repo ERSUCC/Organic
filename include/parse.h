@@ -30,7 +30,7 @@ enum struct ContextType
 
 struct ParserContext
 {
-    ParserContext(ParserContext* parent, const ContextType& type, const std::string name, const std::vector<UniqueToken<InputDef>>& inputs);
+    ParserContext(ParserContext* parent, const ContextType& type, const std::string& name, const std::vector<UniqueToken<InputDef>>& inputs);
     ~ParserContext();
 
     const VariableDef* addVariable(const Identifier* token, const Token* value);

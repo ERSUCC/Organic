@@ -75,7 +75,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::Program* token);
 
 private:
-    Engine::ValueObject* transformArgument(const Parser::ArgumentList* arguments, const std::string name);
+    Engine::ValueObject* transformArgument(const Parser::ArgumentList* arguments, const std::string& name);
 
     void setVariable(const Parser::Identifier* name, Engine::ValueObject* value);
 

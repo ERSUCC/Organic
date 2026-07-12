@@ -20,7 +20,7 @@ const Path Path::beside(const std::filesystem::path& path, const Path& other)
     return Path(other.path.parent_path() / path);
 }
 
-std::filesystem::path Path::formatPath(const std::string path)
+std::filesystem::path Path::formatPath(const std::string& path)
 {
     std::string trimmed;
 

@@ -153,7 +153,7 @@ ProgramOptions FlagParser::getOptions()
     return options;
 }
 
-std::string FlagParser::nextOption(const std::string flag)
+std::string FlagParser::nextOption(const std::string& flag)
 {
     if (flags.empty())
     {
@@ -167,7 +167,7 @@ std::string FlagParser::nextOption(const std::string flag)
     return next;
 }
 
-unsigned int FlagParser::nextInt(const std::string flag)
+unsigned int FlagParser::nextInt(const std::string& flag)
 {
     const std::string next = nextOption(flag);
 
@@ -200,7 +200,7 @@ unsigned int FlagParser::nextInt(const std::string flag)
     return result;
 }
 
-size_t FlagParser::nextLong(const std::string flag)
+size_t FlagParser::nextLong(const std::string& flag)
 {
     const std::string next = nextOption(flag);
 
@@ -232,7 +232,7 @@ size_t FlagParser::nextLong(const std::string flag)
     return result;
 }
 
-double FlagParser::nextDouble(const std::string flag)
+double FlagParser::nextDouble(const std::string& flag)
 {
     const std::string next = nextOption(flag);
 

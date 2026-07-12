@@ -398,7 +398,7 @@ void TypeResolver::resolveTypes(const Program* token) const
     }
 }
 
-void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, const SharedType expectedType, const SharedToken defaultValue) const
+void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string& name, const SharedType& expectedType, const SharedToken& defaultValue) const
 {
     if (const Argument* argument = arguments->findArgument(name))
     {
@@ -425,7 +425,7 @@ void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::stri
     }
 }
 
-void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string name, const Type* expectedType, const Token* defaultValue) const
+void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string& name, const Type* expectedType, const Token* defaultValue) const
 {
     resolveArgumentTypes(arguments, name, SharedType(expectedType), SharedToken(defaultValue));
 }

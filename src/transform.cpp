@@ -346,7 +346,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Program* token)
     return new Engine::Program(allVariables, sources);
 }
 
-Engine::ValueObject* TokenTransformer::transformArgument(const Parser::ArgumentList* arguments, const std::string name)
+Engine::ValueObject* TokenTransformer::transformArgument(const Parser::ArgumentList* arguments, const std::string& name)
 {
     for (const Parser::Argument* argument : arguments->arguments)
     {

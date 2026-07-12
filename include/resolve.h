@@ -53,8 +53,8 @@ struct TypeResolver
     void resolveTypes(const Program* token) const;
 
 private:
-    void resolveArgumentTypes(ArgumentList* arguments, const std::string name, const SharedType expectedType, const SharedToken defaultValue) const;
-    void resolveArgumentTypes(ArgumentList* arguments, const std::string name, const Type* expectedType, const Token* defaultValue = nullptr) const;
+    void resolveArgumentTypes(ArgumentList* arguments, const std::string& name, const SharedType& expectedType, const SharedToken& defaultValue) const;
+    void resolveArgumentTypes(ArgumentList* arguments, const std::string& name, const Type* expectedType, const Token* defaultValue = nullptr) const;
 
 };
 

@@ -50,7 +50,7 @@ ValueObject* ValueObject::getLeaf()
     return this;
 }
 
-List::List(const std::vector<ValueObject*> objects) :
+List::List(const std::vector<ValueObject*>& objects) :
     objects(objects) {}
 
 List::~List()
@@ -97,7 +97,7 @@ void Variable::init()
     value->start(startTime);
 }
 
-Lambda::Lambda(const std::vector<Variable*> inputs, ValueObject* value) :
+Lambda::Lambda(const std::vector<Variable*>& inputs, ValueObject* value) :
     inputs(inputs), value(value) {}
 
 Lambda::~Lambda()

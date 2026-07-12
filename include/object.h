@@ -46,7 +46,7 @@ struct ValueObject : public Sync
 
 struct List : public ValueObject
 {
-    List(const std::vector<ValueObject*> objects);
+    List(const std::vector<ValueObject*>& objects);
     ~List();
 
     const std::vector<ValueObject*> objects;
@@ -74,7 +74,7 @@ protected:
 
 struct Lambda : public ValueObject
 {
-    Lambda(const std::vector<Variable*> inputs, ValueObject* value);
+    Lambda(const std::vector<Variable*>& inputs, ValueObject* value);
     ~Lambda();
 
     double getValue() override;

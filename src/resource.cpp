@@ -2,7 +2,7 @@
 
 using namespace Engine;
 
-Resource::Resource(const Path& path, const SourceLocation location)
+Resource::Resource(const Path& path, const SourceLocation& location)
 {
     if (!path.exists())
     {

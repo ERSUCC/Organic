@@ -28,7 +28,7 @@ struct Path
     static const Path relative(const std::filesystem::path& path);
     static const Path beside(const std::filesystem::path&, const Path& other);
 
-    static std::filesystem::path formatPath(const std::string path);
+    static std::filesystem::path formatPath(const std::string& path);
 
     bool exists() const;
     bool isFile() const;

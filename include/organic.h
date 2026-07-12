@@ -25,7 +25,7 @@
 
 struct Organic
 {
-    Organic(const Path& path, const ProgramOptions options);
+    Organic(const Path& path, const ProgramOptions& options);
     ~Organic();
 
     void start();
@@ -36,7 +36,7 @@ private:
 
     int processAudio(void* output, unsigned int frames);
 
-    void audioError(const std::string message) const;
+    void audioError(const std::string& message) const;
 
     const ProgramOptions options;
 

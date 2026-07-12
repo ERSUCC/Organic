@@ -2,7 +2,7 @@
 
 using namespace Parser;
 
-Type::Type(const TypeConstant base, const std::string str) :
+Type::Type(const TypeConstant& base, const std::string& str) :
     base(base), str(str) {}
 
 Type::~Type() {}
@@ -17,7 +17,7 @@ std::string Type::name() const
     return str;
 }
 
-bool Type::checkType(const SharedType actual) const
+bool Type::checkType(const SharedType& actual) const
 {
     return base == actual->base;
 }
@@ -49,13 +49,13 @@ AudioSourceType::AudioSourceType() :
 EffectType::EffectType() :
     Type(TypeConstant::Effect, "effect") {}
 
-ListType::ListType(const SharedType subType) :
+ListType::ListType(const SharedType& subType) :
     Type(TypeConstant::List, "list of " + subType->name()), subType(subType) {}
 
 ListType::ListType(const Type* subType) :
     ListType(SharedType(subType)) {}
 
-bool ListType::checkType(const SharedType actual) const
+bool ListType::checkType(const SharedType& actual) const
 {
     if (actual->baseType() != TypeConstant::List)
     {
@@ -65,13 +65,13 @@ bool ListType::checkType(const SharedType actual) const
     return subType->checkType(dynamic_cast<const ListType*>(actual.get())->subType);
 }
 
-LambdaType::LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType returnType) :
+LambdaType::LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType& returnType) :
     Type(TypeConstant::Lambda, getName(inputTypes, returnType)), inputTypes(inputTypes), returnType(returnType) {}
 
 LambdaType::LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const Type* returnType) :
     LambdaType(inputTypes, SharedType(returnType)) {}
 
-bool LambdaType::checkType(const SharedType actual) const
+bool LambdaType::checkType(const SharedType& actual) const
 {
     if (actual->baseType() != TypeConstant::Lambda)
     {
@@ -96,7 +96,7 @@ bool LambdaType::checkType(const SharedType actual) const
     return true;
 }
 
-std::string LambdaType::getName(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType returnType)
+std::string LambdaType::getName(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType& returnType)
 {
     if (inputTypes.empty())
     {

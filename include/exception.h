@@ -7,7 +7,7 @@
 
 struct OrganicException : public std::exception
 {
-    OrganicException(const std::string preamble, const std::string message);
+    OrganicException(const std::string& preamble, const std::string& message);
 
     const char* what() const noexcept override;
 
@@ -22,22 +22,22 @@ private:
 
 struct OrganicArgumentException : public OrganicException
 {
-    OrganicArgumentException(const std::string message);
+    OrganicArgumentException(const std::string& message);
 };
 
 struct OrganicFileException : public OrganicException
 {
-    OrganicFileException(const std::string message);
+    OrganicFileException(const std::string& message);
 };
 
 struct OrganicAudioException : public OrganicException
 {
-    OrganicAudioException(const std::string message);
+    OrganicAudioException(const std::string& message);
 };
 
 struct OrganicParseException : public OrganicException
 {
-    OrganicParseException(const std::string message, const SourceLocation& location);
+    OrganicParseException(const std::string& message, const SourceLocation& location);
 
     const SourceLocation location;
 };

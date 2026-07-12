@@ -30,13 +30,13 @@ private:
 
     ProgramOptions getOptions();
 
-    std::string nextOption(const std::string flag);
+    std::string nextOption(const std::string& flag);
 
-    unsigned int nextInt(const std::string flag);
+    unsigned int nextInt(const std::string& flag);
 
-    size_t nextLong(const std::string flag);
+    size_t nextLong(const std::string& flag);
 
-    double nextDouble(const std::string flag);
+    double nextDouble(const std::string& flag);
 
     std::queue<std::string> flags;
 

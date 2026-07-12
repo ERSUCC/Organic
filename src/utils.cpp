@@ -23,12 +23,12 @@ void Utils::printInfo()
     std::cout << "Random Seed: " << utils->seed << "\n";
 }
 
-void Utils::setWarnLevel(const WarnLevel level)
+void Utils::setWarnLevel(const WarnLevel& level)
 {
     Utils::get()->warnLevel = level;
 }
 
-void Utils::parseWarning(const std::string message, const SourceLocation& location)
+void Utils::parseWarning(const std::string& message, const SourceLocation& location)
 {
     Utils* utils = Utils::get();
 

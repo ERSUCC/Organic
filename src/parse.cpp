@@ -40,7 +40,7 @@ static std::unordered_map<std::string, std::function<UniqueToken<Call> (const So
     { "reverb", CALL(Reverb) }
 };
 
-ParserContext::ParserContext(ParserContext* parent, const ContextType& type, const std::string name, const std::vector<UniqueToken<InputDef>>& inputs) :
+ParserContext::ParserContext(ParserContext* parent, const ContextType& type, const std::string& name, const std::vector<UniqueToken<InputDef>>& inputs) :
     parent(parent), type(type), name(name)
 {
     for (const UniqueToken<InputDef>& input : inputs)
