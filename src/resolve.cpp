@@ -24,7 +24,7 @@ void TypeResolver::resolveTypes(const FunctionDef* token) const
         input->resolveTypes(this);
     }
 
-    const SharedType noneType(new NoneType());
+    const UniqueType noneType(new NoneType());
 
     for (size_t i = 0; i < token->program->instructions.size() - 1; i++)
     {
@@ -32,7 +32,7 @@ void TypeResolver::resolveTypes(const FunctionDef* token) const
 
         instruction->resolveTypes(this);
 
-        if (!noneType->checkType(instruction->type()))
+        if (!noneType->checkType(instruction->type().get()))
         {
             Utils::parseWarning("This instruction has no effect, it will be ignored.", instruction->location);
         }
@@ -40,7 +40,7 @@ void TypeResolver::resolveTypes(const FunctionDef* token) const
 
     token->program->instructions.back()->resolveTypes(this);
 
-    if (SharedType(new NoneType())->checkType(token->returnType()))
+    if (noneType->checkType(token->returnType().get()))
     {
         throw OrganicParseException("The function \"" + token->string() + "\" does not return a value.", token->location);
     }
@@ -52,7 +52,7 @@ void TypeResolver::resolveTypes(const List* token) const
     {
         value->resolveTypes(this);
 
-        if (!token->values[0]->type()->checkType(value->type()))
+        if (!token->values[0]->type()->checkType(value->type().get()))
         {
             throw OrganicParseException("All elements in a list must have the same type.", value->location);
         }
@@ -355,7 +355,7 @@ void TypeResolver::resolveTypes(const CallUser* token) const
 
 void TypeResolver::resolveTypes(const CallAlias* token) const
 {
-    const SharedType expected = SharedType(new NumberType());
+    const UniqueType expected(new NumberType());
 
     if (const Argument* argument = token->arguments->findArgument("a"))
     {
@@ -363,7 +363,7 @@ void TypeResolver::resolveTypes(const CallAlias* token) const
 
         const SharedType argumentType = argument->value->type();
 
-        if (!expected->checkType(argumentType))
+        if (!expected->checkType(argumentType.get()))
         {
             throw OrganicParseException("Expected " + expected->name() + " on left-hand side, but received " + argumentType->name() + ".", argument->value->location);
         }
@@ -375,7 +375,7 @@ void TypeResolver::resolveTypes(const CallAlias* token) const
 
         const SharedType argumentType = argument->value->type();
 
-        if (!expected->checkType(argumentType))
+        if (!expected->checkType(argumentType.get()))
         {
             throw OrganicParseException("Expected " + expected->name() + " on right-hand side, but received " + argumentType->name() + ".", argument->value->location);
         }
@@ -384,14 +384,14 @@ void TypeResolver::resolveTypes(const CallAlias* token) const
 
 void TypeResolver::resolveTypes(const Program* token) const
 {
-    const SharedType noneType(new NoneType());
-    const SharedType sourceType(new AudioSourceType());
+    const UniqueType noneType(new NoneType());
+    const UniqueType sourceType(new AudioSourceType());
 
     for (const Token* instruction : token->instructions)
     {
         instruction->resolveTypes(this);
 
-        if (!noneType->checkType(instruction->type()) && !sourceType->checkType(instruction->type()))
+        if (!noneType->checkType(instruction->type().get()) && !sourceType->checkType(instruction->type().get()))
         {
             Utils::parseWarning("This instruction has no effect, it will be ignored.", instruction->location);
         }
@@ -406,7 +406,7 @@ void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::stri
 
         const SharedType argumentType = argument->value->type();
 
-        if (!expectedType->checkType(argumentType))
+        if (!expectedType->checkType(argumentType.get()))
         {
             throw OrganicParseException("Expected " + expectedType->name() + " for input \"" + name + "\", but received " + argumentType->name() + ".", argument->value->location);
         }

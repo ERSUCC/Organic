@@ -17,7 +17,7 @@ std::string Type::name() const
     return str;
 }
 
-bool Type::checkType(const SharedType& actual) const
+bool Type::checkType(const Type* actual) const
 {
     return base == actual->base;
 }
@@ -55,39 +55,39 @@ ListType::ListType(const SharedType& subType) :
 ListType::ListType(const Type* subType) :
     ListType(SharedType(subType)) {}
 
-bool ListType::checkType(const SharedType& actual) const
+bool ListType::checkType(const Type* actual) const
 {
     if (actual->baseType() != TypeConstant::List)
     {
         return false;
     }
 
-    return subType->checkType(dynamic_cast<const ListType*>(actual.get())->subType);
+    return subType->checkType(dynamic_cast<const ListType*>(actual)->subType.get());
 }
 
 LambdaType::LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType& returnType) :
-    Type(TypeConstant::Lambda, getName(inputTypes, returnType)), inputTypes(inputTypes), returnType(returnType) {}
+    Type(TypeConstant::Lambda, getName(inputTypes, returnType.get())), inputTypes(inputTypes), returnType(returnType) {}
 
 LambdaType::LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const Type* returnType) :
     LambdaType(inputTypes, SharedType(returnType)) {}
 
-bool LambdaType::checkType(const SharedType& actual) const
+bool LambdaType::checkType(const Type* actual) const
 {
     if (actual->baseType() != TypeConstant::Lambda)
     {
         return false;
     }
 
-    const LambdaType* lambda = dynamic_cast<const LambdaType*>(actual.get());
+    const LambdaType* lambda = dynamic_cast<const LambdaType*>(actual);
 
-    if (!returnType->checkType(lambda->returnType))
+    if (!returnType->checkType(lambda->returnType.get()))
     {
         return false;
     }
 
     for (const std::pair<std::string, const SharedType>& input : inputTypes)
     {
-        if (!lambda->inputTypes.count(input.first) || !input.second->checkType(lambda->inputTypes.at(input.first)))
+        if (!lambda->inputTypes.count(input.first) || !input.second->checkType(lambda->inputTypes.at(input.first).get()))
         {
             return false;
         }
@@ -96,7 +96,7 @@ bool LambdaType::checkType(const SharedType& actual) const
     return true;
 }
 
-std::string LambdaType::getName(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType& returnType)
+std::string LambdaType::getName(const std::unordered_map<std::string, const SharedType>& inputTypes, const Type* returnType)
 {
     if (inputTypes.empty())
     {

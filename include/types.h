@@ -22,6 +22,7 @@ struct EffectType;
 struct ListType;
 struct LambdaType;
 
+typedef std::unique_ptr<const Type> UniqueType;
 typedef std::shared_ptr<const Type> SharedType;
 
 enum struct TypeConstant
@@ -50,7 +51,7 @@ struct Type
 
     std::string name() const;
 
-    virtual bool checkType(const SharedType& actual) const;
+    virtual bool checkType(const Type* actual) const;
 
 private:
     const TypeConstant base;
@@ -109,7 +110,7 @@ struct ListType : public Type
     ListType(const SharedType& subType);
     ListType(const Type* subType);
 
-    bool checkType(const SharedType& actual) const override;
+    bool checkType(const Type* actual) const override;
 
 private:
     const SharedType subType;
@@ -121,10 +122,10 @@ struct LambdaType : public Type
     LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType& returnType);
     LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const Type* returnType);
 
-    bool checkType(const SharedType& actual) const override;
+    bool checkType(const Type* actual) const override;
 
 private:
-    static std::string getName(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType& returnType);
+    static std::string getName(const std::unordered_map<std::string, const SharedType>& inputTypes, const Type* returnType);
 
     const std::unordered_map<std::string, const SharedType> inputTypes;
 
