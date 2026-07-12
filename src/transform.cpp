@@ -77,6 +77,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::ParenthesizedExpr
     return token->value->transform(this);
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::Negate* token)
+{
+    return new Engine::ValueNegate(token->value->transform(this));
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::Time* token)
 {
     return new Engine::Time();

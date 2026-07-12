@@ -27,6 +27,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::EmptyLambda* token);
     Engine::ValueObject* transform(const Parser::List* token);
     Engine::ValueObject* transform(const Parser::ParenthesizedExpression* token);
+    Engine::ValueObject* transform(const Parser::Negate* token);
     Engine::ValueObject* transform(const Parser::Time* token);
     Engine::ValueObject* transform(const Parser::Hold* token);
     Engine::ValueObject* transform(const Parser::LFO* token);

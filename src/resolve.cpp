@@ -64,6 +64,16 @@ void TypeResolver::resolveTypes(const ParenthesizedExpression* token) const
     token->value->resolveTypes(this);
 }
 
+void TypeResolver::resolveTypes(const Negate* token) const
+{
+    token->value->resolveTypes(this);
+
+    if (!UniqueType(new NumberType())->checkType(token->value->type().get()))
+    {
+        throw OrganicParseException("Expected number, but received " + token->value->type()->name() + ".", token->value->location);
+    }
+}
+
 void TypeResolver::resolveTypes(const Time* token) const
 {
     token->arguments->check();

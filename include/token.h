@@ -340,6 +340,18 @@ struct ParenthesizedExpression : public Token
     const Token* value;
 };
 
+struct Negate : public Token
+{
+    Negate(const SourceLocation& location, const Token* value);
+    ~Negate();
+
+    void resolveTypes(const TypeResolver* visitor) const override;
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+
+    const Token* value;
+};
+
 struct Call : public Token
 {
     Call(const SourceLocation& location, ArgumentList* arguments, const Type* type = new NoneType());

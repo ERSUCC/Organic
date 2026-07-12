@@ -19,6 +19,7 @@ void TestControllers::test()
     beginSuite("Test controllers");
 
     testValue();
+    testValueNegate();
     testValueAdd();
     testValueSubtract();
     testValueSubtract();

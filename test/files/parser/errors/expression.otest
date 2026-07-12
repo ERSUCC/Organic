@@ -50,3 +50,25 @@ error = 'Expected value after "^", but received "^".'
 ---
 
 test = 1 ^ ^
+
+---
+
+name = "Unfinished negation after plus"
+line = 4
+character = 1
+error = 'Expected value after "-".'
+
+---
+
+test = 1 + -
+
+---
+
+name = "Unfinished negation after minus"
+line = 3
+character = 1
+error = 'Expected value after "-".'
+
+---
+
+test = 1 - -

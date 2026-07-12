@@ -328,6 +328,24 @@ Engine::ValueObject* ParenthesizedExpression::transform(TokenTransformer* visito
     return visitor->transform(this);
 }
 
+Negate::Negate(const SourceLocation& location, const Token* value) :
+    Token(location, new NumberType()), value(value) {}
+
+Negate::~Negate()
+{
+    delete value;
+}
+
+void Negate::resolveTypes(const TypeResolver* visitor) const
+{
+    visitor->resolveTypes(this);
+}
+
+Engine::ValueObject* Negate::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
 Call::Call(const SourceLocation& location, ArgumentList* arguments, const Type* type) :
     Token(location, type), arguments(arguments) {}
 

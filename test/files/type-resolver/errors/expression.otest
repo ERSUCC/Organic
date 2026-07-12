@@ -28,3 +28,26 @@ error = "Expected number on right-hand side, but received boolean."
 ---
 
 test = 1 + (2 == 3)
+
+---
+
+name = "Negate language constant"
+line = 2
+character = 9
+error = "Expected number, but received round direction constant."
+
+---
+
+test = -nearest
+
+---
+
+name = "Negate list variable"
+line = 3
+character = 10
+error = "Expected number, but received list of number."
+
+---
+
+test = [ 1, 2, 3 ]
+test2 = -test

@@ -10,11 +10,33 @@
 
 namespace Engine {
 
+struct Value : public ValueObject
+{
+    Value(const double value);
+
+    double getValue() override;
+
+private:
+    const double value;
+
+};
+
 struct ValueByte : public ValueObject
 {
     ValueByte(const unsigned char value);
 
     const unsigned char value;
+};
+
+struct ValueNegate : public ValueObject
+{
+    ValueNegate(ValueObject* value);
+
+    double getValue() override;
+
+private:
+    ValueObject* value;
+
 };
 
 struct ValueCombination : public ValueObject
@@ -280,17 +302,6 @@ private:
     ValueObject* repeats;
 
     size_t times = 0;
-
-};
-
-struct Value : public ValueObject
-{
-    Value(const double value);
-
-    double getValue() override;
-
-private:
-    const double value;
 
 };
 

@@ -8,6 +8,16 @@ sine(frequency: test)
 
 ---
 
+name = "Negated number variable in number input"
+
+---
+
+test = -440
+
+sine(frequency: -test)
+
+---
+
 name = "Constant variable in constant input"
 
 ---

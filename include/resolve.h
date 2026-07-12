@@ -16,6 +16,7 @@ struct TypeResolver
     void resolveTypes(const FunctionDef* token) const;
     void resolveTypes(const List* token) const;
     void resolveTypes(const ParenthesizedExpression* token) const;
+    void resolveTypes(const Negate* token) const;
     void resolveTypes(const Time* token) const;
     void resolveTypes(const Hold* token) const;
     void resolveTypes(const LFO* token) const;

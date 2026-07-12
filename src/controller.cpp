@@ -2,8 +2,24 @@
 
 using namespace Engine;
 
+Value::Value(const double value) :
+    value(value) {}
+
+double Value::getValue()
+{
+    return value;
+}
+
 ValueByte::ValueByte(const unsigned char value) :
     value(value) {}
+
+ValueNegate::ValueNegate(ValueObject* value) :
+    value(value) {}
+
+double ValueNegate::getValue()
+{
+    return -value->getValue();
+}
 
 ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
     value1(value1), value2(value2) {}
@@ -608,14 +624,6 @@ void Repeat::init()
 void Repeat::reinit()
 {
     value->start(repeatTime);
-}
-
-Value::Value(const double value) :
-    value(value) {}
-
-double Value::getValue()
-{
-    return value;
 }
 
 Hold::Hold(ValueObject* value, ValueObject* length) :

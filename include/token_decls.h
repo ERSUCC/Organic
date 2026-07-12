@@ -18,6 +18,7 @@ struct EmptyLambda;
 struct ArgumentList;
 struct List;
 struct ParenthesizedExpression;
+struct Negate;
 struct Time;
 struct Hold;
 struct LFO;

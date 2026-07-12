@@ -581,6 +581,15 @@ const Token* Parser::parseTerms(const std::string& errorContext)
             tokens->expect<CloseParenthesis>("\")\"");
         }
 
+        else if (const Subtract* sub = tokens->peek<Subtract>())
+        {
+            const SourceLocation location = sub->location;
+
+            tokens->drop();
+
+            terms.push_back(UniqueToken<>(new Negate(location, parseTerm(" after \"-\"").release())));
+        }
+
         else
         {
             terms.push_back(parseTerm(terms.empty() ? errorContext : (" after \"" + terms.back()->string() + "\"")));

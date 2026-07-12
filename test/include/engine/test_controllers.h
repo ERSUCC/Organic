@@ -34,6 +34,7 @@ private:
     TestControllers(TestTracker* tracker);
 
     void testValue();
+    void testValueNegate();
     void testValueAdd();
     void testValueSubtract();
     void testValueMultiply();
