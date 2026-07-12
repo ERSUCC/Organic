@@ -114,28 +114,5 @@ bool Path::readToString(std::string& dest) const
     return done;
 }
 
-bool Path::readLines(std::vector<std::string>& dest) const
-{
-    std::ifstream file(string());
-
-    if (!file.is_open())
-    {
-        return false;
-    }
-
-    std::string line;
-
-    for (std::string line; std::getline(file, line, '\n');)
-    {
-        dest.push_back(line);
-    }
-
-    const bool done = file.eof();
-
-    file.close();
-
-    return done;
-}
-
 Path::Path(const std::filesystem::path& path) :
     path(std::filesystem::absolute(std::filesystem::weakly_canonical(path))) {}

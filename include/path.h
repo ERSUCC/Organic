@@ -42,7 +42,6 @@ struct Path
     std::string stem() const;
 
     bool readToString(std::string& dest) const;
-    bool readLines(std::vector<std::string>& dest) const;
 
 private:
     Path(const std::filesystem::path& path);

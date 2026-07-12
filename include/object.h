@@ -11,8 +11,8 @@ struct Sync
 {
     Sync();
 
-    void start(double time);
-    void repeat(double time);
+    void start(const double time);
+    void repeat(const double time);
     void stop();
 
     virtual double syncLength() const;

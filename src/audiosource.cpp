@@ -39,7 +39,7 @@ double Phase::getValue()
     return phase;
 }
 
-void Phase::setDelta(double delta)
+void Phase::setDelta(const double delta)
 {
     this->delta = delta;
 }

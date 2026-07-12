@@ -34,7 +34,7 @@ private:
     void startPlayback();
     void startExport();
 
-    int processAudio(void* output, unsigned int frames);
+    int processAudio(void* output, const unsigned int frames);
 
     void audioError(const std::string& message) const;
 

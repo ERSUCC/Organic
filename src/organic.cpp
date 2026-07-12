@@ -166,7 +166,7 @@ void Organic::startExport()
     delete file;
 }
 
-int Organic::processAudio(void* output, unsigned int frames)
+int Organic::processAudio(void* output, const unsigned int frames)
 {
     for (size_t i = 0; i < frames; i++)
     {

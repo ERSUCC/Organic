@@ -40,7 +40,7 @@ struct Phase : public ValueObject
 {
     double getValue() override;
 
-    void setDelta(double delta);
+    void setDelta(const double delta);
 
     void incrementPhase();
 
