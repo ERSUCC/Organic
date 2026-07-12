@@ -31,6 +31,7 @@ struct ValueByte : public ValueObject
 struct ValueNegate : public ValueObject
 {
     ValueNegate(ValueObject* value);
+    ~ValueNegate();
 
     double getValue() override;
 

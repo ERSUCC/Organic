@@ -16,6 +16,11 @@ ValueByte::ValueByte(const unsigned char value) :
 ValueNegate::ValueNegate(ValueObject* value) :
     value(value) {}
 
+ValueNegate::~ValueNegate()
+{
+    delete value;
+}
+
 double ValueNegate::getValue()
 {
     return -value->getValue();
