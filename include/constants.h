@@ -7,7 +7,7 @@ struct Constants
         Forward,
         Backward,
         PingPong,
-        Random
+        Shuffle
     };
 
     enum Random

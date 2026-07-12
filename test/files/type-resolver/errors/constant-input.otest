@@ -5,7 +5,7 @@ error = 'Expected number for input "frequency", but received sequence order cons
 
 ---
 
-sine(frequency: sequence-forward)
+sine(frequency: forward)
 
 ---
 
@@ -60,7 +60,7 @@ error = 'Expected sequence order constant for input "order", but received list o
 
 ---
 
-sequence(values: [ 0 ], order: [ sequence-forward, sequence-backward ])
+sequence(values: [ 0 ], order: [ forward, backward ])
 
 ---
 
@@ -82,7 +82,7 @@ error = 'Expected string for input "file", but received sequence order constant.
 
 ---
 
-sample(file: sequence-forward)
+sample(file: forward)
 
 ---
 
@@ -114,7 +114,7 @@ error = 'Expected list of number for input "values", but received sequence order
 
 ---
 
-sequence(values: sequence-forward)
+sequence(values: forward)
 
 ---
 

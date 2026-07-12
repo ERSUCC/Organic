@@ -5,7 +5,7 @@ error = 'Expected number for input "frequency", but received sequence order cons
 
 ---
 
-test = sequence-forward
+test = forward
 
 sine(frequency: test)
 

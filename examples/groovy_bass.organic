@@ -6,7 +6,7 @@ peak = repeat(value: sequence(values: [
     hold(value: 0.5, length: note_length),
     hold(value: 1, length: note_length),
     hold(value: 1, length: note_length)
-], order: sequence-random))
+], order: shuffle))
 
 attack = repeat(value: sequence(values: [
     sweep(from: 0, to: peak, length: note_attack),

@@ -389,47 +389,47 @@ const Token* Tokenizer::tokenizeIdentifier()
 
     const SourceLocation location(source, start, current);
 
-    if (name == "sequence-forward")
+    if (name == "forward")
     {
         return new Constant(location, new SequenceOrderType(), Constants::Sequence::Forward);
     }
 
-    if (name == "sequence-backward")
+    if (name == "backward")
     {
         return new Constant(location, new SequenceOrderType(), Constants::Sequence::Backward);
     }
 
-    if (name == "sequence-ping-pong")
+    if (name == "ping-pong")
     {
         return new Constant(location, new SequenceOrderType(), Constants::Sequence::PingPong);
     }
 
-    if (name == "sequence-random")
+    if (name == "shuffle")
     {
-        return new Constant(location, new SequenceOrderType(), Constants::Sequence::Random);
+        return new Constant(location, new SequenceOrderType(), Constants::Sequence::Shuffle);
     }
 
-    if (name == "random-step")
+    if (name == "step")
     {
         return new Constant(location, new RandomTypeType(), Constants::Random::Step);
     }
 
-    if (name == "random-linear")
+    if (name == "linear")
     {
         return new Constant(location, new RandomTypeType(), Constants::Random::Linear);
     }
 
-    if (name == "round-nearest")
+    if (name == "nearest")
     {
         return new Constant(location, new RoundDirectionType(), Constants::Round::Nearest);
     }
 
-    if (name == "round-up")
+    if (name == "up")
     {
         return new Constant(location, new RoundDirectionType(), Constants::Round::Up);
     }
 
-    if (name == "round-down")
+    if (name == "down")
     {
         return new Constant(location, new RoundDirectionType(), Constants::Round::Down);
     }

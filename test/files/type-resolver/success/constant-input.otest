@@ -10,7 +10,7 @@ name = "Constant in constant input"
 
 ---
 
-sequence(values: [ 0 ], order: sequence-forward)
+sequence(values: [ 0 ], order: forward)
 
 ---
 

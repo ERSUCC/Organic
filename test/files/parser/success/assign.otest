@@ -10,7 +10,7 @@ name = "Assign constant to variable"
 
 ---
 
-test = random-linear
+test = linear
 
 ---
 

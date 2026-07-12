@@ -16,7 +16,7 @@ triangle(volume: repeat(value: sequence(values: [
     hold,
     hold,
     hold
-], order: sequence-random)), frequency: repeat(value: sequence(values: [
+], order: shuffle)), frequency: repeat(value: sequence(values: [
     hold(value: c3, length: note_length),
     hold(value: d3, length: note_length),
     hold(value: e3, length: note_length),
@@ -25,6 +25,6 @@ triangle(volume: repeat(value: sequence(values: [
     hold(value: a3, length: note_length),
     hold(value: b3, length: note_length),
     hold(value: c4, length: note_length)
-], order: sequence-random)), effects: [
+], order: shuffle)), effects: [
     delay(mix: 1, delay: note_length * 1.5, feedback: 0.75)
 ])

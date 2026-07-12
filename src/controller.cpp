@@ -479,7 +479,7 @@ void Sequence::init()
         current = objects.size() - 1;
     }
 
-    else if (orderNum == Constants::Sequence::Random)
+    else if (orderNum == Constants::Sequence::Shuffle)
     {
         current = udist(utils->rng);
 
@@ -533,7 +533,7 @@ void Sequence::reinit()
 
             break;
 
-        case Constants::Sequence::Random:
+        case Constants::Sequence::Shuffle:
             if (chosen.size() < objects.size())
             {
                 current = udist(utils->rng);

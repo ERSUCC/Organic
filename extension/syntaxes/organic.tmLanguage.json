@@ -52,13 +52,13 @@
 		"language-constant": {
 			"patterns": [{
         "name": "constant.language.sequence.organic",
-        "match": "\\b(sequence-forward|sequence-backward|sequence-ping-pong|sequence-random)\\b"
+        "match": "\\b(forward|backward|ping-pong|shuffle)\\b"
       }, {
         "name": "constant.language.random.organic",
-        "match": "\\b(random-step|random-linear)\\b"
+        "match": "\\b(step|linear)\\b"
       }, {
         "name": "constant.language.round.organic",
-        "match": "\\b(round-nearest|round-up|round-down)\\b"
+        "match": "\\b(nearest|up|down)\\b"
       }, {
         "name": "constant.language.note.organic",
         "match": "\\b([a-g][sf]?[0-9])\\b"

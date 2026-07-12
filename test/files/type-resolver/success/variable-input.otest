@@ -12,7 +12,7 @@ name = "Constant variable in constant input"
 
 ---
 
-test = sequence-forward
+test = forward
 
 sequence(values: [ 0 ], order: test)
 

@@ -64,7 +64,7 @@ void TestControllers::testSequence()
         new Hold(new Value(5), new Value(1000)),
         new Hold(new Value(6), new Value(1000)),
         new Hold(new Value(7), new Value(1000))
-    }), new ValueByte(Constants::Sequence::Random)),
+    }), new ValueByte(Constants::Sequence::Shuffle)),
     {
         TimeValue(0, 5),
         TimeValue(1, 5),
