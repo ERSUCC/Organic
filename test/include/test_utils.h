@@ -12,6 +12,8 @@ struct TestUtils
     static void printSuccess(const std::string& text, const size_t indents = 0);
     static void printError(const std::string& text, const size_t indents = 0);
 
+    static std::string formatDouble(const double value);
+
 private:
     static void printIndents(const size_t indents);
 

@@ -61,6 +61,7 @@ add_executable(organic_test test/src/main.cpp
                             test/src/test_resolver.cpp
                             test/src/test_tokenizer.cpp
                             test/src/test_utils.cpp
+                            test/src/test_value.cpp
                             test/src/engine/test_controllers.cpp
                             test/src/engine/controllers/absolute.cpp
                             test/src/engine/controllers/add.cpp

@@ -6,6 +6,7 @@
 #include "../include/test_resolver.h"
 #include "../include/test_tokenizer.h"
 #include "../include/test_utils.h"
+#include "../include/test_value.h"
 #include "../include/engine/test_controllers.h"
 
 int main(int argc, char** argv)
@@ -25,6 +26,7 @@ int main(int argc, char** argv)
         TestTokenizer::run(tracker);
         TestParser::run(tracker);
         TestResolver::run(tracker);
+        TestValue::run(tracker);
         TestControllers::run(tracker);
         TestExamples::run(tracker);
     }

@@ -216,8 +216,18 @@ double TOMLDouble::asDouble() const
     return value;
 }
 
+int TOMLDouble::asInteger() const
+{
+    return value;
+}
+
 TOMLInteger::TOMLInteger(const int value) :
     value(value) {}
+
+double TOMLInteger::asDouble() const
+{
+    return value;
+}
 
 int TOMLInteger::asInteger() const
 {

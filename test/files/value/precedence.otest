@@ -1,0 +1,60 @@
+name = "Power before multiply and divide"
+value = 32.4
+
+---
+
+2 * 3 ^ 4 / 5
+
+---
+
+name = "Multiply and divide before add and subtract"
+value = 1.8
+
+---
+
+1 + 2 * 3 + 4 / 5 - 6
+
+---
+
+name = "Power before comparison"
+value = 0
+
+---
+
+5 ^ 2 == 2 ^ 5
+
+---
+
+name = "Add and subtract before comparison"
+value = 1
+
+---
+
+2 + 3 < 4 + 5
+
+---
+
+name = "Left bias in power"
+value = 4096
+
+---
+
+2 ^ 3 ^ 4
+
+---
+
+name = "Left bias in multiply and divide"
+value = 7.5
+
+---
+
+2 * 3 / 4 * 5
+
+---
+
+name = "Left bias in add and subtract"
+value = 4
+
+---
+
+1 + 2 - 3 + 4

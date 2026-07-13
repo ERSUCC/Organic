@@ -59,41 +59,91 @@ Comma::Comma(const SourceLocation& location) :
 Equals::Equals(const SourceLocation& location) :
     Token(location) {}
 
-Operator::Operator(const SourceLocation& location) :
-    Token(location) {}
+Operator::Operator(const SourceLocation& location, const unsigned int precedence) :
+    Token(location), precedence(precedence) {}
 
 Add::Add(const SourceLocation& location) :
-    Operator(location) {}
+    Operator(location, 1) {}
+
+const Token* Add::makeAlias(const Token* left, const Token* right) const
+{
+    return new AddAlias(left, right);
+}
 
 Subtract::Subtract(const SourceLocation& location) :
-    Operator(location) {}
+    Operator(location, 1) {}
+
+const Token* Subtract::makeAlias(const Token* left, const Token* right) const
+{
+    return new SubtractAlias(left, right);
+}
 
 Multiply::Multiply(const SourceLocation& location) :
-    Operator(location) {}
+    Operator(location, 2) {}
+
+const Token* Multiply::makeAlias(const Token* left, const Token* right) const
+{
+    return new MultiplyAlias(left, right);
+}
 
 Divide::Divide(const SourceLocation& location) :
-    Operator(location) {}
+    Operator(location, 2) {}
+
+const Token* Divide::makeAlias(const Token* left, const Token* right) const
+{
+    return new DivideAlias(left, right);
+}
 
 Power::Power(const SourceLocation& location) :
-    Operator(location) {}
+    Operator(location, 3) {}
+
+const Token* Power::makeAlias(const Token* left, const Token* right) const
+{
+    return new PowerAlias(left, right);
+}
 
 BooleanOperator::BooleanOperator(const SourceLocation& location) :
-    Operator(location) {}
+    Operator(location, 0) {}
 
 DoubleEquals::DoubleEquals(const SourceLocation& location) :
     BooleanOperator(location) {}
 
+const Token* DoubleEquals::makeAlias(const Token* left, const Token* right) const
+{
+    return new EqualAlias(left, right);
+}
+
 Less::Less(const SourceLocation& location) :
     BooleanOperator(location) {}
+
+const Token* Less::makeAlias(const Token* left, const Token* right) const
+{
+    return new LessAlias(left, right);
+}
 
 Greater::Greater(const SourceLocation& location) :
     BooleanOperator(location) {}
 
+const Token* Greater::makeAlias(const Token* left, const Token* right) const
+{
+    return new GreaterAlias(left, right);
+}
+
 LessEqual::LessEqual(const SourceLocation& location) :
     BooleanOperator(location) {}
 
+const Token* LessEqual::makeAlias(const Token* left, const Token* right) const
+{
+    return new LessEqualAlias(left, right);
+}
+
 GreaterEqual::GreaterEqual(const SourceLocation& location) :
     BooleanOperator(location) {}
+
+const Token* GreaterEqual::makeAlias(const Token* left, const Token* right) const
+{
+    return new GreaterEqualAlias(left, right);
+}
 
 Identifier::Identifier(const SourceLocation& location) :
     Token(location) {}

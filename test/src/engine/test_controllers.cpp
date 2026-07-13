@@ -96,7 +96,7 @@ void TestControllers::expectConstantUntil(ValueObject* object, const double valu
 
     if (unique->enabled)
     {
-        fail("Expected object to stop at time " + formatDouble(end) + ", but it continued.");
+        fail("Expected object to stop at time " + TestUtils::formatDouble(end) + ", but it continued.");
     }
 }
 
@@ -123,31 +123,7 @@ void TestControllers::expectValues(std::unique_ptr<ValueObject>& object, const s
 
         if (fabs(actual - value.value) >= epsilon)
         {
-            fail("Expected " + formatDouble(value.value) + " at time " + formatDouble(value.time) + ", but received " + formatDouble(actual));
+            fail("Expected " + TestUtils::formatDouble(value.value) + " at time " + TestUtils::formatDouble(value.time) + ", but received " + TestUtils::formatDouble(actual));
         }
     }
-}
-
-std::string TestControllers::formatDouble(const double value) const
-{
-    char buffer[32];
-
-    int end = snprintf(buffer, 32, "%f", value);
-
-    while (end > 0 && buffer[end - 1] == '0')
-    {
-        end--;
-    }
-
-    if (end > 0 && buffer[end - 1] == '.')
-    {
-        end--;
-    }
-
-    if (end >= 0)
-    {
-        buffer[end] = '\0';
-    }
-
-    return buffer;
 }

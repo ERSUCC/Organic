@@ -69,8 +69,6 @@ private:
 
     void expectValues(std::unique_ptr<ValueObject>& object, const std::vector<TimeValue>& values, const double epsilon);
 
-    std::string formatDouble(const double value) const;
-
     Utils* utils;
 
 };

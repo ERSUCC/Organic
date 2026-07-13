@@ -117,32 +117,46 @@ struct Equals : public Token
 
 struct Operator : public Token
 {
-    Operator(const SourceLocation& location);
+    Operator(const SourceLocation& location, const unsigned int precedence);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const = 0;
+
+    const unsigned int precedence;
 };
 
 struct Add : public Operator
 {
     Add(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct Subtract : public Operator
 {
     Subtract(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct Multiply : public Operator
 {
     Multiply(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct Divide : public Operator
 {
     Divide(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct Power : public Operator
 {
     Power(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct BooleanOperator : public Operator
@@ -153,26 +167,36 @@ struct BooleanOperator : public Operator
 struct DoubleEquals : public BooleanOperator
 {
     DoubleEquals(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct Less : public BooleanOperator
 {
     Less(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct Greater : public BooleanOperator
 {
     Greater(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct LessEqual : public BooleanOperator
 {
     LessEqual(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct GreaterEqual : public BooleanOperator
 {
     GreaterEqual(const SourceLocation& location);
+
+    virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
 struct Identifier : public Token

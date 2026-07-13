@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <functional>
+#include <limits.h>
 #include <memory>
 #include <string>
 #include <unordered_map>

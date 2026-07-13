@@ -33,6 +33,30 @@ void TestUtils::printError(const std::string& text, const size_t indents)
     std::cout << "\x1b[49;;m";
 }
 
+std::string TestUtils::formatDouble(const double value)
+{
+    char buffer[32];
+
+    int end = snprintf(buffer, 32, "%f", value);
+
+    while (end > 0 && buffer[end - 1] == '0')
+    {
+        end--;
+    }
+
+    if (end > 0 && buffer[end - 1] == '.')
+    {
+        end--;
+    }
+
+    if (end >= 0)
+    {
+        buffer[end] = '\0';
+    }
+
+    return buffer;
+}
+
 void TestUtils::printIndents(const size_t indents)
 {
     if (indents > 0)

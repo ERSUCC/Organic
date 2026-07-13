@@ -64,6 +64,7 @@ struct TOMLDouble : public TOMLNumber
     TOMLDouble(const double value);
 
     double asDouble() const override;
+    int asInteger() const override;
 
 private:
     const double value;
@@ -74,6 +75,7 @@ struct TOMLInteger : public TOMLNumber
 {
     TOMLInteger(const int value);
 
+    double asDouble() const override;
     int asInteger() const override;
 
 private:

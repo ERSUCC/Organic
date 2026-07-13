@@ -621,63 +621,31 @@ const Token* Parser::collapseTerms(const SourceLocation& location, std::vector<U
         return terms[start].release();
     }
 
-    for (size_t i = end - 2; i > 0; i--)
+    size_t index;
+
+    unsigned int min = INT_MAX;
+
+    for (size_t i = end - 2; i > start; i--)
     {
-        const Token* left = collapseTerms(location, terms, start, i);
-        const Token* right = collapseTerms(location, terms, i + 1, end);
-
-        if (dynamic_cast<const DoubleEquals*>(terms[i].get()))
+        if (const Operator* op = dynamic_cast<const Operator*>(terms[i].get()))
         {
-            return new EqualAlias(left, right);
-        }
-
-        if (dynamic_cast<const Less*>(terms[i].get()))
-        {
-            return new LessAlias(left, right);
-        }
-
-        if (dynamic_cast<const Greater*>(terms[i].get()))
-        {
-            return new GreaterAlias(left, right);
-        }
-
-        if (dynamic_cast<const LessEqual*>(terms[i].get()))
-        {
-            return new LessEqualAlias(left, right);
-        }
-
-        if (dynamic_cast<const GreaterEqual*>(terms[i].get()))
-        {
-            return new GreaterEqualAlias(left, right);
-        }
-
-        if (dynamic_cast<const Power*>(terms[i].get()))
-        {
-            return new PowerAlias(left, right);
-        }
-
-        if (dynamic_cast<const Multiply*>(terms[i].get()))
-        {
-            return new MultiplyAlias(left, right);
-        }
-
-        if (dynamic_cast<const Divide*>(terms[i].get()))
-        {
-            return new DivideAlias(left, right);
-        }
-
-        if (dynamic_cast<const Add*>(terms[i].get()))
-        {
-            return new AddAlias(left, right);
-        }
-
-        if (dynamic_cast<const Subtract*>(terms[i].get()))
-        {
-            return new SubtractAlias(left, right);
+            if (op->precedence < min)
+            {
+                index = i;
+                min = op->precedence;
+            }
         }
     }
 
-    throw OrganicParseException("Invalid expression.", location);
+    if (min == INT_MAX)
+    {
+        throw OrganicParseException("Invalid expression.", location);
+    }
+
+    const Token* left = collapseTerms(location, terms, start, index);
+    const Token* right = collapseTerms(location, terms, index + 1, end);
+
+    return dynamic_cast<const Operator*>(terms[index].get())->makeAlias(left, right);
 }
 
 UniqueToken<> Parser::parseTerm(const std::string& errorContext)

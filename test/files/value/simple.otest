@@ -1,0 +1,42 @@
+name = "Single add"
+value = 6
+
+---
+
+1 + 5
+
+---
+
+name = "Single subtract"
+value = -4
+
+---
+
+1 - 5
+
+---
+
+name = "Single multiply"
+value = 10
+
+---
+
+2 * 5
+
+---
+
+name = "Single divide"
+value = 0.2
+
+---
+
+1 / 5
+
+---
+
+name = "Single power"
+value = 32
+
+---
+
+2 ^ 5
