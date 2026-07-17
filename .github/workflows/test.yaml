@@ -18,7 +18,9 @@ jobs:
           cmakeVersion: ~3.31.0
 
       - name: Install ALSA
-        run: sudo apt install -y libasound2-dev
+        run: |
+          sudo apt update
+          sudo apt install -y libasound2-dev
 
       - name: Build
         run: |
