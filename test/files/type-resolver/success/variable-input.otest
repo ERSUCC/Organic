@@ -28,6 +28,16 @@ sequence(values: [ 0 ], order: test)
 
 ---
 
+name = "Boolean variable in boolean input"
+
+---
+
+test = true
+
+if(condition: test, is-true: 1, is-false: 0)
+
+---
+
 name = "String variable in string input"
 
 ---

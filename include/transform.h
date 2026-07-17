@@ -20,6 +20,7 @@ struct TokenTransformer
 
     Engine::ValueObject* transform(const Parser::Value* token);
     Engine::ValueObject* transform(const Parser::Constant* token);
+    Engine::ValueObject* transform(const Parser::Boolean* token);
     Engine::ValueObject* transform(const Parser::VariableDef* token);
     Engine::ValueObject* transform(const Parser::VariableRef* token);
     Engine::ValueObject* transform(const Parser::InputRef* token);

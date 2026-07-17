@@ -232,6 +232,15 @@ struct Constant : public Token
     const unsigned char value;
 };
 
+struct Boolean : public Token
+{
+    Boolean(const SourceLocation& location, const bool value);
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+
+    const bool value;
+};
+
 struct String : public Token
 {
     String(const SourceLocation& location, const std::string& str);

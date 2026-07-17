@@ -177,6 +177,14 @@ Engine::ValueObject* Constant::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
+Boolean::Boolean(const SourceLocation& location, const bool value) :
+    Token(location, new BooleanType()), value(value) {}
+
+Engine::ValueObject* Boolean::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
 String::String(const SourceLocation& location, const std::string& str) :
     Token(location, new StringType()), str(str) {}
 

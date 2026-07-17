@@ -434,6 +434,16 @@ const Token* Tokenizer::tokenizeIdentifier()
         return new Constant(location, new RoundDirectionType(), Constants::Round::Down);
     }
 
+    if (name == "true")
+    {
+        return new Boolean(location, true);
+    }
+
+    if (name == "false")
+    {
+        return new Boolean(location, false);
+    }
+
     if (name == "pi")
     {
         return new Value(location, utils->pi);

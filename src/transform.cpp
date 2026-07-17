@@ -15,6 +15,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Constant* token)
     return new Engine::ValueByte(token->value);
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::Boolean* token)
+{
+    return new Engine::Value(token->value ? 1 : 0);
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::VariableDef* token)
 {
     setVariable(token, token->value->transform(this));
@@ -129,7 +134,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Trigger* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::If* token)
 {
-    return new Engine::If(ARG("condition"), ARG("true"), ARG("false"));
+    return new Engine::If(ARG("condition"), ARG("is-true"), ARG("is-false"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::All* token)

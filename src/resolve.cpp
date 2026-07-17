@@ -150,8 +150,8 @@ void TypeResolver::resolveTypes(const Trigger* token) const
 
 void TypeResolver::resolveTypes(const If* token) const
 {
-    resolveArgumentTypes(token->arguments, "false", new NumberType());
-    resolveArgumentTypes(token->arguments, "true", new NumberType());
+    resolveArgumentTypes(token->arguments, "is-false", new NumberType());
+    resolveArgumentTypes(token->arguments, "is-true", new NumberType());
     resolveArgumentTypes(token->arguments, "condition", new BooleanType());
 
     token->arguments->check();

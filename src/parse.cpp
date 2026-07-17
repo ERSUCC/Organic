@@ -663,7 +663,7 @@ const Token* Parser::collapseTerms(const SourceLocation& location, std::vector<U
 
 UniqueToken<> Parser::parseTerm(const std::string& errorContext)
 {
-    if (tokens->peek<Value>() || tokens->peek<Constant>() || tokens->peek<String>())
+    if (tokens->peek<Value>() || tokens->peek<Constant>() || tokens->peek<Boolean>() || tokens->peek<String>())
     {
         return tokens->take();
     }

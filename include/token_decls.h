@@ -8,6 +8,7 @@ struct Token;
 struct Identifier;
 struct Value;
 struct Constant;
+struct Boolean;
 struct VariableDef;
 struct VariableRef;
 struct InputDef;

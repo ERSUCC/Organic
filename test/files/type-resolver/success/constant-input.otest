@@ -14,6 +14,14 @@ sequence(values: [ 0 ], order: forward)
 
 ---
 
+name = "Boolean in boolean input"
+
+---
+
+if(condition: true, is-true: 1, is-false: 0)
+
+---
+
 name = "String in string input"
 
 ---

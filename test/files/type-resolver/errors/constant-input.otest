@@ -9,6 +9,17 @@ sine(frequency: forward)
 
 ---
 
+name = "Boolean in number input"
+line = 2
+character = 17
+error = 'Expected number for input "frequency", but received boolean.'
+
+---
+
+sine(frequency: true)
+
+---
+
 name = "String in number input"
 line = 2
 character = 17
@@ -39,6 +50,17 @@ error = 'Expected sequence order constant for input "order", but received number
 ---
 
 sequence(values: [ 0 ], order: 0)
+
+---
+
+name = "Boolean in constant input"
+line = 2
+character = 32
+error = 'Expected sequence order constant for input "order", but received boolean.'
+
+---
+
+sequence(values: [ 0 ], order: false)
 
 ---
 
@@ -86,6 +108,17 @@ sample(file: forward)
 
 ---
 
+name = "Boolean in string input"
+line = 2
+character = 14
+error = 'Expected string for input "file", but received boolean.'
+
+---
+
+sample(file: true)
+
+---
+
 name = "List in string input"
 line = 2
 character = 14
@@ -115,6 +148,17 @@ error = 'Expected list of number for input "values", but received sequence order
 ---
 
 sequence(values: forward)
+
+---
+
+name = "Boolean in list input"
+line = 2
+character = 18
+error = 'Expected list of number for input "values", but received boolean.'
+
+---
+
+sequence(values: false)
 
 ---
 
