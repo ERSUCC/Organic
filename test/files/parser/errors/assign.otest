@@ -53,18 +53,6 @@ error = 'Cannot assign a value to a list.'
 
 ---
 
-name = "Reassign to variable"
-line = 3
-character = 1
-error = 'A variable already exists with the name "test".'
-
----
-
-test = 0
-test = 1
-
----
-
 name = "Incomplete assign"
 line = 4
 character = 1
@@ -84,18 +72,3 @@ error = 'Using a variable in its own definition is not allowed.'
 ---
 
 test = test
-
----
-
-name = "Reassign to variable from parent scope"
-line = 5
-character = 5
-error = 'A variable already exists with the name "test".'
-
----
-
-test = 0
-
-func() = {
-    test = 1
-}

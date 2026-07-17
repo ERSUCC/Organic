@@ -1,24 +1,24 @@
-time = 50
+length = 50
 base = 110
 
 doom = sequence(values: [
-    hold(value: 1, length: time * 11 + 2000),
+    hold(value: 1, length: length * 11 + 2000),
     sweep(from: 1, to: 0, length: 10000)
 ])
 
-add-overtone(overtone: 1, delay: 0) = {
-    triangle(volume: trigger(value: 0.5, condition: time() >= delay), frequency: base * overtone * doom)
+add-overtone(overtone: 1, offset: 0) = {
+    triangle(volume: trigger(value: 0.5, condition: time() >= offset), frequency: base * overtone * doom)
 }
 
 add-overtone()
-add-overtone(overtone: 2, delay: time)
-add-overtone(overtone: 3, delay: time * 2)
-add-overtone(overtone: 4, delay: time * 3)
-add-overtone(overtone: 5, delay: time * 4)
-add-overtone(overtone: 6, delay: time * 5)
-add-overtone(overtone: 7, delay: time * 6)
-add-overtone(overtone: 8, delay: time * 7)
-add-overtone(overtone: 9, delay: time * 8)
-add-overtone(overtone: 10, delay: time * 9)
-add-overtone(overtone: 11, delay: time * 10)
-add-overtone(overtone: 12, delay: time * 11)
+add-overtone(overtone: 2, offset: length)
+add-overtone(overtone: 3, offset: length * 2)
+add-overtone(overtone: 4, offset: length * 3)
+add-overtone(overtone: 5, offset: length * 4)
+add-overtone(overtone: 6, offset: length * 5)
+add-overtone(overtone: 7, offset: length * 6)
+add-overtone(overtone: 8, offset: length * 7)
+add-overtone(overtone: 9, offset: length * 8)
+add-overtone(overtone: 10, offset: length * 9)
+add-overtone(overtone: 11, offset: length * 10)
+add-overtone(overtone: 12, offset: length * 11)

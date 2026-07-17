@@ -6,6 +6,7 @@ namespace Parser {
 
 static std::unordered_map<std::string, std::function<UniqueToken<Call> (const SourceLocation&, ArgumentList*)>> libraryFunctions =
 {
+    { "include", nullptr },
     { "time", CALL(Time) },
     { "hold", CALL(Hold) },
     { "lfo", CALL(LFO) },
@@ -162,12 +163,12 @@ void ParserContext::checkNameConflicts(const Identifier* token) const
         throw OrganicParseException("An input already exists with the name \"" + name + "\".", token->location);
     }
 
-    if (variables.count(name))
+    if (variables.count(name) || (this->name == name && type == ContextType::Assign))
     {
         throw OrganicParseException("A variable already exists with the name \"" + name + "\".", token->location);
     }
 
-    if (functions.count(name))
+    if (functions.count(name) || (this->name == name && type == ContextType::Define))
     {
         throw OrganicParseException("A function already exists with the name \"" + name + "\".", token->location);
     }
@@ -436,6 +437,11 @@ const void Parser::parseAssign()
 
     tokens->drop();
 
+    if (libraryFunctions.count(name->string()))
+    {
+        throw OrganicParseException("A function already exists with the name \"" + name->string() + "\".", name->location);
+    }
+
     context->checkNameConflicts(name.get());
 
     context = new ParserContext(context, ContextType::Assign, name->string(), {});
@@ -478,6 +484,13 @@ const void Parser::parseDefine()
                 }
             }
 
+            if (libraryFunctions.count(input->string()))
+            {
+                throw OrganicParseException("A function already exists with the name \"" + input->string() + "\".", input->location);
+            }
+
+            context->checkNameConflicts(input.get());
+
             tokens->expect<Colon>("\":\" after input name");
 
             inputs.emplace_back(new InputDef(input->location, SharedToken(parseExpression(" after \":\""))));
@@ -486,17 +499,17 @@ const void Parser::parseDefine()
         tokens->expect<CloseParenthesis>("\",\" or \")\"");
     }
 
-    if (libraryFunctions.count(name->string()) || name->string() == "include")
+    if (libraryFunctions.count(name->string()))
     {
         throw OrganicParseException("A function already exists with the name \"" + name->string() + "\".", name->location);
     }
-
-    context->checkNameConflicts(name.get());
 
     if (context->checkRecursive(ContextType::Define, name.get()))
     {
         throw OrganicParseException("Redefining a function in its own definition is not allowed.", name->location);
     }
+
+    context->checkNameConflicts(name.get());
 
     context = new ParserContext(context, ContextType::Define, name->string(), inputs);
 

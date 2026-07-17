@@ -1,0 +1,190 @@
+name = "Shadow variable from current scope"
+line = 3
+character = 1
+error = 'A variable already exists with the name "test".'
+
+---
+
+test = 0
+test = 1
+
+---
+
+name = "Shadow variable from parent scope"
+line = 5
+character = 5
+error = 'A variable already exists with the name "test".'
+
+---
+
+test = 0
+
+func() = {
+    test = 1
+}
+
+---
+
+name = "Shadow variable with input"
+line = 4
+character = 6
+error = 'A variable already exists with the name "test".'
+
+---
+
+test = 0
+
+func(test: 1) = {}
+
+---
+
+name = "Shadow variable with user function"
+line = 4
+character = 1
+error = 'A variable already exists with the name "test".'
+
+---
+
+test = 0
+
+test() = {}
+
+---
+
+name = "Shadow input from current scope"
+line = 3
+character = 5
+error = 'An input already exists with the name "test".'
+
+---
+
+func(test: 0) = {
+    test = 1
+}
+
+---
+
+name = "Shadow input from parent scope"
+line = 4
+character = 9
+error = 'An input already exists with the name "test".'
+
+---
+
+func(test: 0) = {
+    func2(test2: 1) = {
+        test = 2
+    }
+}
+
+---
+
+name = "Shadow input with input"
+line = 3
+character = 11
+error = 'An input already exists with the name "test".'
+
+---
+
+func(test: 0) = {
+    func2(test: 1) = {}
+}
+
+---
+
+name = "Shadow input with user function"
+line = 3
+character = 5
+error = 'An input already exists with the name "test".'
+
+---
+
+func(test: 0) = {
+    test() = {}
+}
+
+---
+
+name = "Shadow library function"
+line = 2
+character = 1
+error = 'A function already exists with the name "time".'
+
+---
+
+time = 0
+
+---
+
+name = "Shadow library function with input"
+line = 2
+character = 6
+error = 'A function already exists with the name "time".'
+
+---
+
+test(time: 0) = {}
+
+---
+
+name = "Shadow library function with user function"
+line = 2
+character = 1
+error = 'A function already exists with the name "time".'
+
+---
+
+time() = {}
+
+---
+
+name = "Shadow user function from current scope"
+line = 4
+character = 1
+error = 'A function already exists with the name "test".'
+
+---
+
+test() = {}
+
+test = 0
+
+---
+
+name = "Shadow user function from parent scope"
+line = 4
+character = 9
+error = 'A function already exists with the name "test".'
+
+---
+
+test() = {
+    test2() = {
+        test = 0
+    }
+}
+
+---
+
+name = "Shadow user function with input"
+line = 4
+character = 6
+error = 'A function already exists with the name "test".'
+
+---
+
+test() = {}
+
+func(test: 0) = {}
+
+---
+
+name = "Shadow user function with user function"
+line = 3
+character = 1
+error = 'A function already exists with the name "test".'
+
+---
+
+test() = {}
+test() = {}

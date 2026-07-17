@@ -6,16 +6,16 @@ pluck = sequence(values: [
     sweep(from: 1, to: 0, length: note_length - note_attack)
 ])
 
-hold = hold(value: 0, length: note_length * 4)
+rest = hold(value: 0, length: note_length * 4)
 
 triangle(volume: repeat(value: sequence(values: [
     repeat(value: pluck, repeats: 1),
     repeat(value: pluck, repeats: 3),
     repeat(value: pluck, repeats: 8),
-    hold,
-    hold,
-    hold,
-    hold
+    rest,
+    rest,
+    rest,
+    rest
 ], order: shuffle)), frequency: repeat(value: sequence(values: [
     hold(value: c3, length: note_length),
     hold(value: d3, length: note_length),
