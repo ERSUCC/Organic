@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "../include/flags.h"
 #include "../include/organic.h"
 #include "../include/path.h"
@@ -37,7 +35,7 @@ int main(int argc, char** argv)
 
     catch (const OrganicException& e)
     {
-        std::cout << e.what() << "\n";
+        Utils::printError(e);
 
         return 1;
     }

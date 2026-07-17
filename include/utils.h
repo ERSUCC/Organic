@@ -34,6 +34,7 @@ struct Utils
 
     static void printInfo();
     static void setWarnLevel(const WarnLevel& level);
+    static void printError(const OrganicException& e);
     static void parseWarning(const std::string& message, const SourceLocation& location);
 
     void setSeed(const std::optional<size_t>& seed);
@@ -59,7 +60,7 @@ private:
 
     WarnLevel warnLevel = WarnLevel::Display;
 
-    bool firstWarning = true;
+    bool firstPrint = true;
 
 };
 

@@ -14,18 +14,37 @@ Utils* Utils::get()
 
 void Utils::printInfo()
 {
-    const Utils* utils = Utils::get();
+    Utils* utils = Utils::get();
 
     std::cout << "Organic v0.1.0" << "\n";
     std::cout << "Channels: " << utils->channels << "\n";
     std::cout << "Sample Rate: " << utils->sampleRate << "\n";
     std::cout << "Buffer Length: " << utils->bufferLength << "\n";
     std::cout << "Random Seed: " << utils->seed << "\n";
+
+    utils->firstPrint = false;
 }
 
 void Utils::setWarnLevel(const WarnLevel& level)
 {
     Utils::get()->warnLevel = level;
+}
+
+void Utils::printError(const OrganicException& e)
+{
+    Utils* utils = Utils::get();
+
+    if (!utils->firstPrint)
+    {
+        std::cout << "\n";
+    }
+
+    else
+    {
+        utils->firstPrint = false;
+    }
+
+    std::cout << e.what() << "\n";
 }
 
 void Utils::parseWarning(const std::string& message, const SourceLocation& location)
@@ -42,14 +61,14 @@ void Utils::parseWarning(const std::string& message, const SourceLocation& locat
         throw OrganicParseException(message, location);
     }
 
-    if (!utils->firstWarning)
+    if (!utils->firstPrint)
     {
         std::cout << "\n";
     }
 
     else
     {
-        utils->firstWarning = false;
+        utils->firstPrint = false;
     }
 
     std::cout << "Parse warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n    " + message << "\n";
