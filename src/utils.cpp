@@ -30,26 +30,9 @@ void Utils::setWarnLevel(const WarnLevel& level)
     Utils::get()->warnLevel = level;
 }
 
-void Utils::printError(const OrganicException& e)
-{
-    Utils* utils = Utils::get();
-
-    if (!utils->firstPrint)
-    {
-        std::cout << "\n";
-    }
-
-    else
-    {
-        utils->firstPrint = false;
-    }
-
-    std::cout << e.what() << "\n";
-}
-
 void Utils::parseWarning(const std::string& message, const SourceLocation& location)
 {
-    Utils* utils = Utils::get();
+    const Utils* utils = Utils::get();
 
     if (utils->warnLevel == WarnLevel::Suppress)
     {
@@ -61,6 +44,13 @@ void Utils::parseWarning(const std::string& message, const SourceLocation& locat
         throw OrganicParseException(message, location);
     }
 
+    printWarning("Parse warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n    " + message);
+}
+
+void Utils::printWarning(const std::string& text)
+{
+    Utils* utils = Utils::get();
+
     if (!utils->firstPrint)
     {
         std::cout << "\n";
@@ -71,7 +61,24 @@ void Utils::parseWarning(const std::string& message, const SourceLocation& locat
         utils->firstPrint = false;
     }
 
-    std::cout << "Parse warning in " + location.source->description() + " at line " + std::to_string(location.line) + " character " + std::to_string(location.character) + ":\n    " + message << "\n";
+    std::cout << "\x1b[38;2;210;210;50m" << text << "\x1b[49;;m\n";
+}
+
+void Utils::printError(const std::string& text)
+{
+    Utils* utils = Utils::get();
+
+    if (!utils->firstPrint)
+    {
+        std::cout << "\n";
+    }
+
+    else
+    {
+        utils->firstPrint = false;
+    }
+
+    std::cout << "\x1b[38;2;255;128;128m" << text << "\x1b[49;;m\n";
 }
 
 void Utils::setSeed(const std::optional<size_t>& seed)

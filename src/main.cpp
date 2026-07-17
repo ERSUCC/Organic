@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 
     catch (const OrganicException& e)
     {
-        Utils::printError(e);
+        Utils::printError(e.what());
 
         return 1;
     }

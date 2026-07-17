@@ -34,8 +34,10 @@ struct Utils
 
     static void printInfo();
     static void setWarnLevel(const WarnLevel& level);
-    static void printError(const OrganicException& e);
     static void parseWarning(const std::string& message, const SourceLocation& location);
+
+    static void printWarning(const std::string& text);
+    static void printError(const std::string& text);
 
     void setSeed(const std::optional<size_t>& seed);
 
