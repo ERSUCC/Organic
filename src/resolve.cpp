@@ -82,7 +82,7 @@ void TypeResolver::resolveTypes(const Time* token) const
 void TypeResolver::resolveTypes(const Hold* token) const
 {
     resolveArgumentTypes(token->arguments, "length", new NumberType());
-    resolveArgumentTypes(token->arguments, "value", new NumberType());
+    resolveArgumentTypes(token->arguments, "value", new AnyType());
 
     token->arguments->check();
 }
@@ -108,7 +108,7 @@ void TypeResolver::resolveTypes(const Sweep* token) const
 void TypeResolver::resolveTypes(const Sequence* token) const
 {
     resolveArgumentTypes(token->arguments, "order", new SequenceOrderType(), new Constant(token->location, new SequenceOrderType(), Constants::Sequence::Forward));
-    resolveArgumentTypes(token->arguments, "values", new ListType(new NumberType()));
+    resolveArgumentTypes(token->arguments, "values", new ListType(new AnyType()));
 
     token->arguments->check();
 }
@@ -116,7 +116,7 @@ void TypeResolver::resolveTypes(const Sequence* token) const
 void TypeResolver::resolveTypes(const Repeat* token) const
 {
     resolveArgumentTypes(token->arguments, "repeats", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "value", new NumberType());
+    resolveArgumentTypes(token->arguments, "value", new AnyType());
 
     token->arguments->check();
 }
@@ -142,7 +142,7 @@ void TypeResolver::resolveTypes(const Limit* token) const
 
 void TypeResolver::resolveTypes(const Trigger* token) const
 {
-    resolveArgumentTypes(token->arguments, "value", new NumberType());
+    resolveArgumentTypes(token->arguments, "value", new AnyType());
     resolveArgumentTypes(token->arguments, "condition", new BooleanType());
 
     token->arguments->check();
@@ -150,9 +150,17 @@ void TypeResolver::resolveTypes(const Trigger* token) const
 
 void TypeResolver::resolveTypes(const If* token) const
 {
-    resolveArgumentTypes(token->arguments, "is-false", new NumberType());
-    resolveArgumentTypes(token->arguments, "is-true", new NumberType());
+    resolveArgumentTypes(token->arguments, "is-false", new AnyType());
+    resolveArgumentTypes(token->arguments, "is-true", new AnyType());
     resolveArgumentTypes(token->arguments, "condition", new BooleanType());
+
+    const SharedToken trueValue = token->arguments->findArgument("is-true")->value;
+    const SharedToken falseValue = token->arguments->findArgument("is-false")->value;
+
+    if (!trueValue->type()->checkType(falseValue->type().get()))
+    {
+        throw OrganicParseException("The type of \"is-false\" must match the type of \"is-true\", which is a " + trueValue->type()->name(), falseValue->location);
+    }
 
     token->arguments->check();
 }

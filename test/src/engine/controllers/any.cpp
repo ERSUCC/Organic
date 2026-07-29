@@ -17,7 +17,7 @@ void TestControllers::testAny()
         TimeValue(250, 1),
         TimeValue(500, 1),
         TimeValue(750, 1),
-        TimeValue(1000, 1)
+        TimeValue(1000, 0)
     });
 
     expectValues(new Any(new List({ new ValueGreaterEqual(new Sweep(new Value(5), new Value(0), new Value(1000)), new Value(2.5)), new ValueGreaterEqual(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(2.5)) })),

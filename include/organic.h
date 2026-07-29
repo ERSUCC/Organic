@@ -15,6 +15,7 @@
 
 #include "exception.h"
 #include "flags.h"
+#include "object.h"
 #include "parse.h"
 #include "path.h"
 #include "program.h"

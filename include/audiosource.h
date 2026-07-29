@@ -26,8 +26,6 @@ struct SingleAudioSource : public AudioSource
     void fillBuffer(double* buffer) override;
 
 protected:
-    virtual void prepareForEffects() = 0;
-
     double* effectBuffer;
 
     ValueObject* volume;
@@ -38,11 +36,11 @@ protected:
 
 struct Phase : public ValueObject
 {
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
     void setDelta(const double delta);
-
-    void incrementPhase();
 
 protected:
     void init() override;
@@ -59,10 +57,10 @@ struct Oscillator : public SingleAudioSource
     Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
     ~Oscillator();
 
+    void update() override;
+
 protected:
     void init() override;
-
-    void prepareForEffects() override;
 
     ValueObject* frequency;
 
@@ -77,28 +75,28 @@ struct Sine : public Oscillator
 {
     Sine(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
 
-    double getValue() override;
+    double getValue() const override;
 };
 
 struct Square : public Oscillator
 {
     Square(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
 
-    double getValue() override;
+    double getValue() const override;
 };
 
 struct Saw : public Oscillator
 {
     Saw(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
 
-    double getValue() override;
+    double getValue() const override;
 };
 
 struct Triangle : public Oscillator
 {
     Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
 
-    double getValue() override;
+    double getValue() const override;
 };
 
 struct CustomOscillator : public Oscillator
@@ -106,7 +104,7 @@ struct CustomOscillator : public Oscillator
     CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, ValueObject* waveform);
     ~CustomOscillator();
 
-    double getValue() override;
+    double getValue() const override;
 
 protected:
     void init() override;
@@ -120,10 +118,10 @@ struct Noise : public SingleAudioSource
 {
     Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects);
 
+    void update() override;
+
 protected:
     void init() override;
-
-    void prepareForEffects() override;
 
 private:
     std::uniform_real_distribution<double> udist = std::uniform_real_distribution<double>(-1, 1);
@@ -135,10 +133,10 @@ struct Sample : public SingleAudioSource
     Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource);
     ~Sample();
 
+    void update() override;
+
 protected:
     void init() override;
-
-    void prepareForEffects() override;
 
 private:
     ValueObject* resource;
@@ -149,7 +147,7 @@ private:
 
 struct ShapeCoordinator : public ValueObject
 {
-    double getValue() override;
+    double getValue() const override;
 
     inline void setValue(const double value);
 
@@ -227,10 +225,10 @@ struct Granulate : public SingleAudioSource
     Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, ValueObject* shape);
     ~Granulate();
 
+    void update() override;
+
 protected:
     void init() override;
-
-    void prepareForEffects() override;
 
 private:
     ValueObject* resource;

@@ -25,63 +25,64 @@ void Sync::repeat(double time)
     reinit();
 }
 
-void Sync::stop()
+void Sync::stop(const double time)
 {
-    enabled = false;
-}
-
-double Sync::syncLength() const
-{
-    return utils->infinity;
+    if (enabled)
+    {
+        stopTime = time;
+        enabled = false;
+    }
 }
 
 void Sync::init() {}
 void Sync::reinit() {}
 
+void Defaults::deinit()
+{
+    for (const std::pair<std::type_index, ValueObject*>& pair : objects)
+    {
+        delete pair.second;
+    }
+}
+
 ValueObject::~ValueObject() {}
 
-double ValueObject::getValue()
+double ValueObject::getValue() const
 {
     return 0;
 }
 
 ValueObject* ValueObject::getLeaf()
 {
+    if (!enabled)
+    {
+        return nullptr;
+    }
+
     return this;
 }
+
+void ValueObject::update() {}
 
 List::List(const std::vector<ValueObject*>& objects) :
     objects(objects) {}
 
 List::~List()
 {
-    for (ValueObject* object : objects)
+    for (const ValueObject* object : objects)
     {
         delete object;
-    }
-}
-
-void List::init()
-{
-    for (ValueObject* object : objects)
-    {
-        object->start(startTime);
     }
 }
 
 Variable::Variable(ValueObject* value) :
     value(value) {}
 
-double Variable::syncLength() const
+double Variable::getValue() const
 {
-    return value->syncLength();
-}
-
-double Variable::getValue()
-{
-    if (!value->enabled)
+    if (!enabled)
     {
-        stop();
+        return 0;
     }
 
     return value->getValue();
@@ -89,7 +90,22 @@ double Variable::getValue()
 
 ValueObject* Variable::getLeaf()
 {
+    if (!enabled)
+    {
+        return nullptr;
+    }
+
     return value->getLeaf();
+}
+
+void Variable::update()
+{
+    value->update();
+
+    if (!value->enabled)
+    {
+        stop(value->getStopTime());
+    }
 }
 
 void Variable::init()
@@ -99,6 +115,9 @@ void Variable::init()
 
 Lambda::Lambda(const std::vector<Variable*>& inputs, ValueObject* value) :
     inputs(inputs), value(value) {}
+
+Lambda::Lambda() :
+    inputs({}), value(new ValueObject()) {}
 
 Lambda::~Lambda()
 {
@@ -110,9 +129,24 @@ Lambda::~Lambda()
     delete value;
 }
 
-double Lambda::getValue()
+double Lambda::getValue() const
 {
+    if (!enabled)
+    {
+        return 0;
+    }
+
     return value->getValue();
+}
+
+void Lambda::update()
+{
+    value->update();
+
+    if (!value->enabled)
+    {
+        stop(value->getStopTime());
+    }
 }
 
 void Lambda::setInputs(const std::vector<ValueObject*>& values)
@@ -131,9 +165,4 @@ void Lambda::init()
     }
 
     value->start(startTime);
-}
-
-double Time::getValue()
-{
-    return utils->time;
 }

@@ -10,17 +10,6 @@
 namespace Parser {
 
 struct Type;
-struct NoneType;
-struct SequenceOrderType;
-struct RandomTypeType;
-struct RoundDirectionType;
-struct NumberType;
-struct BooleanType;
-struct StringType;
-struct AudioSourceType;
-struct EffectType;
-struct ListType;
-struct LambdaType;
 
 typedef std::unique_ptr<const Type> UniqueType;
 typedef std::shared_ptr<const Type> SharedType;
@@ -58,6 +47,13 @@ private:
 
     const std::string str;
 
+};
+
+struct AnyType : public Type
+{
+    AnyType();
+
+    bool checkType(const Type* actual) const override;
 };
 
 struct NoneType : public Type
@@ -112,9 +108,7 @@ struct ListType : public Type
 
     bool checkType(const Type* actual) const override;
 
-private:
     const SharedType subType;
-
 };
 
 struct LambdaType : public Type

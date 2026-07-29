@@ -6,7 +6,6 @@ struct Constants
     {
         Forward,
         Backward,
-        PingPong,
         Shuffle
     };
 

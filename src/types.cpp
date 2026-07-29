@@ -22,6 +22,14 @@ bool Type::checkType(const Type* actual) const
     return base == actual->base;
 }
 
+AnyType::AnyType() :
+    Type(TypeConstant::Any, "anything") {}
+
+bool AnyType::checkType(const Type* actual) const
+{
+    return actual->baseType() != TypeConstant::None;
+}
+
 NoneType::NoneType() :
     Type(TypeConstant::None, "nothing") {}
 

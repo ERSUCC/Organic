@@ -12,6 +12,7 @@ namespace Engine {
 struct Resource : public ValueObject
 {
     Resource(const Path& path, const SourceLocation& location);
+    Resource();
     ~Resource();
 
     double* samples;

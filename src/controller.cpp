@@ -2,15 +2,20 @@
 
 using namespace Engine;
 
+double Time::getValue() const
+{
+    return utils->time;
+}
+
 Value::Value(const double value) :
     value(value) {}
 
-double Value::getValue()
+double Value::getValue() const
 {
     return value;
 }
 
-ValueByte::ValueByte(const unsigned char value) :
+ValueChar::ValueChar(const unsigned char value) :
     value(value) {}
 
 ValueNegate::ValueNegate(ValueObject* value) :
@@ -21,9 +26,29 @@ ValueNegate::~ValueNegate()
     delete value;
 }
 
-double ValueNegate::getValue()
+double ValueNegate::getValue() const
 {
+    if (!enabled)
+    {
+        return 0;
+    }
+
     return -value->getValue();
+}
+
+void ValueNegate::update()
+{
+    value->update();
+
+    if (!value->enabled)
+    {
+        stop(value->getStopTime());
+    }
+}
+
+void ValueNegate::init()
+{
+    value->start(startTime);
 }
 
 ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
@@ -35,24 +60,30 @@ ValueCombination::~ValueCombination()
     delete value2;
 }
 
-double ValueCombination::syncLength() const
+double ValueCombination::getValue() const
 {
-    return fmin(value1->syncLength(), value2->syncLength());
-}
-
-double ValueCombination::getValue()
-{
-    const double val1 = value1->getValue();
-    const double val2 = value2->getValue();
-
-    if (value1->enabled && value2->enabled)
+    if (!enabled)
     {
-        return getValueInternal(val1, val2);
+        return 0;
     }
 
-    stop();
+    return getValueInternal(value1->getValue(), value2->getValue());
+}
 
-    return 0;
+void ValueCombination::update()
+{
+    value1->update();
+    value2->update();
+
+    if (!value1->enabled)
+    {
+        stop(value1->getStopTime());
+    }
+
+    else if (!value2->enabled)
+    {
+        stop(value2->getStopTime());
+    }
 }
 
 void ValueCombination::init()
@@ -149,20 +180,16 @@ All::~All()
     delete values;
 }
 
-double All::getValue()
+double All::getValue() const
 {
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    if (!enabled)
     {
-        const double val = object->getValue();
+        return 0;
+    }
 
-        if (!object->enabled)
-        {
-            stop();
-
-            return 0;
-        }
-
-        if (val == 0)
+    for (const ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        if (object->getValue() == 0)
         {
             return 0;
         }
@@ -171,9 +198,38 @@ double All::getValue()
     return 1;
 }
 
+void All::update()
+{
+    values->update();
+
+    if (!values->enabled)
+    {
+        stop(values->getStopTime());
+
+        return;
+    }
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->update();
+
+        if (!object->enabled)
+        {
+            stop(object->getStopTime());
+
+            return;
+        }
+    }
+}
+
 void All::init()
 {
     values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 Any::Any(ValueObject* values) :
@@ -184,29 +240,56 @@ Any::~Any()
     delete values;
 }
 
-double Any::getValue()
+double Any::getValue() const
 {
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    if (!enabled)
     {
-        if (object->getValue() != 0 && object->enabled)
+        return 0;
+    }
+
+    for (const ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        if (object->getValue() != 0)
         {
             return 1;
-        }
-
-        if (!object->enabled)
-        {
-            stop();
-
-            return 0;
         }
     }
 
     return 0;
 }
 
+void Any::update()
+{
+    values->update();
+
+    if (!values->enabled)
+    {
+        stop(values->getStopTime());
+
+        return;
+    }
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->update();
+
+        if (!object->enabled)
+        {
+            stop(object->getStopTime());
+
+            return;
+        }
+    }
+}
+
 void Any::init()
 {
     values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 None::None(ValueObject* values) :
@@ -217,19 +300,17 @@ None::~None()
     delete values;
 }
 
-double None::getValue()
+double None::getValue() const
 {
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    if (!enabled)
     {
-        if (object->getValue() != 0 && object->enabled)
-        {
-            return 0;
-        }
+        return 0;
+    }
 
-        if (!object->enabled)
+    for (const ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        if (object->getValue() != 0)
         {
-            stop();
-
             return 0;
         }
     }
@@ -237,9 +318,38 @@ double None::getValue()
     return 1;
 }
 
+void None::update()
+{
+    values->update();
+
+    if (!values->enabled)
+    {
+        stop(values->getStopTime());
+
+        return;
+    }
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->update();
+
+        if (!object->enabled)
+        {
+            stop(object->getStopTime());
+
+            return;
+        }
+    }
+}
+
 void None::init()
 {
     values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 Min::Min(ValueObject* values) :
@@ -250,22 +360,18 @@ Min::~Min()
     delete values;
 }
 
-double Min::getValue()
+double Min::getValue() const
 {
-    const std::vector<ValueObject*>& objects = values->getLeafAs<List>()->objects;
+    if (!enabled)
+    {
+        return 0;
+    }
 
     double min = utils->infinity;
 
-    for (ValueObject* object : objects)
+    for (const ValueObject* object : values->getLeafAs<List>()->objects)
     {
         const double value = object->getValue();
-
-        if (!object->enabled)
-        {
-            stop();
-
-            return 0;
-        }
 
         if (value < min)
         {
@@ -276,9 +382,38 @@ double Min::getValue()
     return min;
 }
 
+void Min::update()
+{
+    values->update();
+
+    if (!values->enabled)
+    {
+        stop(values->getStopTime());
+
+        return;
+    }
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->update();
+
+        if (!object->enabled)
+        {
+            stop(object->getStopTime());
+
+            return;
+        }
+    }
+}
+
 void Min::init()
 {
     values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 Max::Max(ValueObject* values) :
@@ -289,22 +424,18 @@ Max::~Max()
     delete values;
 }
 
-double Max::getValue()
+double Max::getValue() const
 {
-    const std::vector<ValueObject*>& objects = values->getLeafAs<List>()->objects;
+    if (!enabled)
+    {
+        return 0;
+    }
 
     double max = -utils->infinity;
 
-    for (ValueObject* object : objects)
+    for (const ValueObject* object : values->getLeafAs<List>()->objects)
     {
         const double value = object->getValue();
-
-        if (!object->enabled)
-        {
-            stop();
-
-            return 0;
-        }
 
         if (value > max)
         {
@@ -315,9 +446,38 @@ double Max::getValue()
     return max;
 }
 
+void Max::update()
+{
+    values->update();
+
+    if (!values->enabled)
+    {
+        stop(values->getStopTime());
+
+        return;
+    }
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->update();
+
+        if (!object->enabled)
+        {
+            stop(object->getStopTime());
+
+            return;
+        }
+    }
+}
+
 void Max::init()
 {
     values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 Round::Round(ValueObject* value, ValueObject* step, ValueObject* direction) :
@@ -330,30 +490,22 @@ Round::~Round()
     delete direction;
 }
 
-double Round::syncLength() const
+double Round::getValue() const
 {
-    return value->syncLength();
-}
-
-double Round::getValue()
-{
-    const double val = value->getValue();
-
-    if (!value->enabled)
+    if (!enabled)
     {
-        stop();
-
         return 0;
     }
 
-    double st = step->getValue();
+    const double val = value->getValue();
+    const double st = step->getValue();
 
     if (st == 0)
     {
         return val;
     }
 
-    switch (direction->getLeafAs<ValueByte>()->value)
+    switch (direction->getLeafAs<ValueChar>()->value)
     {
         case Constants::Round::Nearest:
             return round(val / st) * st;
@@ -366,6 +518,18 @@ double Round::getValue()
     }
 
     return 0;
+}
+
+void Round::update()
+{
+    value->update();
+    step->update();
+    direction->update();
+
+    if (!value->enabled)
+    {
+        stop(value->getStopTime());
+    }
 }
 
 void Round::init()
@@ -383,23 +547,24 @@ Absolute::~Absolute()
     delete value;
 }
 
-double Absolute::syncLength() const
+double Absolute::getValue() const
 {
-    return value->syncLength();
-}
-
-double Absolute::getValue()
-{
-    const double val = fabs(value->getValue());
-
-    if (!value->enabled)
+    if (!enabled)
     {
-        stop();
-
         return 0;
     }
 
-    return val;
+    return fabs(value->getValue());
+}
+
+void Absolute::update()
+{
+    value->update();
+
+    if (!value->enabled)
+    {
+        stop(value->getStopTime());
+    }
 }
 
 void Absolute::init()
@@ -416,65 +581,69 @@ Sequence::~Sequence()
     delete order;
 }
 
-double Sequence::syncLength() const
+double Sequence::getValue() const
 {
-    const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
-
-    double length = 0;
-
-    if (order->getLeafAs<ValueByte>()->value == Constants::Sequence::PingPong)
+    if (!enabled)
     {
-        length += objects[0]->syncLength();
-
-        for (size_t i = 1; i < objects.size() - 1; i++)
-        {
-            length += objects[i]->syncLength() * 2;
-        }
-
-        if (objects.size() > 1)
-        {
-            length += objects.back()->syncLength();
-        }
-    }
-
-    else
-    {
-        for (ValueObject* controller : objects)
-        {
-            length += controller->syncLength();
-        }
-    }
-
-    return length;
-}
-
-double Sequence::getValue()
-{
-    const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
-
-    const double value = objects[current]->getValue();
-
-    if (!objects[current]->enabled)
-    {
-        last = current;
-
-        if (++switches <= max_switches)
-        {
-            repeat(repeatTime + objects[current]->syncLength());
-
-            return objects[current]->getValue();
-        }
-
-        stop();
-
         return 0;
     }
 
-    return value;
+    return controllers->getLeafAs<List>()->objects[current]->getValue();
+}
+
+ValueObject* Sequence::getLeaf()
+{
+    if (!enabled)
+    {
+        return nullptr;
+    }
+
+    return controllers->getLeafAs<List>()->objects[current]->getLeaf();
+}
+
+void Sequence::update()
+{
+    controllers->update();
+    order->update();
+
+    const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
+
+    ValueObject* object = objects[current];
+
+    if (!order->enabled)
+    {
+        const double stopTime = order->getStopTime();
+
+        object->stop(stopTime);
+
+        stop(stopTime);
+
+        return;
+    }
+
+    object->update();
+
+    if (!object->enabled)
+    {
+        last = current;
+
+        if (++switches < objects.size())
+        {
+            repeat(object->getStopTime());
+        }
+
+        else
+        {
+            stop(object->getStopTime());
+        }
+    }
 }
 
 void Sequence::init()
 {
+    controllers->start(startTime);
+    order->start(startTime);
+
     const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
 
     switches = 0;
@@ -483,38 +652,29 @@ void Sequence::init()
 
     udist = std::uniform_int_distribution<size_t>(0, objects.size() - 1);
 
-    const unsigned char orderNum = order->getLeafAs<ValueByte>()->value;
-
-    if (orderNum == Constants::Sequence::PingPong)
+    switch (order->getLeafAs<ValueChar>()->value)
     {
-        max_switches = objects.size() * 2 - 3;
-    }
+        case Constants::Sequence::Backward:
+            current = objects.size() - 1;
 
-    else
-    {
-        max_switches = objects.size() - 1;
-    }
+            break;
 
-    if (orderNum == Constants::Sequence::Backward)
-    {
-        current = objects.size() - 1;
-    }
+        case Constants::Sequence::Shuffle:
+            current = udist(utils->rng);
 
-    else if (orderNum == Constants::Sequence::Shuffle)
-    {
-        current = udist(utils->rng);
+            if (current == last)
+            {
+                current = (current + 1) % objects.size();
+            }
 
-        if (current == last)
-        {
-            current = (current + 1) % objects.size();
-        }
+            chosen.insert(current);
 
-        chosen.insert(current);
-    }
+            break;
 
-    else
-    {
-        current = 0;
+        default:
+            current = 0;
+
+            break;
     }
 
     objects[current]->start(startTime);
@@ -524,7 +684,7 @@ void Sequence::reinit()
 {
     const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
 
-    switch (order->getLeafAs<ValueByte>()->value)
+    switch (order->getLeafAs<ValueChar>()->value)
     {
         case Constants::Sequence::Forward:
             current = (current + 1) % objects.size();
@@ -541,16 +701,6 @@ void Sequence::reinit()
             {
                 current--;
             }
-
-            break;
-
-        case Constants::Sequence::PingPong:
-            if ((direction == -1 && current == 0) || current >= objects.size() - 1)
-            {
-                direction *= -1;
-            }
-
-            current += direction;
 
             break;
 
@@ -582,19 +732,30 @@ Repeat::~Repeat()
     delete repeats;
 }
 
-double Repeat::syncLength() const
+double Repeat::getValue() const
 {
-    if (repeats->getValue() == 0)
+    if (!enabled)
     {
-        return utils->infinity;
+        return 0;
     }
 
-    return value->syncLength() * repeats->getValue();
+    return value->getValue();
 }
 
-double Repeat::getValue()
+ValueObject* Repeat::getLeaf()
 {
-    const double val = value->getValue();
+    if (!enabled)
+    {
+        return nullptr;
+    }
+
+    return value->getLeaf();
+}
+
+void Repeat::update()
+{
+    value->update();
+    repeats->update();
 
     if (!value->enabled)
     {
@@ -602,20 +763,14 @@ double Repeat::getValue()
 
         if (repeatsValue == 0 || ++times < repeatsValue)
         {
-            repeat(repeatTime + value->syncLength());
-
-            return value->getValue();
+            repeat(value->getStopTime());
         }
 
         else
         {
-            stop();
-
-            return 0;
+            stop(value->getStopTime());
         }
     }
-
-    return val;
 }
 
 void Repeat::init()
@@ -629,6 +784,7 @@ void Repeat::init()
 void Repeat::reinit()
 {
     value->start(repeatTime);
+    repeats->start(startTime);
 }
 
 Hold::Hold(ValueObject* value, ValueObject* length) :
@@ -640,21 +796,37 @@ Hold::~Hold()
     delete length;
 }
 
-double Hold::syncLength() const
+double Hold::getValue() const
 {
-    return length->getValue();
-}
-
-double Hold::getValue()
-{
-    if (utils->time - startTime >= length->getValue())
+    if (!enabled)
     {
-        stop();
-
         return 0;
     }
 
     return value->getValue();
+}
+
+ValueObject* Hold::getLeaf()
+{
+    if (!enabled)
+    {
+        return nullptr;
+    }
+
+    return value;
+}
+
+void Hold::update()
+{
+    value->update();
+    length->update();
+
+    const double lengthValue = length->getValue();
+
+    if (utils->time - startTime >= lengthValue)
+    {
+        stop(startTime + lengthValue);
+    }
 }
 
 void Hold::init()
@@ -673,26 +845,32 @@ Sweep::~Sweep()
     delete length;
 }
 
-double Sweep::syncLength() const
+double Sweep::getValue() const
 {
-    return length->getValue();
-}
-
-double Sweep::getValue()
-{
-    const double lengthValue = length->getValue();
-    const double toValue = to->getValue();
-
-    if (utils->time - startTime >= lengthValue)
+    if (!enabled)
     {
-        stop();
-
         return 0;
     }
 
     const double fromValue = from->getValue();
+    const double toValue = to->getValue();
+    const double lengthValue = length->getValue();
 
     return fromValue + (toValue - fromValue) * (utils->time - startTime) / lengthValue;
+}
+
+void Sweep::update()
+{
+    from->update();
+    to->update();
+    length->update();
+
+    const double lengthValue = length->getValue();
+
+    if (utils->time - startTime >= lengthValue)
+    {
+        stop(startTime + lengthValue);
+    }
 }
 
 void Sweep::init()
@@ -712,24 +890,32 @@ LFO::~LFO()
     delete length;
 }
 
-double LFO::syncLength() const
+double LFO::getValue() const
 {
-    return length->getValue();
-}
-
-double LFO::getValue()
-{
-    const double lengthValue = length->getValue();
-    const double fromValue = from->getValue();
-
-    if (utils->time - startTime >= lengthValue)
+    if (!enabled)
     {
-        stop();
-
         return 0;
     }
 
-    return fromValue + (to->getValue() - fromValue) * (-cos(utils->twoPi * (utils->time - startTime) / lengthValue) / 2 + 0.5);
+    const double fromValue = from->getValue();
+    const double toValue = to->getValue();
+    const double lengthValue = length->getValue();
+
+    return fromValue + (toValue - fromValue) * (-cos(utils->twoPi * (utils->time - startTime) / lengthValue) / 2 + 0.5);
+}
+
+void LFO::update()
+{
+    from->update();
+    to->update();
+    length->update();
+
+    const double lengthValue = length->getValue();
+
+    if (utils->time - startTime >= lengthValue)
+    {
+        stop(startTime + lengthValue);
+    }
 }
 
 void LFO::init()
@@ -750,32 +936,38 @@ Random::~Random()
     delete type;
 }
 
-double Random::syncLength() const
+double Random::getValue() const
 {
-    return length->getValue();
-}
-
-double Random::getValue()
-{
-    const double lengthValue = length->getValue();
-
-    if (utils->time - startTime >= lengthValue)
+    if (!enabled)
     {
-        stop();
-
         return 0;
     }
 
-    switch (type->getLeafAs<ValueByte>()->value)
+    switch (type->getLeafAs<ValueChar>()->value)
     {
         case Constants::Random::Step:
             return current;
 
         case Constants::Random::Linear:
-            return current + (next - current) * (utils->time - startTime) / lengthValue;
+            return current + (next - current) * (utils->time - startTime) / length->getValue();
     }
 
     return 0;
+}
+
+void Random::update()
+{
+    from->update();
+    to->update();
+    length->update();
+    type->update();
+
+    const double lengthValue = length->getValue();
+
+    if (utils->time - startTime >= lengthValue)
+    {
+        stop(startTime + lengthValue);
+    }
 }
 
 void Random::init()
@@ -783,6 +975,7 @@ void Random::init()
     from->start(startTime);
     to->start(startTime);
     length->start(startTime);
+    type->start(startTime);
 
     std::uniform_real_distribution<> udist(from->getValue(), to->getValue());
 
@@ -811,17 +1004,10 @@ Limit::~Limit()
     delete max;
 }
 
-double Limit::syncLength() const
+double Limit::getValue() const
 {
-    return value->syncLength();
-}
-
-double Limit::getValue()
-{
-    if (!value->enabled)
+    if (!enabled)
     {
-        stop();
-
         return 0;
     }
 
@@ -842,6 +1028,18 @@ double Limit::getValue()
     return valueValue;
 }
 
+void Limit::update()
+{
+    value->update();
+    min->update();
+    max->update();
+
+    if (!value->enabled)
+    {
+        stop(value->getStopTime());
+    }
+}
+
 void Limit::init()
 {
     value->start(startTime);
@@ -858,46 +1056,55 @@ Trigger::~Trigger()
     delete value;
 }
 
-double Trigger::syncLength() const
+double Trigger::getValue() const
 {
-    return value->syncLength();
+    if (!enabled || !value->enabled)
+    {
+        return 0;
+    }
+
+    return value->getValue();
 }
 
-double Trigger::getValue()
+ValueObject* Trigger::getLeaf()
+{
+    if (!enabled)
+    {
+        return nullptr;
+    }
+
+    return value->getLeaf();
+}
+
+void Trigger::update()
 {
     if (triggered)
     {
-        const double val = value->getValue();
+        condition->update();
+        value->update();
 
-        if (value->enabled)
+        if (!value->enabled)
         {
-            return val;
+            stop(value->getStopTime());
+        }
+    }
+
+    else
+    {
+        condition->update();
+
+        if (!condition->enabled)
+        {
+            stop(condition->getStopTime());
         }
 
-        stop();
+        else if (condition->getValue() != 0)
+        {
+            triggered = true;
 
-        return 0;
+            value->start(utils->time);
+        }
     }
-
-    const double cond = condition->getValue();
-
-    if (!condition->enabled)
-    {
-        stop();
-
-        return 0;
-    }
-
-    if (cond != 0)
-    {
-        triggered = true;
-
-        value->start(utils->time);
-
-        return value->getValue();
-    }
-
-    return 0;
 }
 
 void Trigger::init()
@@ -917,23 +1124,41 @@ If::~If()
     delete falseValue;
 }
 
-double If::getValue()
+double If::getValue() const
 {
-    const double cond = condition->getValue();
-
-    if (!condition->enabled)
-    {
-        stop();
-
-        return 0;
-    }
-
-    if (cond == 0)
+    if (condition->getValue() == 0)
     {
         return falseValue->getValue();
     }
 
     return trueValue->getValue();
+}
+
+ValueObject* If::getLeaf()
+{
+    if (!enabled)
+    {
+        return nullptr;
+    }
+
+    if (condition->getValue() == 0)
+    {
+        return falseValue->getLeaf();
+    }
+
+    return trueValue->getLeaf();
+}
+
+void If::update()
+{
+    condition->update();
+    trueValue->update();
+    falseValue->update();
+
+    if (!condition->enabled)
+    {
+        stop(condition->getStopTime());
+    }
 }
 
 void If::init()

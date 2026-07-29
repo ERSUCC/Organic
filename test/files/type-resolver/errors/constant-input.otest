@@ -133,7 +133,7 @@ sample(file: [ "test", "test1" ])
 name = "Number in list input"
 line = 2
 character = 18
-error = 'Expected list of number for input "values", but received number.'
+error = 'Expected list of anything for input "values", but received number.'
 
 ---
 
@@ -143,7 +143,7 @@ sequence(values: 0)
 name = "Constant in list input"
 line = 2
 character = 18
-error = 'Expected list of number for input "values", but received sequence order constant.'
+error = 'Expected list of anything for input "values", but received sequence order constant.'
 
 ---
 
@@ -154,7 +154,7 @@ sequence(values: forward)
 name = "Boolean in list input"
 line = 2
 character = 18
-error = 'Expected list of number for input "values", but received boolean.'
+error = 'Expected list of anything for input "values", but received boolean.'
 
 ---
 
@@ -165,7 +165,7 @@ sequence(values: false)
 name = "String in list input"
 line = 2
 character = 18
-error = 'Expected list of number for input "values", but received string.'
+error = 'Expected list of anything for input "values", but received string.'
 
 ---
 

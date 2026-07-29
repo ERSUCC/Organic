@@ -21,11 +21,9 @@ SingleAudioSource::~SingleAudioSource()
 
 void SingleAudioSource::fillBuffer(double* buffer)
 {
-    prepareForEffects();
-
-    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
     {
-        effect->getLeafAs<Effect>()->apply(effectBuffer);
+        object->getLeafAs<Effect>()->apply(effectBuffer);
     }
 
     for (size_t i = 0; i < utils->channels; i++)
@@ -34,17 +32,12 @@ void SingleAudioSource::fillBuffer(double* buffer)
     }
 }
 
-double Phase::getValue()
+double Phase::getValue() const
 {
     return phase;
 }
 
-void Phase::setDelta(const double delta)
-{
-    this->delta = delta;
-}
-
-void Phase::incrementPhase()
+void Phase::update()
 {
     phase += delta;
 
@@ -52,6 +45,11 @@ void Phase::incrementPhase()
     {
         phase -= utils->twoPi;
     }
+}
+
+void Phase::setDelta(const double delta)
+{
+    this->delta = delta;
 }
 
 void Phase::init()
@@ -73,18 +71,24 @@ Oscillator::~Oscillator()
     delete phase;
 }
 
-void Oscillator::init()
+void Oscillator::update()
 {
-    volume->start(startTime);
-    pan->start(startTime);
-    effects->start(startTime);
-    frequency->start(startTime);
-    phase->start(startTime);
-}
+    volume->update();
+    pan->update();
+    effects->update();
+    frequency->update();
 
-void Oscillator::prepareForEffects()
-{
-    phase->setDelta(utils->twoPi * frequency->getValue() / utils->sampleRate);
+    const double frequencyValue = frequency->getValue();
+
+    if (frequencyValue == 0)
+    {
+        memset(effectBuffer, 0, sizeof(double) * utils->channels);
+
+        return;
+    }
+
+    phase->setDelta(utils->twoPi * frequencyValue / utils->sampleRate);
+    phase->update();
 
     const double volumeValue = volume->getValue();
 
@@ -96,7 +100,6 @@ void Oscillator::prepareForEffects()
     lastVolume = volumeValue;
 
     const double panValue = pan->getValue();
-
     const double value = volumeValue * getValue();
 
     if (utils->channels == 1)
@@ -109,14 +112,21 @@ void Oscillator::prepareForEffects()
         effectBuffer[0] = value * (1 - panValue) / 2;
         effectBuffer[1] = value * (panValue + 1) / 2;
     }
+}
 
-    phase->incrementPhase();
+void Oscillator::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+    frequency->start(startTime);
+    phase->start(startTime);
 }
 
 Sine::Sine(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
 
-double Sine::getValue()
+double Sine::getValue() const
 {
     return sin(phase->getValue());
 }
@@ -124,7 +134,7 @@ double Sine::getValue()
 Square::Square(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
 
-double Square::getValue()
+double Square::getValue() const
 {
     if (sin(phase->getValue()) > 0)
     {
@@ -137,7 +147,7 @@ double Square::getValue()
 Saw::Saw(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
 
-double Saw::getValue()
+double Saw::getValue() const
 {
     return phase->getValue() / utils->pi - 1;
 }
@@ -145,7 +155,7 @@ double Saw::getValue()
 Triangle::Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
 
-double Triangle::getValue()
+double Triangle::getValue() const
 {
     return 2 * asin(sin(phase->getValue())) / utils->pi;
 }
@@ -161,8 +171,10 @@ CustomOscillator::~CustomOscillator()
     delete waveform;
 }
 
-double CustomOscillator::getValue()
+double CustomOscillator::getValue() const
 {
+    waveform->update();
+
     return waveform->getValue();
 }
 
@@ -179,19 +191,14 @@ void CustomOscillator::init()
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     SingleAudioSource(volume, pan, effects) {}
 
-void Noise::init()
+void Noise::update()
 {
-    volume->start(startTime);
-    pan->start(startTime);
-    effects->start(startTime);
-}
+    volume->update();
+    pan->update();
+    effects->update();
 
-void Noise::prepareForEffects()
-{
-    const double volumeValue = volume->getValue();
+    const double value = volume->getValue() * udist(utils->rng);
     const double panValue = pan->getValue();
-
-    const double value = volumeValue * udist(utils->rng);
 
     if (utils->channels == 1)
     {
@@ -205,6 +212,13 @@ void Noise::prepareForEffects()
     }
 }
 
+void Noise::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+}
+
 Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource) :
     SingleAudioSource(volume, pan, effects), resource(resource) {}
 
@@ -213,18 +227,13 @@ Sample::~Sample()
     delete resource;
 }
 
-void Sample::init()
+void Sample::update()
 {
-    volume->start(startTime);
-    pan->start(startTime);
-    effects->start(startTime);
-    resource->start(startTime);
+    volume->update();
+    pan->update();
+    effects->update();
+    resource->update();
 
-    index = 0;
-}
-
-void Sample::prepareForEffects()
-{
     const double volumeValue = volume->getValue();
     const double panValue = pan->getValue();
 
@@ -249,7 +258,17 @@ void Sample::prepareForEffects()
     }
 }
 
-double ShapeCoordinator::getValue()
+void Sample::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+    resource->start(startTime);
+
+    index = 0;
+}
+
+double ShapeCoordinator::getValue() const
 {
     return value;
 }
@@ -286,7 +305,7 @@ void Grain::apply(double* buffer)
 
     if (currentIndex >= startIndex + clamped)
     {
-        stop();
+        stop(0);
     }
 }
 
@@ -436,7 +455,7 @@ Granulate::~Granulate()
     delete grainList;
 }
 
-void Granulate::init()
+void Granulate::update()
 {
     volume->start(startTime);
     pan->start(startTime);
@@ -445,10 +464,7 @@ void Granulate::init()
     grains->start(startTime);
     length->start(startTime);
     shape->start(startTime);
-}
 
-void Granulate::prepareForEffects()
-{
     memset(effectBuffer, 0, sizeof(double) * utils->channels);
 
     const size_t lengthValue = utils->sampleRate * utils->channels * length->getValue() / 1000;
@@ -486,6 +502,17 @@ void Granulate::prepareForEffects()
     }
 }
 
+void Granulate::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+    resource->start(startTime);
+    grains->start(startTime);
+    length->start(startTime);
+    shape->start(startTime);
+}
+
 Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources) :
     volume(volume), pan(pan), effects(effects), sources(sources)
 {
@@ -504,11 +531,16 @@ Group::~Group()
 
 void Group::fillBuffer(double* buffer)
 {
+    volume->update();
+    pan->update();
+    effects->update();
+    sources->update();
+
     memset(effectBuffer, 0, sizeof(double) * utils->channels);
 
     for (ValueObject* source : sources->getLeafAs<List>()->objects)
     {
-        source->getLeafAs<AudioSource>()->fillBuffer(effectBuffer);
+        source->getLeafAs<AudioSource>();
     }
 
     const double volumeValue = volume->getValue();
@@ -526,9 +558,9 @@ void Group::fillBuffer(double* buffer)
         effectBuffer[1] = effectBuffer[1] * (1 + panValue) / 2;
     }
 
-    for (ValueObject* effect : effects->getLeafAs<List>()->objects)
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
     {
-        effect->getLeafAs<Effect>()->apply(effectBuffer);
+        object->getLeafAs<Effect>();
     }
 
     for (size_t i = 0; i < utils->channels; i++)

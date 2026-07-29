@@ -34,7 +34,7 @@ Organic::Organic(const Path& path, const ProgramOptions& options) :
 
     TokenTransformer* transformer = new TokenTransformer(path);
 
-    this->program = program->transform(transformer)->getLeafAs<Engine::Program>();
+    this->program = program->transform(transformer);
 
     delete transformer;
     delete program;
@@ -45,6 +45,8 @@ Organic::~Organic()
 {
     delete program;
     delete utils;
+
+    Engine::Defaults::deinit();
 }
 
 void Organic::start()

@@ -37,6 +37,8 @@ int main(int argc, char** argv)
 
         delete utils;
 
+        Engine::Defaults::deinit();
+
         return 1;
     }
 
@@ -49,6 +51,8 @@ int main(int argc, char** argv)
         TestUtils::printSuccess("\nAll tests passed.");
 
         delete utils;
+
+        Engine::Defaults::deinit();
 
         return 0;
     }
@@ -64,6 +68,8 @@ int main(int argc, char** argv)
     }
 
     delete utils;
+
+    Engine::Defaults::deinit();
 
     return 1;
 }

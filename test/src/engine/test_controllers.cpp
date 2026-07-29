@@ -112,12 +112,14 @@ void TestControllers::expectValues(std::unique_ptr<ValueObject>& object, const s
 
         while (utils->time < value.time)
         {
-            object->getValue();
+            object->update();
 
             utils->time += utils->timeStep;
         }
 
         utils->time = value.time;
+
+        object->update();
 
         const double actual = object->getValue();
 

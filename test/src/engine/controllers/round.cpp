@@ -4,15 +4,15 @@ void TestControllers::testRound()
 {
     beginTest("Round", true);
 
-    expectConstant(new Round(new Value(0), new Value(0), new ValueByte(Constants::Round::Nearest)), 0);
-    expectConstant(new Round(new Value(0.12345), new Value(0), new ValueByte(Constants::Round::Nearest)), 0.12345);
-    expectConstant(new Round(new Value(0.98765), new Value(0), new ValueByte(Constants::Round::Nearest)), 0.98765);
-    expectConstant(new Round(new Value(0), new Value(1), new ValueByte(Constants::Round::Nearest)), 0);
-    expectConstant(new Round(new Value(0.12345), new Value(1), new ValueByte(Constants::Round::Nearest)), 0);
-    expectConstant(new Round(new Value(0.98765), new Value(1), new ValueByte(Constants::Round::Nearest)), 1);
-    expectConstant(new Round(new Value(5), new Value(1), new ValueByte(Constants::Round::Nearest)), 5);
+    expectConstant(new Round(new Value(0), new Value(0), new ValueChar(Constants::Round::Nearest)), 0);
+    expectConstant(new Round(new Value(0.12345), new Value(0), new ValueChar(Constants::Round::Nearest)), 0.12345);
+    expectConstant(new Round(new Value(0.98765), new Value(0), new ValueChar(Constants::Round::Nearest)), 0.98765);
+    expectConstant(new Round(new Value(0), new Value(1), new ValueChar(Constants::Round::Nearest)), 0);
+    expectConstant(new Round(new Value(0.12345), new Value(1), new ValueChar(Constants::Round::Nearest)), 0);
+    expectConstant(new Round(new Value(0.98765), new Value(1), new ValueChar(Constants::Round::Nearest)), 1);
+    expectConstant(new Round(new Value(5), new Value(1), new ValueChar(Constants::Round::Nearest)), 5);
 
-    expectValues(new Round(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(1), new ValueByte(Constants::Round::Nearest)),
+    expectValues(new Round(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(1), new ValueChar(Constants::Round::Nearest)),
     {
         TimeValue(0, 0),
         TimeValue(250, 1),
@@ -22,7 +22,7 @@ void TestControllers::testRound()
         TimeValue(1000, 0)
     });
 
-    expectValues(new Round(new Sweep(new Value(0), new Value(-5), new Value(1000)), new Value(1), new ValueByte(Constants::Round::Nearest)),
+    expectValues(new Round(new Sweep(new Value(0), new Value(-5), new Value(1000)), new Value(1), new ValueChar(Constants::Round::Nearest)),
     {
         TimeValue(0, 0),
         TimeValue(250, -1),
@@ -32,7 +32,7 @@ void TestControllers::testRound()
         TimeValue(1000, 0)
     });
 
-    expectValues(new Round(new Sweep(new Value(0), new Value(8), new Value(1000)), new Value(3), new ValueByte(Constants::Round::Nearest)),
+    expectValues(new Round(new Sweep(new Value(0), new Value(8), new Value(1000)), new Value(3), new ValueChar(Constants::Round::Nearest)),
     {
         TimeValue(0, 0),
         TimeValue(250, 3),
@@ -42,15 +42,15 @@ void TestControllers::testRound()
         TimeValue(1000, 0)
     });
 
-    expectConstant(new Round(new Value(0), new Value(0), new ValueByte(Constants::Round::Up)), 0);
-    expectConstant(new Round(new Value(0.12345), new Value(0), new ValueByte(Constants::Round::Up)), 0.12345);
-    expectConstant(new Round(new Value(0.98765), new Value(0), new ValueByte(Constants::Round::Up)), 0.98765);
-    expectConstant(new Round(new Value(0), new Value(1), new ValueByte(Constants::Round::Up)), 0);
-    expectConstant(new Round(new Value(0.12345), new Value(1), new ValueByte(Constants::Round::Up)), 1);
-    expectConstant(new Round(new Value(0.98765), new Value(1), new ValueByte(Constants::Round::Up)), 1);
-    expectConstant(new Round(new Value(5), new Value(1), new ValueByte(Constants::Round::Up)), 5);
+    expectConstant(new Round(new Value(0), new Value(0), new ValueChar(Constants::Round::Up)), 0);
+    expectConstant(new Round(new Value(0.12345), new Value(0), new ValueChar(Constants::Round::Up)), 0.12345);
+    expectConstant(new Round(new Value(0.98765), new Value(0), new ValueChar(Constants::Round::Up)), 0.98765);
+    expectConstant(new Round(new Value(0), new Value(1), new ValueChar(Constants::Round::Up)), 0);
+    expectConstant(new Round(new Value(0.12345), new Value(1), new ValueChar(Constants::Round::Up)), 1);
+    expectConstant(new Round(new Value(0.98765), new Value(1), new ValueChar(Constants::Round::Up)), 1);
+    expectConstant(new Round(new Value(5), new Value(1), new ValueChar(Constants::Round::Up)), 5);
 
-    expectValues(new Round(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(1), new ValueByte(Constants::Round::Up)),
+    expectValues(new Round(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(1), new ValueChar(Constants::Round::Up)),
     {
         TimeValue(0, 0),
         TimeValue(250, 2),
@@ -60,7 +60,7 @@ void TestControllers::testRound()
         TimeValue(1000, 0)
     });
 
-    expectValues(new Round(new Sweep(new Value(0), new Value(-5), new Value(1000)), new Value(1), new ValueByte(Constants::Round::Up)),
+    expectValues(new Round(new Sweep(new Value(0), new Value(-5), new Value(1000)), new Value(1), new ValueChar(Constants::Round::Up)),
     {
         TimeValue(0, 0),
         TimeValue(250, -1),
@@ -70,7 +70,7 @@ void TestControllers::testRound()
         TimeValue(1000, 0)
     });
 
-    expectValues(new Round(new Sweep(new Value(0), new Value(8), new Value(1000)), new Value(3), new ValueByte(Constants::Round::Up)),
+    expectValues(new Round(new Sweep(new Value(0), new Value(8), new Value(1000)), new Value(3), new ValueChar(Constants::Round::Up)),
     {
         TimeValue(0, 0),
         TimeValue(250, 3),
@@ -80,15 +80,15 @@ void TestControllers::testRound()
         TimeValue(1000, 0)
     });
 
-    expectConstant(new Round(new Value(0), new Value(0), new ValueByte(Constants::Round::Down)), 0);
-    expectConstant(new Round(new Value(0.12345), new Value(0), new ValueByte(Constants::Round::Down)), 0.12345);
-    expectConstant(new Round(new Value(0.98765), new Value(0), new ValueByte(Constants::Round::Down)), 0.98765);
-    expectConstant(new Round(new Value(0), new Value(1), new ValueByte(Constants::Round::Down)), 0);
-    expectConstant(new Round(new Value(0.12345), new Value(1), new ValueByte(Constants::Round::Down)), 0);
-    expectConstant(new Round(new Value(0.98765), new Value(1), new ValueByte(Constants::Round::Down)), 0);
-    expectConstant(new Round(new Value(5), new Value(1), new ValueByte(Constants::Round::Down)), 5);
+    expectConstant(new Round(new Value(0), new Value(0), new ValueChar(Constants::Round::Down)), 0);
+    expectConstant(new Round(new Value(0.12345), new Value(0), new ValueChar(Constants::Round::Down)), 0.12345);
+    expectConstant(new Round(new Value(0.98765), new Value(0), new ValueChar(Constants::Round::Down)), 0.98765);
+    expectConstant(new Round(new Value(0), new Value(1), new ValueChar(Constants::Round::Down)), 0);
+    expectConstant(new Round(new Value(0.12345), new Value(1), new ValueChar(Constants::Round::Down)), 0);
+    expectConstant(new Round(new Value(0.98765), new Value(1), new ValueChar(Constants::Round::Down)), 0);
+    expectConstant(new Round(new Value(5), new Value(1), new ValueChar(Constants::Round::Down)), 5);
 
-    expectValues(new Round(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(1), new ValueByte(Constants::Round::Down)),
+    expectValues(new Round(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(1), new ValueChar(Constants::Round::Down)),
     {
         TimeValue(0, 0),
         TimeValue(250, 1),
@@ -98,7 +98,7 @@ void TestControllers::testRound()
         TimeValue(1000, 0)
     });
 
-    expectValues(new Round(new Sweep(new Value(0), new Value(-5), new Value(1000)), new Value(1), new ValueByte(Constants::Round::Down)),
+    expectValues(new Round(new Sweep(new Value(0), new Value(-5), new Value(1000)), new Value(1), new ValueChar(Constants::Round::Down)),
     {
         TimeValue(0, 0),
         TimeValue(250, -2),
@@ -108,7 +108,7 @@ void TestControllers::testRound()
         TimeValue(1000, 0)
     });
 
-    expectValues(new Round(new Sweep(new Value(0), new Value(8), new Value(1000)), new Value(3), new ValueByte(Constants::Round::Down)),
+    expectValues(new Round(new Sweep(new Value(0), new Value(8), new Value(1000)), new Value(3), new ValueChar(Constants::Round::Down)),
     {
         TimeValue(0, 0),
         TimeValue(250, 0),

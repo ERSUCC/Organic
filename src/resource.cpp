@@ -88,6 +88,9 @@ Resource::Resource(const Path& path, const SourceLocation& location)
     free(floatSamples);
 }
 
+Resource::Resource() :
+    samples(nullptr), length(0) {}
+
 Resource::~Resource()
 {
     free(samples);

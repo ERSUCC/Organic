@@ -391,6 +391,10 @@ struct Call : public Token
     ~Call();
 
     ArgumentList* arguments;
+
+protected:
+    const SharedType argumentType(const std::string& name) const;
+
 };
 
 struct Time : public Call
@@ -405,6 +409,8 @@ struct Time : public Call
 struct Hold : public Call
 {
     Hold(const SourceLocation& location, ArgumentList* arguments);
+
+    const SharedType type() const override;
 
     void resolveTypes(const TypeResolver* visitor) const override;
 
@@ -433,6 +439,8 @@ struct Sequence : public Call
 {
     Sequence(const SourceLocation& location, ArgumentList* arguments);
 
+    const SharedType type() const override;
+
     void resolveTypes(const TypeResolver* visitor) const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
@@ -441,6 +449,8 @@ struct Sequence : public Call
 struct Repeat : public Call
 {
     Repeat(const SourceLocation& location, ArgumentList* arguments);
+
+    const SharedType type() const override;
 
     void resolveTypes(const TypeResolver* visitor) const override;
 
@@ -469,6 +479,8 @@ struct Trigger : public Call
 {
     Trigger(const SourceLocation& location, ArgumentList* arguments);
 
+    const SharedType type() const override;
+
     void resolveTypes(const TypeResolver* visitor) const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
@@ -477,6 +489,8 @@ struct Trigger : public Call
 struct If : public Call
 {
     If(const SourceLocation& location, ArgumentList* arguments);
+
+    const SharedType type() const override;
 
     void resolveTypes(const TypeResolver* visitor) const override;
 
@@ -806,7 +820,7 @@ struct Program : public Token
 
     void resolveTypes(const TypeResolver* visitor) const override;
 
-    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+    Engine::Program* transform(TokenTransformer* visitor) const override;
 
     const std::vector<const Token*> instructions;
 };

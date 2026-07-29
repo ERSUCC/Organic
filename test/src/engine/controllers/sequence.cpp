@@ -4,17 +4,17 @@ void TestControllers::testSequence()
 {
     beginTest("Sequence", true);
 
-    expectConstant(new Sequence(new List({ new Value(0) }), new ValueByte(Constants::Sequence::Forward)), 0);
-    expectConstant(new Sequence(new List({ new Value(5) }), new ValueByte(Constants::Sequence::Forward)), 5);
-    expectConstant(new Sequence(new List({ new Value(-5) }), new ValueByte(Constants::Sequence::Forward)), -5);
-    expectConstantUntil(new Sequence(new List({ new Hold(new Value(5), new Value(1000)) }), new ValueByte(Constants::Sequence::Forward)), 5, 1000);
+    expectConstant(new Sequence(new List({ new Value(0) }), new ValueChar(Constants::Sequence::Forward)), 0);
+    expectConstant(new Sequence(new List({ new Value(5) }), new ValueChar(Constants::Sequence::Forward)), 5);
+    expectConstant(new Sequence(new List({ new Value(-5) }), new ValueChar(Constants::Sequence::Forward)), -5);
+    expectConstantUntil(new Sequence(new List({ new Hold(new Value(5), new Value(1000)) }), new ValueChar(Constants::Sequence::Forward)), 5, 1000);
 
     expectValues(new Sequence(new List(
     {
         new Hold(new Value(5), new Value(1000)),
         new Hold(new Value(6), new Value(1000)),
         new Hold(new Value(7), new Value(1000))
-    }), new ValueByte(Constants::Sequence::Forward)),
+    }), new ValueChar(Constants::Sequence::Forward)),
     {
         TimeValue(0, 5),
         TimeValue(1, 5),
@@ -30,7 +30,7 @@ void TestControllers::testSequence()
         new Hold(new Value(5), new Value(1000)),
         new Hold(new Value(6), new Value(1000)),
         new Hold(new Value(7), new Value(1000))
-    }), new ValueByte(Constants::Sequence::Backward)),
+    }), new ValueChar(Constants::Sequence::Backward)),
     {
         TimeValue(0, 7),
         TimeValue(1, 7),
@@ -46,25 +46,7 @@ void TestControllers::testSequence()
         new Hold(new Value(5), new Value(1000)),
         new Hold(new Value(6), new Value(1000)),
         new Hold(new Value(7), new Value(1000))
-    }), new ValueByte(Constants::Sequence::PingPong)),
-    {
-        TimeValue(0, 5),
-        TimeValue(1, 5),
-        TimeValue(1000, 6),
-        TimeValue(1001, 6),
-        TimeValue(2000, 7),
-        TimeValue(2001, 7),
-        TimeValue(3000, 6),
-        TimeValue(3001, 6),
-        TimeValue(4000, 0)
-    });
-
-    expectValues(new Sequence(new List(
-    {
-        new Hold(new Value(5), new Value(1000)),
-        new Hold(new Value(6), new Value(1000)),
-        new Hold(new Value(7), new Value(1000))
-    }), new ValueByte(Constants::Sequence::Shuffle)),
+    }), new ValueChar(Constants::Sequence::Shuffle)),
     {
         TimeValue(0, 5),
         TimeValue(1, 5),

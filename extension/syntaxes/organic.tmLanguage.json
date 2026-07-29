@@ -52,7 +52,7 @@
 		"language-constant": {
 			"patterns": [{
         "name": "constant.language.sequence.organic",
-        "match": "\\b(forward|backward|ping-pong|shuffle)\\b"
+        "match": "\\b(forward|backward|shuffle)\\b"
       }, {
         "name": "constant.language.random.organic",
         "match": "\\b(step|linear)\\b"

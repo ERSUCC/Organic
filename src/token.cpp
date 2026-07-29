@@ -412,6 +412,11 @@ Call::~Call()
     delete arguments;
 }
 
+const SharedType Call::argumentType(const std::string& name) const
+{
+    return arguments->findArgument(name)->value->type();
+}
+
 Time::Time(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
@@ -426,7 +431,12 @@ Engine::ValueObject* Time::transform(TokenTransformer* visitor) const
 }
 
 Hold::Hold(const SourceLocation& location, ArgumentList* arguments) :
-    Call(location, arguments, new NumberType()) {}
+    Call(location, arguments) {}
+
+const SharedType Hold::type() const
+{
+    return argumentType("value");
+}
 
 void Hold::resolveTypes(const TypeResolver* visitor) const
 {
@@ -465,7 +475,12 @@ Engine::ValueObject* Sweep::transform(TokenTransformer* visitor) const
 }
 
 Sequence::Sequence(const SourceLocation& location, ArgumentList* arguments) :
-    Call(location, arguments, new NumberType()) {}
+    Call(location, arguments) {}
+
+const SharedType Sequence::type() const
+{
+    return ((const ListType*)argumentType("values").get())->subType;
+}
 
 void Sequence::resolveTypes(const TypeResolver* visitor) const
 {
@@ -479,6 +494,11 @@ Engine::ValueObject* Sequence::transform(TokenTransformer* visitor) const
 
 Repeat::Repeat(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
+
+const SharedType Repeat::type() const
+{
+    return argumentType("value");
+}
 
 void Repeat::resolveTypes(const TypeResolver* visitor) const
 {
@@ -517,7 +537,12 @@ Engine::ValueObject* Limit::transform(TokenTransformer* visitor) const
 }
 
 Trigger::Trigger(const SourceLocation& location, ArgumentList* arguments) :
-    Call(location, arguments, new NumberType()) {}
+    Call(location, arguments) {}
+
+const SharedType Trigger::type() const
+{
+    return argumentType("value");
+}
 
 void Trigger::resolveTypes(const TypeResolver* visitor) const
 {
@@ -530,7 +555,12 @@ Engine::ValueObject* Trigger::transform(TokenTransformer* visitor) const
 }
 
 If::If(const SourceLocation& location, ArgumentList* arguments) :
-    Call(location, arguments, new NumberType()) {}
+    Call(location, arguments) {}
+
+const SharedType If::type() const
+{
+    return argumentType("is-true");
+}
 
 void If::resolveTypes(const TypeResolver* visitor) const
 {
@@ -972,7 +1002,7 @@ void Program::resolveTypes(const TypeResolver* visitor) const
     visitor->resolveTypes(this);
 }
 
-Engine::ValueObject* Program::transform(TokenTransformer* visitor) const
+Engine::Program* Program::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }

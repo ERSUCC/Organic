@@ -12,7 +12,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Value* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Constant* token)
 {
-    return new Engine::ValueByte(token->value);
+    return new Engine::ValueChar(token->value);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Boolean* token)
@@ -334,7 +334,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::GreaterEqualAlias
     return new Engine::ValueGreaterEqual(ARG("a"), ARG("b"));
 }
 
-Engine::ValueObject* TokenTransformer::transform(const Parser::Program* token)
+Engine::Program* TokenTransformer::transform(const Parser::Program* token)
 {
     std::vector<Engine::AudioSource*> sources;
 

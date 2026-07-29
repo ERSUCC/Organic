@@ -24,6 +24,7 @@ void Program::processAudioSources(double* buffer) const
 
     for (AudioSource* audioSource : audioSources)
     {
+        audioSource->update();
         audioSource->fillBuffer(buffer);
     }
 }

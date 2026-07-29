@@ -74,7 +74,8 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::GreaterAlias* token);
     Engine::ValueObject* transform(const Parser::LessEqualAlias* token);
     Engine::ValueObject* transform(const Parser::GreaterEqualAlias* token);
-    Engine::ValueObject* transform(const Parser::Program* token);
+
+    Engine::Program* transform(const Parser::Program* token);
 
 private:
     Engine::ValueObject* transformArgument(const Parser::ArgumentList* arguments, const std::string& name);

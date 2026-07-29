@@ -399,11 +399,6 @@ const Token* Tokenizer::tokenizeIdentifier()
         return new Constant(location, new SequenceOrderType(), Constants::Sequence::Backward);
     }
 
-    if (name == "ping-pong")
-    {
-        return new Constant(location, new SequenceOrderType(), Constants::Sequence::PingPong);
-    }
-
     if (name == "shuffle")
     {
         return new Constant(location, new SequenceOrderType(), Constants::Sequence::Shuffle);

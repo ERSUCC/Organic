@@ -10,20 +10,25 @@
 
 namespace Engine {
 
+struct Time : public ValueObject
+{
+    double getValue() const override;
+};
+
 struct Value : public ValueObject
 {
     Value(const double value);
 
-    double getValue() override;
+    double getValue() const override;
 
 private:
     const double value;
 
 };
 
-struct ValueByte : public ValueObject
+struct ValueChar : public ValueObject
 {
-    ValueByte(const unsigned char value);
+    ValueChar(const unsigned char value = 0);
 
     const unsigned char value;
 };
@@ -33,7 +38,12 @@ struct ValueNegate : public ValueObject
     ValueNegate(ValueObject* value);
     ~ValueNegate();
 
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
+
+protected:
+    void init() override;
 
 private:
     ValueObject* value;
@@ -45,8 +55,9 @@ struct ValueCombination : public ValueObject
     ValueCombination(ValueObject* value1, ValueObject* value2);
     ~ValueCombination();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -154,7 +165,9 @@ struct All : public ValueObject
     All(ValueObject* values);
     ~All();
 
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -169,7 +182,9 @@ struct Any : public ValueObject
     Any(ValueObject* values);
     ~Any();
 
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -184,7 +199,9 @@ struct None : public ValueObject
     None(ValueObject* values);
     ~None();
 
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -199,7 +216,9 @@ struct Min : public ValueObject
     Min(ValueObject* values);
     ~Min();
 
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -214,7 +233,9 @@ struct Max : public ValueObject
     Max(ValueObject* values);
     ~Max();
 
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -229,8 +250,9 @@ struct Round : public ValueObject
     Round(ValueObject* value, ValueObject* step, ValueObject* direction);
     ~Round();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -247,8 +269,9 @@ struct Absolute : public ValueObject
     Absolute(ValueObject* value);
     ~Absolute();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -263,8 +286,11 @@ struct Sequence : public ValueObject
     Sequence(ValueObject* controllers, ValueObject* order);
     ~Sequence();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    ValueObject* getLeaf() override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -282,7 +308,6 @@ private:
     size_t direction = 1;
     size_t last = -1;
     size_t switches = 0;
-    size_t max_switches;
 
 };
 
@@ -291,8 +316,11 @@ struct Repeat : public ValueObject
     Repeat(ValueObject* value, ValueObject* repeats);
     ~Repeat();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    ValueObject* getLeaf() override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -311,8 +339,11 @@ struct Hold : public ValueObject
     Hold(ValueObject* value, ValueObject* length);
     ~Hold();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    ValueObject* getLeaf() override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -328,8 +359,9 @@ struct Sweep : public ValueObject
     Sweep(ValueObject* from, ValueObject* to, ValueObject* length);
     ~Sweep();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -346,8 +378,9 @@ struct LFO : public ValueObject
     LFO(ValueObject* from, ValueObject* to, ValueObject* length);
     ~LFO();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -364,8 +397,9 @@ struct Random : public ValueObject
     Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type);
     ~Random();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -388,8 +422,9 @@ struct Limit : public ValueObject
     Limit(ValueObject* value, ValueObject* min, ValueObject* max);
     ~Limit();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -406,8 +441,11 @@ struct Trigger : public ValueObject
     Trigger(ValueObject* condition, ValueObject* value);
     ~Trigger();
 
-    double syncLength() const override;
-    double getValue() override;
+    double getValue() const override;
+
+    ValueObject* getLeaf() override;
+
+    void update() override;
 
 protected:
     void init() override;
@@ -425,7 +463,11 @@ struct If : public ValueObject
     If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue);
     ~If();
 
-    double getValue() override;
+    double getValue() const override;
+
+    ValueObject* getLeaf() override;
+
+    void update() override;
 
 protected:
     void init() override;
