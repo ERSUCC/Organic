@@ -1,7 +1,9 @@
 #pragma once
 
+#include <functional>
 #include <limits>
 #include <memory>
+#include <stddef.h>
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -21,6 +23,17 @@ struct TimeValue
 
     const double time;
     const double value;
+};
+
+typedef std::function<void(ValueObject*, const double)> ValueFunc;
+
+struct TimeLambda
+{
+    TimeLambda(const double time, const ValueFunc& function);
+
+    const double time;
+
+    const ValueFunc& function;
 };
 
 struct TestControllers : public Test
@@ -68,6 +81,15 @@ private:
     void expectConstantUntil(ValueObject* object, const double value, const double end, const double epsilon = std::numeric_limits<double>::epsilon());
 
     void expectValues(std::unique_ptr<ValueObject>& object, const std::vector<TimeValue>& values, const double epsilon);
+
+    void expectValues(ValueObject* object, const std::vector<TimeLambda>& values);
+    void expectConstant(ValueObject* object, const ValueFunc& function);
+    void expectConstantUntil(ValueObject* object, const ValueFunc& function, const double end, const ValueFunc& endFunc);
+
+    void expectValues(std::unique_ptr<ValueObject>& object, const std::vector<TimeLambda>& values);
+
+    ValueFunc compareChar(const unsigned char value);
+    ValueFunc compareList(const std::vector<double>& values);
 
     Utils* utils;
 
