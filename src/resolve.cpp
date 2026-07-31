@@ -2,17 +2,17 @@
 
 using namespace Parser;
 
-void TypeResolver::resolveTypes(const VariableDef* token) const
+void TypeResolver::resolveTypes(const VariableDef* token)
 {
-    token->value->resolveTypes(this);
+    token->value->resolveTypes();
 }
 
-void TypeResolver::resolveTypes(const InputDef* token) const
+void TypeResolver::resolveTypes(const InputDef* token)
 {
-    token->defaultValue->resolveTypes(this);
+    token->defaultValue->resolveTypes();
 }
 
-void TypeResolver::resolveTypes(const FunctionDef* token) const
+void TypeResolver::resolveTypes(const FunctionDef* token)
 {
     if (token->program->instructions.empty())
     {
@@ -21,7 +21,7 @@ void TypeResolver::resolveTypes(const FunctionDef* token) const
 
     for (const InputDef* input : token->inputs)
     {
-        input->resolveTypes(this);
+        input->resolveTypes();
     }
 
     const UniqueType noneType(new NoneType());
@@ -30,7 +30,7 @@ void TypeResolver::resolveTypes(const FunctionDef* token) const
     {
         const Token* instruction = token->program->instructions[i];
 
-        instruction->resolveTypes(this);
+        instruction->resolveTypes();
 
         if (!noneType->checkType(instruction->type().get()))
         {
@@ -38,7 +38,7 @@ void TypeResolver::resolveTypes(const FunctionDef* token) const
         }
     }
 
-    token->program->instructions.back()->resolveTypes(this);
+    token->program->instructions.back()->resolveTypes();
 
     if (noneType->checkType(token->returnType().get()))
     {
@@ -46,11 +46,11 @@ void TypeResolver::resolveTypes(const FunctionDef* token) const
     }
 }
 
-void TypeResolver::resolveTypes(const List* token) const
+void TypeResolver::resolveTypes(const List* token)
 {
     for (const Token* value : token->values)
     {
-        value->resolveTypes(this);
+        value->resolveTypes();
 
         if (!token->values[0]->type()->checkType(value->type().get()))
         {
@@ -59,14 +59,14 @@ void TypeResolver::resolveTypes(const List* token) const
     }
 }
 
-void TypeResolver::resolveTypes(const ParenthesizedExpression* token) const
+void TypeResolver::resolveTypes(const ParenthesizedExpression* token)
 {
-    token->value->resolveTypes(this);
+    token->value->resolveTypes();
 }
 
-void TypeResolver::resolveTypes(const Negate* token) const
+void TypeResolver::resolveTypes(const Negate* token)
 {
-    token->value->resolveTypes(this);
+    token->value->resolveTypes();
 
     if (!UniqueType(new NumberType())->checkType(token->value->type().get()))
     {
@@ -74,12 +74,12 @@ void TypeResolver::resolveTypes(const Negate* token) const
     }
 }
 
-void TypeResolver::resolveTypes(const Time* token) const
+void TypeResolver::resolveTypes(const Time* token)
 {
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Hold* token) const
+void TypeResolver::resolveTypes(const Hold* token)
 {
     resolveArgumentTypes(token->arguments, "value", new AnyType());
     resolveArgumentTypes(token->arguments, "length", new NumberType());
@@ -87,7 +87,7 @@ void TypeResolver::resolveTypes(const Hold* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const LFO* token) const
+void TypeResolver::resolveTypes(const LFO* token)
 {
     resolveArgumentTypes(token->arguments, "from", new NumberType());
     resolveArgumentTypes(token->arguments, "to", new NumberType());
@@ -96,7 +96,7 @@ void TypeResolver::resolveTypes(const LFO* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Sweep* token) const
+void TypeResolver::resolveTypes(const Sweep* token)
 {
     resolveArgumentTypes(token->arguments, "from", new NumberType());
     resolveArgumentTypes(token->arguments, "to", new NumberType());
@@ -105,7 +105,7 @@ void TypeResolver::resolveTypes(const Sweep* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Sequence* token) const
+void TypeResolver::resolveTypes(const Sequence* token)
 {
     resolveArgumentTypes(token->arguments, "values", new ListType(new AnyType()));
     resolveArgumentTypes(token->arguments, "order", new SequenceOrderType(), new Constant(token->location, new SequenceOrderType(), Constants::Sequence::Forward));
@@ -113,7 +113,7 @@ void TypeResolver::resolveTypes(const Sequence* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Repeat* token) const
+void TypeResolver::resolveTypes(const Repeat* token)
 {
     resolveArgumentTypes(token->arguments, "value", new AnyType());
     resolveArgumentTypes(token->arguments, "repeats", new NumberType(), new Value(token->location, 0));
@@ -121,7 +121,7 @@ void TypeResolver::resolveTypes(const Repeat* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Random* token) const
+void TypeResolver::resolveTypes(const Random* token)
 {
     resolveArgumentTypes(token->arguments, "from", new NumberType());
     resolveArgumentTypes(token->arguments, "to", new NumberType());
@@ -131,7 +131,7 @@ void TypeResolver::resolveTypes(const Random* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Limit* token) const
+void TypeResolver::resolveTypes(const Limit* token)
 {
     resolveArgumentTypes(token->arguments, "value", new NumberType());
     resolveArgumentTypes(token->arguments, "min", new NumberType());
@@ -140,7 +140,7 @@ void TypeResolver::resolveTypes(const Limit* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Trigger* token) const
+void TypeResolver::resolveTypes(const Trigger* token)
 {
     resolveArgumentTypes(token->arguments, "condition", new BooleanType());
     resolveArgumentTypes(token->arguments, "value", new AnyType());
@@ -148,7 +148,7 @@ void TypeResolver::resolveTypes(const Trigger* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const If* token) const
+void TypeResolver::resolveTypes(const If* token)
 {
     resolveArgumentTypes(token->arguments, "condition", new BooleanType());
     resolveArgumentTypes(token->arguments, "is-true", new AnyType());
@@ -165,42 +165,42 @@ void TypeResolver::resolveTypes(const If* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const All* token) const
+void TypeResolver::resolveTypes(const All* token)
 {
     resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
 
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Any* token) const
+void TypeResolver::resolveTypes(const Any* token)
 {
     resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
 
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const None* token) const
+void TypeResolver::resolveTypes(const None* token)
 {
     resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));
 
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Min* token) const
+void TypeResolver::resolveTypes(const Min* token)
 {
     resolveArgumentTypes(token->arguments, "values", new ListType(new NumberType()));
 
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Max* token) const
+void TypeResolver::resolveTypes(const Max* token)
 {
     resolveArgumentTypes(token->arguments, "values", new ListType(new NumberType()));
 
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Round* token) const
+void TypeResolver::resolveTypes(const Round* token)
 {
     resolveArgumentTypes(token->arguments, "value", new NumberType());
     resolveArgumentTypes(token->arguments, "step", new NumberType(), new Value(token->location, 1));
@@ -209,14 +209,14 @@ void TypeResolver::resolveTypes(const Round* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Absolute* token) const
+void TypeResolver::resolveTypes(const Absolute* token)
 {
     resolveArgumentTypes(token->arguments, "value", new NumberType());
 
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Sine* token) const
+void TypeResolver::resolveTypes(const Sine* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
@@ -226,7 +226,7 @@ void TypeResolver::resolveTypes(const Sine* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Square* token) const
+void TypeResolver::resolveTypes(const Square* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
@@ -236,7 +236,7 @@ void TypeResolver::resolveTypes(const Square* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Triangle* token) const
+void TypeResolver::resolveTypes(const Triangle* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
@@ -246,7 +246,7 @@ void TypeResolver::resolveTypes(const Triangle* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Saw* token) const
+void TypeResolver::resolveTypes(const Saw* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
@@ -256,7 +256,7 @@ void TypeResolver::resolveTypes(const Saw* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Oscillator* token) const
+void TypeResolver::resolveTypes(const Oscillator* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
@@ -267,7 +267,7 @@ void TypeResolver::resolveTypes(const Oscillator* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Noise* token) const
+void TypeResolver::resolveTypes(const Noise* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
@@ -276,7 +276,7 @@ void TypeResolver::resolveTypes(const Noise* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Sample* token) const
+void TypeResolver::resolveTypes(const Sample* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "file", new StringType());
@@ -286,7 +286,7 @@ void TypeResolver::resolveTypes(const Sample* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Granulate* token) const
+void TypeResolver::resolveTypes(const Granulate* token)
 {
     EmptyLambda* defaultLambda = new EmptyLambda(token->arguments->location, new Value(token->arguments->location, 1));
 
@@ -301,7 +301,7 @@ void TypeResolver::resolveTypes(const Granulate* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Group* token) const
+void TypeResolver::resolveTypes(const Group* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "sources", new ListType(new AudioSourceType()));
@@ -311,7 +311,7 @@ void TypeResolver::resolveTypes(const Group* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const EffectGroup* token) const
+void TypeResolver::resolveTypes(const EffectGroup* token)
 {
     resolveArgumentTypes(token->arguments, "mix", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
@@ -319,7 +319,7 @@ void TypeResolver::resolveTypes(const EffectGroup* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Delay* token) const
+void TypeResolver::resolveTypes(const Delay* token)
 {
     resolveArgumentTypes(token->arguments, "mix",new  NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "delay", new NumberType());
@@ -328,7 +328,7 @@ void TypeResolver::resolveTypes(const Delay* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Comb* token) const
+void TypeResolver::resolveTypes(const Comb* token)
 {
     resolveArgumentTypes(token->arguments, "mix", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "delay", new NumberType());
@@ -337,7 +337,7 @@ void TypeResolver::resolveTypes(const Comb* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const AllPass* token) const
+void TypeResolver::resolveTypes(const AllPass* token)
 {
     resolveArgumentTypes(token->arguments, "mix", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "delay", new NumberType());
@@ -346,14 +346,14 @@ void TypeResolver::resolveTypes(const AllPass* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const LowPass* token) const
+void TypeResolver::resolveTypes(const LowPass* token)
 {
     resolveArgumentTypes(token->arguments, "threshold", new NumberType());
 
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const Reverb* token) const
+void TypeResolver::resolveTypes(const Reverb* token)
 {
     resolveArgumentTypes(token->arguments, "mix", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "length", new NumberType());
@@ -361,7 +361,7 @@ void TypeResolver::resolveTypes(const Reverb* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const CallUser* token) const
+void TypeResolver::resolveTypes(const CallUser* token)
 {
     for (const InputDef* input : token->function->inputs)
     {
@@ -371,13 +371,13 @@ void TypeResolver::resolveTypes(const CallUser* token) const
     token->arguments->check();
 }
 
-void TypeResolver::resolveTypes(const CallAlias* token) const
+void TypeResolver::resolveTypes(const CallAlias* token)
 {
     const UniqueType expected(new NumberType());
 
     if (const Argument* argument = token->arguments->findArgument("a"))
     {
-        argument->value->resolveTypes(this);
+        argument->value->resolveTypes();
 
         const SharedType argumentType = argument->value->type();
 
@@ -389,7 +389,7 @@ void TypeResolver::resolveTypes(const CallAlias* token) const
 
     if (const Argument* argument = token->arguments->findArgument("b"))
     {
-        argument->value->resolveTypes(this);
+        argument->value->resolveTypes();
 
         const SharedType argumentType = argument->value->type();
 
@@ -400,14 +400,14 @@ void TypeResolver::resolveTypes(const CallAlias* token) const
     }
 }
 
-void TypeResolver::resolveTypes(const Program* token) const
+void TypeResolver::resolveTypes(const Program* token)
 {
     const UniqueType noneType(new NoneType());
     const UniqueType sourceType(new AudioSourceType());
 
     for (const Token* instruction : token->instructions)
     {
-        instruction->resolveTypes(this);
+        instruction->resolveTypes();
 
         if (!noneType->checkType(instruction->type().get()) && !sourceType->checkType(instruction->type().get()))
         {
@@ -416,11 +416,11 @@ void TypeResolver::resolveTypes(const Program* token) const
     }
 }
 
-void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string& name, const SharedType& expectedType, const SharedToken& defaultValue) const
+void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string& name, const SharedType& expectedType, const SharedToken& defaultValue)
 {
     if (const Argument* argument = arguments->findArgument(name))
     {
-        argument->value->resolveTypes(this);
+        argument->value->resolveTypes();
 
         const SharedType argumentType = argument->value->type();
 
@@ -443,7 +443,7 @@ void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::stri
     }
 }
 
-void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string& name, const Type* expectedType, const Token* defaultValue) const
+void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::string& name, const Type* expectedType, const Token* defaultValue)
 {
     resolveArgumentTypes(arguments, name, SharedType(expectedType), SharedToken(defaultValue));
 }

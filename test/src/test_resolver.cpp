@@ -46,13 +46,12 @@ void TestResolver::expectSuccess(const OTest* info)
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
     const Parser::Program* program = nullptr;
-    const Parser::TypeResolver* resolver = new Parser::TypeResolver();
 
     try
     {
         program = Parser::Parser::parseSource(source);
 
-        program->resolveTypes(resolver);
+        program->resolveTypes();
     }
 
     catch (const OrganicException& e)
@@ -60,7 +59,6 @@ void TestResolver::expectSuccess(const OTest* info)
         failWithError(e);
     }
 
-    delete resolver;
     delete program;
     delete source;
 
@@ -74,13 +72,12 @@ void TestResolver::expectError(const OTest* info)
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
     const Parser::Program* program = nullptr;
-    const Parser::TypeResolver* resolver = new Parser::TypeResolver();
 
     try
     {
         program = Parser::Parser::parseSource(source);
 
-        program->resolveTypes(resolver);
+        program->resolveTypes();
 
         fail("Expected error, but no error was thrown.");
     }
@@ -95,7 +92,6 @@ void TestResolver::expectError(const OTest* info)
         failAndCompare(info, e);
     }
 
-    delete resolver;
     delete program;
     delete source;
 

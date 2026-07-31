@@ -31,7 +31,6 @@ void TestValue::expectValue(const OTest* info)
     const NamedSourceProvider* source = new NamedSourceProvider(info->path(), info->getSource());
 
     const Parser::Program* program = nullptr;
-    const Parser::TypeResolver* resolver = new Parser::TypeResolver();
 
     TokenTransformer* transformer = new TokenTransformer(source->path());
 
@@ -39,7 +38,7 @@ void TestValue::expectValue(const OTest* info)
     {
         program = Parser::Parser::parseSource(source);
 
-        program->resolveTypes(resolver);
+        program->resolveTypes();
 
         for (size_t i = 0; i < program->instructions.size() - 1; i++)
         {
@@ -75,7 +74,6 @@ void TestValue::expectValue(const OTest* info)
     }
 
     delete transformer;
-    delete resolver;
     delete program;
     delete source;
 

@@ -19,7 +19,6 @@
 #include "parse.h"
 #include "path.h"
 #include "program.h"
-#include "resolve.h"
 #include "token.h"
 #include "transform.h"
 #include "utils.h"

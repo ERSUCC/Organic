@@ -3,7 +3,6 @@
 #include "exception.h"
 #include "parse.h"
 #include "path.h"
-#include "resolve.h"
 #include "source.h"
 #include "test.h"
 #include "test_utils.h"

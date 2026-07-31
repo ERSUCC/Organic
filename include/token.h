@@ -52,7 +52,7 @@ struct Token
 
     virtual bool eof() const;
 
-    virtual void resolveTypes(const TypeResolver* visitor) const;
+    virtual void resolveTypes() const;
 
     virtual Engine::ValueObject* transform(TokenTransformer* visitor) const;
 
@@ -253,7 +253,7 @@ struct VariableDef : public Identifier
     VariableDef(const SourceLocation& location, const Token* value);
     ~VariableDef();
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
@@ -277,7 +277,7 @@ struct InputDef : public Identifier
 
     const SharedType type() const override;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     const SharedToken defaultValue;
 };
@@ -300,7 +300,7 @@ struct FunctionDef : public Identifier
 
     const SharedType returnType() const;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     const std::vector<const InputDef*> inputs;
 
@@ -352,7 +352,7 @@ struct List : public Token
 
     const SharedType type() const override;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
@@ -366,7 +366,7 @@ struct ParenthesizedExpression : public Token
 
     const SharedType type() const override;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
@@ -378,7 +378,7 @@ struct Negate : public Token
     Negate(const SourceLocation& location, const Token* value);
     ~Negate();
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
@@ -401,7 +401,7 @@ struct Time : public Call
 {
     Time(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -412,7 +412,7 @@ struct Hold : public Call
 
     const SharedType type() const override;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -421,7 +421,7 @@ struct LFO : public Call
 {
     LFO(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -430,7 +430,7 @@ struct Sweep : public Call
 {
     Sweep(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -441,7 +441,7 @@ struct Sequence : public Call
 
     const SharedType type() const override;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -452,7 +452,7 @@ struct Repeat : public Call
 
     const SharedType type() const override;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -461,7 +461,7 @@ struct Random : public Call
 {
     Random(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -470,7 +470,7 @@ struct Limit : public Call
 {
     Limit(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -481,7 +481,7 @@ struct Trigger : public Call
 
     const SharedType type() const override;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -492,7 +492,7 @@ struct If : public Call
 
     const SharedType type() const override;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -501,7 +501,7 @@ struct All : public Call
 {
     All(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -510,7 +510,7 @@ struct Any : public Call
 {
     Any(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -519,7 +519,7 @@ struct None : public Call
 {
     None(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -528,7 +528,7 @@ struct Min : public Call
 {
     Min(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -537,7 +537,7 @@ struct Max : public Call
 {
     Max(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -546,7 +546,7 @@ struct Round : public Call
 {
     Round(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -555,7 +555,7 @@ struct Absolute : public Call
 {
     Absolute(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -576,7 +576,7 @@ struct Sine : public AudioSource
 {
     Sine(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -585,7 +585,7 @@ struct Square : public AudioSource
 {
     Square(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -594,7 +594,7 @@ struct Triangle : public AudioSource
 {
     Triangle(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -603,7 +603,7 @@ struct Saw : public AudioSource
 {
     Saw(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -612,7 +612,7 @@ struct Oscillator : public AudioSource
 {
     Oscillator(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -621,7 +621,7 @@ struct Noise : public AudioSource
 {
     Noise(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -630,7 +630,7 @@ struct Sample : public AudioSource
 {
     Sample(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -639,7 +639,7 @@ struct Granulate : public AudioSource
 {
     Granulate(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -648,7 +648,7 @@ struct Group : public AudioSource
 {
     Group(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -669,7 +669,7 @@ struct EffectGroup : public Effect
 {
     EffectGroup(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -678,7 +678,7 @@ struct Delay : public Effect
 {
     Delay(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -687,7 +687,7 @@ struct Comb : public Effect
 {
     Comb(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -696,7 +696,7 @@ struct AllPass : public Effect
 {
     AllPass(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -705,7 +705,7 @@ struct LowPass : public Effect
 {
     LowPass(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -714,7 +714,7 @@ struct Reverb : public Effect
 {
     Reverb(const SourceLocation& location, ArgumentList* arguments);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
@@ -725,7 +725,7 @@ struct CallUser : public Call
 
     const SharedType type() const override;
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 
@@ -736,7 +736,7 @@ struct CallAlias : public Call
 {
     CallAlias(const Token* a, const Token* b, const std::string& op, const Type* type);
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
 private:
     const std::string op;
@@ -818,7 +818,7 @@ struct Program : public Token
     Program(const SourceLocation& location, const std::vector<const Token*>& instructions);
     ~Program();
 
-    void resolveTypes(const TypeResolver* visitor) const override;
+    void resolveTypes() const override;
 
     Engine::Program* transform(TokenTransformer* visitor) const override;
 
