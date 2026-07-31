@@ -81,78 +81,78 @@ void TypeResolver::resolveTypes(const Time* token) const
 
 void TypeResolver::resolveTypes(const Hold* token) const
 {
-    resolveArgumentTypes(token->arguments, "length", new NumberType());
     resolveArgumentTypes(token->arguments, "value", new AnyType());
+    resolveArgumentTypes(token->arguments, "length", new NumberType());
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const LFO* token) const
 {
-    resolveArgumentTypes(token->arguments, "length", new NumberType());
-    resolveArgumentTypes(token->arguments, "to", new NumberType());
     resolveArgumentTypes(token->arguments, "from", new NumberType());
+    resolveArgumentTypes(token->arguments, "to", new NumberType());
+    resolveArgumentTypes(token->arguments, "length", new NumberType());
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Sweep* token) const
 {
-    resolveArgumentTypes(token->arguments, "length", new NumberType());
-    resolveArgumentTypes(token->arguments, "to", new NumberType());
     resolveArgumentTypes(token->arguments, "from", new NumberType());
+    resolveArgumentTypes(token->arguments, "to", new NumberType());
+    resolveArgumentTypes(token->arguments, "length", new NumberType());
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Sequence* token) const
 {
-    resolveArgumentTypes(token->arguments, "order", new SequenceOrderType(), new Constant(token->location, new SequenceOrderType(), Constants::Sequence::Forward));
     resolveArgumentTypes(token->arguments, "values", new ListType(new AnyType()));
+    resolveArgumentTypes(token->arguments, "order", new SequenceOrderType(), new Constant(token->location, new SequenceOrderType(), Constants::Sequence::Forward));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Repeat* token) const
 {
-    resolveArgumentTypes(token->arguments, "repeats", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "value", new AnyType());
+    resolveArgumentTypes(token->arguments, "repeats", new NumberType(), new Value(token->location, 0));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Random* token) const
 {
-    resolveArgumentTypes(token->arguments, "type", new RandomTypeType(), new Constant(token->location, new RandomTypeType(), Constants::Random::Step));
-    resolveArgumentTypes(token->arguments, "length", new NumberType());
-    resolveArgumentTypes(token->arguments, "to", new NumberType());
     resolveArgumentTypes(token->arguments, "from", new NumberType());
+    resolveArgumentTypes(token->arguments, "to", new NumberType());
+    resolveArgumentTypes(token->arguments, "length", new NumberType());
+    resolveArgumentTypes(token->arguments, "type", new RandomTypeType(), new Constant(token->location, new RandomTypeType(), Constants::Random::Step));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Limit* token) const
 {
-    resolveArgumentTypes(token->arguments, "max", new NumberType());
-    resolveArgumentTypes(token->arguments, "min", new NumberType());
     resolveArgumentTypes(token->arguments, "value", new NumberType());
+    resolveArgumentTypes(token->arguments, "min", new NumberType());
+    resolveArgumentTypes(token->arguments, "max", new NumberType());
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Trigger* token) const
 {
-    resolveArgumentTypes(token->arguments, "value", new AnyType());
     resolveArgumentTypes(token->arguments, "condition", new BooleanType());
+    resolveArgumentTypes(token->arguments, "value", new AnyType());
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const If* token) const
 {
-    resolveArgumentTypes(token->arguments, "is-false", new AnyType());
-    resolveArgumentTypes(token->arguments, "is-true", new AnyType());
     resolveArgumentTypes(token->arguments, "condition", new BooleanType());
+    resolveArgumentTypes(token->arguments, "is-true", new AnyType());
+    resolveArgumentTypes(token->arguments, "is-false", new AnyType());
 
     const SharedToken trueValue = token->arguments->findArgument("is-true")->value;
     const SharedToken falseValue = token->arguments->findArgument("is-false")->value;
@@ -202,9 +202,9 @@ void TypeResolver::resolveTypes(const Max* token) const
 
 void TypeResolver::resolveTypes(const Round* token) const
 {
-    resolveArgumentTypes(token->arguments, "direction", new RoundDirectionType(), new Constant(token->location, new RoundDirectionType(), Constants::Round::Nearest));
-    resolveArgumentTypes(token->arguments, "step", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "value", new NumberType());
+    resolveArgumentTypes(token->arguments, "step", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "direction", new RoundDirectionType(), new Constant(token->location, new RoundDirectionType(), Constants::Round::Nearest));
 
     token->arguments->check();
 }
@@ -218,70 +218,70 @@ void TypeResolver::resolveTypes(const Absolute* token) const
 
 void TypeResolver::resolveTypes(const Sine* token) const
 {
-    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
-    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Square* token) const
 {
-    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
-    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Triangle* token) const
 {
-    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
-    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Saw* token) const
 {
-    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
-    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Oscillator* token) const
 {
-    resolveArgumentTypes(token->arguments, "waveform", new LambdaType({ { "phase", SharedType(new NumberType()) } }, new NumberType()));
-    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
-    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "frequency", new NumberType());
+    resolveArgumentTypes(token->arguments, "waveform", new LambdaType({ { "phase", SharedType(new NumberType()) } }, new NumberType()));
+    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Noise* token) const
 {
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
-    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Sample* token) const
 {
-    resolveArgumentTypes(token->arguments, "file", new StringType());
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
-    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "file", new StringType());
+    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 
     token->arguments->check();
 }
@@ -290,58 +290,58 @@ void TypeResolver::resolveTypes(const Granulate* token) const
 {
     EmptyLambda* defaultLambda = new EmptyLambda(token->arguments->location, new Value(token->arguments->location, 1));
 
+    resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "sample", new StringType());
     resolveArgumentTypes(token->arguments, "shape", new LambdaType({ { "value", SharedType(new NumberType()) } }, new NumberType()), defaultLambda);
     resolveArgumentTypes(token->arguments, "length", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "grains", new NumberType(), new Value(token->location, 1));
-    resolveArgumentTypes(token->arguments, "sample", new StringType());
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Group* token) const
 {
-    resolveArgumentTypes(token->arguments, "sources", new ListType(new AudioSourceType()));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
-    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "sources", new ListType(new AudioSourceType()));
+    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const EffectGroup* token) const
 {
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
     resolveArgumentTypes(token->arguments, "mix", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()));
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Delay* token) const
 {
-    resolveArgumentTypes(token->arguments, "feedback", new NumberType());
-    resolveArgumentTypes(token->arguments, "delay", new NumberType());
     resolveArgumentTypes(token->arguments, "mix",new  NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "delay", new NumberType());
+    resolveArgumentTypes(token->arguments, "feedback", new NumberType());
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Comb* token) const
 {
-    resolveArgumentTypes(token->arguments, "feedback", new NumberType());
-    resolveArgumentTypes(token->arguments, "delay", new NumberType());
     resolveArgumentTypes(token->arguments, "mix", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "delay", new NumberType());
+    resolveArgumentTypes(token->arguments, "feedback", new NumberType());
 
     token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const AllPass* token) const
 {
-    resolveArgumentTypes(token->arguments, "feedback", new NumberType());
-    resolveArgumentTypes(token->arguments, "delay", new NumberType());
     resolveArgumentTypes(token->arguments, "mix", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "delay", new NumberType());
+    resolveArgumentTypes(token->arguments, "feedback", new NumberType());
 
     token->arguments->check();
 }
@@ -355,8 +355,8 @@ void TypeResolver::resolveTypes(const LowPass* token) const
 
 void TypeResolver::resolveTypes(const Reverb* token) const
 {
-    resolveArgumentTypes(token->arguments, "length", new NumberType());
     resolveArgumentTypes(token->arguments, "mix", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "length", new NumberType());
 
     token->arguments->check();
 }
