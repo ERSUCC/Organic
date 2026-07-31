@@ -336,15 +336,17 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::GreaterEqualAlias
 
 Engine::Program* TokenTransformer::transform(const Parser::Program* token)
 {
-    std::vector<Engine::AudioSource*> sources;
+    const Parser::UniqueType sourceType(new Parser::AudioSourceType());
+
+    std::vector<Engine::ValueObject*> sources;
 
     for (const Parser::Token* instruction : token->instructions)
     {
         Engine::ValueObject* object = instruction->transform(this);
 
-        if (Engine::AudioSource* source = dynamic_cast<Engine::AudioSource*>(object))
+        if (sourceType->checkType(instruction->type().get()))
         {
-            sources.push_back(source);
+            sources.push_back(object);
         }
 
         else

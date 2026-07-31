@@ -2,7 +2,7 @@
 
 using namespace Engine;
 
-Program::Program(const std::vector<ValueObject*>& variables, const std::vector<AudioSource*>& audioSources) :
+Program::Program(const std::vector<ValueObject*>& variables, const std::vector<ValueObject*>& audioSources) :
     variables(variables), audioSources(audioSources) {}
 
 Program::~Program()
@@ -12,7 +12,7 @@ Program::~Program()
         delete variable;
     }
 
-    for (const AudioSource* audioSource : audioSources)
+    for (const ValueObject* audioSource : audioSources)
     {
         delete audioSource;
     }
@@ -22,16 +22,16 @@ void Program::processAudioSources(double* buffer) const
 {
     memset(buffer, 0, sizeof(double) * utils->channels);
 
-    for (AudioSource* audioSource : audioSources)
+    for (ValueObject* audioSource : audioSources)
     {
         audioSource->update();
-        audioSource->fillBuffer(buffer);
+        audioSource->getLeafAs<AudioSource>()->fillBuffer(buffer);
     }
 }
 
 void Program::init()
 {
-    for (AudioSource* audioSource : audioSources)
+    for (ValueObject* audioSource : audioSources)
     {
         audioSource->start(startTime);
     }

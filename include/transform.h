@@ -12,6 +12,7 @@
 #include "resource.h"
 #include "token.h"
 #include "token_decls.h"
+#include "types.h"
 #include "utils.h"
 
 struct TokenTransformer
