@@ -15,7 +15,7 @@ jobs:
       - name: Install CMake
         uses: lukka/get-cmake@v4.3.3
         with:
-          cmakeVersion: ~3.31.0
+          cmakeVersion: ~4.4.2
 
       - name: Install ALSA
         run: |
