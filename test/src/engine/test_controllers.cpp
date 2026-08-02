@@ -207,7 +207,7 @@ void TestControllers::expectValues(std::unique_ptr<ValueObject>& object, const s
 
 ValueFunc TestControllers::compareChar(const unsigned char value)
 {
-    return [=](ValueObject* object, const double time)
+    return [this, value](ValueObject* object, const double time)
     {
         const unsigned char actual = object->getLeafAs<ValueChar>()->value;
 

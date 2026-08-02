@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(organic)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # build main API as static library so it can be linked efficiently with the command line program and the test suite
