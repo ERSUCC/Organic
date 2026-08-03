@@ -20,3 +20,5 @@ cp install/lib/*.dylib $TMP_ROOT/lib/organic
 
 pkgbuild --root $TMP_ROOT --identifier Organic --version 0.1.0 --install-location $INSTALL_ROOT $TMP_ROOT/OrganicExec.pkg
 productbuild --distribution dist/mac/distribution.xml --package-path $TMP_ROOT install/Organic.pkg
+
+rm -rf $TMP_ROOT
