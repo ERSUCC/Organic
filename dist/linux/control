@@ -1,6 +1,6 @@
 Package: organic
 Source: organic
-Version: 0.1-0
+Version: {{version}}
 Section: base
 Priority: optional
 Architecture: amd64

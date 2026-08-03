@@ -27,6 +27,8 @@ add_library(organic_lib STATIC src/audiosource.cpp
                                src/types.cpp
                                src/utils.cpp)
 
+target_compile_definitions(organic_lib PRIVATE ORGANIC_VERSION="${ORGANIC_VERSION}")
+
 if (NOT WIN32)
     target_compile_options(organic_lib PRIVATE -O3)
 endif ()
