@@ -1,0 +1,10 @@
+Package: organic
+Source: organic
+Version: 0.1-0
+Section: base
+Priority: optional
+Architecture: amd64
+Maintainer: Isaac Brown <isaacbrown5763@gmail.com>
+Description: Organic
+  A programming language for algorithmic audio synthesis
+Homepage: https://github.com/ERSUCC/Organic
