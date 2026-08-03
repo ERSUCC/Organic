@@ -1,0 +1,23 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="$(name)" Manufacturer="Isaac Brown" Version="$(version)" UpgradeCode="$(guid)">
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="RootDirectory" Name="$(name)" FileSource="$(root)">
+        <Component Id="OrganicComponent">
+          <File Id="OrganicExe" Source="$(root)\bin\organic.exe" ProcessorArchitecture="x64" KeyPath="yes" />
+          <Environment Action="set" Id="UpdatePath" Name="Path" Part="last" Value="[RootDirectory]" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <ComponentGroup Id="DepsComponent">
+      <Files Directory="RootDirectory" Include="$(root)\bin\*.dll" />
+    </ComponentGroup>
+
+    <Feature Id="OrganicFeature" Title="$(name)">
+      <ComponentRef Id="OrganicComponent" />
+      <ComponentGroupRef Id="DepsComponent" />
+    </Feature>
+  </Package>
+</Wix>
