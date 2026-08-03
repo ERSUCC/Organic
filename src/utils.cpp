@@ -20,14 +20,14 @@ void Utils::printUsage()
 
 void Utils::printVersion()
 {
-    std::cout << "Organic v0.1.0" << "\n";
+    std::cout << "Organic v" << ORGANIC_VERSION << "\n";
 }
 
 void Utils::printInfo()
 {
     Utils* utils = Utils::get();
 
-    std::cout << "Organic v0.1.0" << "\n";
+    std::cout << "Organic v" << ORGANIC_VERSION << "\n";
     std::cout << "Channels: " << utils->channels << "\n";
     std::cout << "Sample Rate: " << utils->sampleRate << "\n";
     std::cout << "Buffer Length: " << utils->bufferLength << "\n";
