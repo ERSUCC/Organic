@@ -41,7 +41,7 @@ add_subdirectory(deps/rtaudio)
 add_subdirectory(deps/libsndfile)
 add_subdirectory(deps/libsamplerate)
 
-target_include_directories(organic_lib PUBLIC deps/rtaudio deps/libsndfile/include deps/libsamplerate/include)
+target_include_directories(organic_lib PRIVATE deps/rtaudio deps/libsndfile/include deps/libsamplerate/include)
 
 target_link_libraries(organic_lib rtaudio sndfile samplerate)
 
@@ -99,3 +99,7 @@ target_compile_definitions(organic_test PRIVATE ORGANIC_SOURCE_DIR="${CMAKE_SOUR
 target_include_directories(organic_test PRIVATE include test/include)
 
 target_link_libraries(organic_test organic_lib)
+
+# define release structure
+
+install(TARGETS organic samplerate)

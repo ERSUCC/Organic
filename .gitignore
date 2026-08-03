@@ -1,6 +1,4 @@
 .vscode
-.vs
 build
-
+install
 *.vsix
-*.obc
