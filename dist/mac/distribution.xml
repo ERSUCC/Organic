@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion="1">
+  <title>Organic</title>
+  <options customize="never" />
+  <choices-outline>
+    <line choice="Organic.choice" />
+  </choices-outline>
+  <choice title="Organic" id="Organic.choice">
+    <pkg-ref id="OrganicExec.pkg" />
+  </choice>
+  <pkg-ref id="OrganicExec.pkg">OrganicExec.pkg</pkg-ref>
+</installer-gui-script>
