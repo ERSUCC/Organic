@@ -121,6 +121,11 @@ void Oscillator::init()
     effects->start(startTime);
     frequency->start(startTime);
     phase->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 Sine::Sine(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
@@ -186,6 +191,11 @@ void CustomOscillator::init()
     frequency->start(startTime);
     waveform->start(startTime);
     phase->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
@@ -217,6 +227,11 @@ void Noise::init()
     volume->start(startTime);
     pan->start(startTime);
     effects->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource) :
@@ -264,6 +279,11 @@ void Sample::init()
     pan->start(startTime);
     effects->start(startTime);
     resource->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 
     index = 0;
 }
@@ -511,6 +531,11 @@ void Granulate::init()
     grains->start(startTime);
     length->start(startTime);
     shape->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
 
 Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources) :
@@ -575,4 +600,9 @@ void Group::init()
     pan->start(startTime);
     effects->start(startTime);
     sources->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
 }
