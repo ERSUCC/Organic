@@ -12,6 +12,17 @@ Utils* Utils::get()
     return instance;
 }
 
+void Utils::printUsage()
+{
+    std::cout << "Usage: organic [--version] [--info] [--time <num>] [--fast-forward <num>] [--export <path>] [--channels <num>]\n";
+    std::cout << "               [--sample-rate <num>] [--buffer-length <num>] [--seed <num>] <path>\n";
+}
+
+void Utils::printVersion()
+{
+    std::cout << "Organic v" << ORGANIC_VERSION << "\n";
+}
+
 void Utils::printInfo()
 {
     Utils* utils = Utils::get();

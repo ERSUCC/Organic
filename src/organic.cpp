@@ -1,6 +1,6 @@
 #include "../include/organic.h"
 
-Organic::Organic(const Path& path, const ProgramOptions& options) :
+Organic::Organic(const ProgramOptions& options) :
     options(options)
 {
     utils = Utils::get();
@@ -16,6 +16,8 @@ Organic::Organic(const Path& path, const ProgramOptions& options) :
     {
         Utils::printInfo();
     }
+
+    const Path& path = options.programPath.value();
 
     const FileProvider* source = FileProvider::create(path);
 

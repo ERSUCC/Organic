@@ -1,6 +1,8 @@
+#include <string.h>
+
+#include "../include/exception.h"
 #include "../include/flags.h"
 #include "../include/organic.h"
-#include "../include/path.h"
 #include "../include/utils.h"
 
 int main(int argc, char** argv)
@@ -9,22 +11,19 @@ int main(int argc, char** argv)
     {
         if (argc < 2)
         {
-            throw OrganicArgumentException("Not enough arguments specified.");
+            Utils::printUsage();
+
+            return 1;
         }
 
-        const Path path = Path::relative(Path::formatPath(argv[1]));
-
-        if (!path.exists())
+        if (!strncmp(argv[1], "--version", 10))
         {
-            throw OrganicArgumentException("Specified program file does not exist.");
+            Utils::printVersion();
+
+            return 0;
         }
 
-        if (!path.isFile())
-        {
-            throw OrganicArgumentException("Specified program is not a file.");
-        }
-
-        Organic* organic = new Organic(path, FlagParser::parseFlags(argv + 2, argc - 2));
+        Organic* organic = new Organic(FlagParser::parseFlags(argv + 1, argc - 1));
 
         organic->start();
 
