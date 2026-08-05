@@ -32,6 +32,8 @@ struct Utils
 {
     static Utils* get();
 
+    static void printUsage();
+    static void printVersion();
     static void printInfo();
     static void setWarnLevel(const WarnLevel& level);
     static void parseWarning(const std::string& message, const SourceLocation& location);

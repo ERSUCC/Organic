@@ -23,9 +23,14 @@ ProgramOptions FlagParser::getOptions()
 {
     ProgramOptions options;
 
-    while (!flags.empty())
+    while (flags.size() > 1)
     {
         std::string flag = nextOption("");
+
+        if (flag == "--version")
+        {
+            throw OrganicArgumentException("The option \"--version\" cannot be specified with other options.");
+        }
 
         if (flag == "--info")
         {
@@ -129,11 +134,35 @@ ProgramOptions FlagParser::getOptions()
             options.seed = nextLong(flag);
         }
 
-        else
+        else if (!strncmp(flag.c_str(), "--", 2))
         {
             throw OrganicArgumentException("Unknown option \"" + flag + "\".");
         }
+
+        else
+        {
+            throw OrganicArgumentException("Program file must be specified as the final argument.");
+        }
     }
+
+    if (!strncmp(flags.front().c_str(), "--", 2))
+    {
+        throw OrganicArgumentException("No program file specified.");
+    }
+
+    const Path path = Path::relative(Path::formatPath(flags.front()));
+
+    if (!path.exists())
+    {
+        throw OrganicArgumentException("Specified program file does not exist.");
+    }
+
+    if (!path.isFile())
+    {
+        throw OrganicArgumentException("Specified program is not a file.");
+    }
+
+    options.programPath.emplace(path);
 
     if (options.exportPath && !options.time)
     {

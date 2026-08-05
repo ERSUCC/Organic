@@ -5,6 +5,7 @@
 #include <optional>
 #include <stddef.h>
 #include <string>
+#include <string.h>
 
 #include "exception.h"
 #include "path.h"
@@ -19,6 +20,7 @@ struct ProgramOptions
     std::optional<unsigned int> sampleRate;
     std::optional<unsigned int> bufferLength;
     std::optional<size_t> seed;
+    std::optional<Path> programPath;
 };
 
 struct FlagParser

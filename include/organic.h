@@ -25,7 +25,7 @@
 
 struct Organic
 {
-    Organic(const Path& path, const ProgramOptions& options);
+    Organic(const ProgramOptions& options);
     ~Organic();
 
     void start();

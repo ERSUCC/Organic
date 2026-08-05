@@ -25,6 +25,8 @@ The following section details the optional inputs, for more advanced use of Orga
 
 ### Program Arguments
 
+--version: Display the current version and exit.
+
 --info: Display configuration info before running the program.
 
 --time *number*: Set the runtime of the program in milliseconds. If unspecified, the program will run infinitely.
@@ -68,3 +70,5 @@ Organic uses RtAudio for cross-platform real-time audio output. RtAudio can be f
 Organic uses libsndfile for audio file input and output. libsndfile can be found here: [https://github.com/libsndfile/libsndfile](https://github.com/libsndfile/libsndfile).
 
 Organic uses libsamplerate for resampling audio files. libsamplerate can be found here: [https://github.com/libsndfile/libsamplerate](https://github.com/libsndfile/libsamplerate).
+
+Organic uses CMake to build the source code and link dependencies. CMake can be found here: [https://cmake.org](https://cmake.org).
