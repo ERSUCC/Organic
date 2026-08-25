@@ -106,3 +106,7 @@ target_link_libraries(organic_test organic_lib)
 # define release structure
 
 install(TARGETS organic samplerate)
+
+if (APPLE)
+    add_executable(unify dist/mac/unify.cpp)
+endif ()
