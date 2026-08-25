@@ -4,9 +4,14 @@
   <options customize="never" />
   <choices-outline>
     <line choice="Organic.choice" />
+    <line choice="Path.choice" />
   </choices-outline>
-  <choice title="Organic" id="Organic.choice">
+  <choice id="Organic.choice">
     <pkg-ref id="OrganicExec.pkg" />
   </choice>
+  <choice id="Path.choice">
+    <pkg-ref id="OrganicPath.pkg" />
+  </choice>
   <pkg-ref id="OrganicExec.pkg">OrganicExec.pkg</pkg-ref>
+  <pkg-ref id="OrganicPath.pkg">OrganicPath.pkg</pkg-ref>
 </installer-gui-script>
