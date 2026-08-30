@@ -945,7 +945,7 @@ double Random::getValue() const
 
     switch (type->getLeafAs<ValueChar>()->value)
     {
-        case Constants::Random::Step:
+        case Constants::Random::Stay:
             return current;
 
         case Constants::Random::Linear:

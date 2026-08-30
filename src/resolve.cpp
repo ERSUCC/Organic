@@ -126,7 +126,7 @@ void TypeResolver::resolveTypes(const Random* token)
     resolveArgumentTypes(token->arguments, "from", new NumberType());
     resolveArgumentTypes(token->arguments, "to", new NumberType());
     resolveArgumentTypes(token->arguments, "length", new NumberType());
-    resolveArgumentTypes(token->arguments, "type", new RandomTypeType(), new Constant(token->location, new RandomTypeType(), Constants::Random::Step));
+    resolveArgumentTypes(token->arguments, "type", new RandomTypeType(), new Constant(token->location, new RandomTypeType(), Constants::Random::Stay));
 
     token->arguments->check();
 }

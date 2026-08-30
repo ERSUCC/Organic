@@ -11,7 +11,7 @@ struct Constants
 
     enum Random
     {
-        Step,
+        Stay,
         Linear
     };
 

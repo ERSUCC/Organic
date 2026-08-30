@@ -4,12 +4,12 @@ void TestControllers::testRandom()
 {
     beginTest("Random", true);
 
-    expectConstantUntil(new Random(new Value(0), new Value(0), new Value(0), new ValueChar(Constants::Random::Step)), 0, 0);
-    expectConstantUntil(new Random(new Value(5), new Value(5), new Value(0), new ValueChar(Constants::Random::Step)), 0, 0);
-    expectConstantUntil(new Random(new Value(0), new Value(0), new Value(1000), new ValueChar(Constants::Random::Step)), 0, 1000);
-    expectConstantUntil(new Random(new Value(5), new Value(5), new Value(1000), new ValueChar(Constants::Random::Step)), 5, 1000);
+    expectConstantUntil(new Random(new Value(0), new Value(0), new Value(0), new ValueChar(Constants::Random::Stay)), 0, 0);
+    expectConstantUntil(new Random(new Value(5), new Value(5), new Value(0), new ValueChar(Constants::Random::Stay)), 0, 0);
+    expectConstantUntil(new Random(new Value(0), new Value(0), new Value(1000), new ValueChar(Constants::Random::Stay)), 0, 1000);
+    expectConstantUntil(new Random(new Value(5), new Value(5), new Value(1000), new ValueChar(Constants::Random::Stay)), 5, 1000);
 
-    expectValues(new Random(new Value(0), new Value(5), new Value(1000), new ValueChar(Constants::Random::Step)),
+    expectValues(new Random(new Value(0), new Value(5), new Value(1000), new ValueChar(Constants::Random::Stay)),
     {
         TimeValue(0, 0.798967),
         TimeValue(250, 0.798967),
@@ -18,7 +18,7 @@ void TestControllers::testRandom()
         TimeValue(1000, 0)
     }, 1e-6);
 
-    expectValues(new Random(new Value(5), new Value(0), new Value(1000), new ValueChar(Constants::Random::Step)),
+    expectValues(new Random(new Value(5), new Value(0), new Value(1000), new ValueChar(Constants::Random::Stay)),
     {
         TimeValue(0, 4.201033),
         TimeValue(250, 4.201033),
@@ -27,7 +27,7 @@ void TestControllers::testRandom()
         TimeValue(1000, 0)
     }, 1e-6);
 
-    expectValues(new Random(new Value(0), new Value(-5), new Value(1000), new ValueChar(Constants::Random::Step)),
+    expectValues(new Random(new Value(0), new Value(-5), new Value(1000), new ValueChar(Constants::Random::Stay)),
     {
         TimeValue(0, -0.798967),
         TimeValue(250, -0.798967),
@@ -36,7 +36,7 @@ void TestControllers::testRandom()
         TimeValue(1000, 0)
     }, 1e-6);
 
-    expectValues(new Repeat(new Random(new Value(0), new Value(5), new Value(1000), new ValueChar(Constants::Random::Step)), new Value(2)),
+    expectValues(new Repeat(new Random(new Value(0), new Value(5), new Value(1000), new ValueChar(Constants::Random::Stay)), new Value(2)),
     {
         TimeValue(0, 0.798967),
         TimeValue(250, 0.798967),

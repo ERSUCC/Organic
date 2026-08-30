@@ -55,7 +55,7 @@
         "match": "\\b(forward|backward|shuffle)\\b"
       }, {
         "name": "constant.language.random.organic",
-        "match": "\\b(step|linear)\\b"
+        "match": "\\b(stay|linear)\\b"
       }, {
         "name": "constant.language.round.organic",
         "match": "\\b(nearest|up|down)\\b"

@@ -404,9 +404,9 @@ const Token* Tokenizer::tokenizeIdentifier()
         return new Constant(location, new SequenceOrderType(), Constants::Sequence::Shuffle);
     }
 
-    if (name == "step")
+    if (name == "stay")
     {
-        return new Constant(location, new RandomTypeType(), Constants::Random::Step);
+        return new Constant(location, new RandomTypeType(), Constants::Random::Stay);
     }
 
     if (name == "linear")
