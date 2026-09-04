@@ -210,8 +210,9 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Noise* token)
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 {
     const Parser::Argument* file = token->arguments->findArgument("file");
+    const Parser::String* str = dynamic_cast<const Parser::String*>(file->value.get());
 
-    const Path path = Path::beside(Path::formatPath(file->value->string()), sourcePath);
+    const Path path = Path::beside(Path::formatPath(str->str), sourcePath);
 
     Engine::Resource* resource = new Engine::Resource(path, file->location);
 
@@ -221,8 +222,9 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 {
     const Parser::Argument* file = token->arguments->findArgument("sample");
+    const Parser::String* str = dynamic_cast<const Parser::String*>(file->value.get());
 
-    const Path path = Path::beside(Path::formatPath(file->value->string()), sourcePath);
+    const Path path = Path::beside(Path::formatPath(str->str), sourcePath);
 
     Engine::Resource* resource = new Engine::Resource(path, file->location);
 
