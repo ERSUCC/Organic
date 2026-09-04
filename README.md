@@ -9,9 +9,8 @@ Organic is a labor of love and passion, conceived of and developed from scratch 
 ## Table of Contents
 
 1. [Using Organic](#using-organic)
-2. [Organic Syntax](#organic-syntax)
-3. [Building Organic](#building-organic)
-4. [Credits](#credits)
+2. [Building Organic](#building-organic)
+3. [Credits](#credits)
 
 ## Using Organic
 
@@ -20,32 +19,6 @@ Organic is a command-line compiler, run from the Command Prompt (Windows) or the
 ```
 ./organic /Users/johndoe/Documents/play_a_sine.organic
 ```
-
-The following section details the optional inputs, for more advanced use of Organic.
-
-### Program Arguments
-
---version: Display the current version and exit.
-
---info: Display configuration info before running the program.
-
---time *number*: Set the runtime of the program in milliseconds. If unspecified, the program will run infinitely.
-
---fast-forward *number*: Skip to the provided time in milliseconds before starting audio output.
-
---export *string*: Render the program to the specified audio file instead of playing back in time. Must be used in conjunction with --time.
-
---mono: Use mono audio for the program. If not included, the program will run in stereo.
-
---seed *number*: Use the provided seed for random number generation.
-
---buffer-length *number*: Use the provided buffer length for audio output. If not specified, the buffer length will be 128 samples.
-
---sample-rate *number*: Use the provided sample rate. If not specified, the sample rate will be 44100 Hz.
-
-## Organic Language Specification
-
-TBD
 
 ## Building Organic
 
@@ -72,3 +45,5 @@ Organic uses libsndfile for audio file input and output. libsndfile can be found
 Organic uses libsamplerate for resampling audio files. libsamplerate can be found here: [https://github.com/libsndfile/libsamplerate](https://github.com/libsndfile/libsamplerate).
 
 Organic uses CMake to build the source code and link dependencies. CMake can be found here: [https://cmake.org](https://cmake.org).
+
+Organic uses Sphinx to generate HTML documentation pages. Sphinx can be found here: [https://www.sphinx-doc.org/en/master/index.html](https://www.sphinx-doc.org/en/master/index.html).
