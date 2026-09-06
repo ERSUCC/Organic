@@ -20,7 +20,7 @@ void Utils::printUsage()
 
 void Utils::printVersion()
 {
-    std::cout << "Organic v" << ORGANIC_VERSION << "\n";
+    std::cout << "Organic v0.1.0" << "\n";
 }
 
 void Utils::printInfo()
