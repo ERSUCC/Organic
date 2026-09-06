@@ -24,7 +24,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B build .
+          cmake -B build -DORGANIC_VERSION=0.1.0
           cmake --build build --config Release
 
       - name: Test
