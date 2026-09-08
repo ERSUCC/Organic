@@ -561,11 +561,21 @@ void Group::fillBuffer(double* buffer)
     effects->update();
     sources->update();
 
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
+
+    for (ValueObject* object : sources->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
+
     memset(effectBuffer, 0, sizeof(double) * utils->channels);
 
     for (ValueObject* source : sources->getLeafAs<List>()->objects)
     {
-        source->getLeafAs<AudioSource>();
+        source->getLeafAs<AudioSource>()->fillBuffer(effectBuffer);
     }
 
     const double volumeValue = volume->getValue();
@@ -585,7 +595,7 @@ void Group::fillBuffer(double* buffer)
 
     for (ValueObject* object : effects->getLeafAs<List>()->objects)
     {
-        object->getLeafAs<Effect>();
+        object->getLeafAs<Effect>()->apply(effectBuffer);
     }
 
     for (size_t i = 0; i < utils->channels; i++)
@@ -602,6 +612,11 @@ void Group::init()
     sources->start(startTime);
 
     for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+
+    for (ValueObject* object : sources->getLeafAs<List>()->objects)
     {
         object->start(startTime);
     }
