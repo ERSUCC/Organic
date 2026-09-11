@@ -1,0 +1,30 @@
+swell-attack = 2000
+swell-decay = 500
+swell-length = swell-attack + swell-decay
+
+swell(min-period: 0, max-period: 0, wait: false) = {
+    offset = random(from: min-period, to: max-period, length: max-period)
+    gap = random(from: min-period - swell-length, to: max-period - swell-length, length: max-period)
+
+    sequence(values: [
+        hold(value: 0, length: if(condition: wait, is-true: offset, is-false: 0)),
+        repeat(value: sequence(values: [
+            sweep(from: 0, to: 1, length: swell-attack),
+            sweep(from: 1, to: 0, length: swell-decay),
+            hold(value: 0, length: gap)
+        ]))
+    ])
+}
+
+group(volume: 4, sources: [
+    saw(volume: swell(min-period: swell-length, max-period: swell-length * 2), frequency: f3),
+    saw(volume: swell(min-period: swell-length * 2, max-period: swell-length * 4, wait: true), frequency: f2),
+    saw(volume: swell(min-period: swell-length * 4, max-period: swell-length * 8, wait: true), frequency: c3),
+    saw(volume: swell(min-period: swell-length * 4, max-period: swell-length * 8, wait: true), frequency: c4),
+    saw(volume: swell(min-period: swell-length * 8, max-period: swell-length * 16, wait: true), frequency: a4),
+    saw(volume: swell(min-period: swell-length * 8, max-period: swell-length * 16, wait: true), frequency: bf4)
+], effects: [
+    low-pass(threshold: 500),
+    reverb(mix: 0.75, length: 10000),
+    low-pass(threshold: 1000)
+])

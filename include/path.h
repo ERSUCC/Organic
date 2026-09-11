@@ -37,6 +37,7 @@ struct Path
     const Path parent() const;
 
     std::vector<Path> children(const bool includeDirs = false) const;
+    std::vector<Path> childrenRecursive(const bool includeDirs = false) const;
 
     std::string string() const;
     std::string stem() const;

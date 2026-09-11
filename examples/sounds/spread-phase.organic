@@ -1,0 +1,21 @@
+phase-length = 8000
+
+note-length = repeat(value: lfo(from: 50, to: 250, length: phase-length))
+note-attack = note-length / 4
+
+spread = repeat(value: lfo(from: 1, to: 5, length: phase-length))
+
+spread-saw(volume: 1, frequency: 0) = {
+    group(volume: repeat(value: sequence(values: [
+        sweep(from: 0, to: volume / 3, length: note-attack),
+        sweep(from: volume / 3, to: 0, length: note-length - note-attack)
+    ])), sources: [
+        saw(frequency: frequency - spread, pan: -0.3),
+        saw(frequency: frequency),
+        saw(frequency: frequency + spread, pan: 0.3)
+    ])
+}
+
+spread-saw(volume: 1, frequency: a3)
+spread-saw(volume: 0.5, frequency: e4)
+spread-saw(volume: 0.5, frequency: g4)
