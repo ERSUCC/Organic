@@ -1,0 +1,10 @@
+note-length = repeat(value: random(from: 50, to: 2000, length: 5000, type: linear))
+
+random-freq(max-freq: 0) = {
+    repeat(value: random(from: 0, to: max-freq, length: note-length, type: linear))
+}
+
+sine(volume: 0.5, frequency: random-freq(max-freq: 250))
+sine(volume: 0.5, frequency: random-freq(max-freq: 500))
+sine(volume: 0.25, frequency: random-freq(max-freq: 750))
+sine(volume: 0.25, frequency: random-freq(max-freq: 1000))

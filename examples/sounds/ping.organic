@@ -1,0 +1,6 @@
+note-length = 500
+
+freq = repeat(value: random(from: c3, to: c5, length: note-length, type: linear))
+
+sine(frequency: freq)
+sine(volume: repeat(value: trigger(condition: freq > g4, value: sweep(from: 1, to: 0, length: note-length))), frequency: c5)

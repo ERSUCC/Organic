@@ -1,0 +1,13 @@
+note-length = 50
+cycle-length = note-length * 192
+
+square(volume: repeat(value: sequence(values: [
+    hold(value: 1, length: note-length * 6),
+    hold(value: 0, length: note-length * 6)
+])), frequency: repeat(value: sequence(values: [
+    hold(value: c6, length: note-length),
+    hold(value: bf5, length: note-length)
+])), effects: [
+    low-pass(threshold: repeat(value: lfo(from: 2000, to: 10000, length: cycle-length))),
+    reverb(mix: repeat(value: lfo(from: 0.9, to: 0.3, length: cycle-length)), length: 5000)
+])

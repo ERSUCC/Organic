@@ -1,0 +1,30 @@
+note-attack = 20
+note-length = 250
+
+pluck = sequence(values: [
+    sweep(from: 0, to: 1, length: note-attack),
+    sweep(from: 1, to: 0, length: note-length - note-attack)
+])
+
+rest = hold(value: 0, length: note-length * 4)
+
+triangle(volume: repeat(value: sequence(values: [
+    repeat(value: pluck, repeats: 1),
+    repeat(value: pluck, repeats: 3),
+    repeat(value: pluck, repeats: 8),
+    rest,
+    rest,
+    rest,
+    rest
+], order: shuffle)), frequency: repeat(value: sequence(values: [
+    hold(value: c3, length: note-length),
+    hold(value: d3, length: note-length),
+    hold(value: e3, length: note-length),
+    hold(value: fs3, length: note-length),
+    hold(value: g3, length: note-length),
+    hold(value: a3, length: note-length),
+    hold(value: b3, length: note-length),
+    hold(value: c4, length: note-length)
+], order: shuffle)), effects: [
+    delay(mix: 1, delay: note-length * 1.5, feedback: 0.75)
+])
