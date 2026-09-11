@@ -1,0 +1,9 @@
+square(volume: repeat(value: sequence(values: [
+    sweep(from: 1, to: 0, length: 100),
+    hold(value: 0, length: 900)
+])), frequency: bf4)
+
+square(volume: repeat(value: sequence(values: [
+    sweep(from: 1, to: 0, length: 100),
+    hold(value: 0, length: 890)
+])), frequency: c5)

@@ -86,6 +86,26 @@ std::vector<Path> Path::children(const bool includeDirs) const
     return {};
 }
 
+std::vector<Path> Path::childrenRecursive(const bool includeDirs) const
+{
+    if (isDirectory())
+    {
+        std::vector<Path> paths;
+
+        for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(path))
+        {
+            if (!entry.is_directory() || includeDirs)
+            {
+                paths.push_back(Path(entry.path()));
+            }
+        }
+
+        return paths;
+    }
+
+    return {};
+}
+
 std::string Path::string() const
 {
     return path.string();
