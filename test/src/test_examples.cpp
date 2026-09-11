@@ -11,16 +11,16 @@ void TestExamples::run(TestTracker* tracker)
 
 void TestExamples::test()
 {
-    beginSuite("Compile examples");
+    beginSuite("Run examples");
 
-    for (const Path& path : sourcePath("examples").children())
+    for (const Path& path : sourcePath("examples").childrenRecursive())
     {
         expectSuccess(path);
     }
 }
 
 TestExamples::TestExamples(TestTracker* tracker) :
-    Test(tracker) {}
+    Test(tracker), utils(Utils::get()) {}
 
 void TestExamples::expectSuccess(const Path& path)
 {
@@ -47,7 +47,26 @@ void TestExamples::expectSuccess(const Path& path)
 
         program->resolveTypes();
 
-        delete program->transform(transformer);
+        Engine::Program* engProgram = program->transform(transformer);
+
+        utils->time = 0;
+
+        const size_t steps = utils->sampleRate * 10;
+
+        double* samples = (double*)malloc(sizeof(double) * steps * utils->channels);
+
+        engProgram->start(0);
+
+        for (size_t i = 0; i < steps; i++)
+        {
+            utils->time = i * utils->timeStep;
+
+            engProgram->processAudioSources(samples + i * utils->channels);
+        }
+
+        free(samples);
+
+        delete engProgram;
     }
 
     catch (const OrganicException& e)

@@ -1,0 +1,14 @@
+note-length = 250
+
+base = repeat(value: sequence(values: [
+    hold(value: c2, length: note-length * 32),
+    hold(value: bf1, length: note-length * 32)
+]))
+
+random-partial() = {
+    sine(frequency: base * repeat(value: round(value: random(from: 1, to: 10, length: note-length))))
+}
+
+random-partial()
+random-partial()
+random-partial()

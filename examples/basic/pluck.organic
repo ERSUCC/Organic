@@ -1,0 +1,1 @@
+sine(volume: repeat(value: sweep(from: 1, to: 0, length: 1000)), frequency: 440)

@@ -1,0 +1,7 @@
+sine(frequency: repeat(value: sequence(values: [
+    hold(value: c4, length: 500),
+    hold(value: d4, length: 500),
+    hold(value: e4, length: 500),
+    hold(value: f4, length: 500),
+    hold(value: g4, length: 500)
+])))

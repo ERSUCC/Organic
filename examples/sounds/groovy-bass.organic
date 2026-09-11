@@ -1,0 +1,30 @@
+note-attack = 15
+note-length = 100
+
+peak = repeat(value: sequence(values: [
+    hold(value: 0.5, length: note-length),
+    hold(value: 0.5, length: note-length),
+    hold(value: 1, length: note-length),
+    hold(value: 1, length: note-length)
+], order: shuffle)) * 0.25
+
+attack = repeat(value: sequence(values: [
+    sweep(from: 0, to: peak, length: note-attack),
+    sweep(from: peak, to: 0, length: note-length - note-attack)
+]))
+
+kick-attack = 10
+kick-decay = 100
+
+kick-volume = repeat(value: sequence(values: [
+    sweep(from: 0, to: 2, length: kick-attack),
+    sweep(from: 2, to: 0, length: kick-decay),
+    hold(value: 0, length: note-length * 4 - kick-attack - kick-decay)
+]))
+
+sidechain = limit(value: attack * (2 - kick-volume), min: 0, max: 1)
+
+square(frequency: 55, volume: sidechain)
+square(frequency: 110, volume: sidechain)
+
+sine(frequency: 55, volume: kick-volume)
