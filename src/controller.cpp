@@ -1085,6 +1085,8 @@ void Trigger::update()
 
         if (!value->enabled)
         {
+            triggered = condition->getValue() != 0;
+
             stop(value->getStopTime());
         }
     }
@@ -1109,8 +1111,6 @@ void Trigger::update()
 
 void Trigger::init()
 {
-    triggered = false;
-
     condition->start(startTime);
 }
 
