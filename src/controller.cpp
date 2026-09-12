@@ -1109,9 +1109,9 @@ void Trigger::update()
 
 void Trigger::init()
 {
-    triggered = false;
-
     condition->start(startTime);
+
+    triggered = condition->getValue() != 0;
 }
 
 If::If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue) :
