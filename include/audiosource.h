@@ -49,6 +49,7 @@ protected:
 private:
     double phase = 0;
     double delta = 0;
+    double lastUpdate = -1;
 
 };
 

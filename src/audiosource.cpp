@@ -39,11 +39,16 @@ double Phase::getValue() const
 
 void Phase::update()
 {
-    phase += delta;
-
-    if (phase > utils->twoPi)
+    if (utils->time > lastUpdate)
     {
-        phase -= utils->twoPi;
+        phase += delta;
+
+        if (phase > utils->twoPi)
+        {
+            phase -= utils->twoPi;
+        }
+
+        lastUpdate = utils->time;
     }
 }
 
@@ -166,10 +171,7 @@ double Triangle::getValue() const
 }
 
 CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, ValueObject* waveform) :
-    Oscillator(volume, pan, effects, frequency), waveform(waveform)
-{
-    waveform->getLeafAs<Lambda>()->setInputs({ phase });
-}
+    Oscillator(volume, pan, effects, frequency), waveform(waveform) {}
 
 CustomOscillator::~CustomOscillator()
 {
@@ -196,6 +198,8 @@ void CustomOscillator::init()
     {
         object->start(startTime);
     }
+
+    waveform->getLeafAs<Lambda>()->setInputs({ phase });
 }
 
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
