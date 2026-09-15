@@ -572,6 +572,49 @@ void Absolute::init()
     value->start(startTime);
 }
 
+Modulo::Modulo(ValueObject* value, ValueObject* divisor) :
+    value(value), divisor(divisor) {}
+
+Modulo::~Modulo()
+{
+    delete value;
+    delete divisor;
+}
+
+double Modulo::getValue() const
+{
+    if (!enabled)
+    {
+        return 0;
+    }
+
+    const double divisorValue = divisor->getValue();
+
+    if (divisorValue == 0)
+    {
+        return 0;
+    }
+
+    return fmod(value->getValue(), divisorValue);
+}
+
+void Modulo::update()
+{
+    value->update();
+    divisor->update();
+
+    if (!value->enabled || !divisor->enabled)
+    {
+        stop(value->getStopTime());
+    }
+}
+
+void Modulo::init()
+{
+    value->start(startTime);
+    divisor->start(startTime);
+}
+
 Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
     controllers(controllers), order(order) {}
 

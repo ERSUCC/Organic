@@ -281,6 +281,24 @@ private:
 
 };
 
+struct Modulo : public ValueObject
+{
+    Modulo(ValueObject* value, ValueObject* divisor);
+    ~Modulo();
+
+    double getValue() const override;
+
+    void update() override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* value;
+    ValueObject* divisor;
+
+};
+
 struct Sequence : public ValueObject
 {
     Sequence(ValueObject* controllers, ValueObject* order);

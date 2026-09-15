@@ -79,6 +79,7 @@ add_executable(organic_test test/src/main.cpp
                             test/src/engine/controllers/limit.cpp
                             test/src/engine/controllers/max.cpp
                             test/src/engine/controllers/min.cpp
+                            test/src/engine/controllers/modulo.cpp
                             test/src/engine/controllers/multiply.cpp
                             test/src/engine/controllers/negate.cpp
                             test/src/engine/controllers/none.cpp

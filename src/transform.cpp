@@ -172,6 +172,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Absolute* token)
     return new Engine::Absolute(ARG("value"));
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::Modulo* token)
+{
+    return new Engine::Modulo(ARG("value"), ARG("divisor"));
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyAudioSource* token)
 {
     return new Engine::AudioSource();

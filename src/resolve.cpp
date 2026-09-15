@@ -216,6 +216,14 @@ void TypeResolver::resolveTypes(const Absolute* token)
     token->arguments->check();
 }
 
+void TypeResolver::resolveTypes(const Modulo* token)
+{
+    resolveArgumentTypes(token->arguments, "value", new NumberType());
+    resolveArgumentTypes(token->arguments, "divisor", new NumberType());
+
+    token->arguments->check();
+}
+
 void TypeResolver::resolveTypes(const Sine* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));

@@ -663,6 +663,19 @@ Engine::ValueObject* Absolute::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
+Modulo::Modulo(const SourceLocation& location, ArgumentList* arguments) :
+    Call(location, arguments, new NumberType()) {}
+
+void Modulo::resolveTypes() const
+{
+    TypeResolver::resolveTypes(this);
+}
+
+Engine::ValueObject* Modulo::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
 AudioSource::AudioSource(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new AudioSourceType()) {}
 

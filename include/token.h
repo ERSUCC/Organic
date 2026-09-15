@@ -560,6 +560,15 @@ struct Absolute : public Call
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
+struct Modulo : public Call
+{
+    Modulo(const SourceLocation& location, ArgumentList* arguments);
+
+    void resolveTypes() const override;
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
+
 struct AudioSource : public Call
 {
     AudioSource(const SourceLocation& location, ArgumentList* arguments);

@@ -51,6 +51,7 @@ void TestControllers::test()
     testMax();
     testRound();
     testAbsolute();
+    testModulo();
 }
 
 TestControllers::TestControllers(TestTracker* tracker) :

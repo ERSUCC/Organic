@@ -47,6 +47,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::Max* token);
     Engine::ValueObject* transform(const Parser::Round* token);
     Engine::ValueObject* transform(const Parser::Absolute* token);
+    Engine::ValueObject* transform(const Parser::Modulo* token);
     Engine::ValueObject* transform(const Parser::EmptyAudioSource* token);
     Engine::ValueObject* transform(const Parser::Sine* token);
     Engine::ValueObject* transform(const Parser::Square* token);
