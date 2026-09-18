@@ -41,11 +41,13 @@ void TestExamples::expectSuccess(const Path& path)
 
     TokenTransformer* transformer = new TokenTransformer(path);
 
+    Parser::TypeResolver* resolver = new Parser::TypeResolver();
+
     try
     {
         program = Parser::Parser::parseSource(source);
 
-        program->resolveTypes();
+        program->resolveTypes(resolver);
 
         Engine::Program* engProgram = program->transform(transformer);
 
@@ -75,6 +77,7 @@ void TestExamples::expectSuccess(const Path& path)
     }
 
     delete transformer;
+    delete resolver;
     delete program;
     delete source;
 

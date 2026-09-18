@@ -75,6 +75,28 @@ test $
 
 ---
 
+name = "Invalid symbol in fillable value"
+line = 2
+character = 6
+error = 'Expected "|" after fillable value name.'
+
+---
+
+|test$|
+
+---
+
+name = "Invalid symbol after fillable value"
+line = 2
+character = 8
+error = 'Unrecognized symbol "$".'
+
+---
+
+|test| $
+
+---
+
 name = "Invalid symbol in assignment"
 line = 2
 character = 8

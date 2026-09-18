@@ -47,11 +47,13 @@ void TestResolver::expectSuccess(const OTest* info)
 
     const Parser::Program* program = nullptr;
 
+    Parser::TypeResolver* resolver = new Parser::TypeResolver();
+
     try
     {
         program = Parser::Parser::parseSource(source);
 
-        program->resolveTypes();
+        program->resolveTypes(resolver);
     }
 
     catch (const OrganicException& e)
@@ -59,6 +61,7 @@ void TestResolver::expectSuccess(const OTest* info)
         failWithError(e);
     }
 
+    delete resolver;
     delete program;
     delete source;
 
@@ -73,11 +76,13 @@ void TestResolver::expectError(const OTest* info)
 
     const Parser::Program* program = nullptr;
 
+    Parser::TypeResolver* resolver = new Parser::TypeResolver();
+
     try
     {
         program = Parser::Parser::parseSource(source);
 
-        program->resolveTypes();
+        program->resolveTypes(resolver);
 
         fail("Expected error, but no error was thrown.");
     }
@@ -92,6 +97,7 @@ void TestResolver::expectError(const OTest* info)
         failAndCompare(info, e);
     }
 
+    delete resolver;
     delete program;
     delete source;
 

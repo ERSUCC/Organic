@@ -1,0 +1,45 @@
+name = "Inline lone fillable value"
+
+---
+
+oscillator(frequency: 440, waveform: |phase|)
+
+---
+
+name = "Inline fillable value in expression"
+
+---
+
+oscillator(frequency: 440, waveform: 1 + |phase| - 42)
+
+---
+
+name = "fillable value in nested built-in function call"
+
+---
+
+oscillator(frequency: 440, waveform: repeat(value: |phase|))
+
+---
+
+name = "fillable value in nested user function call"
+
+---
+
+get-wave(phase: 0) = {
+    phase / pi - 1
+}
+
+oscillator(frequency: 440, waveform: get-wave(phase: |phase|))
+
+---
+
+name = "fillable value in nested function call with expression"
+
+---
+
+get-wave(phase: 0) = {
+    phase
+}
+
+oscillator(frequency: 440, waveform: get-wave(phase: |phase| / pi - 1))

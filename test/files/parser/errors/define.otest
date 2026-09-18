@@ -112,6 +112,17 @@ func(test: 0, test1: 1, test1: 1) = {
 
 ---
 
+name = "Fillable value as define input"
+line = 2
+character = 6
+error = 'Expected input name after "(", but received "|test|".'
+
+---
+
+func(|test|: 0) = {}
+
+---
+
 name = "Call function directly in its definition"
 line = 3
 character = 5

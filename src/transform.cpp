@@ -1,9 +1,53 @@
 #include "../include/transform.h"
 
 #define ARG(name) transformArgument(token->arguments, name)
+#define FILL_ARG(name, inputs) fillArgument(token->arguments, name, inputs)
+
+LambdaContext::LambdaContext(LambdaContext* parent, const std::vector<std::string>& inputs, std::vector<Engine::ValueObject*>& variables) :
+    parent(parent)
+{
+    for (const std::string& input : inputs)
+    {
+        fillables[input] = new Engine::Variable(Engine::Defaults::get<Engine::ValueObject>());
+
+        variables.push_back(fillables[input]);
+    }
+}
+
+Engine::Variable* LambdaContext::findFillable(const std::string& name)
+{
+    if (fillables.count(name))
+    {
+        return fillables[name];
+    }
+
+    if (parent)
+    {
+        return parent->findFillable(name);
+    }
+
+    return nullptr;
+}
 
 TokenTransformer::TokenTransformer(const Path& sourcePath) :
     sourcePath(sourcePath) {}
+
+TokenTransformer::~TokenTransformer()
+{
+    while (context)
+    {
+        const LambdaContext* current = context;
+
+        context = context->parent;
+
+        delete current;
+    }
+}
+
+Engine::ValueObject* TokenTransformer::transform(const Parser::Fillable* token)
+{
+    return new Engine::Variable(context->findFillable(token->name));
+}
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Value* token)
 {
@@ -35,34 +79,6 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::VariableRef* toke
 Engine::ValueObject* TokenTransformer::transform(const Parser::InputRef* token)
 {
     return new Engine::Variable(currentVariables[token->definition]);
-}
-
-Engine::ValueObject* TokenTransformer::transform(const Parser::FunctionRef* token)
-{
-    std::vector<Engine::Variable*> placeholders;
-
-    for (const Parser::InputDef* input : token->definition->inputs)
-    {
-        Engine::Variable* placeholder = new Engine::Variable(input->defaultValue->transform(this));
-
-        placeholders.push_back(placeholder);
-
-        setVariable(input, placeholder);
-    }
-
-    for (size_t i = 0; i < token->definition->program->instructions.size() - 1; i++)
-    {
-        token->definition->program->instructions[i]->transform(this);
-    }
-
-    Engine::ValueObject* value = token->definition->program->instructions.back()->transform(this);
-
-    return new Engine::Lambda(placeholders, value);
-}
-
-Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyLambda* token)
-{
-    return new Engine::Lambda({}, token->value->transform(this));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::List* token)
@@ -204,7 +220,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Saw* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Oscillator* token)
 {
-    return new Engine::CustomOscillator(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"), ARG("waveform"));
+    return new Engine::CustomOscillator(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"), FILL_ARG("waveform", { "phase" }));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Noise* token)
@@ -233,7 +249,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 
     Engine::Resource* resource = new Engine::Resource(path, file->location);
 
-    return new Engine::Granulate(ARG("volume"), ARG("pan"), ARG("effects"), resource, ARG("grains"), ARG("length"), ARG("shape"));
+    return new Engine::Granulate(ARG("volume"), ARG("pan"), ARG("effects"), resource, ARG("grains"), ARG("length"), FILL_ARG("shape", { "position" }));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Group* token)
@@ -343,15 +359,13 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::GreaterEqualAlias
 
 Engine::Program* TokenTransformer::transform(const Parser::Program* token)
 {
-    const Parser::UniqueType sourceType(new Parser::AudioSourceType());
-
     std::vector<Engine::ValueObject*> sources;
 
     for (const Parser::Token* instruction : token->instructions)
     {
         Engine::ValueObject* object = instruction->transform(this);
 
-        if (sourceType->checkType(instruction->type().get()))
+        if (instruction->type()->baseType() == Parser::TypeConstant::AudioSource)
         {
             sources.push_back(object);
         }
@@ -376,6 +390,21 @@ Engine::ValueObject* TokenTransformer::transformArgument(const Parser::ArgumentL
     }
 
     return nullptr;
+}
+
+Engine::Lambda* TokenTransformer::fillArgument(const Parser::ArgumentList* arguments, const std::string& name, const std::vector<std::string>& inputs)
+{
+    context = new LambdaContext(context, inputs, allVariables);
+
+    Engine::Lambda* argument = new Engine::Lambda(context->fillables, transformArgument(arguments, name));
+
+    const LambdaContext* current = context;
+
+    context = context->parent;
+
+    delete current;
+
+    return argument;
 }
 
 void TokenTransformer::setVariable(const Parser::Identifier* name, Engine::ValueObject* value)

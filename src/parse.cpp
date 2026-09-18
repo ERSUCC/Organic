@@ -108,15 +108,6 @@ const Identifier* ParserContext::findIdentifier(const Identifier* token)
         return new VariableRef(token->location, variable);
     }
 
-    if (functions.count(token->string()))
-    {
-        const FunctionDef* function = functions[token->string()];
-
-        used.insert(function);
-
-        return new FunctionRef(token->location, function);
-    }
-
     if (parent)
     {
         if (const Identifier* identifier = parent->findIdentifier(token))
@@ -125,7 +116,7 @@ const Identifier* ParserContext::findIdentifier(const Identifier* token)
         }
     }
 
-    throw OrganicParseException("No variable, input, or function exists with the name \"" + token->string() + "\".", token->location);
+    throw OrganicParseException("No variable or input exists with the name \"" + token->string() + "\".", token->location);
 }
 
 const FunctionDef* ParserContext::findFunction(const Identifier* token)
@@ -434,6 +425,11 @@ const void Parser::parseAssign()
         throw OrganicParseException("Cannot assign a value to a string.", token->location);
     }
 
+    if (const Fillable* token = tokens->peek<Fillable>())
+    {
+        throw OrganicParseException("Cannot assign a value to a fillable value.", token->location);
+    }
+
     const UniqueToken<Identifier> name = tokens->take<Identifier>();
 
     tokens->drop();
@@ -664,7 +660,7 @@ const Token* Parser::collapseTerms(const SourceLocation& location, std::vector<U
 
 UniqueToken<> Parser::parseTerm(const std::string& errorContext)
 {
-    if (tokens->peek<Value>() || tokens->peek<Constant>() || tokens->peek<Boolean>() || tokens->peek<String>())
+    if (tokens->peek<Value>() || tokens->peek<Constant>() || tokens->peek<Boolean>() || tokens->peek<String>() || tokens->peek<Fillable>())
     {
         return tokens->take();
     }

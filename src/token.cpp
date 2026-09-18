@@ -17,7 +17,7 @@ bool Token::eof() const
     return false;
 }
 
-void Token::resolveTypes() const {}
+void Token::resolveTypes(TypeResolver* visitor) const {}
 
 Engine::ValueObject* Token::transform(TokenTransformer* visitor) const
 {
@@ -148,19 +148,6 @@ const Token* GreaterEqual::makeAlias(const Token* left, const Token* right) cons
 Identifier::Identifier(const SourceLocation& location) :
     Token(location) {}
 
-EmptyLambda::EmptyLambda(const SourceLocation& location, const Token* value) :
-    Token(location), value(value) {}
-
-EmptyLambda::~EmptyLambda()
-{
-    delete value;
-}
-
-Engine::ValueObject* EmptyLambda::transform(TokenTransformer* visitor) const
-{
-    return visitor->transform(this);
-}
-
 Value::Value(const SourceLocation& location, const double value) :
     Token(location, new NumberType()), value(value) {}
 
@@ -196,9 +183,9 @@ VariableDef::~VariableDef()
     delete value;
 }
 
-void VariableDef::resolveTypes() const
+void VariableDef::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* VariableDef::transform(TokenTransformer* visitor) const
@@ -227,9 +214,9 @@ const SharedType InputDef::type() const
     return defaultValue->type();
 }
 
-void InputDef::resolveTypes() const
+void InputDef::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 InputRef::InputRef(const SourceLocation& location, const InputDef* definition) :
@@ -263,27 +250,15 @@ const SharedType FunctionDef::returnType() const
     return program->instructions.back()->type();
 }
 
-void FunctionDef::resolveTypes() const
+void FunctionDef::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
-FunctionRef::FunctionRef(const SourceLocation& location, const FunctionDef* definition) :
-    Identifier(location), definition(definition) {}
+Fillable::Fillable(const SourceLocation& location, const std::string& name) :
+    Token(location, new FillableType(name)), name(name) {}
 
-const SharedType FunctionRef::type() const
-{
-    std::unordered_map<std::string, const SharedType> inputTypes;
-
-    for (const InputDef* input : definition->inputs)
-    {
-        inputTypes.insert(std::make_pair(input->string(), input->type()));
-    }
-
-    return SharedType(new LambdaType(inputTypes, definition->returnType()));
-}
-
-Engine::ValueObject* FunctionRef::transform(TokenTransformer* visitor) const
+Engine::ValueObject* Fillable::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }
@@ -353,9 +328,9 @@ const SharedType List::type() const
     return SharedType(new ListType(values[0]->type()));
 }
 
-void List::resolveTypes() const
+void List::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* List::transform(TokenTransformer* visitor) const
@@ -376,9 +351,9 @@ const SharedType ParenthesizedExpression::type() const
     return value->type();
 }
 
-void ParenthesizedExpression::resolveTypes() const
+void ParenthesizedExpression::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* ParenthesizedExpression::transform(TokenTransformer* visitor) const
@@ -394,9 +369,9 @@ Negate::~Negate()
     delete value;
 }
 
-void Negate::resolveTypes() const
+void Negate::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Negate::transform(TokenTransformer* visitor) const
@@ -420,9 +395,9 @@ const SharedType Call::argumentType(const std::string& name) const
 Time::Time(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void Time::resolveTypes() const
+void Time::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Time::transform(TokenTransformer* visitor) const
@@ -438,9 +413,9 @@ const SharedType Hold::type() const
     return argumentType("value");
 }
 
-void Hold::resolveTypes() const
+void Hold::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Hold::transform(TokenTransformer* visitor) const
@@ -451,9 +426,9 @@ Engine::ValueObject* Hold::transform(TokenTransformer* visitor) const
 LFO::LFO(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void LFO::resolveTypes() const
+void LFO::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* LFO::transform(TokenTransformer* visitor) const
@@ -464,9 +439,9 @@ Engine::ValueObject* LFO::transform(TokenTransformer* visitor) const
 Sweep::Sweep(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void Sweep::resolveTypes() const
+void Sweep::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Sweep::transform(TokenTransformer* visitor) const
@@ -482,9 +457,9 @@ const SharedType Sequence::type() const
     return ((const ListType*)argumentType("values").get())->subType;
 }
 
-void Sequence::resolveTypes() const
+void Sequence::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Sequence::transform(TokenTransformer* visitor) const
@@ -500,9 +475,9 @@ const SharedType Repeat::type() const
     return argumentType("value");
 }
 
-void Repeat::resolveTypes() const
+void Repeat::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Repeat::transform(TokenTransformer* visitor) const
@@ -513,9 +488,9 @@ Engine::ValueObject* Repeat::transform(TokenTransformer* visitor) const
 Random::Random(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void Random::resolveTypes() const
+void Random::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Random::transform(TokenTransformer* visitor) const
@@ -526,9 +501,9 @@ Engine::ValueObject* Random::transform(TokenTransformer* visitor) const
 Limit::Limit(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void Limit::resolveTypes() const
+void Limit::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Limit::transform(TokenTransformer* visitor) const
@@ -544,9 +519,9 @@ const SharedType Trigger::type() const
     return argumentType("value");
 }
 
-void Trigger::resolveTypes() const
+void Trigger::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Trigger::transform(TokenTransformer* visitor) const
@@ -562,9 +537,9 @@ const SharedType If::type() const
     return argumentType("is-true");
 }
 
-void If::resolveTypes() const
+void If::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* If::transform(TokenTransformer* visitor) const
@@ -575,9 +550,9 @@ Engine::ValueObject* If::transform(TokenTransformer* visitor) const
 All::All(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new BooleanType()) {}
 
-void All::resolveTypes() const
+void All::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* All::transform(TokenTransformer* visitor) const
@@ -588,9 +563,9 @@ Engine::ValueObject* All::transform(TokenTransformer* visitor) const
 Any::Any(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new BooleanType()) {}
 
-void Any::resolveTypes() const
+void Any::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Any::transform(TokenTransformer* visitor) const
@@ -601,9 +576,9 @@ Engine::ValueObject* Any::transform(TokenTransformer* visitor) const
 None::None(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new BooleanType()) {}
 
-void None::resolveTypes() const
+void None::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* None::transform(TokenTransformer* visitor) const
@@ -614,9 +589,9 @@ Engine::ValueObject* None::transform(TokenTransformer* visitor) const
 Min::Min(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void Min::resolveTypes() const
+void Min::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Min::transform(TokenTransformer* visitor) const
@@ -627,9 +602,9 @@ Engine::ValueObject* Min::transform(TokenTransformer* visitor) const
 Max::Max(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void Max::resolveTypes() const
+void Max::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Max::transform(TokenTransformer* visitor) const
@@ -640,9 +615,9 @@ Engine::ValueObject* Max::transform(TokenTransformer* visitor) const
 Round::Round(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void Round::resolveTypes() const
+void Round::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Round::transform(TokenTransformer* visitor) const
@@ -653,9 +628,9 @@ Engine::ValueObject* Round::transform(TokenTransformer* visitor) const
 Absolute::Absolute(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void Absolute::resolveTypes() const
+void Absolute::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Absolute::transform(TokenTransformer* visitor) const
@@ -666,9 +641,9 @@ Engine::ValueObject* Absolute::transform(TokenTransformer* visitor) const
 Modulo::Modulo(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 
-void Modulo::resolveTypes() const
+void Modulo::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Modulo::transform(TokenTransformer* visitor) const
@@ -690,9 +665,9 @@ Engine::ValueObject* EmptyAudioSource::transform(TokenTransformer* visitor) cons
 Sine::Sine(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
-void Sine::resolveTypes() const
+void Sine::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Sine::transform(TokenTransformer* visitor) const
@@ -703,9 +678,9 @@ Engine::ValueObject* Sine::transform(TokenTransformer* visitor) const
 Square::Square(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
-void Square::resolveTypes() const
+void Square::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Square::transform(TokenTransformer* visitor) const
@@ -716,9 +691,9 @@ Engine::ValueObject* Square::transform(TokenTransformer* visitor) const
 Triangle::Triangle(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
-void Triangle::resolveTypes() const
+void Triangle::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Triangle::transform(TokenTransformer* visitor) const
@@ -729,9 +704,9 @@ Engine::ValueObject* Triangle::transform(TokenTransformer* visitor) const
 Saw::Saw(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
-void Saw::resolveTypes() const
+void Saw::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Saw::transform(TokenTransformer* visitor) const
@@ -742,9 +717,9 @@ Engine::ValueObject* Saw::transform(TokenTransformer* visitor) const
 Oscillator::Oscillator(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
-void Oscillator::resolveTypes() const
+void Oscillator::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Oscillator::transform(TokenTransformer* visitor) const
@@ -755,9 +730,9 @@ Engine::ValueObject* Oscillator::transform(TokenTransformer* visitor) const
 Noise::Noise(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
-void Noise::resolveTypes() const
+void Noise::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Noise::transform(TokenTransformer* visitor) const
@@ -768,9 +743,9 @@ Engine::ValueObject* Noise::transform(TokenTransformer* visitor) const
 Sample::Sample(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
-void Sample::resolveTypes() const
+void Sample::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Sample::transform(TokenTransformer* visitor) const
@@ -781,9 +756,9 @@ Engine::ValueObject* Sample::transform(TokenTransformer* visitor) const
 Granulate::Granulate(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
-void Granulate::resolveTypes() const
+void Granulate::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Granulate::transform(TokenTransformer* visitor) const
@@ -794,9 +769,9 @@ Engine::ValueObject* Granulate::transform(TokenTransformer* visitor) const
 Group::Group(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
-void Group::resolveTypes() const
+void Group::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Group::transform(TokenTransformer* visitor) const
@@ -818,9 +793,9 @@ Engine::ValueObject* EmptyEffect::transform(TokenTransformer* visitor) const
 EffectGroup::EffectGroup(const SourceLocation& location, ArgumentList* arguments) :
     Effect(location, arguments) {}
 
-void EffectGroup::resolveTypes() const
+void EffectGroup::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* EffectGroup::transform(TokenTransformer* visitor) const
@@ -831,9 +806,9 @@ Engine::ValueObject* EffectGroup::transform(TokenTransformer* visitor) const
 Delay::Delay(const SourceLocation& location, ArgumentList* arguments) :
     Effect(location, arguments) {}
 
-void Delay::resolveTypes() const
+void Delay::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Delay::transform(TokenTransformer* visitor) const
@@ -844,9 +819,9 @@ Engine::ValueObject* Delay::transform(TokenTransformer* visitor) const
 Comb::Comb(const SourceLocation& location, ArgumentList* arguments) :
     Effect(location, arguments) {}
 
-void Comb::resolveTypes() const
+void Comb::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Comb::transform(TokenTransformer* visitor) const
@@ -857,9 +832,9 @@ Engine::ValueObject* Comb::transform(TokenTransformer* visitor) const
 AllPass::AllPass(const SourceLocation& location, ArgumentList* arguments) :
     Effect(location, arguments) {}
 
-void AllPass::resolveTypes() const
+void AllPass::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* AllPass::transform(TokenTransformer* visitor) const
@@ -870,9 +845,9 @@ Engine::ValueObject* AllPass::transform(TokenTransformer* visitor) const
 LowPass::LowPass(const SourceLocation& location, ArgumentList* arguments) :
     Effect(location, arguments) {}
 
-void LowPass::resolveTypes() const
+void LowPass::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* LowPass::transform(TokenTransformer* visitor) const
@@ -883,9 +858,9 @@ Engine::ValueObject* LowPass::transform(TokenTransformer* visitor) const
 Reverb::Reverb(const SourceLocation& location, ArgumentList* arguments) :
     Effect(location, arguments) {}
 
-void Reverb::resolveTypes() const
+void Reverb::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* Reverb::transform(TokenTransformer* visitor) const
@@ -901,9 +876,9 @@ const SharedType CallUser::type() const
     return function->returnType();
 }
 
-void CallUser::resolveTypes() const
+void CallUser::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::ValueObject* CallUser::transform(TokenTransformer* visitor) const
@@ -914,9 +889,9 @@ Engine::ValueObject* CallUser::transform(TokenTransformer* visitor) const
 CallAlias::CallAlias(const Token* a, const Token* b, const std::string& op, const Type* type) :
     Call(SourceLocation(a->source(), a->start(), b->end()), new ArgumentList(location, { new Argument(a->location, "a", SharedToken(a)), new Argument(b->location, "b", SharedToken(b)) }, op), type), op(op) {}
 
-void CallAlias::resolveTypes() const
+void CallAlias::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 AddAlias::AddAlias(const Token* a, const Token* b) :
@@ -1010,9 +985,9 @@ Program::~Program()
     }
 }
 
-void Program::resolveTypes() const
+void Program::resolveTypes(TypeResolver* visitor) const
 {
-    TypeResolver::resolveTypes(this);
+    visitor->resolveTypes(this);
 }
 
 Engine::Program* Program::transform(TokenTransformer* visitor) const

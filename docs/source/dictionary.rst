@@ -398,10 +398,12 @@ These functions are used to create various sources of audio, such as oscillating
       specified in this input.
 
 .. organic:function:: oscillator
-   :required: frequency ~ number, waveform ~ ???
+   :required: frequency ~ number, waveform ~ number
    :return: audio source
 
-   Generates a custom oscillator with the specified waveform and frequency.
+   Generates a custom oscillator with the specified :code:`waveform` and :code:`frequency`. The fillable value
+   :code:`|phase|`, which is a number between :code:`0` and :code:`tau`, can be used in the :code:`waveform` input to
+   return a waveform that is properly synchronized with the phase of the resulting audio source.
 
    **Optional Inputs**
 
@@ -508,10 +510,12 @@ These functions are used to create various sources of audio, such as oscillating
       Use this input to control the number of grains playing at the same time.
 
    .. organic:input:: shape
-      :type: ???
-      :default: ???
+      :type: number
+      :default: 1
 
-      Use this input to control the amplitude of each grain over the course of its lifetime.
+      Use this input to control the amplitude of each grain over the course of its lifetime. The fillable value
+      :code:`position`, which is a number between :code:`0` and :code:`1`, can be used in this input to properly
+      generate the grain shape regardless of its length.
 
    .. organic:input:: volume
       :type: number

@@ -27,7 +27,22 @@ enum struct TypeConstant
     AudioSource,
     Effect,
     List,
-    Lambda
+    Fillable
+};
+
+typedef std::unordered_map<std::string, SharedType> FillTypes;
+
+struct FillContext
+{
+    FillContext(FillContext* parent, const FillTypes& types);
+
+    const SharedType findType(const std::string& name) const;
+
+    FillContext* parent;
+
+private:
+    const FillTypes types;
+
 };
 
 struct Type
@@ -40,7 +55,7 @@ struct Type
 
     std::string name() const;
 
-    virtual bool checkType(const Type* actual) const;
+    virtual bool checkType(const FillContext* context, const Type* actual) const;
 
 private:
     const TypeConstant base;
@@ -53,7 +68,7 @@ struct AnyType : public Type
 {
     AnyType();
 
-    bool checkType(const Type* actual) const override;
+    bool checkType(const FillContext* context, const Type* actual) const override;
 };
 
 struct NoneType : public Type
@@ -106,25 +121,16 @@ struct ListType : public Type
     ListType(const SharedType& subType);
     ListType(const Type* subType);
 
-    bool checkType(const Type* actual) const override;
+    bool checkType(const FillContext* context, const Type* actual) const override;
 
     const SharedType subType;
 };
 
-struct LambdaType : public Type
+struct FillableType : public Type
 {
-    LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType& returnType);
-    LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const Type* returnType);
+    FillableType(const std::string& input);
 
-    bool checkType(const Type* actual) const override;
-
-private:
-    static std::string getName(const std::unordered_map<std::string, const SharedType>& inputTypes, const Type* returnType);
-
-    const std::unordered_map<std::string, const SharedType> inputTypes;
-
-    const SharedType returnType;
-
+    const std::string input;
 };
 
 }

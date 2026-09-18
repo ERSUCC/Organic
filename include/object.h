@@ -108,21 +108,20 @@ protected:
 
 struct Lambda : public ValueObject
 {
-    Lambda(const std::vector<Variable*>& inputs, ValueObject* value);
-    Lambda();
+    Lambda(const std::unordered_map<std::string, Variable*>& inputs, ValueObject* value);
     ~Lambda();
 
     double getValue() const override;
 
     void update() override;
 
-    void setInputs(const std::vector<ValueObject*>& values);
+    void setInput(const std::string& name, ValueObject* value);
 
 protected:
     void init() override;
 
 private:
-    std::vector<Variable*> inputs;
+    const std::unordered_map<std::string, Variable*> inputs;
 
     ValueObject* value;
 

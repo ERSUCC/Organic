@@ -11,10 +11,10 @@ how the language is constructed.
 Types
 #####
 
-There are 5 integral types in Organic: numbers, booleans, constants, strings, and lists. There are also 3 complex types
-that can be returned by built-in functions: audio sources, effects, and lambda functions. Organic does not support the
-creation of custom types or data structures, so all built-in functions and all user-defined functions operate
-exclusively on the above types. The following sections detail the creation and use of these 8 types.
+There are 5 integral types in Organic: numbers, booleans, constants, strings, and lists. There are also 2 complex types
+that can be returned by built-in functions: audio sources and effects. Organic does not support the creation of custom
+types or data structures, so all built-in functions and all user-defined functions operate exclusively on the above
+types. The following sections detail the creation and use of these 7 types.
 
 -------
 Numbers
@@ -124,17 +124,6 @@ context of an audio source. All built-in functions that return an audio source h
 with which you can specify a list of effects that you would like to apply to that audio source. Effects are not an
 integral type, so they must be created using built-in functions like :code:`delay` and :code:`reverb`.
 
-----------------
-Lambda Functions
-----------------
-
-Lambda functions allow you to use functions with input values provided internally by Organic, rather than input values
-provided manually in your program. Any user-defined function can be used as a lambda function if it is referenced
-without any parentheses or arguments after its name. One example of this is the :code:`oscillator` function, which
-allows you to define a custom oscillating waveform. This waveform is provided as a lambda function with one input,
-representing the phase of the oscillator. At runtime, Organic will use the provided function to construct the audio
-output for the oscillator, filling in the correct phase values automatically.
-
 #########
 Variables
 #########
@@ -198,4 +187,3 @@ to a reasonable default value based on its type. The default value for each type
 - List: :code:`[]`
 - Audio Source: Silence
 - Effect: No effect
-- Lambda Function: Default value of return type

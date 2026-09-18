@@ -72,3 +72,14 @@ error = 'Input "frequency" specified more than once for function "sine".'
 ---
 
 sine(volume: 1, frequency: 440, frequency: 440)
+
+---
+
+name = "Fillable value as call input"
+line = 2
+character = 6
+error = 'Expected input name after "(", but received "|frequency|".'
+
+---
+
+sine(|frequency|: 440)

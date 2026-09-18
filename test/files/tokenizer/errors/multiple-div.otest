@@ -1,0 +1,30 @@
+name = "Multiple decimal points in number"
+line = 2
+character = 6
+error = "Numbers cannot contain more than one decimal point."
+
+---
+
+12.34.56
+
+---
+
+name = "Extra pipe in fillable value"
+line = 2
+character = 8
+error = 'Expected "|" after fillable value name.'
+
+---
+
+|te|st|
+
+---
+
+name = "Extra quote in string"
+line = 2
+character = 8
+error = "Expected closing double quotation mark."
+
+---
+
+"te"st"

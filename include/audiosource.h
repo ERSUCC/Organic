@@ -102,7 +102,7 @@ struct Triangle : public Oscillator
 
 struct CustomOscillator : public Oscillator
 {
-    CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, ValueObject* waveform);
+    CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, Lambda* waveform);
     ~CustomOscillator();
 
     double getValue() const override;
@@ -111,7 +111,7 @@ protected:
     void init() override;
 
 private:
-    ValueObject* waveform;
+    Lambda* waveform;
 
 };
 
@@ -223,7 +223,7 @@ private:
 
 struct Granulate : public SingleAudioSource
 {
-    Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, ValueObject* shape);
+    Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, Lambda* shape);
     ~Granulate();
 
     void update() override;
@@ -235,7 +235,8 @@ private:
     ValueObject* resource;
     ValueObject* grains;
     ValueObject* length;
-    ValueObject* shape;
+
+    Lambda* shape;
 
     ShapeCoordinator* coordinator = new ShapeCoordinator();
 

@@ -28,7 +28,21 @@ Organic::Organic(const ProgramOptions& options) :
 
     const Parser::Program* program = Parser::Parser::parseSource(source);
 
-    program->resolveTypes();
+    Parser::TypeResolver* resolver = new Parser::TypeResolver();
+
+    try
+    {
+        program->resolveTypes(resolver);
+    }
+
+    catch (const OrganicException& ex)
+    {
+        delete resolver;
+
+        throw;
+    }
+
+    delete resolver;
 
     TokenTransformer* transformer = new TokenTransformer(path);
 

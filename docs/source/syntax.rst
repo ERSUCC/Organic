@@ -257,6 +257,31 @@ would like, only using the name of the function instead of typing out all the co
 example, :code:`create-sine` is used three times, each of which runs the code inside the function, creating a total of
 three new sine waves.
 
+###############
+Fillable Values
+###############
+
+There are a few functions in Organic that can provide input values to you, instead of you providing input values to
+Organic. For example, consider the :code:`oscillator` function, which allows you create a custom oscillator waveform
+instead of using one of the built-in waveforms like :code:`sine` or :code:`saw`. When using the :code:`oscillator`
+function, you can provide your own function to create the waveform, but Organic needs to provide the phase so that your
+function can return the right values at the right times. This is achieved with a fillable value, which might look
+something like the following:
+
+.. code-block::
+
+   custom-saw(phase: 0) = {
+      phase / pi - 1
+   }
+
+   oscillator(frequency: 220, waveform: custom-saw(phase: |phase|))
+
+In the above example, the :code:`oscillator` function's :code:`waveform` input provides the fillable value
+:code:`phase`, which can be used by surrounding its name with the pipe character, :code:`|`. If an input to a function
+provides a fillable value, you can use it however you would like within that input's value, as if it is a normal
+variable. In this example, it is sent directly to the :code:`custom-saw` function, which uses it to manually create a
+saw wave.
+
 ##########
 Next Steps
 ##########

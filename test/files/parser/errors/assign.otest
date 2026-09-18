@@ -42,6 +42,17 @@ error = "Cannot assign a value to a string."
 
 ---
 
+name = "Assign to fillable value"
+line = 2
+character = 1
+error = "Cannot assign a value to a fillable value."
+
+---
+
+|test| = 0
+
+---
+
 name = "Assign to list"
 line = 2
 character = 1

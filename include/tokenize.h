@@ -115,6 +115,7 @@ private:
     const Token* tokenizeString();
     const Token* tokenizeNumber();
     const Token* tokenizeIdentifier();
+    const Token* tokenizeFillable();
 
     void skipWhitespace();
 
