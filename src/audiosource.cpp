@@ -170,7 +170,7 @@ double Triangle::getValue() const
     return 2 * asin(sin(phase->getValue())) / utils->pi;
 }
 
-CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, ValueObject* waveform) :
+CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, Lambda* waveform) :
     Oscillator(volume, pan, effects, frequency), waveform(waveform) {}
 
 CustomOscillator::~CustomOscillator()
@@ -199,7 +199,7 @@ void CustomOscillator::init()
         object->start(startTime);
     }
 
-    waveform->getLeafAs<Lambda>()->setInputs({ phase });
+    waveform->setInput("phase", phase);
 }
 
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
@@ -463,11 +463,8 @@ size_t GrainList::getTotalLength() const
     return totalLength;
 }
 
-Granulate::Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, ValueObject* shape) :
-    SingleAudioSource(volume, pan, effects), resource(resource), grains(grains), length(length), shape(shape)
-{
-    shape->getLeafAs<Lambda>()->setInputs({ coordinator });
-}
+Granulate::Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, Lambda* shape) :
+    SingleAudioSource(volume, pan, effects), resource(resource), grains(grains), length(length), shape(shape) {}
 
 Granulate::~Granulate()
 {
@@ -540,6 +537,8 @@ void Granulate::init()
     {
         object->start(startTime);
     }
+
+    shape->setInput("position", coordinator);
 }
 
 Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources) :

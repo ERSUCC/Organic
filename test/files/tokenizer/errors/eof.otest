@@ -9,6 +9,17 @@ error = "Expected digits after decimal point."
 
 ---
 
+name = "End of file in fillable value"
+line = 2
+character = 6
+error = 'Expected "|" after fillable value name.'
+
+---
+
+|test
+
+---
+
 name = "End of file in string"
 line = 2
 character = 14

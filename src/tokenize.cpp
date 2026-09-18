@@ -294,6 +294,21 @@ TokenIterator* Tokenizer::tokenizeProgram()
             tokens->push(tokenizeIdentifier());
         }
 
+        else if (source->get(current) == '|')
+        {
+            try
+            {
+                tokens->push(tokenizeFillable());
+            }
+
+            catch (const OrganicException& e)
+            {
+                delete tokens;
+
+                throw;
+            }
+        }
+
         else
         {
             delete tokens;
@@ -521,6 +536,25 @@ const Token* Tokenizer::tokenizeIdentifier()
     }
 
     return new Identifier(location);
+}
+
+const Token* Tokenizer::tokenizeFillable()
+{
+    const size_t start = current++;
+
+    std::string name;
+
+    while (current < source->length() && (isalnum(source->get(current)) || source->get(current) == '-' || source->get(current) == '_'))
+    {
+        name += source->get(current++);
+    }
+
+    if (source->get(current) != '|')
+    {
+        throw OrganicParseException("Expected \"|\" after fillable value name.", SourceLocation(source, current, current));
+    }
+
+    return new Fillable(SourceLocation(source, start, ++current), name);
 }
 
 void Tokenizer::skipWhitespace()

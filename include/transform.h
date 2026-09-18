@@ -2,8 +2,8 @@
 
 #include <stddef.h>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "controller.h"
 #include "object.h"
@@ -15,9 +15,21 @@
 #include "types.h"
 #include "utils.h"
 
+struct LambdaContext
+{
+    LambdaContext(LambdaContext* parent, const std::vector<std::string>& inputs, std::vector<Engine::ValueObject*>& variables);
+
+    Engine::Variable* findFillable(const std::string& input);
+
+    LambdaContext* parent;
+
+    std::unordered_map<std::string, Engine::Variable*> fillables;
+};
+
 struct TokenTransformer
 {
     TokenTransformer(const Path& sourcePath);
+    ~TokenTransformer();
 
     Engine::ValueObject* transform(const Parser::Value* token);
     Engine::ValueObject* transform(const Parser::Constant* token);
@@ -25,8 +37,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::VariableDef* token);
     Engine::ValueObject* transform(const Parser::VariableRef* token);
     Engine::ValueObject* transform(const Parser::InputRef* token);
-    Engine::ValueObject* transform(const Parser::FunctionRef* token);
-    Engine::ValueObject* transform(const Parser::EmptyLambda* token);
+    Engine::ValueObject* transform(const Parser::Fillable* token);
     Engine::ValueObject* transform(const Parser::List* token);
     Engine::ValueObject* transform(const Parser::ParenthesizedExpression* token);
     Engine::ValueObject* transform(const Parser::Negate* token);
@@ -82,6 +93,8 @@ struct TokenTransformer
 private:
     Engine::ValueObject* transformArgument(const Parser::ArgumentList* arguments, const std::string& name);
 
+    Engine::Lambda* fillArgument(const Parser::ArgumentList* arguments, const std::string& name, const std::vector<std::string>& inputs);
+
     void setVariable(const Parser::Identifier* name, Engine::ValueObject* value);
 
     const Path sourcePath;
@@ -89,5 +102,7 @@ private:
     std::unordered_map<const Parser::Identifier*, Engine::ValueObject*> currentVariables;
 
     std::vector<Engine::ValueObject*> allVariables;
+
+    LambdaContext* context = nullptr;
 
 };

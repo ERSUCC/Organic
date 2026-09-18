@@ -113,19 +113,11 @@ void Variable::init()
     value->start(startTime);
 }
 
-Lambda::Lambda(const std::vector<Variable*>& inputs, ValueObject* value) :
+Lambda::Lambda(const std::unordered_map<std::string, Variable*>& inputs, ValueObject* value) :
     inputs(inputs), value(value) {}
-
-Lambda::Lambda() :
-    inputs({}), value(new ValueObject()) {}
 
 Lambda::~Lambda()
 {
-    for (Variable* input : inputs)
-    {
-        delete input;
-    }
-
     delete value;
 }
 
@@ -149,20 +141,12 @@ void Lambda::update()
     }
 }
 
-void Lambda::setInputs(const std::vector<ValueObject*>& values)
+void Lambda::setInput(const std::string& name, ValueObject* value)
 {
-    for (size_t i = 0; i < inputs.size(); i++)
-    {
-        inputs[i]->value = values[i];
-    }
+    inputs.at(name)->value = value;
 }
 
 void Lambda::init()
 {
-    for (Variable* input : inputs)
-    {
-        input->start(startTime);
-    }
-
     value->start(startTime);
 }

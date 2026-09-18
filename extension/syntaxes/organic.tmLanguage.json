@@ -72,6 +72,9 @@
 		},
 		"variable": {
 			"patterns": [{
+        "name": "variable.parameter.organic",
+        "match": "\\|[a-zA-Z_][a-zA-Z0-9\\-_]*\\|"
+      }, {
         "name": "variable.name.organic",
         "match": "[a-zA-Z_][a-zA-Z0-9\\-_]*"
       }]

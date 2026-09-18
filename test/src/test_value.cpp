@@ -32,13 +32,15 @@ void TestValue::expectValue(const OTest* info)
 
     const Parser::Program* program = nullptr;
 
+    Parser::TypeResolver* resolver = new Parser::TypeResolver();
+
     TokenTransformer* transformer = new TokenTransformer(source->path());
 
     try
     {
         program = Parser::Parser::parseSource(source);
 
-        program->resolveTypes();
+        program->resolveTypes(resolver);
 
         for (size_t i = 0; i < program->instructions.size() - 1; i++)
         {
@@ -74,6 +76,7 @@ void TestValue::expectValue(const OTest* info)
     }
 
     delete transformer;
+    delete resolver;
     delete program;
     delete source;
 

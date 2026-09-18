@@ -1,0 +1,34 @@
+name = "Use fillable value before fillable context"
+line = 2
+character = 17
+error = 'There is no fillable value available with the name "phase".'
+
+---
+
+sine(frequency: |phase|)
+
+oscillator(frequency: 440, waveform: |phase|)
+
+---
+
+name = "Use fillable value after fillable context"
+line = 4
+character = 17
+error = 'There is no fillable value available with the name "phase".'
+
+---
+
+oscillator(frequency: 440, waveform: |phase|)
+
+sine(frequency: |phase|)
+
+---
+
+name = "fillable value with incorrect type"
+line = 2
+character = 69
+error = 'Expected sequence order constant for input "order", but received number.'
+
+---
+
+oscillator(frequency: 440, waveform: sequence(values: [ 0 ], order: |phase|))

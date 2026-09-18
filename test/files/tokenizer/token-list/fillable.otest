@@ -1,0 +1,30 @@
+name = "Inline lone fillable value"
+tokens = [
+    'oscillator', '(', 'frequency', ':', '440', ',', 'waveform', ':', '|phase|', ')'
+]
+
+---
+
+oscillator(frequency: 440, waveform: |phase|)
+
+---
+
+name = "Inline expression with fillable value"
+tokens = [
+    'oscillator', '(', 'frequency', ':', '440', ',', 'waveform', ':', '1', '+', '|phase|', '-', '42', ')'
+]
+
+---
+
+oscillator(frequency: 440, waveform: 1 + |phase| - 42)
+
+---
+
+name = "fillable value in nested call"
+tokens = [
+    'oscillator', '(', 'frequency', ':', '440', ',', 'waveform', ':', 'get-wave', '(', 'phase', ':', '|phase|', ')', ')'
+]
+
+---
+
+oscillator(frequency: 440, waveform: get-wave(phase: |phase|))

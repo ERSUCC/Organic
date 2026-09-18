@@ -2,6 +2,24 @@
 
 using namespace Parser;
 
+FillContext::FillContext(FillContext* parent, const FillTypes& types) :
+    parent(parent), types(types) {}
+
+const SharedType FillContext::findType(const std::string& name) const
+{
+    if (types.count(name))
+    {
+        return types.at(name);
+    }
+
+    if (parent)
+    {
+        return parent->findType(name);
+    }
+
+    return SharedType(nullptr);
+}
+
 Type::Type(const TypeConstant& base, const std::string& str) :
     base(base), str(str) {}
 
@@ -17,15 +35,30 @@ std::string Type::name() const
     return str;
 }
 
-bool Type::checkType(const Type* actual) const
+bool Type::checkType(const FillContext* context, const Type* actual) const
 {
-    return base == actual->base;
+    if (base == actual->base)
+    {
+        return true;
+    }
+
+    if (actual->base != TypeConstant::Fillable)
+    {
+        return false;
+    }
+
+    if (const SharedType type = context->findType(dynamic_cast<const FillableType*>(actual)->input))
+    {
+        return base == type->base;
+    }
+
+    return false;
 }
 
 AnyType::AnyType() :
     Type(TypeConstant::Any, "anything") {}
 
-bool AnyType::checkType(const Type* actual) const
+bool AnyType::checkType(const FillContext* context, const Type* actual) const
 {
     return actual->baseType() != TypeConstant::None;
 }
@@ -63,82 +96,15 @@ ListType::ListType(const SharedType& subType) :
 ListType::ListType(const Type* subType) :
     ListType(SharedType(subType)) {}
 
-bool ListType::checkType(const Type* actual) const
+bool ListType::checkType(const FillContext* context, const Type* actual) const
 {
     if (actual->baseType() != TypeConstant::List)
     {
         return false;
     }
 
-    return subType->checkType(dynamic_cast<const ListType*>(actual)->subType.get());
+    return subType->checkType(context, dynamic_cast<const ListType*>(actual)->subType.get());
 }
 
-LambdaType::LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const SharedType& returnType) :
-    Type(TypeConstant::Lambda, getName(inputTypes, returnType.get())), inputTypes(inputTypes), returnType(returnType) {}
-
-LambdaType::LambdaType(const std::unordered_map<std::string, const SharedType>& inputTypes, const Type* returnType) :
-    LambdaType(inputTypes, SharedType(returnType)) {}
-
-bool LambdaType::checkType(const Type* actual) const
-{
-    if (actual->baseType() != TypeConstant::Lambda)
-    {
-        return false;
-    }
-
-    const LambdaType* lambda = dynamic_cast<const LambdaType*>(actual);
-
-    if (!returnType->checkType(lambda->returnType.get()))
-    {
-        return false;
-    }
-
-    for (const std::pair<std::string, const SharedType>& input : inputTypes)
-    {
-        if (!lambda->inputTypes.count(input.first) || !input.second->checkType(lambda->inputTypes.at(input.first).get()))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-std::string LambdaType::getName(const std::unordered_map<std::string, const SharedType>& inputTypes, const Type* returnType)
-{
-    if (inputTypes.empty())
-    {
-        return "function with no inputs returning " + returnType->name();
-    }
-
-    std::string str;
-
-    if (inputTypes.size() == 1)
-    {
-        str += "with input (";
-    }
-
-    else
-    {
-        str += "with inputs (";
-    }
-
-    bool first = true;
-
-    for (const std::pair<std::string, const SharedType>& input : inputTypes)
-    {
-        if (first)
-        {
-            str += input.first + ": " + input.second->name();
-        }
-
-        else
-        {
-            str += ", " + input.first + ": " + input.second->name();
-        }
-
-        first = false;
-    }
-
-    return "function " + str + ") returning " + returnType->name();
-}
+FillableType::FillableType(const std::string& input) :
+    Type(TypeConstant::Fillable, "fillable"), input(input) {}
