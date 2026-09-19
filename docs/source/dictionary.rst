@@ -98,7 +98,9 @@ Functions
 The following sections detail the behavior and inputs for every built-in function in Organic. Each entry begins with the
 function's name, followed by the type of value it returns. The lines below the function name list any required inputs
 and their types. Next, the function's standard behavior is described. Finally, any optional inputs are listed, along
-with their types and a description of how their use affects the behavior of the function.
+with their types and a description of how their use affects the behavior of the function. For both required and optional
+inputs, if the input provides any fillable values, their names and types will be listed in parentheses after the primary
+input's information.
 
 -----------
 Controllers
@@ -112,28 +114,51 @@ These functions are used to automate the values of other parameters, and can typ
    Returns the time in milliseconds since the start of the program.
 
 .. organic:function:: hold
-   :required: value ~ anything, length ~ number
    :return: type of :code:`value`
+
+   .. organic:input:: value
+      :type: anything
+
+   .. organic:input:: length
+      :type: number
 
    Returns :code:`value` for :code:`length` milliseconds, then stops.
 
 .. organic:function:: lfo
-   :required: from ~ number, to ~ number, length ~ number
    :return: number
+
+   .. organic:input:: from
+      :type: number
+
+   .. organic:input:: to
+      :type: number
+
+   .. organic:input:: length
+      :type: number
 
    Generates a sinusoidal interpolation between :code:`from` and :code:`to`, with a period equal to :code:`length`
    milliseconds. Stops after one period is completed.
 
 .. organic:function:: sweep
-   :required: from ~ number, to ~ number, length ~ number
    :return: number
+
+   .. organic:input:: from
+      :type: number
+
+   .. organic:input:: to
+      :type: number
+
+   .. organic:input:: length
+      :type: number
 
    Generates a linear interpolation between :code:`from` and :code:`to`, lasting for :code:`length` milliseconds. Stops
    after reaching :code:`to`.
 
 .. organic:function:: sequence
-   :required: values ~ list of anything
    :return: type of :code:`values`
+
+   .. organic:input:: values
+      :type: list of anything
 
    Steps through :code:`values` one value at a time, waiting until each value stops before moving on to the next. Stops
    after each value has been completed once.
@@ -149,8 +174,10 @@ These functions are used to automate the values of other parameters, and can typ
       input.
 
 .. organic:function:: repeat
-   :required: value ~ anything
    :return: type of :code:`value`
+
+   .. organic:input:: value
+      :type: anything
 
    Restarts :code:`value` when it stops. By default, this causes :code:`value` to repeat infinitely.
 
@@ -164,8 +191,16 @@ These functions are used to automate the values of other parameters, and can typ
       will stop after the final repeat.
 
 .. organic:function:: random
-   :required: from ~ number, to ~ number, length ~ number
    :return: number
+
+   .. organic:input:: from
+      :type: number
+
+   .. organic:input:: to
+      :type: number
+
+   .. organic:input:: length
+      :type: number
 
    Generates a random number between :code:`from` and :code:`to`, holding it for :code:`length` milliseconds. Stops
    after :code:`length` milliseconds have elapsed.
@@ -180,64 +215,97 @@ These functions are used to automate the values of other parameters, and can typ
       :ref:`random-type` for details on the constants used in this input.
 
 .. organic:function:: limit
-   :required: value ~ number, min ~ number, max ~ number
    :return: number
+
+   .. organic:input:: value
+      :type: number
+
+   .. organic:input:: min
+      :type: number
+
+   .. organic:input:: max
+      :type: number
 
    Restricts :code:`value` to the inclusive range between :code:`min` and :code:`max`. A number is always returned, but
    if :code:`value` goes below :code:`min` or above :code:`max`, the corresponding bound is returned instead of the
    original :code:`value`. Stops when :code:`value` stops.
 
 .. organic:function:: trigger
-   :required: value ~ anything, condition ~ boolean
    :return: type of :code:`value`
+
+   .. organic:input:: value
+      :type: anything
+
+   .. organic:input:: condition
+      :type: boolean
 
    Waits until :code:`condition` becomes :code:`true`, then starts and returns :code:`value`. Stops after :code:`value`
    has started and completed.
 
 .. organic:function:: if
-   :required: condition ~ boolean, if-true ~ anything, if-false ~ type of :code:`if-true`
    :return: type of :code:`if-true`
+
+   .. organic:input:: condition
+      :type: boolean
+
+   .. organic:input:: if-true
+      :type: anything
+
+   .. organic:input:: if-false
+      :type: type of :code:`if-true`
 
    Returns :code:`if-true` if :code:`condition` evaluates to :code:`true`, otherwise returns :code:`if-false`.
    :code:`if-true` and :code:`if-false` can be of any type, as long as they are both of the same type. Stops after
    :code:`condition` stops.
 
 .. organic:function:: all
-   :required: values ~ list of boolean
    :return: boolean
+
+   .. organic:input:: values
+      :type: list of boolean
 
    Returns :code:`true` if all items in :code:`values` evaluate to :code:`true`, otherwise returns :code:`false`. Stops
    when any item in :code:`values` stops.
 
 .. organic:function:: any
-   :required: values ~ list of boolean
    :return: boolean
+
+   .. organic:input:: values
+      :type: list of boolean
 
    Returns :code:`true` if any item in :code:`values` evaluates to :code:`true`, otherwise returns :code:`false`. Stops
    when any item in :code:`values` stops.
 
 .. organic:function:: none
-   :required: values ~ list of boolean
    :return: boolean
+
+   .. organic:input:: values
+      :type: list of boolean
 
    Returns :code:`true` if all items in :code:`values` evaluate to :code:`false`, otherwise returns :code:`false`. Stops
    when any item in :code:`values` stops.
 
 .. organic:function:: min
-   :required: values ~ list of number
    :return: number
+
+   .. organic:input:: values
+      :type: list of number
 
    Returns the minimum value in :code:`values`. Stops when any item in :code:`values` stops.
 
 .. organic:function:: min
-   :required: values ~ list of number
    :return: number
+
+   .. organic:input:: values
+      :type: list of number
 
    Returns the maximum value in :code:`values`. Stops when any item in :code:`values` stops.
 
 .. organic:function:: round
-   :required: value ~ number
    :return: number
+
+   .. organic:input:: value
+      :type: number
 
    Rounds :code:`value` to the nearest whole number. Stops when :code:`value` stops.
 
@@ -257,15 +325,22 @@ These functions are used to automate the values of other parameters, and can typ
       on the constants used in this input.
 
 .. organic:function:: absolute
-   :required: value ~ number
    :return: number
+
+   .. organic:input:: value
+      :type: number
 
    Returns the `absolute value <https://en.wikipedia.org/wiki/Absolute_value_(algebra)>`__ of :code:`value`. Stops when
    :code:`value` stops.
 
 .. organic:function:: modulo
-   :required: value ~ number, divisor ~ number
    :return: number
+
+   .. organic:input:: value
+      :type: number
+
+   .. organic:input:: divisor
+      :type: number
 
    Returns the remainder after attempting to divide :code:`value` evenly by :code:`divisor`. If :code:`value` is
    negative, the result will be negative, but the sign of :code:`divisor` does not affect the result. If :code:`divisor`
@@ -278,8 +353,10 @@ Audio Sources
 These functions are used to create various sources of audio, such as oscillating waveforms or pre-recorded sounds.
 
 .. organic:function:: sine
-   :required: frequency ~ number
    :return: audio source
+
+   .. organic:input:: frequency
+      :type: number
 
    Generates a `sine wave <https://en.wikipedia.org/wiki/Sine_wave>`__ with the specified frequency.
 
@@ -308,8 +385,10 @@ These functions are used to create various sources of audio, such as oscillating
       specified in this input.
 
 .. organic:function:: square
-   :required: frequency ~ number
    :return: audio source
+
+   .. organic:input:: frequency
+      :type: number
 
    Generates a `square wave <https://en.wikipedia.org/wiki/Square_wave_(waveform)>`__ with the specified frequency.
 
@@ -338,8 +417,10 @@ These functions are used to create various sources of audio, such as oscillating
       specified in this input.
 
 .. organic:function:: triangle
-   :required: frequency ~ number
    :return: audio source
+
+   .. organic:input:: frequency
+      :type: number
 
    Generates a `triangle wave <https://en.wikipedia.org/wiki/Triangle_wave>`__ with the specified frequency.
 
@@ -368,8 +449,10 @@ These functions are used to create various sources of audio, such as oscillating
       are specified in this input.
 
 .. organic:function:: saw
-   :required: frequency ~ number
    :return: audio source
+
+   .. organic:input:: frequency
+      :type: number
 
    Generates a `saw wave <https://en.wikipedia.org/wiki/Sawtooth_wave>`__ with the specified frequency.
 
@@ -398,11 +481,17 @@ These functions are used to create various sources of audio, such as oscillating
       specified in this input.
 
 .. organic:function:: oscillator
-   :required: frequency ~ number, waveform ~ number
    :return: audio source
 
+   .. organic:input:: frequency
+      :type: number
+
+   .. organic:input:: waveform
+      :type: number
+      :fillable: phase ~ number
+
    Generates a custom oscillator with the specified :code:`waveform` and :code:`frequency`. The fillable value
-   :code:`|phase|`, which is a number between :code:`0` and :code:`tau`, can be used in the :code:`waveform` input to
+   :code:`phase`, which is a number between :code:`0` and :code:`tau`, can be used in the :code:`waveform` input to
    return a waveform that is properly synchronized with the phase of the resulting audio source.
 
    **Optional Inputs**
@@ -459,8 +548,10 @@ These functions are used to create various sources of audio, such as oscillating
       specified in this input.
 
 .. organic:function:: sample
-   :required: file ~ string
    :return: audio source
+
+   .. organic:input:: file
+      :type: string
 
    Plays back the contents of the specified audio file. Currently, this function supports WAV and MP3 files.
 
@@ -489,8 +580,10 @@ These functions are used to create various sources of audio, such as oscillating
       this input.
 
 .. organic:function:: granulate
-   :required: sample ~ string
    :return: audio source
+
+   .. organic:input:: sample
+      :type: string
 
    Performs `granular synthesis <https://en.wikipedia.org/wiki/Granular_synthesis>`__, using the audio file specified in
    the :code:`sample` input as the source for audio samples.
@@ -512,6 +605,7 @@ These functions are used to create various sources of audio, such as oscillating
    .. organic:input:: shape
       :type: number
       :default: 1
+      :fillable: position ~ number
 
       Use this input to control the amplitude of each grain over the course of its lifetime. The fillable value
       :code:`position`, which is a number between :code:`0` and :code:`1`, can be used in this input to properly
@@ -540,8 +634,10 @@ These functions are used to create various sources of audio, such as oscillating
       specified in this input.
 
 .. organic:function:: group
-   :required: sources ~ list of audio source
    :return: audio source
+
+   .. organic:input:: sources
+      :type: list of audio source
 
    Creates a composite audio source from the specified sources. Inputs to this function will be applied to the group as
    a whole, so any existing inputs on the specified sources will still be applied to those sources.
@@ -579,8 +675,13 @@ These functions are used to manipulate the output of an audio source after it is
 source regardless of the function that created it or the values of its inputs.
 
 .. organic:function:: delay
-   :required: delay ~ number, feedback ~ number
    :return: effect
+
+   .. organic:input:: delay
+      :type: number
+
+   .. organic:input:: feedback
+      :type: number
 
    Applies a delay effect to the target audio source. The :code:`delay` input, specified in milliseconds, defines the
    length of time before an audio sample is repeated. The :code:`feedback` input, specified as a ratio between :code:`0`
@@ -596,8 +697,13 @@ source regardless of the function that created it or the values of its inputs.
       Use this input to control the overall volume of the delayed samples, regardless of the value of :code:`feedback`.
 
 .. organic:function:: comb
-   :required: delay ~ number, feedback ~ number
    :return: effect
+
+   .. organic:input:: delay
+      :type: number
+
+   .. organic:input:: feedback
+      :type: number
 
    Applies a `comb filter <https://en.wikipedia.org/wiki/Comb_filter>`__ to the target audio source. This is similar to
    a delay effect, although comb filters are better suited for shorter delays that result in timbral effects, rather
@@ -616,8 +722,13 @@ source regardless of the function that created it or the values of its inputs.
       Use this input to control the overall volume of the delayed samples, regardless of the value of :code:`feedback`.
 
 .. organic:function:: all-pass
-   :required: delay ~ number, feedback ~ number
    :return: effect
+
+   .. organic:input:: delay
+      :type: number
+
+   .. organic:input:: feedback
+      :type: number
 
    Applies an `all-pass filter <https://en.wikipedia.org/wiki/All-pass_filter>`__ to the target audio source.
 
@@ -631,15 +742,19 @@ source regardless of the function that created it or the values of its inputs.
       the original audio being played, and a value of :code:`1` would result in only the filtered audio being played.
 
 .. organic:function:: low-pass
-   :required: threshold ~ number
    :return: effect
+
+   .. organic:input:: threshold
+      :type: number
 
    Applies a `low-pass filter <https://en.wikipedia.org/wiki/Low-pass_filter>`__ to the target audio source. The
    :code:`threshold` input defines the maximum frequency in Hz that is allowed to pass through the filter.
 
 .. organic:function:: reverb
-   :required: length ~ number
    :return: effect
+
+   .. organic:input:: length
+      :type: number
 
    Applies a `reverb effect <https://en.wikipedia.org/wiki/Reverb_effect>`__ to the target audio source. The
    :code:`length` input defines the length of the echoes resulting from an initial sound.
@@ -654,8 +769,10 @@ source regardless of the function that created it or the values of its inputs.
       original audio being played, and a value of :code:`1` would result in only the echoes being played.
 
 .. organic:function:: effect-group
-   :required: effects ~ list of effect
    :return: effect
+
+   .. organic:input:: effects
+      :type: list of effect
 
    Creates a composite audio effect from the specified effects. Inputs to this function will be applied to the group as
    a whole, so any existing inputs on the specified effects will still be applied to those effects.

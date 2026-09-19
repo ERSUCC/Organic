@@ -1,4 +1,4 @@
-from docutils.nodes import emphasis, inline, literal, raw, Text
+from docutils.nodes import emphasis, inline, literal, Text
 from docutils.parsers.rst.directives import unchanged, unchanged_required
 
 from re import split
@@ -14,7 +14,6 @@ class OrganicFunction(ObjectDescription):
   required_arguments = 1
 
   option_spec = {
-    "required": unchanged,
     "return": unchanged
   }
 
@@ -30,48 +29,37 @@ class OrganicFunction(ObjectDescription):
   def add_target_and_index(self, _, signature, signode):
     signode["ids"].append(f"function-{signature}")
 
-  def parse_content_to_nodes(self, allow_section_headings):
-    nodes = []
-
-    if "required" in self.options:
-      for desc in split(",\\s*", self.options["required"]):
-        param = split("\\s*~\\s*", desc)
-
-        node = inline()
-
-        node.append(emphasis(text = param[0], classes = [ "mono" ]))
-        node.append(inline(text = ":", classes = [ "mono", "separator" ]))
-
-        tpe = inline(classes = [ "mono" ])
-
-        tpe.extend(self.parse_inline(param[1])[0])
-
-        node.append(tpe)
-
-        nodes.append(node)
-        nodes.append(raw(text = "<br>", format = "html"))
-
-    nodes.extend(super().parse_content_to_nodes(allow_section_headings))
-
-    return nodes
-
 class OrganicInput(ObjectDescription):
   has_content = True
   required_arguments = 1
 
   option_spec = {
     "type": unchanged_required,
-    "default": unchanged_required
+    "default": unchanged,
+    "fillable": unchanged
   }
 
   def handle_signature(self, signature, signode):
     node = inline()
 
     node.append(emphasis(text = signature, classes = [ "mono" ]))
-    node.append(Text(": "))
+    node.append(inline(text = ":", classes = [ "mono", "separator" ]))
     node.extend(self.parse_inline(self.options["type"])[0])
-    node.append(Text(" = "))
-    node.append(literal(text = self.options["default"]))
+
+    if "default" in self.options:
+      node.append(Text(" = "))
+      node.append(literal(text = self.options["default"]))
+    else:
+      signode["classes"].append("required")
+
+    if "fillable" in self.options:
+      fillable = split("\\s*~\\s*", self.options["fillable"])
+
+      node.append(Text(" (|"))
+      node.append(emphasis(text = fillable[0], classes = [ "mono" ]))
+      node.append(Text("|: "))
+      node.extend(self.parse_inline(fillable[1])[0])
+      node.append(Text(")"))
 
     signode.append(node)
 

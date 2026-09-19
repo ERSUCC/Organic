@@ -5,3 +5,11 @@
 .separator {
   margin-right: 5px;
 }
+
+dl.organic.input:has(dt.required) {
+  margin-bottom: 0px;
+}
+
+dt.required {
+  line-height: 1.1em;
+}
