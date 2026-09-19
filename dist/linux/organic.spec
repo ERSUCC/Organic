@@ -6,6 +6,7 @@ Summary: A programming language for algorithmic audio synthesis
 License: GPLv3
 URL: https://github.com/ERSUCC/Organic
 Source: %{name}-%{version}.tar.gz
+Requires: libsndfile >= 1.2.2, libsamplerate >= 0.2.2
 
 %global debug_package %{nil}
 
