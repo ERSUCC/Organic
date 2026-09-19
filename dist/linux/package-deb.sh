@@ -17,7 +17,7 @@ rm -rf $TMP_ROOT
 mkdir -p $TMP_INSTALL/bin $TMP_INSTALL/lib/organic
 
 cp install/bin/organic $TMP_INSTALL/bin
-cp install/lib/*.so* $TMP_INSTALL/lib/organic
+cp install/lib/librtaudio*.so* $TMP_INSTALL/lib/organic
 
 mkdir -p $TMP_ROOT/DEBIAN
 

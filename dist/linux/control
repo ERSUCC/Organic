@@ -7,3 +7,4 @@ Architecture: amd64
 Maintainer: Isaac Brown <isaacbrown5763@gmail.com>
 Description: A programming language for algorithmic audio synthesis
 Homepage: https://github.com/ERSUCC/Organic
+Depends: libsndfile1 (>= 1.2.2), libsamplerate0 (>= 0.2.2)
