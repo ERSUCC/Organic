@@ -1,10 +1,9 @@
 Package: organic
 Source: organic
 Version: {{version}}
-Section: base
+Section: sound
 Priority: optional
 Architecture: amd64
 Maintainer: Isaac Brown <isaacbrown5763@gmail.com>
-Description: Organic
-  A programming language for algorithmic audio synthesis
+Description: A programming language for algorithmic audio synthesis
 Homepage: https://github.com/ERSUCC/Organic
