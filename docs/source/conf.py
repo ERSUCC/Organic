@@ -20,4 +20,7 @@ html_copy_source = False
 html_show_sourcelink = False
 html_permalinks = False
 
+highlight_language = "organic"
+pygments_style = "organic"
+
 extensions = [ "organic" ]

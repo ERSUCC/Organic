@@ -19,7 +19,7 @@ instructions on the screen to complete the installation.
 
 To make sure that Organic is installed correctly, run the following command in a :doc:`command line <cmd-line>`:
 
-.. code-block::
+.. code-block:: none
 
    organic --version
 
@@ -61,7 +61,7 @@ In your text editor, make a new file called "hello.organic" and type the code ab
 the file in a location you can remember, and make sure your :doc:`command line <cmd-line>` is pointing to that location.
 When you're ready, run the following command:
 
-.. code-block::
+.. code-block:: none
 
    organic hello.organic
 

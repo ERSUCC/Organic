@@ -9,7 +9,7 @@ likely to be useful in standard use cases. For instructions on the basic usage o
 General Usage
 #############
 
-.. code-block::
+.. code-block:: none
 
    organic [--version] [--info] [--time <num>] [--fast-forward <num>]
            [--export <path>] [--channels <num>] [--sample-rate <num>]

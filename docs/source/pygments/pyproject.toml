@@ -1,0 +1,10 @@
+[project]
+name = "pygments-plugin-organic"
+version = "0.1.0"
+dependencies = [ "pygments" ]
+
+[project.entry-points."pygments.lexers"]
+organic = "organic_plugin:OrganicLexer"
+
+[project.entry-points."pygments.styles"]
+organic = "organic_plugin:OrganicStyle"
