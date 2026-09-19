@@ -11,10 +11,11 @@ how the language is constructed.
 Types
 #####
 
-There are 5 integral types in Organic: numbers, booleans, constants, strings, and lists. There are also 2 complex types
-that can be returned by built-in functions: audio sources and effects. Organic does not support the creation of custom
-types or data structures, so all built-in functions and all user-defined functions operate exclusively on the above
-types. The following sections detail the creation and use of these 7 types.
+There are :organic:mono:`5` integral types in Organic: numbers, booleans, constants, strings, and lists. There are also
+:organic:mono:`2` complex types that can be returned by built-in functions: audio sources and effects. Organic does not
+support the creation of custom types or data structures, so all built-in functions and all user-defined functions
+operate exclusively on the above types. The following sections detail the creation and use of these :organic:mono:`7`
+types.
 
 -------
 Numbers
@@ -58,11 +59,11 @@ Constants
 ---------
 
 The first of two types of constants in Organic are note names. As a shortcut for pitches in the Western chromatic scale,
-some frequencies can be written as note names instead of numbers. For example, :code:`a4` refers to the frequency 440
-:term:`Hz <hertz>`, and will be converted to the numeric value :code:`440` during parsing. This means that note names
-can also be used in arithmetic expressions, such as :code:`c2 * 2`, which would produce a frequency twice that of
-:code:`c2`. All note names can optionally include :code:`s` or :code:`f` before the octave number, to indicate a sharp
-or flat note, respectively.
+some frequencies can be written as note names instead of numbers. For example, :code:`a4` refers to the frequency
+:organic:mono:`440` :term:`Hz <hertz>`, and will be converted to the numeric value :organic:mono:`440` during parsing.
+This means that note names can also be used in arithmetic expressions, such as :code:`c2 * 2`, which would produce a
+frequency twice that of :code:`c2`. All note names can optionally include :code:`s` or :code:`f` before the octave
+number, to indicate a sharp or flat note, respectively.
 
 The second type of constant in Organic is an enumeration, which is a set of reserved names that are used to control the
 behavior of specific built-in functions. Enumeration constants cannot be used in arithmetic or boolean expressions, as
@@ -147,10 +148,10 @@ however the standard is to use :term:`kebab case`. For example, the following ar
 Functions
 #########
 
-Functions in Organic are primarily used to create and configure objects of the 3 complex types named in the :ref:`types`
-section above. Because Organic is a declarative language, neither built-in functions nor user-defined functions can have
-side effects; they simply construct and return a value based on the inputs to the function. In Organic, all function
-arguments must be named, but they can appear in any order.
+Functions in Organic are primarily used to create and configure objects of the :organic:mono:`2` complex types named in
+the :ref:`types` section above. Because Organic is a declarative language, neither built-in functions nor user-defined
+functions can have side effects; they simply construct and return a value based on the inputs to the function. In
+Organic, all function arguments must be named, but they can appear in any order.
 
 All functions in Organic return a value, which can optionally be assigned to a variable or used as the input to a
 function. Any function that returns an audio source can also be used directly in the global scope, in which case the

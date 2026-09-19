@@ -13,3 +13,12 @@ dl.organic.input:has(dt.required) {
 dt.required {
   line-height: 1.1em;
 }
+
+code {
+  padding: 0px 0.3em;
+  border-radius: 0.3em;
+}
+
+code.xref {
+  border-bottom: none;
+}

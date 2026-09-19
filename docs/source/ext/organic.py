@@ -7,6 +7,7 @@ from sphinx.addnodes import desc_name
 from sphinx.application import Sphinx
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain
+from sphinx.util.docutils import SphinxRole
 from sphinx.util.typing import ExtensionMetadata
 
 class OrganicFunction(ObjectDescription):
@@ -68,6 +69,10 @@ class OrganicInput(ObjectDescription):
   def add_target_and_index(self, _, signature, signode):
     signode["ids"].append(f"input-{signature}")
 
+class OrganicMono(SphinxRole):
+  def run(self):
+    return [ inline(text = self.text, classes = [ "mono" ]) ], []
+
 class OrganicDomain(Domain):
   name = "organic"
   label = "Organic"
@@ -76,6 +81,10 @@ class OrganicDomain(Domain):
   directives = {
     "function": OrganicFunction,
     "input": OrganicInput
+  }
+
+  roles = {
+    "mono": OrganicMono()
   }
 
   def get_full_qualified_name(self, node):

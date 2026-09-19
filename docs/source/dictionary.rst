@@ -17,14 +17,14 @@ General Constants
 
 :code:`pi`
    A numeric constant, equal to the standard mathematical constant `pi <https://en.wikipedia.org/wiki/Pi>`__, or
-   approximately :code:`3.141592`.
+   approximately :organic:mono:`3.141592`.
 
 :code:`tau`
-   A numeric constant, equal to twice the value of :code:`pi`, or approximately :code:`6.283184`.
+   A numeric constant, equal to twice the value of :code:`pi`, or approximately :organic:mono:`6.283184`.
 
 :code:`e`
-   A numeric constant, equal to the standard mathematical constant
-   `e <https://en.wikipedia.org/wiki/E_(mathematical_constant)>`__, or approximately :code:`2.71828`.
+   A numeric constant, equal to the standard mathematical constant `e
+   <https://en.wikipedia.org/wiki/E_(mathematical_constant)>`__, or approximately :organic:mono:`2.71828`.
 
 :code:`true`, :code:`false`
    These are boolean constants. They can be used in place of conditional statements, such as :code:`frequency < 440`, to
@@ -73,7 +73,8 @@ These constants are used in the :code:`direction` input of the :code:`round` fun
 the :code:`value` input is rounded.
 
 :code:`nearest`
-   Round the value to the nearest whole number. With this option, values ending in .5 will be rounded away from 0.
+   Round the value to the nearest whole number. With this option, values ending in :organic:mono:`.5` will be rounded
+   away from :organic:mono:`0`.
 
 :code:`up`
    Round the value up to the next whole number. This option always rounds in the positive direction, regardless of sign.
@@ -88,8 +89,9 @@ Note Name Constants
 
 These numeric constants can be used to specify frequencies that correspond to the notes in the Western chromatic scale.
 The format is the note name, followed by an optional :code:`s` or :code:`f` to indicate a sharp or flat note,
-respectively, followed by the octave number from 0-9. For example, :code:`a4` refers to A in the 4th octave, or 440
-:term:`Hz <hertz>`, and :code:`fs6` refers to F sharp in the 6th octave, or 1479.98 Hz.
+respectively, followed by the octave number from :organic:mono:`0-9`. For example, :code:`a4` refers to A in the 4th
+octave, or :organic:mono:`440` :term:`Hz <hertz>`, and :code:`fs6` refers to F sharp in the 6th octave, or
+:organic:mono:`1479.98` Hz.
 
 #########
 Functions
@@ -187,8 +189,8 @@ These functions are used to automate the values of other parameters, and can typ
       :type: number
       :default: 0
 
-      Use this input to specify a finite number of repeats. If a number other than :code:`0` is specified, the function
-      will stop after the final repeat.
+      Use this input to specify a finite number of repeats. If a number other than :organic:mono:`0` is specified, the
+      function will stop after the final repeat.
 
 .. organic:function:: random
    :return: number
@@ -344,7 +346,7 @@ These functions are used to automate the values of other parameters, and can typ
 
    Returns the remainder after attempting to divide :code:`value` evenly by :code:`divisor`. If :code:`value` is
    negative, the result will be negative, but the sign of :code:`divisor` does not affect the result. If :code:`divisor`
-   is 0, returns 0. Stops when :code:`value` or :code:`divisor` stops.
+   is equal to :organic:mono:`0`, returns :organic:mono:`0`. Stops when :code:`value` or :code:`divisor` stops.
 
 -------------
 Audio Sources
@@ -367,15 +369,16 @@ These functions are used to create various sources of audio, such as oscillating
       :default: 1
 
       Use this input to increase or decrease the volume of the generated sine wave. Any number greater than or equal to
-      :code:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
+      :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
       :default: 0
 
       Use this input to control the stereo balance of the generated sine wave. Valid values are in the range from
-      :code:`-1` to :code:`1`, where :code:`-1` sends all output to the left speaker and :code:`1` sends all output to
-      the right speaker. If :option:`--mono` is specified, this input has no effect.
+      :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
+      :organic:mono:`1` sends all output to the right speaker. If :option:`--mono` is specified, this input has no
+      effect.
 
    .. organic:input:: effects
       :type: list of effect
@@ -399,15 +402,16 @@ These functions are used to create various sources of audio, such as oscillating
       :default: 1
 
       Use this input to increase or decrease the volume of the generated square wave. Any number greater than or equal
-      to :code:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
+      to :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
       :default: 0
 
       Use this input to control the stereo balance of the generated square wave. Valid values are in the range from
-      :code:`-1` to :code:`1`, where :code:`-1` sends all output to the left speaker and :code:`1` sends all output to
-      the right speaker. If :option:`--mono` is specified, this input has no effect.
+      :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
+      :organic:mono:`1` sends all output to the right speaker. If :option:`--mono` is specified, this input has no
+      effect.
 
    .. organic:input:: effects
       :type: list of effect
@@ -431,15 +435,16 @@ These functions are used to create various sources of audio, such as oscillating
       :default: 1
 
       Use this input to increase or decrease the volume of the generated triangle wave. Any number greater than or equal
-      to :code:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
+      to :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
       :default: 0
 
       Use this input to control the stereo balance of the generated triangle wave. Valid values are in the range from
-      :code:`-1` to :code:`1`, where :code:`-1` sends all output to the left speaker and :code:`1` sends all output to
-      the right speaker. If :option:`--mono` is specified, this input has no effect.
+      :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
+      :organic:mono:`1` sends all output to the right speaker. If :option:`--mono` is specified, this input has no
+      effect.
 
    .. organic:input:: effects
       :type: list of effect
@@ -463,15 +468,16 @@ These functions are used to create various sources of audio, such as oscillating
       :default: 1
 
       Use this input to increase or decrease the volume of the generated saw wave. Any number greater than or equal to
-      :code:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
+      :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
       :default: 0
 
       Use this input to control the stereo balance of the generated saw wave. Valid values are in the range from
-      :code:`-1` to :code:`1`, where :code:`-1` sends all output to the left speaker and :code:`1` sends all output to
-      the right speaker. If :option:`--mono` is specified, this input has no effect.
+      :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
+      :organic:mono:`1` sends all output to the right speaker. If :option:`--mono` is specified, this input has no
+      effect.
 
    .. organic:input:: effects
       :type: list of effect
@@ -491,8 +497,8 @@ These functions are used to create various sources of audio, such as oscillating
       :fillable: phase ~ number
 
    Generates a custom oscillator with the specified :code:`waveform` and :code:`frequency`. The fillable value
-   :code:`phase`, which is a number between :code:`0` and :code:`tau`, can be used in the :code:`waveform` input to
-   return a waveform that is properly synchronized with the phase of the resulting audio source.
+   :code:`phase`, which is a number between :organic:mono:`0` and :code:`tau`, can be used in the :code:`waveform` input
+   to return a waveform that is properly synchronized with the phase of the resulting audio source.
 
    **Optional Inputs**
 
@@ -501,15 +507,16 @@ These functions are used to create various sources of audio, such as oscillating
       :default: 1
 
       Use this input to increase or decrease the volume of the generated wave. Any number greater than or equal to
-      :code:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
+      :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
       :default: 0
 
-      Use this input to control the stereo balance of the generated wave. Valid values are in the range from :code:`-1`
-      to :code:`1`, where :code:`-1` sends all output to the left speaker and :code:`1` sends all output to the right
-      speaker. If :option:`--mono` is specified, this input has no effect.
+      Use this input to control the stereo balance of the generated wave. Valid values are in the range from
+      :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
+      :organic:mono:`1` sends all output to the right speaker. If :option:`--mono` is specified, this input has no
+      effect.
 
    .. organic:input:: effects
       :type: list of effect
@@ -530,15 +537,16 @@ These functions are used to create various sources of audio, such as oscillating
       :default: 1
 
       Use this input to increase or decrease the volume of the generated noise. Any number greater than or equal to
-      :code:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
+      :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
       :default: 0
 
-      Use this input to control the stereo balance of the generated noise. Valid values are in the range from :code:`-1`
-      to :code:`1`, where :code:`-1` sends all output to the left speaker and :code:`1` sends all output to the right
-      speaker. If :option:`--mono` is specified, this input has no effect.
+      Use this input to control the stereo balance of the generated noise. Valid values are in the range from
+      :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
+      :organic:mono:`1` sends all output to the right speaker. If :option:`--mono` is specified, this input has no
+      effect.
 
    .. organic:input:: effects
       :type: list of effect
@@ -561,16 +569,16 @@ These functions are used to create various sources of audio, such as oscillating
       :type: number
       :default: 1
 
-      Use this input to increase or decrease the volume of the sample. Any number greater than or equal to :code:`0` is
-      valid, but extremely high volume values can be dangerous or otherwise undesirable.
+      Use this input to increase or decrease the volume of the sample. Any number greater than or equal to
+      :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
       :default: 0
 
-      Use this input to control the stereo balance of the sample. Valid values are in the range from :code:`-1` to
-      :code:`1`, where :code:`-1` sends all output to the left speaker and :code:`1` sends all output to the right
-      speaker. If :option:`--mono` is specified, this input has no effect.
+      Use this input to control the stereo balance of the sample. Valid values are in the range from :organic:mono:`-1`
+      to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and :organic:mono:`1` sends
+      all output to the right speaker. If :option:`--mono` is specified, this input has no effect.
 
    .. organic:input:: effects
       :type: list of effect
@@ -608,23 +616,24 @@ These functions are used to create various sources of audio, such as oscillating
       :fillable: position ~ number
 
       Use this input to control the amplitude of each grain over the course of its lifetime. The fillable value
-      :code:`position`, which is a number between :code:`0` and :code:`1`, can be used in this input to properly
-      generate the grain shape regardless of its length.
+      :code:`position`, which is a number between :organic:mono:`0` and :organic:mono:`1`, can be used in this input to
+      properly generate the grain shape regardless of its length.
 
    .. organic:input:: volume
       :type: number
       :default: 1
 
       Use this input to increase or decrease the volume of the generated audio. Any number greater than or equal to
-      :code:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
+      :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
       :default: 0
 
-      Use this input to control the stereo balance of the generated audio. Valid values are in the range from :code:`-1`
-      to :code:`1`, where :code:`-1` sends all output to the left speaker and :code:`1` sends all output to the right
-      speaker. If :option:`--mono` is specified, this input has no effect.
+      Use this input to control the stereo balance of the generated audio. Valid values are in the range from
+      :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
+      :organic:mono:`1` sends all output to the right speaker. If :option:`--mono` is specified, this input has no
+      effect.
 
    .. organic:input:: effects
       :type: list of effect
@@ -648,16 +657,16 @@ These functions are used to create various sources of audio, such as oscillating
       :type: number
       :default: 1
 
-      Use this input to increase or decrease the volume of the group. Any number greater than or equal to :code:`0` is
-      valid, but extremely high volume values can be dangerous or otherwise undesirable.
+      Use this input to increase or decrease the volume of the group. Any number greater than or equal to
+      :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
       :default: 0
 
-      Use this input to control the stereo balance of the group. Valid values are in the range from :code:`-1` to
-      :code:`1`, where :code:`-1` sends all output to the left speaker and :code:`1` sends all output to the right
-      speaker. If :option:`--mono` is specified, this input has no effect.
+      Use this input to control the stereo balance of the group. Valid values are in the range from :organic:mono:`-1`
+      to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and :organic:mono:`1` sends
+      all output to the right speaker. If :option:`--mono` is specified, this input has no effect.
 
    .. organic:input:: effects
       :type: list of effect
@@ -684,9 +693,10 @@ source regardless of the function that created it or the values of its inputs.
       :type: number
 
    Applies a delay effect to the target audio source. The :code:`delay` input, specified in milliseconds, defines the
-   length of time before an audio sample is repeated. The :code:`feedback` input, specified as a ratio between :code:`0`
-   and :code:`1`, defines the volume of each delayed sample relative to its original sample. A :code:`feedback` of
-   :code:`0` would result in no audible delay, and a :code:`feedback` of :code:`1` would result in an infinite delay.
+   length of time before an audio sample is repeated. The :code:`feedback` input, specified as a ratio between
+   :organic:mono:`0` and :organic:mono:`1`, defines the volume of each delayed sample relative to its original sample. A
+   :code:`feedback` of :organic:mono:`0` would result in no audible delay, and a :code:`feedback` of :organic:mono:`1`
+   would result in an infinite delay.
 
    **Optional Inputs**
 
@@ -709,9 +719,9 @@ source regardless of the function that created it or the values of its inputs.
    a delay effect, although comb filters are better suited for shorter delays that result in timbral effects, rather
    than longer delays that result in audibly repeated audio. The :code:`delay` input, specified in milliseconds, defines
    the length of time before an audio sample is repeated. The :code:`feedback` input, specified as a ratio between
-   :code:`0` and :code:`1`, defines the volume of each delayed sample relative to its original sample. A
-   :code:`feedback` of :code:`0` would result in no audible filtering, and a :code:`feedback` of :code:`1` would result
-   in a harsher metallic effect.
+   :organic:mono:`0` and :organic:mono:`1`, defines the volume of each delayed sample relative to its original sample. A
+   :code:`feedback` of :organic:mono:`0` would result in no audible filtering, and a :code:`feedback` of
+   :organic:mono:`1` would result in a harsher metallic effect.
 
    **Optional Inputs**
 
@@ -738,8 +748,9 @@ source regardless of the function that created it or the values of its inputs.
       :type: number
       :default: 1
 
-      Use this input to control the ratio of filtered audio to original audio. A value of :code:`0` would result in only
-      the original audio being played, and a value of :code:`1` would result in only the filtered audio being played.
+      Use this input to control the ratio of filtered audio to original audio. A value of :organic:mono:`0` would result
+      in only the original audio being played, and a value of :organic:mono:`1` would result in only the filtered audio
+      being played.
 
 .. organic:function:: low-pass
    :return: effect
@@ -765,8 +776,8 @@ source regardless of the function that created it or the values of its inputs.
       :type: number
       :default: 1
 
-      Use this input to control the ratio of echoes to original audio. A value of :code:`0` would result in only the
-      original audio being played, and a value of :code:`1` would result in only the echoes being played.
+      Use this input to control the ratio of echoes to original audio. A value of :organic:mono:`0` would result in only
+      the original audio being played, and a value of :organic:mono:`1` would result in only the echoes being played.
 
 .. organic:function:: effect-group
    :return: effect
@@ -783,8 +794,9 @@ source regardless of the function that created it or the values of its inputs.
       :type: number
       :default: 1
 
-      Use this input to control the ratio of effects to original audio. A value of :code:`0` would result in only the
-      original audio being played, and a value of :code:`1` would result in only the composite effect being played.
+      Use this input to control the ratio of effects to original audio. A value of :organic:mono:`0` would result in
+      only the original audio being played, and a value of :organic:mono:`1` would result in only the composite effect
+      being played.
 
 -----------------
 Special Functions
