@@ -58,11 +58,11 @@ Option Details
 
 .. option:: --buffer-length <number>
 
-   Use the provided buffer length for audio output. If not specified, the buffer length will be 128 samples. Specifying
-   a shorter buffer length can improve latency, usually at the cost of performance.
+   Use the provided buffer length for audio output. If not specified, the buffer length will be :organic:mono:`128`
+   samples. Specifying a shorter buffer length can improve latency, usually at the cost of performance.
 
 .. option:: --sample-rate <number>
 
-   Use the provided sample rate. If not specified, the sample rate will be 44100 :term:`Hz <hertz>`. Specifying a lower
-   sample rate can improve performance significantly, but it will also decrease the quality of the resulting audio
-   output.
+   Use the provided sample rate. If not specified, the sample rate will be :organic:mono:`44100` :term:`Hz <hertz>`.
+   Specifying a lower sample rate can improve performance significantly, but it will also decrease the quality of the
+   resulting audio output.

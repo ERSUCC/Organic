@@ -50,8 +50,8 @@ this website.
 Writing your first Organic program
 ##################################
 
-If you've made it here, congratulations! You're now ready to write your first Organic program. As a first example,
-we'll make a simple sine wave at 440 :term:`Hz <hertz>`. In Organic, this looks like the following:
+If you've made it here, congratulations! You're now ready to write your first Organic program. As a first example, we'll
+make a simple sine wave at :organic:mono:`440` :term:`Hz <hertz>`. In Organic, this looks like the following:
 
 .. code-block::
 

@@ -29,8 +29,9 @@ sections of the documentation. The entries are organized in alphabetic order for
       Hertz, often abbreviated as Hz, are a unit of measurement of the frequency or pitch of a sound. Hertz are
       equivalent to "times per second", when referring to the oscillations of a sound wave. In Organic, all numeric
       frequency values are specified in Hertz, but you can also use note names such as :code:`c3` or :code:`gf2` to
-      refer to notes in the Western chromatic scale. For example, the numeric frequency :code:`440` is equivalent to the
-      note name :code:`a4`, and they can be used interchangeably when specifying the frequency of an audio source.
+      refer to notes in the Western chromatic scale. For example, the numeric frequency :organic:mono:`440` is
+      equivalent to the note name :code:`a4`, and they can be used interchangeably when specifying the frequency of an
+      audio source.
 
    Kebab Case
       When writing code, there are a variety of ways to use case and separate words within names. The standard in
