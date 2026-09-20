@@ -21,23 +21,23 @@ sections of the documentation. The entries are organized in alphabetic order for
 
    Case-sensitive
       Like most programming languages, Organic is case-sensitive, which means that it matters whether you use capital or
-      lowercase letters when writing a program. For example, if something is named :code:`test` and you try to use it by
-      typing :code:`TEST`, Organic will tell you that the name does not exist. Although it is not a strict requirement,
-      the standard for Organic programs is to use :term:`kebab case` for all names.
+      lowercase letters when writing a program. For example, if something is named :organic:code:`test` and you try to
+      use it by typing :organic:code:`TEST`, Organic will tell you that the name does not exist. Although it is not a
+      strict requirement, the standard for Organic programs is to use :term:`kebab case` for all names.
 
    Hertz
       Hertz, often abbreviated as Hz, are a unit of measurement of the frequency or pitch of a sound. Hertz are
       equivalent to "times per second", when referring to the oscillations of a sound wave. In Organic, all numeric
-      frequency values are specified in Hertz, but you can also use note names such as :code:`c3` or :code:`gf2` to
-      refer to notes in the Western chromatic scale. For example, the numeric frequency :organic:mono:`440` is
-      equivalent to the note name :code:`a4`, and they can be used interchangeably when specifying the frequency of an
-      audio source.
+      frequency values are specified in Hertz, but you can also use note names such as :organic:code:`c3` or
+      :organic:code:`gf2` to refer to notes in the Western chromatic scale. For example, the numeric frequency
+      :organic:mono:`440` is equivalent to the note name :organic:code:`a4`, and they can be used interchangeably when
+      specifying the frequency of an audio source.
 
    Kebab Case
       When writing code, there are a variety of ways to use case and separate words within names. The standard in
       Organic programs is to use kebab case, which uses all lowercase letters and separates words with hyphens. Names
-      that use kebab case can have just one word, such as :code:`test`, or they can have multiple words, such as
-      :code:`things-and-stuff`.
+      that use kebab case can have just one word, such as :organic:code:`test`, or they can have multiple words, such as
+      :organic:code:`things-and-stuff`.
 
    Timbre
       Timbre is the quality, or color, of a sound. Timbre is defined by the relative strength of specific high and low

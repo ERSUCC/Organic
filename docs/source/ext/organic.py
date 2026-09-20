@@ -49,7 +49,7 @@ class OrganicInput(ObjectDescription):
 
     if "default" in self.options:
       node.append(Text(" = "))
-      node.append(literal(text = self.options["default"]))
+      node.extend(self.parse_inline(self.options["default"])[0])
     else:
       signode["classes"].append("required")
 
@@ -69,6 +69,20 @@ class OrganicInput(ObjectDescription):
   def add_target_and_index(self, _, signature, signode):
     signode["ids"].append(f"input-{signature}")
 
+class OrganicFunctionHighlight(SphinxRole):
+  def run(self):
+    node = literal(classes = [
+      "code",
+      "highlight",
+      "organic-code",
+      "organic",
+      "highlight-organic"
+    ])
+
+    node.append(inline(text = self.text, classes = [ "nf" ]))
+
+    return [ node ], []
+
 class OrganicMono(SphinxRole):
   def run(self):
     return [ inline(text = self.text, classes = [ "mono" ]) ], []
@@ -84,7 +98,8 @@ class OrganicDomain(Domain):
   }
 
   roles = {
-    "mono": OrganicMono()
+    "mono": OrganicMono(),
+    "code:function": OrganicFunctionHighlight()
   }
 
   def get_full_qualified_name(self, node):

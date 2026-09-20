@@ -35,35 +35,35 @@ numbers:
 
 Organic supports the following arithmetic operators, all used as infix operators:
 
-* :code:`+` (Add)
-* :code:`-` (Subtract)
-* :code:`*` (Multiply)
-* :code:`/` (Divide)
-* :code:`^` (Power)
+* :organic:code:`+` (Add)
+* :organic:code:`-` (Subtract)
+* :organic:code:`*` (Multiply)
+* :organic:code:`/` (Divide)
+* :organic:code:`^` (Power)
 
 --------
 Booleans
 --------
 
-Organic supports the boolean literals :code:`true` and :code:`false`, as well as the following boolean operators, all
-used as infix operators:
+Organic supports the boolean literals :organic:code:`true` and :organic:code:`false`, as well as the following boolean
+operators, all used as infix operators:
 
-* :code:`<` (Less than)
-* :code:`>` (Greater than)
-* :code:`<=` (Less than or equal to)
-* :code:`>=` (Greater than or equal to)
-* :code:`==` (Equal to)
+* :organic:code:`<` (Less than)
+* :organic:code:`>` (Greater than)
+* :organic:code:`<=` (Less than or equal to)
+* :organic:code:`>=` (Greater than or equal to)
+* :organic:code:`==` (Equal to)
 
 ---------
 Constants
 ---------
 
 The first of two types of constants in Organic are note names. As a shortcut for pitches in the Western chromatic scale,
-some frequencies can be written as note names instead of numbers. For example, :code:`a4` refers to the frequency
-:organic:mono:`440` :term:`Hz <hertz>`, and will be converted to the numeric value :organic:mono:`440` during parsing.
-This means that note names can also be used in arithmetic expressions, such as :code:`c2 * 2`, which would produce a
-frequency twice that of :code:`c2`. All note names can optionally include :code:`s` or :code:`f` before the octave
-number, to indicate a sharp or flat note, respectively.
+some frequencies can be written as note names instead of numbers. For example, :organic:code:`a4` refers to the
+frequency :organic:mono:`440` :term:`Hz <hertz>`, and will be converted to the numeric value :organic:code:`440` during
+parsing. This means that note names can also be used in arithmetic expressions, such as :organic:code:`c2 * 2`, which
+would produce a frequency twice that of :organic:code:`c2`. All note names can optionally include :code:`s` or :code:`f`
+before the octave number, to indicate a sharp or flat note, respectively.
 
 The second type of constant in Organic is an enumeration, which is a set of reserved names that are used to control the
 behavior of specific built-in functions. Enumeration constants cannot be used in arithmetic or boolean expressions, as
@@ -113,17 +113,18 @@ Audio Sources
 
 Audio sources are the most important type in Organic, because they are the values that actually produce audio output.
 Audio sources can be stored in variables or returned from functions, but are only sent to output if returned into the
-global scope. Audio sources are not an integral type, so they must be created using built-in functions like :code:`sine`
-and :code:`saw`.
+global scope. Audio sources are not an integral type, so they must be created using built-in functions like
+:organic:code:function:`sine` and :organic:code:function:`saw`.
 
 -------
 Effects
 -------
 
 Effects are used to manipulate the raw audio output of audio sources, and are therefore only valid when used in the
-context of an audio source. All built-in functions that return an audio source have an optional :code:`effects` input,
-with which you can specify a list of effects that you would like to apply to that audio source. Effects are not an
-integral type, so they must be created using built-in functions like :code:`delay` and :code:`reverb`.
+context of an audio source. All built-in functions that return an audio source have an optional :organic:code:`effects`
+input, with which you can specify a list of effects that you would like to apply to that audio source. Effects are not
+an integral type, so they must be created using built-in functions like :organic:code:function:`delay` and
+:organic:code:function:`reverb`.
 
 #########
 Variables
@@ -179,12 +180,12 @@ you know what its length will be, so that you can prevent unintended silences or
 If a function nested inside another function stops before the surrounding function does, the nested function will switch
 to a reasonable default value based on its type. The default value for each type is as follows:
 
-- Number: :code:`0`
-- Boolean: :code:`false`
-- Sequence Order: :code:`forward`
-- Random Type: :code:`stay`
-- Round Direction: :code:`nearest`
-- String: :code:`""`
-- List: :code:`[]`
+- Number: :organic:code:`0`
+- Boolean: :organic:code:`false`
+- Sequence Order: :organic:code:`forward`
+- Random Type: :organic:code:`stay`
+- Round Direction: :organic:code:`nearest`
+- String: :organic:code:`""`
+- List: :organic:code:`[]`
 - Audio Source: Silence
 - Effect: No effect

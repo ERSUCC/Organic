@@ -24,3 +24,8 @@ highlight_language = "organic"
 pygments_style = "organic"
 
 extensions = [ "organic" ]
+
+rst_prolog = """
+.. role:: organic:code(code)
+   :language: organic
+"""

@@ -15,20 +15,20 @@ values or create a new variable with the same name as a constant.
 General Constants
 -----------------
 
-:code:`pi`
+:organic:code:`pi`
    A numeric constant, equal to the standard mathematical constant `pi <https://en.wikipedia.org/wiki/Pi>`__, or
    approximately :organic:mono:`3.141592`.
 
-:code:`tau`
-   A numeric constant, equal to twice the value of :code:`pi`, or approximately :organic:mono:`6.283184`.
+:organic:code:`tau`
+   A numeric constant, equal to twice the value of :organic:code:`pi`, or approximately :organic:mono:`6.283184`.
 
-:code:`e`
+:organic:code:`e`
    A numeric constant, equal to the standard mathematical constant `e
    <https://en.wikipedia.org/wiki/E_(mathematical_constant)>`__, or approximately :organic:mono:`2.71828`.
 
-:code:`true`, :code:`false`
-   These are boolean constants. They can be used in place of conditional statements, such as :code:`frequency < 440`, to
-   represent a conditional that does not change.
+:organic:code:`true`, :organic:code:`false`
+   These are boolean constants. They can be used in place of conditional statements, such as
+   :organic:code:`frequency < 440`, to represent a conditional that does not change.
 
 .. _sequence-order:
 
@@ -36,16 +36,16 @@ General Constants
 Sequence Order Constants
 ------------------------
 
-These constants are used in the :code:`order` input of the :code:`sequence` function, to control the order in which the
-values in the sequence are traversed.
+These constants are used in the :organic:code:`order` input of the :organic:code:function:`sequence` function, to
+control the order in which the values in the sequence are traversed.
 
-:code:`forward`
+:organic:code:`forward`
    Traverse the values in the order they are specified.
 
-:code:`backward`
+:organic:code:`backward`
    Traverse the values in the opposite order from which they are specified.
 
-:code:`shuffle`
+:organic:code:`shuffle`
    Traverse the values in random order, with no repeated values.
 
 .. _random-type:
@@ -54,13 +54,13 @@ values in the sequence are traversed.
 Random Type Constants
 ---------------------
 
-These constants are used in the :code:`type` input of the :code:`random` function, to control how the returned value
-changes in between random number selections.
+These constants are used in the :organic:code:`type` input of the :organic:code:function:`random` function, to control
+how the returned value changes in between random number selections.
 
-:code:`stay`
+:organic:code:`stay`
    Keep the returned value constant until the next selection.
 
-:code:`linear`
+:organic:code:`linear`
    Linearly interpolate the returned value between the current selection and the next selection.
 
 .. _round-direction:
@@ -69,17 +69,17 @@ changes in between random number selections.
 Round Direction Constants
 -------------------------
 
-These constants are used in the :code:`direction` input of the :code:`round` function, to control the direction in which
-the :code:`value` input is rounded.
+These constants are used in the :organic:code:`direction` input of the :organic:code:function:`round` function, to
+control the direction in which the :organic:code:`value` input is rounded.
 
-:code:`nearest`
+:organic:code:`nearest`
    Round the value to the nearest whole number. With this option, values ending in :organic:mono:`.5` will be rounded
    away from :organic:mono:`0`.
 
-:code:`up`
+:organic:code:`up`
    Round the value up to the next whole number. This option always rounds in the positive direction, regardless of sign.
 
-:code:`down`
+:organic:code:`down`
    Round the value down to the previous whole number. This option always rounds in the negative direction, regardless of
    sign.
 
@@ -89,8 +89,8 @@ Note Name Constants
 
 These numeric constants can be used to specify frequencies that correspond to the notes in the Western chromatic scale.
 The format is the note name, followed by an optional :code:`s` or :code:`f` to indicate a sharp or flat note,
-respectively, followed by the octave number from :organic:mono:`0-9`. For example, :code:`a4` refers to A in the 4th
-octave, or :organic:mono:`440` :term:`Hz <hertz>`, and :code:`fs6` refers to F sharp in the 6th octave, or
+respectively, followed by the octave number from :organic:mono:`0-9`. For example, :organic:code:`a4` refers to A in the
+4th octave, or :organic:mono:`440` :term:`Hz <hertz>`, and :organic:code:`fs6` refers to F sharp in the 6th octave, or
 :organic:mono:`1479.98` Hz.
 
 #########
@@ -116,7 +116,7 @@ These functions are used to automate the values of other parameters, and can typ
    Returns the time in milliseconds since the start of the program.
 
 .. organic:function:: hold
-   :return: type of :code:`value`
+   :return: type of :organic:code:`value`
 
    .. organic:input:: value
       :type: anything
@@ -124,7 +124,7 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: length
       :type: number
 
-   Returns :code:`value` for :code:`length` milliseconds, then stops.
+   Returns :organic:code:`value` for :organic:code:`length` milliseconds, then stops.
 
 .. organic:function:: lfo
    :return: number
@@ -138,8 +138,8 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: length
       :type: number
 
-   Generates a sinusoidal interpolation between :code:`from` and :code:`to`, with a period equal to :code:`length`
-   milliseconds. Stops after one period is completed.
+   Generates a sinusoidal interpolation between :organic:code:`from` and :organic:code:`to`, with a period equal to
+   :organic:code:`length` milliseconds. Stops after one period is completed.
 
 .. organic:function:: sweep
    :return: number
@@ -153,41 +153,41 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: length
       :type: number
 
-   Generates a linear interpolation between :code:`from` and :code:`to`, lasting for :code:`length` milliseconds. Stops
-   after reaching :code:`to`.
+   Generates a linear interpolation between :organic:code:`from` and :organic:code:`to`, lasting for
+   :organic:code:`length` milliseconds. Stops after reaching :organic:code:`to`.
 
 .. organic:function:: sequence
-   :return: type of :code:`values`
+   :return: type of :organic:code:`values`
 
    .. organic:input:: values
       :type: list of anything
 
-   Steps through :code:`values` one value at a time, waiting until each value stops before moving on to the next. Stops
-   after each value has been completed once.
+   Steps through :organic:code:`values` one value at a time, waiting until each value stops before moving on to the
+   next. Stops after each value has been completed once.
 
    **Optional Inputs**
 
    .. organic:input:: order
-      :type: :code:`forward` | :code:`backward` | :code:`shuffle`
-      :default: forward
+      :type: :organic:code:`forward` | :organic:code:`backward` | :organic:code:`shuffle`
+      :default: :organic:code:`forward`
 
       Use this input to control the order in which the specified values are traversed. Note that the function will stop
       if the value specified for this input stops. See :ref:`sequence-order` for details on the constants used in this
       input.
 
 .. organic:function:: repeat
-   :return: type of :code:`value`
+   :return: type of :organic:code:`value`
 
    .. organic:input:: value
       :type: anything
 
-   Restarts :code:`value` when it stops. By default, this causes :code:`value` to repeat infinitely.
+   Restarts :organic:code:`value` when it stops. By default, this causes :organic:code:`value` to repeat infinitely.
 
    **Optional Inputs**
 
    .. organic:input:: repeats
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to specify a finite number of repeats. If a number other than :organic:mono:`0` is specified, the
       function will stop after the final repeat.
@@ -204,14 +204,14 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: length
       :type: number
 
-   Generates a random number between :code:`from` and :code:`to`, holding it for :code:`length` milliseconds. Stops
-   after :code:`length` milliseconds have elapsed.
+   Generates a random number between :organic:code:`from` and :organic:code:`to`, holding it for :organic:code:`length`
+   milliseconds. Stops after :organic:code:`length` milliseconds have elapsed.
 
    **Optional Inputs**
 
    .. organic:input:: type
-      :type: :code:`stay` | :code:`linear`
-      :default: stay
+      :type: :organic:code:`stay` | :organic:code:`linear`
+      :default: :organic:code:`stay`
 
       Use this input to control the behavior of the returned value during the length of the function. See
       :ref:`random-type` for details on the constants used in this input.
@@ -228,12 +228,13 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: max
       :type: number
 
-   Restricts :code:`value` to the inclusive range between :code:`min` and :code:`max`. A number is always returned, but
-   if :code:`value` goes below :code:`min` or above :code:`max`, the corresponding bound is returned instead of the
-   original :code:`value`. Stops when :code:`value` stops.
+   Restricts :organic:code:`value` to the inclusive range between :organic:code:`min` and :organic:code:`max`. A number
+   is always returned, but if :organic:code:`value` goes below :organic:code:`min` or above :organic:code:`max`, the
+   corresponding bound is returned instead of the original :organic:code:`value`. Stops when :organic:code:`value`
+   stops.
 
 .. organic:function:: trigger
-   :return: type of :code:`value`
+   :return: type of :organic:code:`value`
 
    .. organic:input:: value
       :type: anything
@@ -241,11 +242,11 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: condition
       :type: boolean
 
-   Waits until :code:`condition` becomes :code:`true`, then starts and returns :code:`value`. Stops after :code:`value`
-   has started and completed.
+   Waits until :organic:code:`condition` becomes :organic:code:`true`, then starts and returns :organic:code:`value`.
+   Stops after :organic:code:`value` has started and completed.
 
 .. organic:function:: if
-   :return: type of :code:`if-true`
+   :return: type of :organic:code:`if-true`
 
    .. organic:input:: condition
       :type: boolean
@@ -254,11 +255,11 @@ These functions are used to automate the values of other parameters, and can typ
       :type: anything
 
    .. organic:input:: if-false
-      :type: type of :code:`if-true`
+      :type: type of :organic:code:`if-true`
 
-   Returns :code:`if-true` if :code:`condition` evaluates to :code:`true`, otherwise returns :code:`if-false`.
-   :code:`if-true` and :code:`if-false` can be of any type, as long as they are both of the same type. Stops after
-   :code:`condition` stops.
+   Returns :organic:code:`if-true` if :organic:code:`condition` evaluates to :organic:code:`true`, otherwise returns
+   :organic:code:`if-false`. :organic:code:`if-true` and :organic:code:`if-false` can be of any type, as long as they
+   are both of the same type. Stops after :organic:code:`condition` stops.
 
 .. organic:function:: all
    :return: boolean
@@ -266,8 +267,8 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: values
       :type: list of boolean
 
-   Returns :code:`true` if all items in :code:`values` evaluate to :code:`true`, otherwise returns :code:`false`. Stops
-   when any item in :code:`values` stops.
+   Returns :organic:code:`true` if all items in :organic:code:`values` evaluate to :organic:code:`true`, otherwise
+   returns :organic:code:`false`. Stops when any item in :organic:code:`values` stops.
 
 .. organic:function:: any
    :return: boolean
@@ -275,8 +276,8 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: values
       :type: list of boolean
 
-   Returns :code:`true` if any item in :code:`values` evaluates to :code:`true`, otherwise returns :code:`false`. Stops
-   when any item in :code:`values` stops.
+   Returns :organic:code:`true` if any item in :organic:code:`values` evaluates to :organic:code:`true`, otherwise
+   returns :organic:code:`false`. Stops when any item in :organic:code:`values` stops.
 
 .. organic:function:: none
    :return: boolean
@@ -284,8 +285,8 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: values
       :type: list of boolean
 
-   Returns :code:`true` if all items in :code:`values` evaluate to :code:`false`, otherwise returns :code:`false`. Stops
-   when any item in :code:`values` stops.
+   Returns :organic:code:`true` if all items in :organic:code:`values` evaluate to :organic:code:`false`, otherwise
+   returns :organic:code:`false`. Stops when any item in :organic:code:`values` stops.
 
 .. organic:function:: min
    :return: number
@@ -293,7 +294,7 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: values
       :type: list of number
 
-   Returns the minimum value in :code:`values`. Stops when any item in :code:`values` stops.
+   Returns the minimum value in :organic:code:`values`. Stops when any item in :organic:code:`values` stops.
 
 .. organic:function:: min
    :return: number
@@ -301,7 +302,7 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: values
       :type: list of number
 
-   Returns the maximum value in :code:`values`. Stops when any item in :code:`values` stops.
+   Returns the maximum value in :organic:code:`values`. Stops when any item in :organic:code:`values` stops.
 
 .. organic:function:: round
    :return: number
@@ -309,22 +310,22 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: value
       :type: number
 
-   Rounds :code:`value` to the nearest whole number. Stops when :code:`value` stops.
+   Rounds :organic:code:`value` to the nearest whole number. Stops when :organic:code:`value` stops.
 
    **Optional Inputs**
 
    .. organic:input:: step
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to round to increments other than whole numbers.
 
    .. organic:input:: direction
-      :type: :code:`nearest` | :code:`up` | :code:`down`
-      :default: nearest
+      :type: :organic:code:`nearest` | :organic:code:`up` | :organic:code:`down`
+      :default: :organic:code:`nearest`
 
-      Use this input to control the direction in which :code:`value` is rounded. See :ref:`round-direction` for details
-      on the constants used in this input.
+      Use this input to control the direction in which :organic:code:`value` is rounded. See :ref:`round-direction` for
+      details on the constants used in this input.
 
 .. organic:function:: absolute
    :return: number
@@ -332,8 +333,8 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: value
       :type: number
 
-   Returns the `absolute value <https://en.wikipedia.org/wiki/Absolute_value_(algebra)>`__ of :code:`value`. Stops when
-   :code:`value` stops.
+   Returns the `absolute value <https://en.wikipedia.org/wiki/Absolute_value_(algebra)>`__ of :organic:code:`value`.
+   Stops when :organic:code:`value` stops.
 
 .. organic:function:: modulo
    :return: number
@@ -344,9 +345,10 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: divisor
       :type: number
 
-   Returns the remainder after attempting to divide :code:`value` evenly by :code:`divisor`. If :code:`value` is
-   negative, the result will be negative, but the sign of :code:`divisor` does not affect the result. If :code:`divisor`
-   is equal to :organic:mono:`0`, returns :organic:mono:`0`. Stops when :code:`value` or :code:`divisor` stops.
+   Returns the remainder after attempting to divide :organic:code:`value` evenly by :organic:code:`divisor`. If
+   :organic:code:`value` is negative, the result will be negative, but the sign of :organic:code:`divisor` does not
+   affect the result. If :organic:code:`divisor` is equal to :organic:mono:`0`, returns :organic:mono:`0`. Stops when
+   :organic:code:`value` or :organic:code:`divisor` stops.
 
 -------------
 Audio Sources
@@ -366,14 +368,14 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: volume
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to increase or decrease the volume of the generated sine wave. Any number greater than or equal to
       :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the stereo balance of the generated sine wave. Valid values are in the range from
       :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
@@ -382,7 +384,7 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: effects
       :type: list of effect
-      :default: []
+      :default: :organic:code:`[]`
 
       Use this input to apply audio effects to the generated sine wave. Effects will be applied in the order they are
       specified in this input.
@@ -399,14 +401,14 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: volume
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to increase or decrease the volume of the generated square wave. Any number greater than or equal
       to :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the stereo balance of the generated square wave. Valid values are in the range from
       :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
@@ -415,7 +417,7 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: effects
       :type: list of effect
-      :default: []
+      :default: :organic:code:`[]`
 
       Use this input to apply audio effects to the generated square wave. Effects will be applied in the order they are
       specified in this input.
@@ -432,14 +434,14 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: volume
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to increase or decrease the volume of the generated triangle wave. Any number greater than or equal
       to :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the stereo balance of the generated triangle wave. Valid values are in the range from
       :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
@@ -448,7 +450,7 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: effects
       :type: list of effect
-      :default: []
+      :default: :organic:code:`[]`
 
       Use this input to apply audio effects to the generated triangle wave. Effects will be applied in the order they
       are specified in this input.
@@ -465,14 +467,14 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: volume
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to increase or decrease the volume of the generated saw wave. Any number greater than or equal to
       :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the stereo balance of the generated saw wave. Valid values are in the range from
       :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
@@ -481,7 +483,7 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: effects
       :type: list of effect
-      :default: []
+      :default: :organic:code:`[]`
 
       Use this input to apply audio effects to the generated saw wave. Effects will be applied in the order they are
       specified in this input.
@@ -496,22 +498,23 @@ These functions are used to create various sources of audio, such as oscillating
       :type: number
       :fillable: phase ~ number
 
-   Generates a custom oscillator with the specified :code:`waveform` and :code:`frequency`. The fillable value
-   :code:`phase`, which is a number between :organic:mono:`0` and :code:`tau`, can be used in the :code:`waveform` input
-   to return a waveform that is properly synchronized with the phase of the resulting audio source.
+   Generates a custom oscillator with the specified :organic:code:`waveform` and :organic:code:`frequency`. The fillable
+   value :organic:code:`phase`, which is a number between :organic:mono:`0` and :organic:code:`tau`, can be used in the
+   :organic:code:`waveform` input to return a waveform that is properly synchronized with the phase of the resulting
+   audio source.
 
    **Optional Inputs**
 
    .. organic:input:: volume
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to increase or decrease the volume of the generated wave. Any number greater than or equal to
       :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the stereo balance of the generated wave. Valid values are in the range from
       :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
@@ -520,7 +523,7 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: effects
       :type: list of effect
-      :default: []
+      :default: :organic:code:`[]`
 
       Use this input to apply audio effects to the generated wave. Effects will be applied in the order they are
       specified in this input.
@@ -534,14 +537,14 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: volume
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to increase or decrease the volume of the generated noise. Any number greater than or equal to
       :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the stereo balance of the generated noise. Valid values are in the range from
       :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
@@ -550,7 +553,7 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: effects
       :type: list of effect
-      :default: []
+      :default: :organic:code:`[]`
 
       Use this input to apply audio effects to the generated noise. Effects will be applied in the order they are
       specified in this input.
@@ -567,14 +570,14 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: volume
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to increase or decrease the volume of the sample. Any number greater than or equal to
       :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the stereo balance of the sample. Valid values are in the range from :organic:mono:`-1`
       to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and :organic:mono:`1` sends
@@ -582,7 +585,7 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: effects
       :type: list of effect
-      :default: []
+      :default: :organic:code:`[]`
 
       Use this input to apply audio effects to the sample. Effects will be applied in the order they are specified in
       this input.
@@ -594,41 +597,41 @@ These functions are used to create various sources of audio, such as oscillating
       :type: string
 
    Performs `granular synthesis <https://en.wikipedia.org/wiki/Granular_synthesis>`__, using the audio file specified in
-   the :code:`sample` input as the source for audio samples.
+   the :organic:code:`sample` input as the source for audio samples.
 
    **Optional Inputs**
 
    .. organic:input:: length
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the length of each grain, specified in milliseconds.
 
    .. organic:input:: grains
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to control the number of grains playing at the same time.
 
    .. organic:input:: shape
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
       :fillable: position ~ number
 
       Use this input to control the amplitude of each grain over the course of its lifetime. The fillable value
-      :code:`position`, which is a number between :organic:mono:`0` and :organic:mono:`1`, can be used in this input to
-      properly generate the grain shape regardless of its length.
+      :organic:code:`position`, which is a number between :organic:mono:`0` and :organic:mono:`1`, can be used in this
+      input to properly generate the grain shape regardless of its length.
 
    .. organic:input:: volume
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to increase or decrease the volume of the generated audio. Any number greater than or equal to
       :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the stereo balance of the generated audio. Valid values are in the range from
       :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
@@ -637,7 +640,7 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: effects
       :type: list of effect
-      :default: []
+      :default: :organic:code:`[]`
 
       Use this input to apply audio effects to the generated audio. Effects will be applied in the order they are
       specified in this input.
@@ -655,14 +658,14 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: volume
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to increase or decrease the volume of the group. Any number greater than or equal to
       :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
 
    .. organic:input:: pan
       :type: number
-      :default: 0
+      :default: :organic:code:`0`
 
       Use this input to control the stereo balance of the group. Valid values are in the range from :organic:mono:`-1`
       to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and :organic:mono:`1` sends
@@ -670,7 +673,7 @@ These functions are used to create various sources of audio, such as oscillating
 
    .. organic:input:: effects
       :type: list of effect
-      :default: []
+      :default: :organic:code:`[]`
 
       Use this input to apply audio effects to the group. Effects will be applied in the order they are specified in
       this input.
@@ -692,19 +695,20 @@ source regardless of the function that created it or the values of its inputs.
    .. organic:input:: feedback
       :type: number
 
-   Applies a delay effect to the target audio source. The :code:`delay` input, specified in milliseconds, defines the
-   length of time before an audio sample is repeated. The :code:`feedback` input, specified as a ratio between
-   :organic:mono:`0` and :organic:mono:`1`, defines the volume of each delayed sample relative to its original sample. A
-   :code:`feedback` of :organic:mono:`0` would result in no audible delay, and a :code:`feedback` of :organic:mono:`1`
-   would result in an infinite delay.
+   Applies a delay effect to the target audio source. The :organic:code:`delay` input, specified in milliseconds,
+   defines the length of time before an audio sample is repeated. The :organic:code:`feedback` input, specified as a
+   ratio between :organic:mono:`0` and :organic:mono:`1`, defines the volume of each delayed sample relative to its
+   original sample. A :organic:code:`feedback` of :organic:mono:`0` would result in no audible delay, and a
+   :organic:code:`feedback` of :organic:mono:`1` would result in an infinite delay.
 
    **Optional Inputs**
 
    .. organic:input:: mix
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
-      Use this input to control the overall volume of the delayed samples, regardless of the value of :code:`feedback`.
+      Use this input to control the overall volume of the delayed samples, regardless of the value of
+      :organic:code:`feedback`.
 
 .. organic:function:: comb
    :return: effect
@@ -717,19 +721,20 @@ source regardless of the function that created it or the values of its inputs.
 
    Applies a `comb filter <https://en.wikipedia.org/wiki/Comb_filter>`__ to the target audio source. This is similar to
    a delay effect, although comb filters are better suited for shorter delays that result in timbral effects, rather
-   than longer delays that result in audibly repeated audio. The :code:`delay` input, specified in milliseconds, defines
-   the length of time before an audio sample is repeated. The :code:`feedback` input, specified as a ratio between
-   :organic:mono:`0` and :organic:mono:`1`, defines the volume of each delayed sample relative to its original sample. A
-   :code:`feedback` of :organic:mono:`0` would result in no audible filtering, and a :code:`feedback` of
-   :organic:mono:`1` would result in a harsher metallic effect.
+   than longer delays that result in audibly repeated audio. The :organic:code:`delay` input, specified in milliseconds,
+   defines the length of time before an audio sample is repeated. The :organic:code:`feedback` input, specified as a
+   ratio between :organic:mono:`0` and :organic:mono:`1`, defines the volume of each delayed sample relative to its
+   original sample. A :organic:code:`feedback` of :organic:mono:`0` would result in no audible filtering, and a
+   :organic:code:`feedback` of :organic:mono:`1` would result in a harsher metallic effect.
 
    **Optional Inputs**
 
    .. organic:input:: mix
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
-      Use this input to control the overall volume of the delayed samples, regardless of the value of :code:`feedback`.
+      Use this input to control the overall volume of the delayed samples, regardless of the value of
+      :organic:code:`feedback`.
 
 .. organic:function:: all-pass
    :return: effect
@@ -746,7 +751,7 @@ source regardless of the function that created it or the values of its inputs.
 
    .. organic:input:: mix
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to control the ratio of filtered audio to original audio. A value of :organic:mono:`0` would result
       in only the original audio being played, and a value of :organic:mono:`1` would result in only the filtered audio
@@ -759,7 +764,7 @@ source regardless of the function that created it or the values of its inputs.
       :type: number
 
    Applies a `low-pass filter <https://en.wikipedia.org/wiki/Low-pass_filter>`__ to the target audio source. The
-   :code:`threshold` input defines the maximum frequency in Hz that is allowed to pass through the filter.
+   :organic:code:`threshold` input defines the maximum frequency in Hz that is allowed to pass through the filter.
 
 .. organic:function:: reverb
    :return: effect
@@ -768,13 +773,13 @@ source regardless of the function that created it or the values of its inputs.
       :type: number
 
    Applies a `reverb effect <https://en.wikipedia.org/wiki/Reverb_effect>`__ to the target audio source. The
-   :code:`length` input defines the length of the echoes resulting from an initial sound.
+   :organic:code:`length` input defines the length of the echoes resulting from an initial sound.
 
    **Optional Inputs**
 
    .. organic:input:: mix
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to control the ratio of echoes to original audio. A value of :organic:mono:`0` would result in only
       the original audio being played, and a value of :organic:mono:`1` would result in only the echoes being played.
@@ -792,7 +797,7 @@ source regardless of the function that created it or the values of its inputs.
 
    .. organic:input:: mix
       :type: number
-      :default: 1
+      :default: :organic:code:`1`
 
       Use this input to control the ratio of effects to original audio. A value of :organic:mono:`0` would result in
       only the original audio being played, and a value of :organic:mono:`1` would result in only the composite effect
@@ -807,9 +812,10 @@ These functions do not fall into another category, either due to their usage or 
 .. organic:function:: include
 
    This function allows you to include the contents of another Organic program file in the current program. You can
-   include more than one Organic program using multiple :code:`include` instructions, however all includes must be
-   placed before any other instructions in the program. The :code:`include` function is not used like a normal function;
-   it is written with the desired file path written as a string directly in the function's parentheses. For example:
+   include more than one Organic program using multiple :organic:code:function:`include` instructions, however all
+   includes must be placed before any other instructions in the program. The :organic:code:function:`include` function
+   is not used like a normal function; it is written with the desired file path written as a string directly in the
+   function's parentheses. For example:
 
    .. code-block::
 
