@@ -1,3 +1,5 @@
+from typing import AbstractSet, Any
+
 from docutils.nodes import emphasis, inline, literal, Text
 from docutils.parsers.rst.directives import unchanged, unchanged_required
 
@@ -104,6 +106,9 @@ class OrganicDomain(Domain):
 
   def get_full_qualified_name(self, node):
     return f"organic.{node.arguments[0]}"
+
+  def merge_domaindata(self, docnames, otherdata):
+    pass
 
 def setup(app: Sphinx) -> ExtensionMetadata:
   app.add_domain(OrganicDomain)
