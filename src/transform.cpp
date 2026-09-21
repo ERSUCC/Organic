@@ -193,6 +193,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Modulo* token)
     return new Engine::Modulo(ARG("value"), ARG("divisor"));
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::Logarithm* token)
+{
+    return new Engine::Logarithm(ARG("value"), ARG("base"));
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyAudioSource* token)
 {
     return new Engine::AudioSource();

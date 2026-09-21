@@ -37,6 +37,7 @@ struct TypeResolver
     void resolveTypes(const Round* token);
     void resolveTypes(const Absolute* token);
     void resolveTypes(const Modulo* token);
+    void resolveTypes(const Logarithm* token);
     void resolveTypes(const Sine* token);
     void resolveTypes(const Square* token);
     void resolveTypes(const Triangle* token);

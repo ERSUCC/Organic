@@ -299,6 +299,24 @@ private:
 
 };
 
+struct Logarithm : public ValueObject
+{
+    Logarithm(ValueObject* value, ValueObject* base);
+    ~Logarithm();
+
+    double getValue() const override;
+
+    void update() override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* value;
+    ValueObject* base;
+
+};
+
 struct Sequence : public ValueObject
 {
     Sequence(ValueObject* controllers, ValueObject* order);

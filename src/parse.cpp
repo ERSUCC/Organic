@@ -25,6 +25,7 @@ static std::unordered_map<std::string, std::function<UniqueToken<Call> (const So
     { "round", CALL(Round) },
     { "absolute", CALL(Absolute) },
     { "modulo", CALL(Modulo) },
+    { "logarithm", CALL(Logarithm) },
     { "sine", CALL(Sine) },
     { "square", CALL(Square) },
     { "triangle", CALL(Triangle) },

@@ -79,6 +79,7 @@ add_executable(organic_test test/src/main.cpp
                             test/src/engine/controllers/less.cpp
                             test/src/engine/controllers/lfo.cpp
                             test/src/engine/controllers/limit.cpp
+                            test/src/engine/controllers/logarithm.cpp
                             test/src/engine/controllers/max.cpp
                             test/src/engine/controllers/min.cpp
                             test/src/engine/controllers/modulo.cpp

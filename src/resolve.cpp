@@ -236,6 +236,12 @@ void TypeResolver::resolveTypes(const Modulo* token)
     token->arguments->check();
 }
 
+void TypeResolver::resolveTypes(const Logarithm* token)
+{
+    resolveArgumentTypes(token->arguments, "value", new NumberType());
+    resolveArgumentTypes(token->arguments, "base", new NumberType(), new Value(token->location, 10));
+}
+
 void TypeResolver::resolveTypes(const Sine* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));

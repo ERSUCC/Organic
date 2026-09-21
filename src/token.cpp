@@ -651,6 +651,19 @@ Engine::ValueObject* Modulo::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
+Logarithm::Logarithm(const SourceLocation& location, ArgumentList* arguments) :
+    Call(location, arguments, new NumberType()) {}
+
+void Logarithm::resolveTypes(TypeResolver* visitor) const
+{
+    visitor->resolveTypes(this);
+}
+
+Engine::ValueObject* Logarithm::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
 AudioSource::AudioSource(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new AudioSourceType()) {}
 

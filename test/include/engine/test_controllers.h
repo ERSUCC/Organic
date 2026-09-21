@@ -76,6 +76,7 @@ private:
     void testRound();
     void testAbsolute();
     void testModulo();
+    void testLogarithm();
 
     void expectValues(ValueObject* object, const std::vector<TimeValue>& values, const double epsilon = std::numeric_limits<double>::epsilon());
     void expectConstant(ValueObject* object, const double value, const double epsilon = std::numeric_limits<double>::epsilon());

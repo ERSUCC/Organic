@@ -37,6 +37,7 @@ struct Max;
 struct Round;
 struct Absolute;
 struct Modulo;
+struct Logarithm;
 struct EmptyAudioSource;
 struct Sine;
 struct Square;

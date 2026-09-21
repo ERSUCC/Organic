@@ -52,6 +52,7 @@ void TestControllers::test()
     testRound();
     testAbsolute();
     testModulo();
+    testLogarithm();
 }
 
 TestControllers::TestControllers(TestTracker* tracker) :

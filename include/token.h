@@ -557,6 +557,15 @@ struct Modulo : public Call
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
+struct Logarithm : public Call
+{
+    Logarithm(const SourceLocation& location, ArgumentList* arguments);
+
+    void resolveTypes(TypeResolver* visitor) const override;
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
+
 struct AudioSource : public Call
 {
     AudioSource(const SourceLocation& location, ArgumentList* arguments);

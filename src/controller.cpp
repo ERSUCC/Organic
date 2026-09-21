@@ -615,6 +615,50 @@ void Modulo::init()
     divisor->start(startTime);
 }
 
+Logarithm::Logarithm(ValueObject* value, ValueObject* base) :
+    value(value), base(base) {}
+
+Logarithm::~Logarithm()
+{
+    delete value;
+    delete base;
+}
+
+double Logarithm::getValue() const
+{
+    if (!enabled)
+    {
+        return 0;
+    }
+
+    const double valueValue = value->getValue();
+    const double baseValue = base->getValue();
+
+    if (valueValue <= 0 || baseValue <= 0 || baseValue == 1)
+    {
+        return 0;
+    }
+
+    return log(valueValue) / log(baseValue);
+}
+
+void Logarithm::update()
+{
+    value->update();
+    base->update();
+
+    if (!value->enabled || !base->enabled)
+    {
+        stop(value->getStopTime());
+    }
+}
+
+void Logarithm::init()
+{
+    value->start(startTime);
+    base->start(startTime);
+}
+
 Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
     controllers(controllers), order(order) {}
 
