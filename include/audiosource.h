@@ -249,6 +249,8 @@ struct Group : public AudioSource
     Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources);
     ~Group();
 
+    void update() override;
+
     void fillBuffer(double* buffer) override;
 
 protected:

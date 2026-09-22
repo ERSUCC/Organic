@@ -19,6 +19,8 @@ struct EffectGroup : public Effect
     EffectGroup(ValueObject* mix, ValueObject* effects);
     ~EffectGroup();
 
+    void update() override;
+
     void apply(double* buffer) override;
 
 protected:
@@ -37,6 +39,8 @@ struct Delay : public Effect
 {
     Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
     ~Delay();
+
+    void update() override;
 
     void apply(double* buffer) override;
 
@@ -57,6 +61,8 @@ struct Comb : public Effect
     Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
     ~Comb();
 
+    void update() override;
+
     void apply(double* buffer) override;
 
 protected:
@@ -76,6 +82,8 @@ struct AllPass : public Effect
     AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
     ~AllPass();
 
+    void update() override;
+
     void apply(double* buffer) override;
 
 protected:
@@ -94,6 +102,8 @@ struct LowPass : public Effect
 {
     LowPass(ValueObject* threshold);
     ~LowPass();
+
+    void update() override;
 
     void apply(double* buffer) override;
 
@@ -189,6 +199,8 @@ struct Reverb : public Effect
 {
     Reverb(ValueObject* mix, ValueObject* length);
     ~Reverb();
+
+    void update() override;
 
     void apply(double* buffer) override;
 

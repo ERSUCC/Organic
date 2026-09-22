@@ -20,6 +20,16 @@ EffectGroup::~EffectGroup()
     free(applied);
 }
 
+void EffectGroup::update()
+{
+    effects->update();
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
+}
+
 void EffectGroup::apply(double* buffer)
 {
     memcpy(original, buffer, sizeof(double) * utils->channels);
@@ -61,6 +71,13 @@ Delay::~Delay()
     delete mix;
     delete delay;
     delete feedback;
+}
+
+void Delay::update()
+{
+    mix->update();
+    delay->update();
+    feedback->update();
 }
 
 void Delay::apply(double* buffer)
@@ -111,6 +128,13 @@ Comb::~Comb()
     delete feedback;
 }
 
+void Comb::update()
+{
+    mix->update();
+    delay->update();
+    feedback->update();
+}
+
 void Comb::apply(double* buffer)
 {
     const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
@@ -157,6 +181,13 @@ AllPass::~AllPass()
     delete mix;
     delete delay;
     delete feedback;
+}
+
+void AllPass::update()
+{
+    mix->update();
+    delay->update();
+    feedback->update();
 }
 
 void AllPass::apply(double* buffer)
@@ -208,6 +239,11 @@ LowPass::~LowPass()
 
     free(raw);
     free(filtered);
+}
+
+void LowPass::update()
+{
+    threshold->update();
 }
 
 void LowPass::apply(double* buffer)
@@ -381,6 +417,12 @@ Reverb::~Reverb()
     delete mix;
     delete length;
     delete matrix;
+}
+
+void Reverb::update()
+{
+    mix->update();
+    length->update();
 }
 
 void Reverb::apply(double* buffer)

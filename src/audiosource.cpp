@@ -557,6 +557,24 @@ Group::~Group()
     delete sources;
 }
 
+void Group::update()
+{
+    volume->update();
+    pan->update();
+    effects->update();
+    sources->update();
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
+
+    for (ValueObject* object : sources->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
+}
+
 void Group::fillBuffer(double* buffer)
 {
     volume->update();
