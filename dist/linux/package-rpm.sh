@@ -19,7 +19,7 @@ rm -rf $TMP_ROOT
 mkdir -p $TMP_INSTALL/bin $TMP_INSTALL/lib64/organic $RPM_ROOT/SOURCES $RPM_ROOT/SPECS
 
 cp install/bin/organic $TMP_INSTALL/bin
-cp install/lib64/librtaudio*.so* $TMP_INSTALL/lib64/organic
+cp install/lib/librtaudio*.so* $TMP_INSTALL/lib64/organic
 
 tar -cf $RPM_ROOT/SOURCES/$ARCHIVE.tar.gz -C $TMP_ROOT $ARCHIVE
 

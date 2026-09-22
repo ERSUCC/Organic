@@ -22,6 +22,17 @@ jobs:
           sudo apt update
           sudo apt install -y libasound2-dev
 
+      - name: Install Dependencies
+        run: sudo apt install -y libsndfile1-dev libsamplerate0-dev
+
+      - name: Build RtAudio
+        run: |
+          git clone https://github.com/thestk/rtaudio
+          cd rtaudio
+          cmake -B build
+          cd build
+          sudo make install
+
       - name: Build
         run: |
           cmake -B build

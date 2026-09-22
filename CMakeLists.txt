@@ -39,11 +39,16 @@ set(BUILD_SHARED_LIBS True)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(BUILD_TESTING False)
 
-add_subdirectory(deps/rtaudio)
-add_subdirectory(deps/libsndfile)
-add_subdirectory(deps/libsamplerate)
-
-target_include_directories(organic_lib PRIVATE deps/rtaudio deps/libsndfile/include deps/libsamplerate/include)
+if (WIN32)
+    target_include_directories(organic_lib PUBLIC "C:/Program Files/libsndfile/include" "C:/Program Files/libsamplerate/include" "C:/Program Files/RtAudio/include/rtaudio")
+    target_link_directories(organic_lib PUBLIC "C:/Program Files/libsndfile/lib" "C:/Program Files/libsamplerate/lib" "C:/Program Files/RtAudio/lib")
+elseif (APPLE)
+    target_include_directories(organic_lib PUBLIC /opt/homebrew/include /usr/local/include/rtaudio)
+    target_link_directories(organic_lib PUBLIC /opt/homebrew/lib /usr/local/lib)
+else ()
+    target_include_directories(organic_lib PUBLIC /usr/local/include/rtaudio)
+    target_link_directories(organic_lib PUBLIC /usr/local/lib64)
+endif ()
 
 target_link_libraries(organic_lib rtaudio sndfile samplerate)
 
@@ -106,8 +111,17 @@ target_link_libraries(organic_test organic_lib)
 
 # define release structure
 
-install(TARGETS organic samplerate)
+if (WIN32)
+    # avoid ridiculous regex to match paths with any case
+    cmake_policy(VERSION 4.3)
 
-if (APPLE)
+    install(TARGETS organic RUNTIME_DEPENDENCIES PRE_EXCLUDE_REGEXES "api-ms-*" "ext-ms-*" "azure*" "hvsi*" "pdm*" "wpax*"
+                                                 POST_EXCLUDE_REGEXES "C:/WINDOWS/system32/*"
+                                                 DIRECTORIES "C:/Program Files/RtAudio/bin" "C:/Program Files/libsndfile/bin" "C:/Program Files/libsamplerate/bin")
+elseif (APPLE)
     add_executable(unify dist/mac/unify.cpp)
-endif ()
+
+    install(TARGETS organic RUNTIME_DEPENDENCIES FRAMEWORK DESTINATION frameworks)
+else ()
+    install(TARGETS organic RUNTIME_DEPENDENCIES)
+endif()
