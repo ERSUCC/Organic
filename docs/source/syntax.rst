@@ -295,5 +295,7 @@ Next Steps
 
 Congratulations, you now know all the core concepts of the syntax of the Organic programming language! For now, you can
 keep experimenting with the functions you have learned so far, nesting them further to create more unique sounds. Once
-you feel ready, take a look at the :doc:`dictionary` page to learn about the other built-in functions in Organic. After
-that, if you want to dive deeper into the specifics of the language, you can read the :doc:`syntax-adv` page. Good luck!
+you feel ready, take a look at the :doc:`dictionary` page to learn about the other built-in functions in Organic. You
+can also download and peruse `the examples <https://github.com/ERSUCC/Organic/tree/main/examples>`__ to get inspiration
+and see how the language is used. After that, if you want to dive deeper into the specifics of the language, you can
+read the :doc:`syntax-adv` page. Good luck!
