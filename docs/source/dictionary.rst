@@ -350,6 +350,26 @@ These functions are used to automate the values of other parameters, and can typ
    affect the result. If :organic:code:`divisor` is equal to :organic:mono:`0`, returns :organic:mono:`0`. Stops when
    :organic:code:`value` or :organic:code:`divisor` stops.
 
+.. organic:function:: logarithm
+   :return: number
+
+   .. organic:input:: value
+      :type: number
+
+   Returns the `logarithm <https://en.wikipedia.org/wiki/Logarithm>`__ of :organic:code:`value` in base
+   :organic:mono:`10`. If :organic:code:`value` is less than or equal to :organic:mono:`0`, returns :organic:mono:`0`.
+   Stops when :organic:code:`value` stops.
+
+   **Optional Inputs**
+
+   .. organic:input:: base
+      :type: number
+      :default: :organic:code:`10`
+
+      Use this input to specify a different base for the logarithm. If :organic:code:`base` is equal to
+      :organic:mono:`1` or less than or equal to :organic:mono:`0`, the function will return :organic:mono:`0`. If
+      :organic:code:`base` is specified, the function will also stop when :organic:code:`base` stops.
+
 -------------
 Audio Sources
 -------------
