@@ -1,0 +1,14 @@
+sweep-down(start: 0) = {
+    decay-length = 250
+
+    decay = repeat(value: -logarithm(value: sweep(from: 0, to: 1, length: decay-length)))
+    surround = repeat(value: random(from: -1, to: 1, length: decay-length, type: linear))
+
+    saw(volume: 0.3 * decay, frequency: start * decay, pan: surround, effects: [
+        comb(delay: 15, feedback: 0.75)
+    ])
+}
+
+sweep-down(start: c4)
+sweep-down(start: g4)
+sweep-down(start: g5)

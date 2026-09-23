@@ -1,0 +1,33 @@
+note-length = 50
+cycle-length = 6000
+
+fifth(factor: 0) = {
+    base = repeat(value: sequence(values: [
+        hold(value: af2, length: cycle-length),
+        hold(value: ef1, length: cycle-length),
+        hold(value: e1, length: cycle-length),
+        hold(value: c1, length: cycle-length)
+    ]))
+
+    hold(value: base * (3 / 2) ^ factor, length: note-length)
+}
+
+pluck = repeat(value: sweep(from: 1, to: sweep(from: 0.85, to: 0, length: note-length * 10), length: note-length))
+
+square(volume: pluck, frequency: repeat(value: sequence(values: [
+    fifth(),
+    fifth(factor: 1),
+    fifth(factor: 2),
+    fifth(factor: 3),
+    fifth(factor: 4),
+    fifth(factor: 5),
+    fifth(factor: 6),
+    fifth(factor: 7),
+    fifth(factor: 8),
+    fifth(factor: 9),
+    hold(value: 0, length: cycle-length - note-length * 10)
+])), effects: [
+    low-pass(threshold: 3000),
+    delay(delay: 1000, feedback: 0.5),
+    reverb(mix: 0.75, length: 10000)
+])

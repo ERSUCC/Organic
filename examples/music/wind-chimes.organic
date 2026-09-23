@@ -1,0 +1,19 @@
+note-length = 500
+
+pause = repeat(value: round(value: random(from: 0, to: note-length * 4, length: note-length * 4), step: note-length))
+
+cycle-length = note-length + pause
+
+sine(volume: repeat(value: sequence(values: [
+    sweep(from: 1, to: 0, length: note-length),
+    hold(value: 0, length: pause)
+])), frequency: repeat(value: sequence(values: [
+    hold(value: c2, length: cycle-length),
+    hold(value: g2, length: cycle-length),
+    hold(value: g3, length: cycle-length),
+    hold(value: c4, length: cycle-length),
+    hold(value: d4, length: cycle-length),
+    hold(value: g4, length: cycle-length)
+], order: shuffle)), pan: repeat(value: random(from: -1, to: 1, length: cycle-length)), effects: [
+    delay(delay: note-length * 2 / 3, feedback: 0.75)
+])
