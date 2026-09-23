@@ -83,6 +83,11 @@ void Oscillator::update()
     effects->update();
     frequency->update();
 
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
+
     const double frequencyValue = frequency->getValue();
 
     if (frequencyValue == 0)
@@ -211,6 +216,11 @@ void Noise::update()
     pan->update();
     effects->update();
 
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
+
     const double value = volume->getValue() * udist(utils->rng);
     const double panValue = pan->getValue();
 
@@ -252,6 +262,11 @@ void Sample::update()
     pan->update();
     effects->update();
     resource->update();
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
 
     const double volumeValue = volume->getValue();
     const double panValue = pan->getValue();
@@ -485,6 +500,11 @@ void Granulate::update()
     grains->start(startTime);
     length->start(startTime);
     shape->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
 
     memset(effectBuffer, 0, sizeof(double) * utils->channels);
 
