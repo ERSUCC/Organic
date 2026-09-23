@@ -85,6 +85,20 @@ class OrganicFunctionHighlight(SphinxRole):
 
     return [ node ], []
 
+class OrganicCommentHighlight(SphinxRole):
+  def run(self):
+    node = literal(classes = [
+      "code",
+      "highlight",
+      "organic-code",
+      "organic",
+      "highlight-organic"
+    ])
+
+    node.append(inline(text = self.text, classes = [ "c" ]))
+
+    return [ node ], []
+
 class OrganicMono(SphinxRole):
   def run(self):
     return [ inline(text = self.text, classes = [ "mono" ]) ], []
@@ -101,7 +115,8 @@ class OrganicDomain(Domain):
 
   roles = {
     "mono": OrganicMono(),
-    "code:function": OrganicFunctionHighlight()
+    "code:function": OrganicFunctionHighlight(),
+    "code:comment": OrganicCommentHighlight()
   }
 
   def get_full_qualified_name(self, node):

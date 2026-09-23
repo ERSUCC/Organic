@@ -169,6 +169,14 @@ conflict with variable names. All arguments in a function definition must provid
 to determine the type of each argument. The last instruction in a function body serves as its return value, and any
 prior instructions in the function body other than variable and function definitions will be ignored.
 
+########
+Comments
+########
+
+You can use :organic:code:`//` anywhere on a line to mark the rest of the line as a comment. You can also use
+:organic:code:`/*` to begin a block comment, which marks every subsequent character, including newlines, as a comment
+until it is closed with :organic:code:comment:`*/`.
+
 #############
 Value Lengths
 #############
