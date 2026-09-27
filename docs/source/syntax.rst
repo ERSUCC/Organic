@@ -161,7 +161,7 @@ done with the :organic:code:function:`if` function, like in the following exampl
 .. code-block::
 
    freq = repeat(value: sweep(from: 220, to: 880, length: 2000))
-   vol = if(condition: frequency < 440, is-true: 1, is-false: 0)
+   vol = if(condition: freq < 440, is-true: 1, is-false: 0)
 
 The above example first creates a variable named :organic:code:`freq` to contain the frequency, using the
 :organic:code:function:`sweep` function and the :organic:code:function:`repeat` function as you saw in the previous
@@ -293,9 +293,9 @@ uses it to manually create a saw wave.
 Next Steps
 ##########
 
-Congratulations, you now know all the core concepts of the syntax of the Organic programming language! For now, you can
-keep experimenting with the functions you have learned so far, nesting them further to create more unique sounds. Once
-you feel ready, take a look at the :doc:`dictionary` page to learn about the other built-in functions in Organic. You
-can also download and peruse `the examples <https://github.com/ERSUCC/Organic/tree/main/examples>`__ to get inspiration
-and see how the language is used. After that, if you want to dive deeper into the specifics of the language, you can
-read the :doc:`syntax-adv` page. Good luck!
+Congratulations, you now know all the core concepts of the Organic programming language! For now, you can keep
+experimenting with the functions you have learned so far, nesting them further to create more unique sounds. Once you
+feel ready, take a look at the :doc:`dictionary` page to learn about the other built-in functions in Organic. You can
+also download and peruse `the examples <https://github.com/ERSUCC/Organic/tree/main/examples>`__ to get inspiration and
+see how the language is used. After that, if you want to dive deeper into the specifics of the language, you can read
+the :doc:`syntax-adv` page. Good luck!

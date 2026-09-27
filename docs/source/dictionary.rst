@@ -74,7 +74,8 @@ control the direction in which the :organic:code:`value` input is rounded.
 
 :organic:code:`nearest`
    Round the value to the nearest whole number. With this option, values ending in :organic:mono:`.5` will be rounded
-   away from :organic:mono:`0`.
+   away from :organic:mono:`0`. For example, :organic:mono:`1.5` would be rounded to :organic:mono:`2`, and
+   :organic:mono:`-1.5` would be rounded to :organic:mono:`-2`.
 
 :organic:code:`up`
    Round the value up to the next whole number. This option always rounds in the positive direction, regardless of sign.
@@ -242,8 +243,8 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: condition
       :type: boolean
 
-   Waits until :organic:code:`condition` becomes :organic:code:`true`, then starts and returns :organic:code:`value`.
-   Stops after :organic:code:`value` has started and completed.
+   Waits until :organic:code:`condition` evaluates to :organic:code:`true`, then starts and returns
+   :organic:code:`value` until it stops. Stops when :organic:code:`value` stops.
 
 .. organic:function:: if
    :return: type of :organic:code:`if-true`
@@ -259,7 +260,7 @@ These functions are used to automate the values of other parameters, and can typ
 
    Returns :organic:code:`if-true` if :organic:code:`condition` evaluates to :organic:code:`true`, otherwise returns
    :organic:code:`if-false`. :organic:code:`if-true` and :organic:code:`if-false` can be of any type, as long as they
-   are both of the same type. Stops after :organic:code:`condition` stops.
+   are both of the same type. Stops when :organic:code:`condition` stops.
 
 .. organic:function:: all
    :return: boolean
@@ -318,7 +319,9 @@ These functions are used to automate the values of other parameters, and can typ
       :type: number
       :default: :organic:code:`1`
 
-      Use this input to round to increments other than whole numbers.
+      Use this input to round to increments other than whole numbers. For example, if :organic:code:`step` is
+      :organic:mono:`2`, :organic:code:`value` will be rounded to the nearest multiple of :organic:mono:`2`. Values less
+      than :organic:mono:`1` are also valid, such as :organic:mono:`0.5` or :organic:mono:`0.33`.
 
    .. organic:input:: direction
       :type: :organic:code:`nearest` | :organic:code:`up` | :organic:code:`down`
@@ -333,8 +336,8 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: value
       :type: number
 
-   Returns the `absolute value <https://en.wikipedia.org/wiki/Absolute_value_(algebra)>`__ of :organic:code:`value`.
-   Stops when :organic:code:`value` stops.
+   Returns the positive version of :organic:code:`value`, regardless of its original sign. Stops when
+   :organic:code:`value` stops.
 
 .. organic:function:: modulo
    :return: number
@@ -356,9 +359,9 @@ These functions are used to automate the values of other parameters, and can typ
    .. organic:input:: value
       :type: number
 
-   Returns the `logarithm <https://en.wikipedia.org/wiki/Logarithm>`__ of :organic:code:`value` in base
-   :organic:mono:`10`. If :organic:code:`value` is less than or equal to :organic:mono:`0`, returns :organic:mono:`0`.
-   Stops when :organic:code:`value` stops.
+   Returns the logarithm of :organic:code:`value` in base :organic:mono:`10`, or in other words, the exponent to which
+   :organic:mono:`10` must be raised in order to get :organic:code:`value`. If :organic:code:`value` is less than or
+   equal to :organic:mono:`0`, returns :organic:mono:`0`. Stops when :organic:code:`value` stops.
 
    **Optional Inputs**
 
@@ -617,7 +620,9 @@ These functions are used to create various sources of audio, such as oscillating
       :type: string
 
    Performs `granular synthesis <https://en.wikipedia.org/wiki/Granular_synthesis>`__, using the audio file specified in
-   the :organic:code:`sample` input as the source for audio samples.
+   the :organic:code:`sample` input as the source for audio samples. This synthesis technique splits the audio file into
+   a series of short segments, known as grains, playing them back randomly and overlapping each other. When used
+   creatively, this can turn a mundane audio sample into an unique, expressive ambient sound.
 
    **Optional Inputs**
 
@@ -715,11 +720,14 @@ source regardless of the function that created it or the values of its inputs.
    .. organic:input:: feedback
       :type: number
 
-   Applies a delay effect to the target audio source. The :organic:code:`delay` input, specified in milliseconds,
-   defines the length of time before an audio sample is repeated. The :organic:code:`feedback` input, specified as a
-   ratio between :organic:mono:`0` and :organic:mono:`1`, defines the volume of each delayed sample relative to its
-   original sample. A :organic:code:`feedback` of :organic:mono:`0` would result in no audible delay, and a
-   :organic:code:`feedback` of :organic:mono:`1` would result in an infinite delay.
+   Applies a delay effect to the target audio source, creating repeated copies of the input audio at a specified
+   interval. The :organic:code:`delay` input, specified in milliseconds, defines the length of time before an audio
+   sample is repeated. The :organic:code:`feedback` input, specified as a ratio between :organic:mono:`0` and
+   :organic:mono:`1`, defines the volume of each delayed sample relative to its original sample. A
+   :organic:code:`feedback` of :organic:mono:`0` would result in no audible delay, and a :organic:code:`feedback` closer
+   to :organic:mono:`1` would cause the input audio to repeat many times before fully decaying. Note that specifying a
+   :organic:code:`feedback` equal to :organic:mono:`1` is not recommended, as it will cause the delayed copies to never
+   decay, resulting in a sound that steadily increases in volume over time.
 
    **Optional Inputs**
 
@@ -745,7 +753,9 @@ source regardless of the function that created it or the values of its inputs.
    defines the length of time before an audio sample is repeated. The :organic:code:`feedback` input, specified as a
    ratio between :organic:mono:`0` and :organic:mono:`1`, defines the volume of each delayed sample relative to its
    original sample. A :organic:code:`feedback` of :organic:mono:`0` would result in no audible filtering, and a
-   :organic:code:`feedback` of :organic:mono:`1` would result in a harsher metallic effect.
+   :organic:code:`feedback` closer to :organic:mono:`1` would result in a harsher metallic effect. Note that specifying
+   a :organic:code:`feedback` equal to :organic:mono:`1` is not recommended, as it will cause the effect to stack
+   without decay, resulting in a sound that steadily increases in volume over time.
 
    **Optional Inputs**
 
@@ -765,7 +775,14 @@ source regardless of the function that created it or the values of its inputs.
    .. organic:input:: feedback
       :type: number
 
-   Applies an `all-pass filter <https://en.wikipedia.org/wiki/All-pass_filter>`__ to the target audio source.
+   Applies an `all-pass filter <https://en.wikipedia.org/wiki/All-pass_filter>`__ to the target audio source. This is
+   similar to a comb filter, but the resulting effect is less metallic. The :organic:code:`delay` input, specified in
+   milliseconds, defines the length of time before an audio sample is repeated. The :organic:code:`feedback` input,
+   specified as a ratio between :organic:mono:`0` and :organic:mono:`1`, defines the volume of each delayed sample
+   relative to its original sample. A :organic:code:`feedback` of :organic:mono:`0` would result in no audible
+   filtering, and a :organic:code:`feedback` closer to :organic:mono:`1` would result in a stronger phasing effect. Note
+   that specifying a :organic:code:`feedback` equal to :organic:mono:`1` is not recommended, as it will cause the effect
+   to stack without decay, resulting in a sound that steadily increases in volume over time.
 
    **Optional Inputs**
 
@@ -783,7 +800,8 @@ source regardless of the function that created it or the values of its inputs.
    .. organic:input:: threshold
       :type: number
 
-   Applies a `low-pass filter <https://en.wikipedia.org/wiki/Low-pass_filter>`__ to the target audio source. The
+   Applies a `low-pass filter <https://en.wikipedia.org/wiki/Low-pass_filter>`__ to the target audio source. A low-pass
+   filter reduces the higher frequencies and overtones in a sound, making it sound more muffled or subdued. The
    :organic:code:`threshold` input defines the maximum frequency in Hz that is allowed to pass through the filter.
 
 .. organic:function:: reverb
@@ -792,8 +810,9 @@ source regardless of the function that created it or the values of its inputs.
    .. organic:input:: length
       :type: number
 
-   Applies a `reverb effect <https://en.wikipedia.org/wiki/Reverb_effect>`__ to the target audio source. The
-   :organic:code:`length` input defines the length of the echoes resulting from an initial sound.
+   Applies a `reverb effect <https://en.wikipedia.org/wiki/Reverb_effect>`__ to the target audio source, simulating the
+   effect of a large room with prolonged echoes. The :organic:code:`length` input defines the length of the echoes
+   resulting from an initial sound.
 
    **Optional Inputs**
 

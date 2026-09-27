@@ -39,6 +39,15 @@ sections of the documentation. The entries are organized in alphabetic order for
       that use kebab case can have just one word, such as :organic:code:`test`, or they can have multiple words, such as
       :organic:code:`things-and-stuff`.
 
+   Modular Synthesis
+      Modular synthesis is an analog :term:`audio synthesis` technique in which self-contained electronic modules are
+      connected with cables to create and modify an audio signal. Each module has a specific purpose such as producing a
+      basic wave shape, adding an effect, or controlling the volume. Unlike many modern digital platforms for creating
+      electronic music, modular synthesis does not place any restrictions on the inputs and outputs of each module; you
+      can connect any output to any input with a cable and something will happen. Organic takes inspiration from this
+      concept, representing modules as functions with flexible and composable inputs, but without the restriction of
+      needing to buy more modules to get more of a particular sound or effect.
+
    Timbre
       Timbre is the quality, or color, of a sound. Timbre is defined by the relative strength of specific high and low
       frequencies present in a sound, and it is how our brains are able to identify what type of sound we are hearing in
