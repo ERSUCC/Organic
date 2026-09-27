@@ -13,9 +13,11 @@ Installation
 ############
 
 The installation process is the same regardless of which operating system you are using, although you will need to
-download the correct installer. You can download the latest version of Organic for your operating system
-`here <http://github.com/ERSUCC/Organic/releases>`__. Once you have downloaded the installer, run it and follow the
-instructions on the screen to complete the installation.
+download the correct installer. You can download the latest version of Organic for your operating system `here
+<http://github.com/ERSUCC/Organic/releases>`__. If you are using a Mac, note that Organic is only supported on Silicon
+processors. If you don't know what that means or you aren't sure which one you have, you can read the short article
+`here <https://macreports.com/how-to-know-if-your-mac-has-apple-silicon-or-intel-chip>`__ for more information. Once you
+have downloaded the installer, run it and follow the instructions on the screen to complete the installation.
 
 To make sure that Organic is installed correctly, run the following command in a :doc:`command line <cmd-line>`:
 
@@ -25,9 +27,8 @@ To make sure that Organic is installed correctly, run the following command in a
 
 If everything was installed correctly, you should see "Organic v\ |release|" printed below your command. If nothing
 happens or if you see an error message instead, first ensure that you installed the correct version of Organic for your
-operating system. If you are using a Mac, also make sure that you installed the version that is made for your processor
-architecture. If you don't know what that means or you aren't sure which one you have, you can read the short article
-`here <https://macreports.com/how-to-know-if-your-mac-has-apple-silicon-or-intel-chip>`__ for more information.
+operating system. If that isn't the problem, feel free to report the issue on Organic's `issues page
+<https://github.com/ERSUCC/Organic/issues>`__.
 
 If this is your first time programming, continue on in this section for instructions on setting up a text editor, which
 you will need to use Organic. If you already have a text editor, you can skip the rest of this section and move on to
