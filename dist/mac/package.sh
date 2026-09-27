@@ -32,6 +32,6 @@ echo $INSTALL_ROOT/bin > $TMP_ROOT/paths.d/organic
 
 pkgbuild --root $TMP_ROOT --identifier OrganicPath --version $VERSION --install-location /etc /tmp/OrganicPath.pkg
 
-productbuild --distribution dist/mac/distribution.xml --package-path /tmp "install/Organic $VERSION.pkg"
+productbuild --distribution dist/mac/distribution.xml --package-path /tmp "install/Organic-$VERSION.pkg"
 
 rm -rf $TMP_ROOT

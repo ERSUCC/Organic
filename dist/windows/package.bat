@@ -10,5 +10,5 @@ for /f "tokens=* USEBACKQ" %%x in (`powershell -Command "[guid]::NewGuid()"`) do
   set guid=%%x
 )
 
-wix build -src dist\windows\Organic.wxs -arch x64 -pdbtype none -bindpath install -out "install\Organic %version%.msi" ^
+wix build -src dist\windows\Organic.wxs -arch x64 -pdbtype none -bindpath install -out "install\Organic-%version%.msi" ^
           -define name=Organic -define version=%version% -define guid=%guid% -define root="%cd%\install" || exit /b 1
