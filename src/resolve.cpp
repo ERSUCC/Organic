@@ -317,9 +317,9 @@ void TypeResolver::resolveTypes(const Granulate* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "sample", new StringType());
+    resolveArgumentTypes(token->arguments, "length", new NumberType());
+    resolveArgumentTypes(token->arguments, "grains", new NumberType());
     resolveArgumentTypes(token->arguments, "shape", new NumberType(), new Value(token->location, 1), { { "position", SharedType(new NumberType()) } });
-    resolveArgumentTypes(token->arguments, "length", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "grains", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
 

@@ -628,24 +628,19 @@ These functions are used to create various sources of audio, such as oscillating
    .. organic:input:: sample
       :type: string
 
-   Performs `granular synthesis <https://en.wikipedia.org/wiki/Granular_synthesis>`__, using the audio file specified in
-   the :organic:code:`sample` input as the source for audio samples. This synthesis technique splits the audio file into
-   a series of short segments, known as grains, playing them back randomly and overlapping each other. When used
-   creatively, this can turn a mundane audio sample into an unique, expressive ambient sound.
-
-   **Optional Inputs**
+   .. organic:input:: grains
+      :type: numbers
 
    .. organic:input:: length
       :type: number
-      :default: :organic:code:`0`
 
-      Use this input to control the length of each grain, specified in milliseconds.
+   Performs `granular synthesis <https://en.wikipedia.org/wiki/Granular_synthesis>`__, using the audio file specified in
+   the :organic:code:`sample` input as the source, and a number of grains equal to :organic:code:`grains`, each with a
+   length of :organic:code:`length` milliseconds. This synthesis technique splits the audio file into a series of short
+   segments, known as grains, playing them back randomly and overlapping each other. When used creatively, this can turn
+   a mundane audio sample into an unique, expressive ambient sound.
 
-   .. organic:input:: grains
-      :type: number
-      :default: :organic:code:`1`
-
-      Use this input to control the number of grains playing at the same time.
+   **Optional Inputs**
 
    .. organic:input:: shape
       :type: number
