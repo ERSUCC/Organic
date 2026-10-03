@@ -131,7 +131,7 @@ private:
 
 struct Sample : public SingleAudioSource
 {
-    Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource);
+    Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* length);
     ~Sample();
 
     void update() override;
@@ -141,6 +141,7 @@ protected:
 
 private:
     ValueObject* resource;
+    ValueObject* length;
 
     size_t index;
 

@@ -308,6 +308,7 @@ void TypeResolver::resolveTypes(const Sample* token)
     resolveArgumentTypes(token->arguments, "file", new StringType());
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "length", new NumberType(), new Value(token->location, 0));
 
     token->arguments->check();
 }

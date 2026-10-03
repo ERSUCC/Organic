@@ -248,12 +248,13 @@ void Noise::init()
     }
 }
 
-Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource) :
-    SingleAudioSource(volume, pan, effects), resource(resource) {}
+Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* length) :
+    SingleAudioSource(volume, pan, effects), resource(resource), length(length) {}
 
 Sample::~Sample()
 {
     delete resource;
+    delete length;
 }
 
 void Sample::update()
@@ -262,6 +263,7 @@ void Sample::update()
     pan->update();
     effects->update();
     resource->update();
+    length->update();
 
     for (ValueObject* object : effects->getLeafAs<List>()->objects)
     {
@@ -273,22 +275,32 @@ void Sample::update()
 
     const Resource* resourceLeaf = resource->getLeafAs<Resource>();
 
-    if (utils->channels == 1)
+    if (index < resourceLeaf->length)
     {
-        effectBuffer[0] = volumeValue * resourceLeaf->samples[index];
-    }
+        if (utils->channels == 1)
+        {
+            effectBuffer[0] = volumeValue * resourceLeaf->samples[index];
+        }
 
-    else
-    {
-        effectBuffer[0] = volumeValue * resourceLeaf->samples[index] * (1 - panValue) / 2;
-        effectBuffer[1] = volumeValue * resourceLeaf->samples[index + 1] * (panValue + 1) / 2;
+        else
+        {
+            effectBuffer[0] = volumeValue * resourceLeaf->samples[index] * (1 - panValue) / 2;
+            effectBuffer[1] = volumeValue * resourceLeaf->samples[index + 1] * (panValue + 1) / 2;
+        }
     }
 
     index += utils->channels;
 
-    if (index >= resourceLeaf->length)
+    const double lengthValue = length->getValue();
+
+    if (lengthValue == 0 && index >= resourceLeaf->length)
     {
-        index -= resourceLeaf->length;
+        stop(startTime + 1000.0 * (resourceLeaf->length / utils->channels) / utils->sampleRate);
+    }
+
+    else if (lengthValue > 0 && 1000.0 * (index / utils->channels) / utils->sampleRate >= lengthValue)
+    {
+        stop(startTime + lengthValue);
     }
 }
 
@@ -298,6 +310,7 @@ void Sample::init()
     pan->start(startTime);
     effects->start(startTime);
     resource->start(startTime);
+    length->start(startTime);
 
     for (ValueObject* object : effects->getLeafAs<List>()->objects)
     {

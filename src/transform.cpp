@@ -242,7 +242,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 
     Engine::Resource* resource = new Engine::Resource(path, file->location);
 
-    return new Engine::Sample(ARG("volume"), ARG("pan"), ARG("effects"), resource);
+    return new Engine::Sample(ARG("volume"), ARG("pan"), ARG("effects"), resource, ARG("length"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)

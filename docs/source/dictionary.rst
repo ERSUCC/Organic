@@ -613,6 +613,15 @@ These functions are used to create various sources of audio, such as oscillating
       Use this input to apply audio effects to the sample. Effects will be applied in the order they are specified in
       this input.
 
+   .. organic:input:: length
+      :type: number
+      :default: :organic:code:`0`
+
+      Use this input to set the length of time for which the sample plays before stopping. If :organic:code:`length` is
+      equal to :organic:mono:`0`, the sample will stop when the specified file ends. If :organic:code:`length` is less
+      than the length of the specified file, the sample will be cut short. If :organic:code:`length` is greater than the
+      length of the specified file, the remaining time will be filled with silence.
+
 .. organic:function:: granulate
    :return: audio source
 
