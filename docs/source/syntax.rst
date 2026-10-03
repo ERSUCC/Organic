@@ -118,11 +118,12 @@ Controllers
 -----------
 
 The most common type of function in Organic is a controller, which can be used to automate function inputs over time.
-For example, consider the :organic:code:function:`sweep` function:
+Controllers don't produce sound on their own; they just control internal parameters. For example, consider the
+:organic:code:function:`sweep` function:
 
 .. code-block::
 
-   sweep(from: 0, to: 1, length: 1000)
+   sweep(from: 220, to: 440, length: 1000)
 
 The above example produces a number that starts at :organic:mono:`0` and steadily increases to :organic:mono:`1` over
 the course of :organic:mono:`1000` milliseconds, or :organic:mono:`1` second. This doesn't do much on its own, but if
@@ -186,18 +187,12 @@ Effects
 The final type of function is an effect, which can only be used along with an audio source like
 :organic:code:function:`sine`. Effects alter the output of an audio source after its creation, directly manipulating the
 stream of audio data before it is played. This allows you to fine-tune more abstract parameters of a sound, such as
-:term:`timbre`, regardless of which function was used to create the original sound. One common example of an effect is
-reverberation, or reverb for short. Reverb adds echoes to a sound, making it seem like it was produced in a much larger
-space like a church or a cave. In Organic, you can create a reverb effect like this:
+:term:`timbre`, regardless of which function was used to create the original sound.
 
-.. code-block::
-
-   reverb(length: 10000)
-
-The above example creates a reverb effect with a :organic:mono:`10000` millisecond, or :organic:mono:`10` second, decay
-time. To use it with an audio source, you can provide it as the value for that audio source's :organic:code:`effects`
-input. To hear what this sounds like, let's build up an example using what you've learned about controllers and effects.
-Start by creating a basic saw wave at :organic:mono:`440` Hz:
+One common example of an effect is reverberation, or reverb for short. Reverb adds echoes to a sound, making it seem
+like it was produced in a much larger space like a church or a cave. To hear what this sounds like, let's build up an
+example using what you've learned about controllers and effects. Start by creating a basic saw wave at
+:organic:mono:`440` Hz:
 
 .. code-block::
 
