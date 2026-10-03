@@ -1,7 +1,7 @@
 name = "Invalid variable type in function input"
 line = 4
 character = 17
-error = 'Expected number for input "frequency", but received sequence order constant.'
+error = 'Expected a number for input "frequency", but received a sequence order constant.'
 
 ---
 
@@ -14,7 +14,7 @@ sine(frequency: test)
 name = "Invalid variable type from outer scope in function input"
 line = 5
 character = 21
-error = 'Expected number for input "frequency", but received string.'
+error = 'Expected a number for input "frequency", but received a string.'
 
 ---
 
@@ -29,7 +29,7 @@ func() = {
 name = "Invalid input type in function input"
 line = 3
 character = 21
-error = 'Expected number for input "frequency", but received list of number.'
+error = 'Expected a number for input "frequency", but received a list of numbers.'
 
 ---
 

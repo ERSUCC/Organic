@@ -1,7 +1,7 @@
 name = "Include with no file name"
 line = 2
 character = 9
-error = 'Expected file path, but received ")".'
+error = 'Expected a file path, but received ")".'
 
 ---
 

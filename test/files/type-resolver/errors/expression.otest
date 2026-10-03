@@ -1,7 +1,7 @@
 name = "Chained boolean expressions"
 line = 2
 character = 8
-error = "Expected number on left-hand side, but received boolean."
+error = "Expected a number on the left-hand side, but received a boolean."
 
 ---
 
@@ -12,7 +12,7 @@ test = 1 == 2 == 3
 name = "Chained parenthesized boolean expressions"
 line = 2
 character = 8
-error = "Expected number on left-hand side, but received boolean."
+error = "Expected a number on the left-hand side, but received a boolean."
 
 ---
 
@@ -23,7 +23,7 @@ test = (1 == 2) == 3
 name = "Add boolean expression to number"
 line = 2
 character = 12
-error = "Expected number on right-hand side, but received boolean."
+error = "Expected a number on the right-hand side, but received a boolean."
 
 ---
 
@@ -34,7 +34,7 @@ test = 1 + (2 == 3)
 name = "Negate language constant"
 line = 2
 character = 9
-error = "Expected number, but received round direction constant."
+error = "Expected a number, but received a round direction constant."
 
 ---
 
@@ -45,7 +45,7 @@ test = -nearest
 name = "Negate list variable"
 line = 3
 character = 10
-error = "Expected number, but received list of number."
+error = "Expected a number, but received a list of numbers."
 
 ---
 

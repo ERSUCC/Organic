@@ -1,7 +1,7 @@
 name = "Define with comma before first input"
 line = 2
 character = 6
-error = 'Expected input name after "(", but received ",".'
+error = 'Expected an input name after "(", but received ",".'
 
 ---
 
@@ -34,7 +34,7 @@ sine() = 0
 name = "Missing closing curly brace"
 line = 4
 character = 1
-error = 'Expected "}" at end of function definition.'
+error = 'Expected "}" at the end of a function definition.'
 
 ---
 
@@ -45,7 +45,7 @@ test() = {
 name = "Define closed after first input"
 line = 2
 character = 12
-error = 'Expected ":" after input name, but received ")".'
+error = 'Expected ":" after an input name, but received ")".'
 
 ---
 
@@ -56,7 +56,7 @@ test(volume) = {}
 name = "Define closed after second input"
 line = 2
 character = 26
-error = 'Expected ":" after input name, but received ")".'
+error = 'Expected ":" after an input name, but received ")".'
 
 ---
 
@@ -67,7 +67,7 @@ test(volume: 1, frequency) = {}
 name = "Define closed after first comma"
 line = 2
 character = 17
-error = 'Expected input name after ",", but received ")".'
+error = 'Expected an input name after ",", but received ")".'
 
 ---
 
@@ -78,7 +78,7 @@ test(volume: 1, ) = {}
 name = "Define closed after second comma"
 line = 2
 character = 33
-error = 'Expected input name after ",", but received ")".'
+error = 'Expected an input name after ",", but received ")".'
 
 ---
 
@@ -115,7 +115,7 @@ func(test: 0, test1: 1, test1: 1) = {
 name = "Fillable value as define input"
 line = 2
 character = 6
-error = 'Expected input name after "(", but received "|test|".'
+error = 'Expected an input name after "(", but received "|test|".'
 
 ---
 

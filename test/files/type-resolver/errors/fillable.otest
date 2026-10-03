@@ -27,7 +27,7 @@ sine(frequency: |phase|)
 name = "fillable value with incorrect type"
 line = 2
 character = 69
-error = 'Expected sequence order constant for input "order", but received number.'
+error = 'Expected a sequence order constant for input "order", but received a number.'
 
 ---
 

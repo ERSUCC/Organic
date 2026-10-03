@@ -82,7 +82,7 @@ void TypeResolver::resolveTypes(const Negate* token)
 
     if (!UniqueType(new NumberType())->checkType(context, token->value->type().get()))
     {
-        throw OrganicParseException("Expected number, but received " + token->value->type()->name() + ".", token->value->location);
+        throw OrganicParseException("Expected a number, but received " + token->value->type()->singular() + ".", token->value->location);
     }
 }
 
@@ -171,7 +171,7 @@ void TypeResolver::resolveTypes(const If* token)
 
     if (!trueValue->type()->checkType(context, falseValue->type().get()))
     {
-        throw OrganicParseException("The type of \"is-false\" must match the type of \"is-true\", which is a " + trueValue->type()->name(), falseValue->location);
+        throw OrganicParseException("The type of \"is-false\" must match the type of \"is-true\", which is " + trueValue->type()->singular(), falseValue->location);
     }
 
     token->arguments->check();
@@ -408,7 +408,7 @@ void TypeResolver::resolveTypes(const CallAlias* token)
 
         if (!expected->checkType(context, argumentType.get()))
         {
-            throw OrganicParseException("Expected " + expected->name() + " on left-hand side, but received " + argumentType->name() + ".", argument->value->location);
+            throw OrganicParseException("Expected " + expected->singular() + " on the left-hand side, but received " + argumentType->singular() + ".", argument->value->location);
         }
     }
 
@@ -420,7 +420,7 @@ void TypeResolver::resolveTypes(const CallAlias* token)
 
         if (!expected->checkType(context, argumentType.get()))
         {
-            throw OrganicParseException("Expected " + expected->name() + " on right-hand side, but received " + argumentType->name() + ".", argument->value->location);
+            throw OrganicParseException("Expected " + expected->singular() + " on the right-hand side, but received " + argumentType->singular() + ".", argument->value->location);
         }
     }
 }
@@ -455,14 +455,14 @@ void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::stri
         {
             if (argumentType->baseType() != TypeConstant::Fillable)
             {
-                throw OrganicParseException("Expected " + expectedType->name() + " for input \"" + name + "\", but received " + argumentType->name() + ".", argument->value->location);
+                throw OrganicParseException("Expected " + expectedType->singular() + " for input \"" + name + "\", but received " + argumentType->singular() + ".", argument->value->location);
             }
 
             const FillableType* fillable = dynamic_cast<const FillableType*>(argumentType.get());
 
             if (const SharedType type = context->findType(fillable->input))
             {
-                throw OrganicParseException("Expected " + expectedType->name() + " for input \"" + name + "\", but received " + type->name() + ".", argument->value->location);
+                throw OrganicParseException("Expected " + expectedType->singular() + " for input \"" + name + "\", but received " + type->singular() + ".", argument->value->location);
             }
 
             throw OrganicParseException("There is no fillable value available with the name \"" + fillable->input + "\".", argument->value->location);

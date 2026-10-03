@@ -67,7 +67,7 @@ error = 'Cannot assign a value to a list.'
 name = "Incomplete assign"
 line = 4
 character = 1
-error = 'Expected value after "=".'
+error = 'Expected a value after "=".'
 
 ---
 

@@ -1,7 +1,7 @@
 name = "Call with comma before first input"
 line = 2
 character = 6
-error = 'Expected input name after "(", but received ",".'
+error = 'Expected an input name after "(", but received ",".'
 
 ---
 
@@ -12,7 +12,7 @@ sine(,)
 name = "Call closed after first input"
 line = 2
 character = 12
-error = 'Expected ":" after input name, but received ")".'
+error = 'Expected ":" after an input name, but received ")".'
 
 ---
 
@@ -23,7 +23,7 @@ sine(volume)
 name = "Call closed after second input"
 line = 2
 character = 26
-error = 'Expected ":" after input name, but received ")".'
+error = 'Expected ":" after an input name, but received ")".'
 
 ---
 
@@ -34,7 +34,7 @@ sine(volume: 1, frequency)
 name = "Call closed after first comma"
 line = 2
 character = 17
-error = 'Expected input name after ",", but received ")".'
+error = 'Expected an input name after ",", but received ")".'
 
 ---
 
@@ -45,7 +45,7 @@ sine(volume: 1, )
 name = "Call closed after second comma"
 line = 2
 character = 33
-error = 'Expected input name after ",", but received ")".'
+error = 'Expected an input name after ",", but received ")".'
 
 ---
 
@@ -78,7 +78,7 @@ sine(volume: 1, frequency: 440, frequency: 440)
 name = "Fillable value as call input"
 line = 2
 character = 6
-error = 'Expected input name after "(", but received "|frequency|".'
+error = 'Expected an input name after "(", but received "|frequency|".'
 
 ---
 

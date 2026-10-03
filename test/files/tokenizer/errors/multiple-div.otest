@@ -12,7 +12,7 @@ error = "Numbers cannot contain more than one decimal point."
 name = "Extra pipe in fillable value"
 line = 2
 character = 8
-error = 'Expected "|" after fillable value name.'
+error = 'Expected "|" after a fillable value name.'
 
 ---
 
@@ -23,7 +23,7 @@ error = 'Expected "|" after fillable value name.'
 name = "Extra quote in string"
 line = 2
 character = 8
-error = "Expected closing double quotation mark."
+error = "Expected a closing double quotation mark."
 
 ---
 

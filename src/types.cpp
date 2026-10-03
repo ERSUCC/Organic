@@ -20,8 +20,8 @@ const SharedType FillContext::findType(const std::string& name) const
     return SharedType(nullptr);
 }
 
-Type::Type(const TypeConstant& base, const std::string& str) :
-    base(base), str(str) {}
+Type::Type(const TypeConstant& base, const std::string& singularStr, const std::string& pluralStr) :
+    base(base), singularStr(singularStr), pluralStr(pluralStr) {}
 
 Type::~Type() {}
 
@@ -30,9 +30,14 @@ TypeConstant Type::baseType() const
     return base;
 }
 
-std::string Type::name() const
+std::string Type::singular() const
 {
-    return str;
+    return singularStr;
+}
+
+std::string Type::plural() const
+{
+    return pluralStr;
 }
 
 bool Type::checkType(const FillContext* context, const Type* actual) const
@@ -56,7 +61,7 @@ bool Type::checkType(const FillContext* context, const Type* actual) const
 }
 
 AnyType::AnyType() :
-    Type(TypeConstant::Any, "anything") {}
+    Type(TypeConstant::Any, "anything", "anything") {}
 
 bool AnyType::checkType(const FillContext* context, const Type* actual) const
 {
@@ -64,34 +69,34 @@ bool AnyType::checkType(const FillContext* context, const Type* actual) const
 }
 
 NoneType::NoneType() :
-    Type(TypeConstant::None, "nothing") {}
+    Type(TypeConstant::None, "nothing", "nothing") {}
 
 SequenceOrderType::SequenceOrderType() :
-    Type(TypeConstant::SequenceOrder, "sequence order constant") {}
+    Type(TypeConstant::SequenceOrder, "a sequence order constant", "sequence order constants") {}
 
 RandomTypeType::RandomTypeType() :
-    Type(TypeConstant::RandomType, "random type constant") {}
+    Type(TypeConstant::RandomType, "a random type constant", "random type constants") {}
 
 RoundDirectionType::RoundDirectionType() :
-    Type(TypeConstant::RoundDirection, "round direction constant") {}
+    Type(TypeConstant::RoundDirection, "a round direction constant", "round direction constants") {}
 
 NumberType::NumberType() :
-    Type(TypeConstant::Number, "number") {}
+    Type(TypeConstant::Number, "a number", "numbers") {}
 
 BooleanType::BooleanType() :
-    Type(TypeConstant::Boolean, "boolean") {}
+    Type(TypeConstant::Boolean, "a boolean", "booleans") {}
 
 StringType::StringType() :
-    Type(TypeConstant::String, "string") {}
+    Type(TypeConstant::String, "a string", "strings") {}
 
 AudioSourceType::AudioSourceType() :
-    Type(TypeConstant::AudioSource, "audio source") {}
+    Type(TypeConstant::AudioSource, "an audio source", "audio sources") {}
 
 EffectType::EffectType() :
-    Type(TypeConstant::Effect, "effect") {}
+    Type(TypeConstant::Effect, "an effect", "effects") {}
 
 ListType::ListType(const SharedType& subType) :
-    Type(TypeConstant::List, "list of " + subType->name()), subType(subType) {}
+    Type(TypeConstant::List, "a list of " + subType->plural(), "lists of " + subType->plural()), subType(subType) {}
 
 ListType::ListType(const Type* subType) :
     ListType(SharedType(subType)) {}
@@ -107,4 +112,4 @@ bool ListType::checkType(const FillContext* context, const Type* actual) const
 }
 
 FillableType::FillableType(const std::string& input) :
-    Type(TypeConstant::Fillable, "fillable"), input(input) {}
+    Type(TypeConstant::Fillable, "a fillable", "fillables"), input(input) {}

@@ -341,7 +341,7 @@ const Token* Tokenizer::tokenizeString()
 
     if (current >= source->length() || source->get(current) != '"')
     {
-        throw OrganicParseException("Expected closing double quotation mark.", SourceLocation(source, current, current));
+        throw OrganicParseException("Expected a closing double quotation mark.", SourceLocation(source, current, current));
     }
 
     current++;
@@ -383,7 +383,7 @@ const Token* Tokenizer::tokenizeNumber()
 
     if (constant[constant.size() - 1] == '.')
     {
-        throw OrganicParseException("Expected digits after decimal point.", SourceLocation(source, current, current));
+        throw OrganicParseException("Expected digits after a decimal point.", SourceLocation(source, current, current));
     }
 
     return new Value(SourceLocation(source, start, current), std::stod(constant));
@@ -551,7 +551,7 @@ const Token* Tokenizer::tokenizeFillable()
 
     if (source->get(current) != '|')
     {
-        throw OrganicParseException("Expected \"|\" after fillable value name.", SourceLocation(source, current, current));
+        throw OrganicParseException("Expected \"|\" after a fillable value name.", SourceLocation(source, current, current));
     }
 
     return new Fillable(SourceLocation(source, start, ++current), name);

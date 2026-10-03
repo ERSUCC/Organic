@@ -47,20 +47,22 @@ private:
 
 struct Type
 {
-    Type(const TypeConstant& base, const std::string& str);
+    Type(const TypeConstant& base, const std::string& singularStr, const std::string& pluralStr);
 
     virtual ~Type();
 
     TypeConstant baseType() const;
 
-    std::string name() const;
+    std::string singular() const;
+    std::string plural() const;
 
     virtual bool checkType(const FillContext* context, const Type* actual) const;
 
 private:
     const TypeConstant base;
 
-    const std::string str;
+    const std::string singularStr;
+    const std::string pluralStr;
 
 };
 

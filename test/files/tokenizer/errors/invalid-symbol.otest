@@ -23,7 +23,7 @@ error = 'Unrecognized symbol "$".'
 name = "Invalid symbol after decimal"
 line = 2
 character = 6
-error = "Expected digits after decimal point."
+error = "Expected digits after a decimal point."
 
 ---
 
@@ -78,7 +78,7 @@ test $
 name = "Invalid symbol in fillable value"
 line = 2
 character = 6
-error = 'Expected "|" after fillable value name.'
+error = 'Expected "|" after a fillable value name.'
 
 ---
 
