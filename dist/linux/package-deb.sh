@@ -14,10 +14,11 @@ TMP_ROOT=/tmp/organic-$VERSION
 TMP_INSTALL=$TMP_ROOT/usr
 
 rm -rf $TMP_ROOT
-mkdir -p $TMP_INSTALL/bin $TMP_INSTALL/lib/organic
+mkdir -p $TMP_INSTALL/bin $TMP_INSTALL/lib/organic $TMP_INSTALL/share/licenses/organic
 
 cp install/bin/organic $TMP_INSTALL/bin
 cp install/lib/librtaudio*.so* $TMP_INSTALL/lib/organic
+cp LICENSE.txt NOTICE.txt $TMP_INSTALL/share/licenses/organic
 
 mkdir -p $TMP_ROOT/DEBIAN
 

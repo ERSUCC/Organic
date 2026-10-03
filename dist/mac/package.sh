@@ -22,6 +22,7 @@ mkdir -p $TMP_ROOT/bin $TMP_ROOT/lib
 
 cp install/bin/organic $TMP_ROOT/bin
 cp install/lib/*.dylib $TMP_ROOT/lib
+cp LICENSE.txt NOTICE.txt $TMP_ROOT
 
 pkgbuild --root $TMP_ROOT --identifier OrganicExec --version $VERSION --install-location $INSTALL_ROOT /tmp/OrganicExec.pkg
 

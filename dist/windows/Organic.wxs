@@ -5,18 +5,28 @@
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="RootDirectory" Name="$(name)" FileSource="$(root)">
         <Component Id="OrganicComponent">
-          <File Id="OrganicExe" Source="$(root)\bin\organic.exe" ProcessorArchitecture="x64" KeyPath="yes" />
+          <File Id="OrganicExe" Source="$(root)\install\bin\organic.exe" ProcessorArchitecture="x64" KeyPath="yes" />
           <Environment Action="set" Id="UpdatePath" Name="Path" Part="last" Value="[RootDirectory]" />
+        </Component>
+
+        <Component Id="LicenseComponent">
+          <File Id="License" Source="$(root)\LICENSE.txt" />
+        </Component>
+
+        <Component Id="NoticeComponent">
+          <File Id="Notice" Source="$(root)\NOTICE.txt" />
         </Component>
       </Directory>
     </StandardDirectory>
 
     <ComponentGroup Id="DepsComponent">
-      <Files Directory="RootDirectory" Include="$(root)\bin\*.dll" />
+      <Files Directory="RootDirectory" Include="$(root)\install\bin\*.dll" />
     </ComponentGroup>
 
     <Feature Id="OrganicFeature" Title="$(name)">
       <ComponentRef Id="OrganicComponent" />
+      <ComponentRef Id="LicenseComponent" />
+      <ComponentRef Id="NoticeComponent" />
       <ComponentGroupRef Id="DepsComponent" />
     </Feature>
   </Package>

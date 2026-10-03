@@ -3,7 +3,7 @@ Version: {{version}}
 Release: 1
 BuildArch: x86_64
 Summary: A programming language for algorithmic audio synthesis
-License: GPLv3
+License: Apache-2.0
 URL: https://github.com/ERSUCC/Organic
 Source: %{name}-%{version}.tar.gz
 Requires: libsndfile >= 1.2.2, libsamplerate >= 0.2.2
@@ -18,10 +18,13 @@ A programming language for algorithmic audio synthesis
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_bindir} %{buildroot}%{_defaultlicensedir}
 cp bin/organic %{buildroot}%{_bindir}
 cp -r lib64 %{buildroot}%{_libdir}
+cp -r share/licenses/organic %{buildroot}%{_defaultlicensedir}
 
 %files
 %{_bindir}/organic
 %{_libdir}/organic
+%license LICENSE.txt
+%license NOTICE.txt

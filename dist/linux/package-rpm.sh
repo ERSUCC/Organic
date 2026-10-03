@@ -16,10 +16,12 @@ TMP_INSTALL=$TMP_ROOT/$ARCHIVE
 RPM_ROOT=$TMP_ROOT/rpmbuild
 
 rm -rf $TMP_ROOT
-mkdir -p $TMP_INSTALL/bin $TMP_INSTALL/lib64/organic $RPM_ROOT/SOURCES $RPM_ROOT/SPECS
+mkdir -p $TMP_INSTALL/bin $TMP_INSTALL/lib64/organic $TMP_INSTALL/share/licenses/organic
+mkdir -p $RPM_ROOT/SOURCES $RPM_ROOT/SPECS
 
 cp install/bin/organic $TMP_INSTALL/bin
 cp install/lib/librtaudio*.so* $TMP_INSTALL/lib64/organic
+cp LICENSE.txt NOTICE.txt $TMP_INSTALL/share/licenses/organic
 
 tar -cf $RPM_ROOT/SOURCES/$ARCHIVE.tar.gz -C $TMP_ROOT $ARCHIVE
 
