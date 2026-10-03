@@ -45,8 +45,9 @@ Option Details
 .. option:: --export <path>
 
    Render the program to the specified audio file instead of playing back in time. Must be used in conjunction with
-   :code:`--time`. The only format currently supported for export is WAV, and specifying a different file extension may
-   result in undefined behavior.
+   :code:`--time`. Output that exceeds a total volume of :organic:mono:`1` will be normalized to :organic:mono:`1` to
+   prevent clipping. The only format currently supported for export is WAV, and specifying a different file extension
+   may result in undefined behavior.
 
 .. option:: --mono
 
