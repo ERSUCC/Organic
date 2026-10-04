@@ -1,6 +1,6 @@
 note-length = 32000
 
-swell = repeat(value: lfo(from: 0, to: 1, length: note-length))
+swell = repeat(value: lfo(from: 0, to: 0.25, length: note-length))
 
 sine(frequency: repeat(value: sequence(values: [
     hold(value: af2, length: note-length),

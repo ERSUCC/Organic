@@ -5,4 +5,4 @@ squeeze(phase: 0) = {
     if(condition: modulo(value: phase, divisor: tau / mult) * mult / pi < 1, is-true: 1, is-false: -1)
 }
 
-oscillator(volume: 0.25, frequency: c3, waveform: squeeze(phase: |phase|))
+oscillator(volume: 0.1, frequency: c3, waveform: squeeze(phase: |phase|))

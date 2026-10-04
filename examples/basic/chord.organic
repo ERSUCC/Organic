@@ -1,3 +1,3 @@
-triangle(frequency: c3)
-triangle(frequency: e3)
-triangle(frequency: g3)
+triangle(volume: 0.3, frequency: c3)
+triangle(volume: 0.3, frequency: e3)
+triangle(volume: 0.3, frequency: g3)
