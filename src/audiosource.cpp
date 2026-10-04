@@ -151,12 +151,43 @@ Square::Square(ValueObject* volume, ValueObject* pan, ValueObject* effects, Valu
 
 double Square::getValue() const
 {
-    if (sin(phase->getValue()) > 0)
+    const double phaseNorm = phase->getValue() / utils->twoPi;
+    const double spread = frequency->getValue() / utils->sampleRate;
+
+    if (phaseNorm < spread)
     {
-        return -1;
+        const double offset = phaseNorm / spread;
+
+        return offset * (2 - offset);
     }
 
-    return 1;
+    if (phaseNorm > 0.5 - spread && phaseNorm < 0.5)
+    {
+        const double offset = (phaseNorm - 0.5) / spread;
+
+        return -offset * (offset + 2);
+    }
+
+    if (phaseNorm > 0.5 && phaseNorm < 0.5 + spread)
+    {
+        const double offset = (phaseNorm - 0.5) / spread;
+
+        return -offset * (2 - offset);
+    }
+
+    if (phaseNorm > 1 - spread)
+    {
+        const double offset = (phaseNorm - 1) / spread;
+
+        return offset * (offset + 2);
+    }
+
+    if (phaseNorm < 0.5)
+    {
+        return 1;
+    }
+
+    return -1;
 }
 
 Saw::Saw(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
@@ -164,7 +195,24 @@ Saw::Saw(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObjec
 
 double Saw::getValue() const
 {
-    return phase->getValue() / utils->pi - 1;
+    const double phaseNorm = phase->getValue() / utils->twoPi;
+    const double spread = frequency->getValue() / utils->sampleRate;
+
+    if (phaseNorm < spread)
+    {
+        const double offset = phaseNorm / spread;
+
+        return phaseNorm * 2 - offset * (2 - offset);
+    }
+
+    if (phaseNorm > 1 - spread)
+    {
+        const double offset = (phaseNorm - 1) / spread;
+
+        return phaseNorm * 2 - offset * (offset + 2) - 2;
+    }
+
+    return phaseNorm * 2 - 1;
 }
 
 Triangle::Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
