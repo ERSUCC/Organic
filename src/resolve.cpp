@@ -125,6 +125,15 @@ void TypeResolver::resolveTypes(const Sequence* token)
     token->arguments->check();
 }
 
+void TypeResolver::resolveTypes(const Envelope* token)
+{
+    resolveArgumentTypes(token->arguments, "attack", new NumberType());
+    resolveArgumentTypes(token->arguments, "release", new NumberType());
+    resolveArgumentTypes(token->arguments, "from", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "to", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "sustain", new NumberType(), new Value(token->location, 0));
+}
+
 void TypeResolver::resolveTypes(const Repeat* token)
 {
     resolveArgumentTypes(token->arguments, "value", new AnyType());

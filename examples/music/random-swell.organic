@@ -9,8 +9,7 @@ swell(period: 0, frequency: 0) = {
     volume = sequence(values: [
         hold(value: 0, length: if(condition: period > swell-length, is-true: offset, is-false: 0)),
         repeat(value: sequence(values: [
-            sweep(from: 0, to: 1, length: swell-attack),
-            sweep(from: 1, to: 0, length: swell-decay),
+            envelope(attack: swell-attack, release: swell-decay),
             hold(value: 0, length: gap)
         ]))
     ])

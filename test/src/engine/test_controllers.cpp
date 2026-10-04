@@ -39,6 +39,7 @@ void TestControllers::test()
     testLFO();
     testSweep();
     testSequence();
+    testEnvelope();
     testRepeat();
     testRandom();
     testLimit();

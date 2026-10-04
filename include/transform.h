@@ -46,6 +46,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::LFO* token);
     Engine::ValueObject* transform(const Parser::Sweep* token);
     Engine::ValueObject* transform(const Parser::Sequence* token);
+    Engine::ValueObject* transform(const Parser::Envelope* token);
     Engine::ValueObject* transform(const Parser::Repeat* token);
     Engine::ValueObject* transform(const Parser::Random* token);
     Engine::ValueObject* transform(const Parser::Limit* token);

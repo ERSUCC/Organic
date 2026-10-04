@@ -63,6 +63,7 @@ private:
     void testLFO();
     void testSweep();
     void testSequence();
+    void testEnvelope();
     void testRepeat();
     void testRandom();
     void testLimit();

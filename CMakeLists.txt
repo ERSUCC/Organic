@@ -76,6 +76,7 @@ if (ORGANIC_BUILD_TESTS)
                                 test/src/engine/controllers/all.cpp
                                 test/src/engine/controllers/any.cpp
                                 test/src/engine/controllers/divide.cpp
+                                test/src/engine/controllers/envelope.cpp
                                 test/src/engine/controllers/equals.cpp
                                 test/src/engine/controllers/geq.cpp
                                 test/src/engine/controllers/greater.cpp

@@ -24,6 +24,7 @@ struct TypeResolver
     void resolveTypes(const LFO* token);
     void resolveTypes(const Sweep* token);
     void resolveTypes(const Sequence* token);
+    void resolveTypes(const Envelope* token);
     void resolveTypes(const Repeat* token);
     void resolveTypes(const Random* token);
     void resolveTypes(const Limit* token);

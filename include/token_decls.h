@@ -24,6 +24,7 @@ struct Hold;
 struct LFO;
 struct Sweep;
 struct Sequence;
+struct Envelope;
 struct Repeat;
 struct Random;
 struct Limit;

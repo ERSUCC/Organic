@@ -428,6 +428,27 @@ private:
 
 };
 
+struct Envelope : public ValueObject
+{
+    Envelope(ValueObject* from, ValueObject* to, ValueObject* attack, ValueObject* sustain, ValueObject* release);
+    ~Envelope();
+
+    double getValue() const override;
+
+    void update() override;
+
+protected:
+    void init() override;
+
+private:
+    ValueObject* from;
+    ValueObject* to;
+    ValueObject* attack;
+    ValueObject* sustain;
+    ValueObject* release;
+
+};
+
 struct Random : public ValueObject
 {
     Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type);

@@ -12,6 +12,7 @@ static std::unordered_map<std::string, std::function<UniqueToken<Call> (const So
     { "lfo", CALL(LFO) },
     { "sweep", CALL(Sweep) },
     { "sequence", CALL(Sequence) },
+    { "envelope", CALL(Envelope) },
     { "repeat", CALL(Repeat) },
     { "random", CALL(Random) },
     { "limit", CALL(Limit) },

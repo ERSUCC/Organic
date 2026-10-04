@@ -467,6 +467,19 @@ Engine::ValueObject* Sequence::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
+Envelope::Envelope(const SourceLocation& location, ArgumentList* arguments) :
+    Call(location, arguments, new NumberType()) {}
+
+void Envelope::resolveTypes(TypeResolver* visitor) const
+{
+    visitor->resolveTypes(this);
+}
+
+Engine::ValueObject* Envelope::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
 Repeat::Repeat(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new NumberType()) {}
 

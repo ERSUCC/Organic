@@ -176,6 +176,42 @@ These functions are used to automate the values of other parameters, and can typ
       if the value specified for this input stops. See :ref:`sequence-order` for details on the constants used in this
       input.
 
+.. organic:function:: envelope
+   :return: number
+
+   .. organic:input:: attack
+      :type: number
+
+   .. organic:input:: release
+      :type: number
+
+   Generates a linear interpolation between :organic:mono:`0` and :organic:mono:`1` with a length of
+   :organic:code:`attack` milliseconds, followed by a linear interpolation between :organic:mono:`1` and
+   :organic:mono:`0` with a length of :organic:code:`release` milliseconds. Stops after :organic:code:`attack` and
+   :organic:code:`release` have both completed.
+
+   **Optional Inputs**
+
+   .. organic:input:: from
+      :type: number
+      :default: :organic:code:`0`
+
+      Use this input to specify a different minimum value. This applies to both the beginning of :organic:code:`attack`
+      and the end of :organic:code:`release`.
+
+   .. organic:input:: to
+      :type: number
+      :default: :organic:code:`1`
+
+      Use this input to specify a different maximum value.
+
+   .. organic:input:: sustain
+      :type: number
+      :default: :organic:code:`0`
+
+      Use this input to specify the length of time to hold :organic:code:`to` in between :organic:code:`attack` and
+      :organic:code:`release`.
+
 .. organic:function:: repeat
    :return: type of :organic:code:`value`
 

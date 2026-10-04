@@ -128,6 +128,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Sequence* token)
     return new Engine::Sequence(ARG("values"), ARG("order"));
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::Envelope* token)
+{
+    return new Engine::Envelope(ARG("from"), ARG("to"), ARG("attack"), ARG("sustain"), ARG("release"));
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::Repeat* token)
 {
     return new Engine::Repeat(ARG("value"), ARG("repeats"));

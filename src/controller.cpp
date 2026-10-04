@@ -1012,6 +1012,75 @@ void LFO::init()
     length->start(startTime);
 }
 
+Envelope::Envelope(ValueObject* from, ValueObject* to, ValueObject* attack, ValueObject* sustain, ValueObject* release) :
+    from(from), to(to), attack(attack), sustain(sustain), release(release) {}
+
+Envelope::~Envelope()
+{
+    delete from;
+    delete to;
+    delete attack;
+    delete sustain;
+    delete release;
+}
+
+double Envelope::getValue() const
+{
+    if (!enabled)
+    {
+        return 0;
+    }
+
+    const double fromValue = from->getValue();
+    const double toValue = to->getValue();
+    const double attackValue = attack->getValue();
+    const double sustainValue = sustain->getValue();
+    const double releaseValue = release->getValue();
+
+    const double time = utils->time - startTime;
+
+    if (time < attackValue)
+    {
+        return fromValue + (toValue - fromValue) * time / attackValue;
+    }
+
+    if (time < attackValue + sustainValue)
+    {
+        return toValue;
+    }
+
+    return toValue - (toValue - fromValue) * (time - attackValue - sustainValue) / releaseValue;
+}
+
+void Envelope::update()
+{
+    from->update();
+    to->update();
+    attack->update();
+    sustain->update();
+    release->update();
+
+    const double attackValue = attack->getValue();
+    const double sustainValue = sustain->getValue();
+    const double releaseValue = release->getValue();
+
+    const double length = attackValue + sustainValue + releaseValue;
+
+    if (utils->time - startTime >= length)
+    {
+        stop(startTime + length);
+    }
+}
+
+void Envelope::init()
+{
+    from->start(startTime);
+    to->start(startTime);
+    attack->start(startTime);
+    sustain->start(startTime);
+    release->start(startTime);
+}
+
 Random::Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type) :
     from(from), to(to), length(length), type(type) {}
 

@@ -434,6 +434,15 @@ struct Sequence : public Call
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
+struct Envelope : public Call
+{
+    Envelope(const SourceLocation& location, ArgumentList* arguments);
+
+    void resolveTypes(TypeResolver* visitor) const override;
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
+
 struct Repeat : public Call
 {
     Repeat(const SourceLocation& location, ArgumentList* arguments);
