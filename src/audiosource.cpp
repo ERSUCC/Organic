@@ -24,7 +24,7 @@ void AudioSource::fillBuffer(double* buffer)
 {
     for (ValueObject* object : effects->getLeafAs<List>()->objects)
     {
-        object->getLeafAs<Effect>()->apply(effectBuffer);
+        object->getLeafAs<Effect>()->apply(this, effectBuffer);
     }
 
     for (size_t i = 0; i < utils->channels; i++)

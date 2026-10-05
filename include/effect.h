@@ -4,6 +4,8 @@
 #include <queue>
 #include <random>
 #include <stddef.h>
+#include <unordered_map>
+#include <utility>
 
 #include "object.h"
 
@@ -11,7 +13,7 @@ namespace Engine {
 
 struct Effect : public ValueObject
 {
-    virtual void apply(double* buffer);
+    virtual void apply(ValueObject* source, double* buffer);
 };
 
 struct EffectGroup : public Effect
@@ -19,7 +21,7 @@ struct EffectGroup : public Effect
     EffectGroup(ValueObject* mix, ValueObject* effects);
     ~EffectGroup();
 
-    void apply(double* buffer) override;
+    void apply(ValueObject* source, double* buffer) override;
 
 protected:
     void init() override;
@@ -39,7 +41,7 @@ struct Delay : public Effect
     Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
     ~Delay();
 
-    void apply(double* buffer) override;
+    void apply(ValueObject* source, double* buffer) override;
 
 protected:
     void init() override;
@@ -50,7 +52,7 @@ private:
     ValueObject* delay;
     ValueObject* feedback;
 
-    std::queue<double> delayBuffer;
+    std::unordered_map<ValueObject*, std::queue<double>> delayBuffers;
 
 };
 
@@ -59,7 +61,7 @@ struct Comb : public Effect
     Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
     ~Comb();
 
-    void apply(double* buffer) override;
+    void apply(ValueObject* source, double* buffer) override;
 
 protected:
     void init() override;
@@ -70,7 +72,7 @@ private:
     ValueObject* delay;
     ValueObject* feedback;
 
-    std::queue<double> delayBuffer;
+    std::unordered_map<ValueObject*, std::queue<double>> delayBuffers;
 
 };
 
@@ -79,7 +81,7 @@ struct AllPass : public Effect
     AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
     ~AllPass();
 
-    void apply(double* buffer) override;
+    void apply(ValueObject* source, double* buffer) override;
 
 protected:
     void init() override;
@@ -90,8 +92,17 @@ private:
     ValueObject* delay;
     ValueObject* feedback;
 
-    std::queue<double> delayBuffer;
+    std::unordered_map<ValueObject*, std::queue<double>> delayBuffers;
 
+};
+
+struct History
+{
+    History();
+    ~History();
+
+    double* raw;
+    double* filtered;
 };
 
 struct LowPass : public Effect
@@ -99,7 +110,7 @@ struct LowPass : public Effect
     LowPass(ValueObject* threshold);
     ~LowPass();
 
-    void apply(double* buffer) override;
+    void apply(ValueObject* source, double* buffer) override;
 
 protected:
     void init() override;
@@ -108,8 +119,7 @@ protected:
 private:
     ValueObject* threshold;
 
-    double* raw;
-    double* filtered;
+    std::unordered_map<ValueObject*, History*> histories;
 
 };
 
@@ -195,7 +205,7 @@ struct Reverb : public Effect
     Reverb(ValueObject* mix, ValueObject* length);
     ~Reverb();
 
-    void apply(double* buffer) override;
+    void apply(ValueObject* source, double* buffer) override;
 
 protected:
     void init() override;
@@ -205,7 +215,7 @@ private:
     ValueObject* mix;
     ValueObject* length;
 
-    DelayMatrix* matrix = new DelayMatrix();
+    std::unordered_map<ValueObject*, DelayMatrix*> matrices;
 
 };
 

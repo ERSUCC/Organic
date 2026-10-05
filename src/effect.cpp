@@ -2,7 +2,7 @@
 
 using namespace Engine;
 
-void Effect::apply(double* buffer) {}
+void Effect::apply(ValueObject* source, double* buffer) {}
 
 EffectGroup::EffectGroup(ValueObject* mix, ValueObject* effects) :
     mix(mix), effects(effects)
@@ -20,7 +20,7 @@ EffectGroup::~EffectGroup()
     free(applied);
 }
 
-void EffectGroup::apply(double* buffer)
+void EffectGroup::apply(ValueObject* source, double* buffer)
 {
     memcpy(original, buffer, sizeof(double) * utils->channels);
     memset(buffer, 0, sizeof(double) * utils->channels);
@@ -33,7 +33,7 @@ void EffectGroup::apply(double* buffer)
     {
         memcpy(applied, original, sizeof(double) * utils->channels);
 
-        static_cast<Effect*>(effect)->apply(applied);
+        static_cast<Effect*>(effect)->apply(source, applied);
 
         for (size_t i = 0; i < utils->channels; i++)
         {
@@ -73,8 +73,10 @@ Delay::~Delay()
     delete feedback;
 }
 
-void Delay::apply(double* buffer)
+void Delay::apply(ValueObject* source, double* buffer)
 {
+    std::queue<double>& delayBuffer = delayBuffers[source];
+
     const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
 
     while (delayBuffer.size() > delayFrames)
@@ -128,8 +130,10 @@ Comb::~Comb()
     delete feedback;
 }
 
-void Comb::apply(double* buffer)
+void Comb::apply(ValueObject* source, double* buffer)
 {
+    std::queue<double>& delayBuffer = delayBuffers[source];
+
     const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
 
     while (delayBuffer.size() > delayFrames)
@@ -183,8 +187,10 @@ AllPass::~AllPass()
     delete feedback;
 }
 
-void AllPass::apply(double* buffer)
+void AllPass::apply(ValueObject* source, double* buffer)
 {
+    std::queue<double>& delayBuffer = delayBuffers[source];
+
     const size_t delayFrames = utils->channels * utils->sampleRate * delay->getValue() / 1000;
 
     while (delayBuffer.size() > delayFrames)
@@ -226,23 +232,43 @@ void AllPass::compute()
     feedback->update();
 }
 
-LowPass::LowPass(ValueObject* threshold) :
-    threshold(threshold)
+History::History()
 {
+    const Utils* utils = Utils::get();
+
     raw = (double*)calloc(utils->channels * 2, sizeof(double));
     filtered = (double*)calloc(utils->channels * 2, sizeof(double));
 }
+
+History::~History()
+{
+    free(raw);
+    free(filtered);
+}
+
+LowPass::LowPass(ValueObject* threshold) :
+    threshold(threshold) {}
 
 LowPass::~LowPass()
 {
     delete threshold;
 
-    free(raw);
-    free(filtered);
+    for (const std::pair<ValueObject*, History*>& pair : histories)
+    {
+        delete pair.second;
+    }
 }
 
-void LowPass::apply(double* buffer)
+void LowPass::apply(ValueObject* source, double* buffer)
 {
+    if (!histories.count(source))
+    {
+        histories[source] = new History();
+    }
+
+    double* raw = histories.at(source)->raw;
+    double* filtered = histories.at(source)->filtered;
+
     const double omega = tan(utils->pi * threshold->getValue() / utils->sampleRate);
     const double omega2 = omega * omega;
     const double c = 1 + sqrt(2) * omega + omega2;
@@ -416,12 +442,21 @@ Reverb::~Reverb()
 {
     delete mix;
     delete length;
-    delete matrix;
+
+    for (const std::pair<ValueObject*, DelayMatrix*>& pair : matrices)
+    {
+        delete pair.second;
+    }
 }
 
-void Reverb::apply(double* buffer)
+void Reverb::apply(ValueObject* source, double* buffer)
 {
-    matrix->apply(buffer, length->getValue(), mix->getValue());
+    if (!matrices.count(source))
+    {
+        matrices[source] = new DelayMatrix();
+    }
+
+    matrices.at(source)->apply(buffer, length->getValue(), mix->getValue());
 }
 
 void Reverb::init()
