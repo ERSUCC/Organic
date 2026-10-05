@@ -36,7 +36,12 @@ double ValueNegate::getValue() const
     return -value->getValue();
 }
 
-void ValueNegate::update()
+void ValueNegate::init()
+{
+    value->start(startTime);
+}
+
+void ValueNegate::compute()
 {
     value->update();
 
@@ -44,11 +49,6 @@ void ValueNegate::update()
     {
         stop(value->getStopTime());
     }
-}
-
-void ValueNegate::init()
-{
-    value->start(startTime);
 }
 
 ValueCombination::ValueCombination(ValueObject* value1, ValueObject* value2) :
@@ -70,7 +70,13 @@ double ValueCombination::getValue() const
     return getValueInternal(value1->getValue(), value2->getValue());
 }
 
-void ValueCombination::update()
+void ValueCombination::init()
+{
+    value1->start(startTime);
+    value2->start(startTime);
+}
+
+void ValueCombination::compute()
 {
     value1->update();
     value2->update();
@@ -84,12 +90,6 @@ void ValueCombination::update()
     {
         stop(value2->getStopTime());
     }
-}
-
-void ValueCombination::init()
-{
-    value1->start(startTime);
-    value2->start(startTime);
 }
 
 ValueAdd::ValueAdd(ValueObject* value1, ValueObject* value2) :
@@ -198,7 +198,17 @@ double All::getValue() const
     return 1;
 }
 
-void All::update()
+void All::init()
+{
+    values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+void All::compute()
 {
     values->update();
 
@@ -219,16 +229,6 @@ void All::update()
 
             return;
         }
-    }
-}
-
-void All::init()
-{
-    values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
     }
 }
 
@@ -258,7 +258,17 @@ double Any::getValue() const
     return 0;
 }
 
-void Any::update()
+void Any::init()
+{
+    values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+void Any::compute()
 {
     values->update();
 
@@ -279,16 +289,6 @@ void Any::update()
 
             return;
         }
-    }
-}
-
-void Any::init()
-{
-    values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
     }
 }
 
@@ -318,7 +318,17 @@ double None::getValue() const
     return 1;
 }
 
-void None::update()
+void None::init()
+{
+    values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+void None::compute()
 {
     values->update();
 
@@ -339,16 +349,6 @@ void None::update()
 
             return;
         }
-    }
-}
-
-void None::init()
-{
-    values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
     }
 }
 
@@ -382,7 +382,17 @@ double Min::getValue() const
     return min;
 }
 
-void Min::update()
+void Min::init()
+{
+    values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+void Min::compute()
 {
     values->update();
 
@@ -403,16 +413,6 @@ void Min::update()
 
             return;
         }
-    }
-}
-
-void Min::init()
-{
-    values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
     }
 }
 
@@ -446,7 +446,17 @@ double Max::getValue() const
     return max;
 }
 
-void Max::update()
+void Max::init()
+{
+    values->start(startTime);
+
+    for (ValueObject* object : values->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+void Max::compute()
 {
     values->update();
 
@@ -467,16 +477,6 @@ void Max::update()
 
             return;
         }
-    }
-}
-
-void Max::init()
-{
-    values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
     }
 }
 
@@ -520,7 +520,14 @@ double Round::getValue() const
     return 0;
 }
 
-void Round::update()
+void Round::init()
+{
+    value->start(startTime);
+    step->start(startTime);
+    direction->start(startTime);
+}
+
+void Round::compute()
 {
     value->update();
     step->update();
@@ -530,13 +537,6 @@ void Round::update()
     {
         stop(value->getStopTime());
     }
-}
-
-void Round::init()
-{
-    value->start(startTime);
-    step->start(startTime);
-    direction->start(startTime);
 }
 
 Absolute::Absolute(ValueObject* value) :
@@ -557,7 +557,12 @@ double Absolute::getValue() const
     return fabs(value->getValue());
 }
 
-void Absolute::update()
+void Absolute::init()
+{
+    value->start(startTime);
+}
+
+void Absolute::compute()
 {
     value->update();
 
@@ -565,11 +570,6 @@ void Absolute::update()
     {
         stop(value->getStopTime());
     }
-}
-
-void Absolute::init()
-{
-    value->start(startTime);
 }
 
 Modulo::Modulo(ValueObject* value, ValueObject* divisor) :
@@ -598,7 +598,13 @@ double Modulo::getValue() const
     return fmod(value->getValue(), divisorValue);
 }
 
-void Modulo::update()
+void Modulo::init()
+{
+    value->start(startTime);
+    divisor->start(startTime);
+}
+
+void Modulo::compute()
 {
     value->update();
     divisor->update();
@@ -607,12 +613,6 @@ void Modulo::update()
     {
         stop(value->getStopTime());
     }
-}
-
-void Modulo::init()
-{
-    value->start(startTime);
-    divisor->start(startTime);
 }
 
 Logarithm::Logarithm(ValueObject* value, ValueObject* base) :
@@ -642,7 +642,13 @@ double Logarithm::getValue() const
     return log(valueValue) / log(baseValue);
 }
 
-void Logarithm::update()
+void Logarithm::init()
+{
+    value->start(startTime);
+    base->start(startTime);
+}
+
+void Logarithm::compute()
 {
     value->update();
     base->update();
@@ -651,12 +657,6 @@ void Logarithm::update()
     {
         stop(value->getStopTime());
     }
-}
-
-void Logarithm::init()
-{
-    value->start(startTime);
-    base->start(startTime);
 }
 
 Sequence::Sequence(ValueObject* controllers, ValueObject* order) :
@@ -686,44 +686,6 @@ ValueObject* Sequence::getLeaf()
     }
 
     return controllers->getLeafAs<List>()->objects[current]->getLeaf();
-}
-
-void Sequence::update()
-{
-    controllers->update();
-    order->update();
-
-    const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
-
-    ValueObject* object = objects[current];
-
-    if (!order->enabled)
-    {
-        const double stopTime = order->getStopTime();
-
-        object->stop(stopTime);
-
-        stop(stopTime);
-
-        return;
-    }
-
-    object->update();
-
-    if (!object->enabled)
-    {
-        last = current;
-
-        if (++switches < objects.size())
-        {
-            repeat(object->getStopTime());
-        }
-
-        else
-        {
-            stop(object->getStopTime());
-        }
-    }
 }
 
 void Sequence::init()
@@ -810,6 +772,44 @@ void Sequence::reinit()
     objects[current]->start(repeatTime);
 }
 
+void Sequence::compute()
+{
+    controllers->update();
+    order->update();
+
+    const std::vector<ValueObject*>& objects = controllers->getLeafAs<List>()->objects;
+
+    ValueObject* object = objects[current];
+
+    if (!order->enabled)
+    {
+        const double stopTime = order->getStopTime();
+
+        object->stop(stopTime);
+
+        stop(stopTime);
+
+        return;
+    }
+
+    object->update();
+
+    if (!object->enabled)
+    {
+        last = current;
+
+        if (++switches < objects.size())
+        {
+            repeat(object->getStopTime());
+        }
+
+        else
+        {
+            stop(object->getStopTime());
+        }
+    }
+}
+
 Repeat::Repeat(ValueObject* value, ValueObject* repeats) :
     value(value), repeats(repeats) {}
 
@@ -839,7 +839,21 @@ ValueObject* Repeat::getLeaf()
     return value->getLeaf();
 }
 
-void Repeat::update()
+void Repeat::init()
+{
+    value->start(startTime);
+    repeats->start(startTime);
+
+    times = 0;
+}
+
+void Repeat::reinit()
+{
+    value->start(repeatTime);
+    repeats->start(startTime);
+}
+
+void Repeat::compute()
 {
     value->update();
     repeats->update();
@@ -858,20 +872,6 @@ void Repeat::update()
             stop(value->getStopTime());
         }
     }
-}
-
-void Repeat::init()
-{
-    value->start(startTime);
-    repeats->start(startTime);
-
-    times = 0;
-}
-
-void Repeat::reinit()
-{
-    value->start(repeatTime);
-    repeats->start(startTime);
 }
 
 Hold::Hold(ValueObject* value, ValueObject* length) :
@@ -903,7 +903,13 @@ ValueObject* Hold::getLeaf()
     return value;
 }
 
-void Hold::update()
+void Hold::init()
+{
+    value->start(startTime);
+    length->start(startTime);
+}
+
+void Hold::compute()
 {
     value->update();
     length->update();
@@ -914,12 +920,6 @@ void Hold::update()
     {
         stop(startTime + lengthValue);
     }
-}
-
-void Hold::init()
-{
-    value->start(startTime);
-    length->start(startTime);
 }
 
 Sweep::Sweep(ValueObject* from, ValueObject* to, ValueObject* length) :
@@ -946,7 +946,14 @@ double Sweep::getValue() const
     return fromValue + (toValue - fromValue) * (utils->time - startTime) / lengthValue;
 }
 
-void Sweep::update()
+void Sweep::init()
+{
+    from->start(startTime);
+    to->start(startTime);
+    length->start(startTime);
+}
+
+void Sweep::compute()
 {
     from->update();
     to->update();
@@ -958,13 +965,6 @@ void Sweep::update()
     {
         stop(startTime + lengthValue);
     }
-}
-
-void Sweep::init()
-{
-    from->start(startTime);
-    to->start(startTime);
-    length->start(startTime);
 }
 
 LFO::LFO(ValueObject* from, ValueObject* to, ValueObject* length) :
@@ -991,7 +991,14 @@ double LFO::getValue() const
     return fromValue + (toValue - fromValue) * (-cos(utils->twoPi * (utils->time - startTime) / lengthValue) / 2 + 0.5);
 }
 
-void LFO::update()
+void LFO::init()
+{
+    from->start(startTime);
+    to->start(startTime);
+    length->start(startTime);
+}
+
+void LFO::compute()
 {
     from->update();
     to->update();
@@ -1003,13 +1010,6 @@ void LFO::update()
     {
         stop(startTime + lengthValue);
     }
-}
-
-void LFO::init()
-{
-    from->start(startTime);
-    to->start(startTime);
-    length->start(startTime);
 }
 
 Envelope::Envelope(ValueObject* from, ValueObject* to, ValueObject* attack, ValueObject* sustain, ValueObject* release) :
@@ -1052,7 +1052,16 @@ double Envelope::getValue() const
     return toValue - (toValue - fromValue) * (time - attackValue - sustainValue) / releaseValue;
 }
 
-void Envelope::update()
+void Envelope::init()
+{
+    from->start(startTime);
+    to->start(startTime);
+    attack->start(startTime);
+    sustain->start(startTime);
+    release->start(startTime);
+}
+
+void Envelope::compute()
 {
     from->update();
     to->update();
@@ -1070,15 +1079,6 @@ void Envelope::update()
     {
         stop(startTime + length);
     }
-}
-
-void Envelope::init()
-{
-    from->start(startTime);
-    to->start(startTime);
-    attack->start(startTime);
-    sustain->start(startTime);
-    release->start(startTime);
 }
 
 Random::Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type) :
@@ -1111,21 +1111,6 @@ double Random::getValue() const
     return 0;
 }
 
-void Random::update()
-{
-    from->update();
-    to->update();
-    length->update();
-    type->update();
-
-    const double lengthValue = length->getValue();
-
-    if (utils->time - startTime >= lengthValue)
-    {
-        stop(startTime + lengthValue);
-    }
-}
-
 void Random::init()
 {
     from->start(startTime);
@@ -1148,6 +1133,21 @@ void Random::init()
     next = udist(utils->rng);
 
     first = false;
+}
+
+void Random::compute()
+{
+    from->update();
+    to->update();
+    length->update();
+    type->update();
+
+    const double lengthValue = length->getValue();
+
+    if (utils->time - startTime >= lengthValue)
+    {
+        stop(startTime + lengthValue);
+    }
 }
 
 Limit::Limit(ValueObject* value, ValueObject* min, ValueObject* max) :
@@ -1184,7 +1184,14 @@ double Limit::getValue() const
     return valueValue;
 }
 
-void Limit::update()
+void Limit::init()
+{
+    value->start(startTime);
+    min->start(startTime);
+    max->start(startTime);
+}
+
+void Limit::compute()
 {
     value->update();
     min->update();
@@ -1194,13 +1201,6 @@ void Limit::update()
     {
         stop(value->getStopTime());
     }
-}
-
-void Limit::init()
-{
-    value->start(startTime);
-    min->start(startTime);
-    max->start(startTime);
 }
 
 Trigger::Trigger(ValueObject* condition, ValueObject* value) :
@@ -1232,7 +1232,12 @@ ValueObject* Trigger::getLeaf()
     return value->getLeaf();
 }
 
-void Trigger::update()
+void Trigger::init()
+{
+    condition->start(startTime);
+}
+
+void Trigger::compute()
 {
     if (triggered)
     {
@@ -1263,11 +1268,6 @@ void Trigger::update()
             value->start(utils->time);
         }
     }
-}
-
-void Trigger::init()
-{
-    condition->start(startTime);
 }
 
 If::If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue) :
@@ -1305,7 +1305,14 @@ ValueObject* If::getLeaf()
     return trueValue->getLeaf();
 }
 
-void If::update()
+void If::init()
+{
+    condition->start(startTime);
+    trueValue->start(startTime);
+    falseValue->start(startTime);
+}
+
+void If::compute()
 {
     condition->update();
     trueValue->update();
@@ -1315,11 +1322,4 @@ void If::update()
     {
         stop(condition->getStopTime());
     }
-}
-
-void If::init()
-{
-    condition->start(startTime);
-    trueValue->start(startTime);
-    falseValue->start(startTime);
 }

@@ -40,10 +40,9 @@ struct ValueNegate : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* value;
@@ -57,10 +56,9 @@ struct ValueCombination : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
     virtual double getValueInternal(const double value1, const double value2) const = 0;
 
@@ -167,10 +165,9 @@ struct All : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* values;
@@ -184,10 +181,9 @@ struct Any : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* values;
@@ -201,10 +197,9 @@ struct None : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* values;
@@ -218,10 +213,9 @@ struct Min : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* values;
@@ -235,10 +229,9 @@ struct Max : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* values;
@@ -252,10 +245,9 @@ struct Round : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* value;
@@ -271,10 +263,9 @@ struct Absolute : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* value;
@@ -288,10 +279,9 @@ struct Modulo : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* value;
@@ -306,10 +296,9 @@ struct Logarithm : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* value;
@@ -326,11 +315,10 @@ struct Sequence : public ValueObject
 
     ValueObject* getLeaf() override;
 
-    void update() override;
-
 protected:
     void init() override;
     void reinit() override;
+    void compute() override;
 
 private:
     ValueObject* controllers;
@@ -356,11 +344,10 @@ struct Repeat : public ValueObject
 
     ValueObject* getLeaf() override;
 
-    void update() override;
-
 protected:
     void init() override;
     void reinit() override;
+    void compute() override;
 
 private:
     ValueObject* value;
@@ -379,10 +366,9 @@ struct Hold : public ValueObject
 
     ValueObject* getLeaf() override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* value;
@@ -397,10 +383,9 @@ struct Sweep : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* from;
@@ -416,10 +401,9 @@ struct LFO : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* from;
@@ -435,10 +419,9 @@ struct Envelope : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* from;
@@ -456,10 +439,9 @@ struct Random : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* from;
@@ -481,10 +463,9 @@ struct Limit : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* value;
@@ -502,10 +483,9 @@ struct Trigger : public ValueObject
 
     ValueObject* getLeaf() override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* condition;
@@ -524,10 +504,9 @@ struct If : public ValueObject
 
     ValueObject* getLeaf() override;
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* condition;

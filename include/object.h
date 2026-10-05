@@ -78,7 +78,14 @@ struct ValueObject : public Sync
         return Defaults::get<T>();
     }
 
-    virtual void update();
+    void update();
+
+protected:
+    virtual void compute();
+
+private:
+    double lastUpdate = -1;
+
 };
 
 struct List : public ValueObject
@@ -97,12 +104,11 @@ struct Variable : public ValueObject
 
     ValueObject* getLeaf() override;
 
-    void update() override;
-
     ValueObject* value;
 
 protected:
     void init() override;
+    void compute() override;
 
 };
 
@@ -113,12 +119,11 @@ struct Lambda : public ValueObject
 
     double getValue() const override;
 
-    void update() override;
-
     void setInput(const std::string& name, ValueObject* value);
 
 protected:
     void init() override;
+    void compute() override;
 
 private:
     const std::unordered_map<std::string, Variable*> inputs;

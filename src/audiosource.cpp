@@ -37,21 +37,6 @@ double Phase::getValue() const
     return phase;
 }
 
-void Phase::update()
-{
-    if (utils->time > lastUpdate)
-    {
-        phase += delta;
-
-        if (phase > utils->twoPi)
-        {
-            phase -= utils->twoPi;
-        }
-
-        lastUpdate = utils->time;
-    }
-}
-
 void Phase::setDelta(const double delta)
 {
     this->delta = delta;
@@ -67,6 +52,21 @@ void Phase::reinit()
     phase = 0;
 }
 
+void Phase::compute()
+{
+    if (utils->time > lastUpdate)
+    {
+        phase += delta;
+
+        if (phase > utils->twoPi)
+        {
+            phase -= utils->twoPi;
+        }
+
+        lastUpdate = utils->time;
+    }
+}
+
 Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
     SingleAudioSource(volume, pan, effects), frequency(frequency), phase(new Phase()) {}
 
@@ -76,7 +76,21 @@ Oscillator::~Oscillator()
     delete phase;
 }
 
-void Oscillator::update()
+void Oscillator::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+    frequency->start(startTime);
+    phase->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+void Oscillator::compute()
 {
     volume->update();
     pan->update();
@@ -121,20 +135,6 @@ void Oscillator::update()
     {
         effectBuffer[0] = value * (1 - panValue) / 2;
         effectBuffer[1] = value * (panValue + 1) / 2;
-    }
-}
-
-void Oscillator::init()
-{
-    volume->start(startTime);
-    pan->start(startTime);
-    effects->start(startTime);
-    frequency->start(startTime);
-    phase->start(startTime);
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
     }
 }
 
@@ -258,7 +258,19 @@ void CustomOscillator::init()
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     SingleAudioSource(volume, pan, effects) {}
 
-void Noise::update()
+void Noise::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+void Noise::compute()
 {
     volume->update();
     pan->update();
@@ -284,18 +296,6 @@ void Noise::update()
     }
 }
 
-void Noise::init()
-{
-    volume->start(startTime);
-    pan->start(startTime);
-    effects->start(startTime);
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
-}
-
 Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* length) :
     SingleAudioSource(volume, pan, effects), resource(resource), length(length) {}
 
@@ -305,7 +305,23 @@ Sample::~Sample()
     delete length;
 }
 
-void Sample::update()
+void Sample::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+    resource->start(startTime);
+    length->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+
+    index = 0;
+}
+
+void Sample::compute()
 {
     volume->update();
     pan->update();
@@ -350,22 +366,6 @@ void Sample::update()
     {
         stop(startTime + lengthValue);
     }
-}
-
-void Sample::init()
-{
-    volume->start(startTime);
-    pan->start(startTime);
-    effects->start(startTime);
-    resource->start(startTime);
-    length->start(startTime);
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
-
-    index = 0;
 }
 
 double ShapeCoordinator::getValue() const
@@ -552,7 +552,25 @@ Granulate::~Granulate()
     delete grainList;
 }
 
-void Granulate::update()
+void Granulate::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+    resource->start(startTime);
+    grains->start(startTime);
+    length->start(startTime);
+    shape->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+
+    shape->setInput("position", coordinator);
+}
+
+void Granulate::compute()
 {
     volume->start(startTime);
     pan->start(startTime);
@@ -604,24 +622,6 @@ void Granulate::update()
     }
 }
 
-void Granulate::init()
-{
-    volume->start(startTime);
-    pan->start(startTime);
-    effects->start(startTime);
-    resource->start(startTime);
-    grains->start(startTime);
-    length->start(startTime);
-    shape->start(startTime);
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
-
-    shape->setInput("position", coordinator);
-}
-
 Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources) :
     volume(volume), pan(pan), effects(effects), sources(sources)
 {
@@ -636,24 +636,6 @@ Group::~Group()
     delete pan;
     delete effects;
     delete sources;
-}
-
-void Group::update()
-{
-    volume->update();
-    pan->update();
-    effects->update();
-    sources->update();
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
-
-    for (ValueObject* object : sources->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
 }
 
 void Group::fillBuffer(double* buffer)
@@ -721,5 +703,23 @@ void Group::init()
     for (ValueObject* object : sources->getLeafAs<List>()->objects)
     {
         object->start(startTime);
+    }
+}
+
+void Group::compute()
+{
+    volume->update();
+    pan->update();
+    effects->update();
+    sources->update();
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
+
+    for (ValueObject* object : sources->getLeafAs<List>()->objects)
+    {
+        object->update();
     }
 }

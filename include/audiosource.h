@@ -38,13 +38,12 @@ struct Phase : public ValueObject
 {
     double getValue() const override;
 
-    void update() override;
-
     void setDelta(const double delta);
 
 protected:
     void init() override;
     void reinit() override;
+    void compute() override;
 
 private:
     double phase = 0;
@@ -58,10 +57,9 @@ struct Oscillator : public SingleAudioSource
     Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
     ~Oscillator();
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
     ValueObject* frequency;
 
@@ -119,10 +117,9 @@ struct Noise : public SingleAudioSource
 {
     Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects);
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     std::uniform_real_distribution<double> udist = std::uniform_real_distribution<double>(-1, 1);
@@ -134,10 +131,9 @@ struct Sample : public SingleAudioSource
     Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* length);
     ~Sample();
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* resource;
@@ -227,10 +223,9 @@ struct Granulate : public SingleAudioSource
     Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, Lambda* shape);
     ~Granulate();
 
-    void update() override;
-
 protected:
     void init() override;
+    void compute() override;
 
 private:
     ValueObject* resource;
@@ -250,12 +245,11 @@ struct Group : public AudioSource
     Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources);
     ~Group();
 
-    void update() override;
-
     void fillBuffer(double* buffer) override;
 
 protected:
     void init() override;
+    void compute() override;
 
 private:
     double* effectBuffer;

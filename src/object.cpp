@@ -62,7 +62,17 @@ ValueObject* ValueObject::getLeaf()
     return this;
 }
 
-void ValueObject::update() {}
+void ValueObject::update()
+{
+    if (lastUpdate != utils->time)
+    {
+        lastUpdate = utils->time;
+
+        compute();
+    }
+}
+
+void ValueObject::compute() {}
 
 List::List(const std::vector<ValueObject*>& objects) :
     objects(objects) {}
@@ -98,7 +108,12 @@ ValueObject* Variable::getLeaf()
     return value->getLeaf();
 }
 
-void Variable::update()
+void Variable::init()
+{
+    value->start(startTime);
+}
+
+void Variable::compute()
 {
     value->update();
 
@@ -106,11 +121,6 @@ void Variable::update()
     {
         stop(value->getStopTime());
     }
-}
-
-void Variable::init()
-{
-    value->start(startTime);
 }
 
 Lambda::Lambda(const std::unordered_map<std::string, Variable*>& inputs, ValueObject* value) :
@@ -131,16 +141,6 @@ double Lambda::getValue() const
     return value->getValue();
 }
 
-void Lambda::update()
-{
-    value->update();
-
-    if (!value->enabled)
-    {
-        stop(value->getStopTime());
-    }
-}
-
 void Lambda::setInput(const std::string& name, ValueObject* value)
 {
     inputs.at(name)->value = value;
@@ -149,4 +149,14 @@ void Lambda::setInput(const std::string& name, ValueObject* value)
 void Lambda::init()
 {
     value->start(startTime);
+}
+
+void Lambda::compute()
+{
+    value->update();
+
+    if (!value->enabled)
+    {
+        stop(value->getStopTime());
+    }
 }

@@ -20,16 +20,6 @@ EffectGroup::~EffectGroup()
     free(applied);
 }
 
-void EffectGroup::update()
-{
-    effects->update();
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
-}
-
 void EffectGroup::apply(double* buffer)
 {
     memcpy(original, buffer, sizeof(double) * utils->channels);
@@ -63,6 +53,16 @@ void EffectGroup::init()
     effects->start(startTime);
 }
 
+void EffectGroup::compute()
+{
+    effects->update();
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->update();
+    }
+}
+
 Delay::Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
 
@@ -71,13 +71,6 @@ Delay::~Delay()
     delete mix;
     delete delay;
     delete feedback;
-}
-
-void Delay::update()
-{
-    mix->update();
-    delay->update();
-    feedback->update();
 }
 
 void Delay::apply(double* buffer)
@@ -118,6 +111,13 @@ void Delay::init()
     feedback->start(startTime);
 }
 
+void Delay::compute()
+{
+    mix->update();
+    delay->update();
+    feedback->update();
+}
+
 Comb::Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
 
@@ -126,13 +126,6 @@ Comb::~Comb()
     delete mix;
     delete delay;
     delete feedback;
-}
-
-void Comb::update()
-{
-    mix->update();
-    delay->update();
-    feedback->update();
 }
 
 void Comb::apply(double* buffer)
@@ -173,6 +166,13 @@ void Comb::init()
     feedback->start(startTime);
 }
 
+void Comb::compute()
+{
+    mix->update();
+    delay->update();
+    feedback->update();
+}
+
 AllPass::AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :
     mix(mix), delay(delay), feedback(feedback) {}
 
@@ -181,13 +181,6 @@ AllPass::~AllPass()
     delete mix;
     delete delay;
     delete feedback;
-}
-
-void AllPass::update()
-{
-    mix->update();
-    delay->update();
-    feedback->update();
 }
 
 void AllPass::apply(double* buffer)
@@ -226,6 +219,13 @@ void AllPass::init()
     feedback->start(startTime);
 }
 
+void AllPass::compute()
+{
+    mix->update();
+    delay->update();
+    feedback->update();
+}
+
 LowPass::LowPass(ValueObject* threshold) :
     threshold(threshold)
 {
@@ -239,11 +239,6 @@ LowPass::~LowPass()
 
     free(raw);
     free(filtered);
-}
-
-void LowPass::update()
-{
-    threshold->update();
 }
 
 void LowPass::apply(double* buffer)
@@ -272,6 +267,11 @@ void LowPass::apply(double* buffer)
 void LowPass::init()
 {
     threshold->start(startTime);
+}
+
+void LowPass::compute()
+{
+    threshold->update();
 }
 
 RingBuffer::RingBuffer(const size_t length) :
@@ -419,12 +419,6 @@ Reverb::~Reverb()
     delete matrix;
 }
 
-void Reverb::update()
-{
-    mix->update();
-    length->update();
-}
-
 void Reverb::apply(double* buffer)
 {
     matrix->apply(buffer, length->getValue(), mix->getValue());
@@ -434,4 +428,10 @@ void Reverb::init()
 {
     mix->start(startTime);
     length->start(startTime);
+}
+
+void Reverb::compute()
+{
+    mix->update();
+    length->update();
 }
