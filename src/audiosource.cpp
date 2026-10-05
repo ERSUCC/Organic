@@ -2,24 +2,25 @@
 
 using namespace Engine;
 
-void AudioSource::fillBuffer(double* buffer) {}
-
-SingleAudioSource::SingleAudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
+AudioSource::AudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
     volume(volume), pan(pan), effects(effects)
 {
     effectBuffer = (double*)malloc(sizeof(double) * utils->channels);
 }
 
-SingleAudioSource::~SingleAudioSource()
-{
-    free(effectBuffer);
+AudioSource::AudioSource() :
+    AudioSource(new ValueObject(), new ValueObject(), new ValueObject()) {}
 
+AudioSource::~AudioSource()
+{
     delete volume;
     delete pan;
     delete effects;
+
+    free(effectBuffer);
 }
 
-void SingleAudioSource::fillBuffer(double* buffer)
+void AudioSource::fillBuffer(double* buffer)
 {
     for (ValueObject* object : effects->getLeafAs<List>()->objects)
     {
@@ -68,7 +69,7 @@ void Phase::compute()
 }
 
 Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
-    SingleAudioSource(volume, pan, effects), frequency(frequency), phase(new Phase()) {}
+    AudioSource(volume, pan, effects), frequency(frequency), phase(new Phase()) {}
 
 Oscillator::~Oscillator()
 {
@@ -256,7 +257,7 @@ void CustomOscillator::init()
 }
 
 Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
-    SingleAudioSource(volume, pan, effects) {}
+    AudioSource(volume, pan, effects) {}
 
 void Noise::init()
 {
@@ -297,7 +298,7 @@ void Noise::compute()
 }
 
 Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* length) :
-    SingleAudioSource(volume, pan, effects), resource(resource), length(length) {}
+    AudioSource(volume, pan, effects), resource(resource), length(length) {}
 
 Sample::~Sample()
 {
@@ -540,7 +541,7 @@ size_t GrainList::getTotalLength() const
 }
 
 Granulate::Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, Lambda* shape) :
-    SingleAudioSource(volume, pan, effects), resource(resource), grains(grains), length(length), shape(shape) {}
+    AudioSource(volume, pan, effects), resource(resource), grains(grains), length(length), shape(shape) {}
 
 Granulate::~Granulate()
 {
@@ -623,22 +624,32 @@ void Granulate::compute()
 }
 
 Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources) :
-    volume(volume), pan(pan), effects(effects), sources(sources)
-{
-    effectBuffer = (double*)malloc(sizeof(double) * utils->channels);
-}
+    AudioSource(volume, pan, effects), sources(sources) {}
 
 Group::~Group()
 {
-    free(effectBuffer);
-
-    delete volume;
-    delete pan;
-    delete effects;
     delete sources;
 }
 
-void Group::fillBuffer(double* buffer)
+void Group::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+    sources->start(startTime);
+
+    for (ValueObject* object : effects->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+
+    for (ValueObject* object : sources->getLeafAs<List>()->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+void Group::compute()
 {
     volume->update();
     pan->update();
@@ -675,51 +686,5 @@ void Group::fillBuffer(double* buffer)
     {
         effectBuffer[0] = effectBuffer[0] * (1 - panValue) / 2;
         effectBuffer[1] = effectBuffer[1] * (1 + panValue) / 2;
-    }
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->getLeafAs<Effect>()->apply(effectBuffer);
-    }
-
-    for (size_t i = 0; i < utils->channels; i++)
-    {
-        buffer[i] += effectBuffer[i];
-    }
-}
-
-void Group::init()
-{
-    volume->start(startTime);
-    pan->start(startTime);
-    effects->start(startTime);
-    sources->start(startTime);
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
-
-    for (ValueObject* object : sources->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
-}
-
-void Group::compute()
-{
-    volume->update();
-    pan->update();
-    effects->update();
-    sources->update();
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
-
-    for (ValueObject* object : sources->getLeafAs<List>()->objects)
-    {
-        object->update();
     }
 }

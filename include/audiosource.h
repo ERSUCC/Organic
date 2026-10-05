@@ -15,22 +15,18 @@ namespace Engine {
 
 struct AudioSource : public ValueObject
 {
-    virtual void fillBuffer(double* buffer);
-};
+    AudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects);
+    AudioSource();
+    ~AudioSource();
 
-struct SingleAudioSource : public AudioSource
-{
-    SingleAudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects);
-    ~SingleAudioSource();
-
-    void fillBuffer(double* buffer) override;
+    void fillBuffer(double* buffer);
 
 protected:
-    double* effectBuffer;
-
     ValueObject* volume;
     ValueObject* pan;
     ValueObject* effects;
+
+    double* effectBuffer;
 
 };
 
@@ -52,7 +48,7 @@ private:
 
 };
 
-struct Oscillator : public SingleAudioSource
+struct Oscillator : public AudioSource
 {
     Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
     ~Oscillator();
@@ -113,7 +109,7 @@ private:
 
 };
 
-struct Noise : public SingleAudioSource
+struct Noise : public AudioSource
 {
     Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects);
 
@@ -126,7 +122,7 @@ private:
 
 };
 
-struct Sample : public SingleAudioSource
+struct Sample : public AudioSource
 {
     Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* length);
     ~Sample();
@@ -218,7 +214,7 @@ private:
 
 };
 
-struct Granulate : public SingleAudioSource
+struct Granulate : public AudioSource
 {
     Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, Lambda* shape);
     ~Granulate();
@@ -245,18 +241,11 @@ struct Group : public AudioSource
     Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources);
     ~Group();
 
-    void fillBuffer(double* buffer) override;
-
 protected:
     void init() override;
     void compute() override;
 
 private:
-    double* effectBuffer;
-
-    ValueObject* volume;
-    ValueObject* pan;
-    ValueObject* effects;
     ValueObject* sources;
 
 };
