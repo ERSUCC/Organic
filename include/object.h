@@ -18,6 +18,11 @@ struct Sync
     void repeat(const double time);
     void stop(const double time);
 
+    inline double getStartTime() const
+    {
+        return startTime;
+    }
+
     inline double getStopTime() const
     {
         return stopTime;
@@ -94,6 +99,24 @@ struct List : public ValueObject
     ~List();
 
     const std::vector<ValueObject*> objects;
+};
+
+struct MultiList : public ValueObject
+{
+    MultiList(ValueObject* object);
+    ~MultiList();
+
+    ValueObject* getLeaf() override;
+
+protected:
+    void init() override;
+    void compute() override;
+
+private:
+    ValueObject* object;
+
+    List* currentList = nullptr;
+
 };
 
 struct Variable : public ValueObject

@@ -5,7 +5,7 @@ using namespace Engine;
 void Effect::apply(ValueObject* source, double* buffer) {}
 
 EffectGroup::EffectGroup(ValueObject* mix, ValueObject* effects) :
-    mix(mix), effects(effects)
+    mix(mix), effects(new MultiList(effects))
 {
     original = (double*)malloc(sizeof(double) * utils->channels);
     applied = (double*)malloc(sizeof(double) * utils->channels);
@@ -56,11 +56,6 @@ void EffectGroup::init()
 void EffectGroup::compute()
 {
     effects->update();
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
 }
 
 Delay::Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback) :

@@ -24,7 +24,8 @@ struct AudioSource : public ValueObject
 protected:
     ValueObject* volume;
     ValueObject* pan;
-    ValueObject* effects;
+
+    MultiList* effects;
 
     double* effectBuffer;
 
@@ -246,7 +247,7 @@ protected:
     void compute() override;
 
 private:
-    ValueObject* sources;
+    MultiList* sources;
 
 };
 

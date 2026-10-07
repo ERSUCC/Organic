@@ -3,7 +3,7 @@
 using namespace Engine;
 
 AudioSource::AudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
-    volume(volume), pan(pan), effects(effects)
+    volume(volume), pan(pan), effects(new MultiList(effects))
 {
     effectBuffer = (double*)malloc(sizeof(double) * utils->channels);
 }
@@ -84,11 +84,6 @@ void Oscillator::init()
     effects->start(startTime);
     frequency->start(startTime);
     phase->start(startTime);
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
 }
 
 void Oscillator::compute()
@@ -97,11 +92,6 @@ void Oscillator::compute()
     pan->update();
     effects->update();
     frequency->update();
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
 
     const double frequencyValue = frequency->getValue();
 
@@ -248,11 +238,6 @@ void CustomOscillator::init()
     waveform->start(startTime);
     phase->start(startTime);
 
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
-
     waveform->setInput("phase", phase);
 }
 
@@ -264,11 +249,6 @@ void Noise::init()
     volume->start(startTime);
     pan->start(startTime);
     effects->start(startTime);
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
 }
 
 void Noise::compute()
@@ -276,11 +256,6 @@ void Noise::compute()
     volume->update();
     pan->update();
     effects->update();
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
 
     const double value = volume->getValue() * udist(utils->rng);
     const double panValue = pan->getValue();
@@ -314,11 +289,6 @@ void Sample::init()
     resource->start(startTime);
     length->start(startTime);
 
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
-
     index = 0;
 }
 
@@ -329,11 +299,6 @@ void Sample::compute()
     effects->update();
     resource->update();
     length->update();
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
 
     const double volumeValue = volume->getValue();
     const double panValue = pan->getValue();
@@ -563,11 +528,6 @@ void Granulate::init()
     length->start(startTime);
     shape->start(startTime);
 
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
-
     shape->setInput("position", coordinator);
 }
 
@@ -580,11 +540,6 @@ void Granulate::compute()
     grains->start(startTime);
     length->start(startTime);
     shape->start(startTime);
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
 
     memset(effectBuffer, 0, sizeof(double) * utils->channels);
 
@@ -624,7 +579,7 @@ void Granulate::compute()
 }
 
 Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources) :
-    AudioSource(volume, pan, effects), sources(sources) {}
+    AudioSource(volume, pan, effects), sources(new MultiList(sources)) {}
 
 Group::~Group()
 {
@@ -637,16 +592,6 @@ void Group::init()
     pan->start(startTime);
     effects->start(startTime);
     sources->start(startTime);
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
-
-    for (ValueObject* object : sources->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
 }
 
 void Group::compute()
@@ -655,16 +600,6 @@ void Group::compute()
     pan->update();
     effects->update();
     sources->update();
-
-    for (ValueObject* object : effects->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
-
-    for (ValueObject* object : sources->getLeafAs<List>()->objects)
-    {
-        object->update();
-    }
 
     memset(effectBuffer, 0, sizeof(double) * utils->channels);
 

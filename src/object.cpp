@@ -85,6 +85,53 @@ List::~List()
     }
 }
 
+MultiList::MultiList(ValueObject* object) :
+    object(object) {}
+
+MultiList::~MultiList()
+{
+    delete object;
+}
+
+ValueObject* MultiList::getLeaf()
+{
+    return object->getLeaf();
+}
+
+void MultiList::init()
+{
+    object->start(startTime);
+
+    currentList = object->getLeafAs<List>();
+
+    for (ValueObject* object : currentList->objects)
+    {
+        object->start(startTime);
+    }
+}
+
+void MultiList::compute()
+{
+    object->update();
+
+    List* list = object->getLeafAs<List>();
+
+    if (list != currentList)
+    {
+        for (ValueObject* object : list->objects)
+        {
+            object->start(list->getStartTime());
+        }
+
+        currentList = list;
+    }
+
+    for (ValueObject* object : currentList->objects)
+    {
+        object->update();
+    }
+}
+
 Variable::Variable(ValueObject* value) :
     value(value) {}
 

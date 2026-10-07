@@ -170,7 +170,7 @@ protected:
     void compute() override;
 
 private:
-    ValueObject* values;
+    MultiList* values;
 
 };
 
@@ -186,7 +186,7 @@ protected:
     void compute() override;
 
 private:
-    ValueObject* values;
+    MultiList* values;
 
 };
 
@@ -202,7 +202,7 @@ protected:
     void compute() override;
 
 private:
-    ValueObject* values;
+    MultiList* values;
 
 };
 
@@ -218,7 +218,7 @@ protected:
     void compute() override;
 
 private:
-    ValueObject* values;
+    MultiList* values;
 
 };
 
@@ -234,7 +234,7 @@ protected:
     void compute() override;
 
 private:
-    ValueObject* values;
+    MultiList* values;
 
 };
 

@@ -173,7 +173,7 @@ double ValueGreaterEqual::getValueInternal(const double value1, const double val
 }
 
 All::All(ValueObject* values) :
-    values(values) {}
+    values(new MultiList(values)) {}
 
 All::~All()
 {
@@ -201,11 +201,6 @@ double All::getValue() const
 void All::init()
 {
     values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
 }
 
 void All::compute()
@@ -221,8 +216,6 @@ void All::compute()
 
     for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
-        object->update();
-
         if (!object->enabled)
         {
             stop(object->getStopTime());
@@ -233,7 +226,7 @@ void All::compute()
 }
 
 Any::Any(ValueObject* values) :
-    values(values) {}
+    values(new MultiList(values)) {}
 
 Any::~Any()
 {
@@ -261,11 +254,6 @@ double Any::getValue() const
 void Any::init()
 {
     values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
 }
 
 void Any::compute()
@@ -281,8 +269,6 @@ void Any::compute()
 
     for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
-        object->update();
-
         if (!object->enabled)
         {
             stop(object->getStopTime());
@@ -293,7 +279,7 @@ void Any::compute()
 }
 
 None::None(ValueObject* values) :
-    values(values) {}
+    values(new MultiList(values)) {}
 
 None::~None()
 {
@@ -321,11 +307,6 @@ double None::getValue() const
 void None::init()
 {
     values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
 }
 
 void None::compute()
@@ -341,8 +322,6 @@ void None::compute()
 
     for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
-        object->update();
-
         if (!object->enabled)
         {
             stop(object->getStopTime());
@@ -353,7 +332,7 @@ void None::compute()
 }
 
 Min::Min(ValueObject* values) :
-    values(values) {}
+    values(new MultiList(values)) {}
 
 Min::~Min()
 {
@@ -385,11 +364,6 @@ double Min::getValue() const
 void Min::init()
 {
     values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
 }
 
 void Min::compute()
@@ -405,8 +379,6 @@ void Min::compute()
 
     for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
-        object->update();
-
         if (!object->enabled)
         {
             stop(object->getStopTime());
@@ -417,7 +389,7 @@ void Min::compute()
 }
 
 Max::Max(ValueObject* values) :
-    values(values) {}
+    values(new MultiList(values)) {}
 
 Max::~Max()
 {
@@ -449,11 +421,6 @@ double Max::getValue() const
 void Max::init()
 {
     values->start(startTime);
-
-    for (ValueObject* object : values->getLeafAs<List>()->objects)
-    {
-        object->start(startTime);
-    }
 }
 
 void Max::compute()
@@ -469,8 +436,6 @@ void Max::compute()
 
     for (ValueObject* object : values->getLeafAs<List>()->objects)
     {
-        object->update();
-
         if (!object->enabled)
         {
             stop(object->getStopTime());

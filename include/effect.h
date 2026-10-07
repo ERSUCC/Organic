@@ -29,7 +29,8 @@ protected:
 
 private:
     ValueObject* mix;
-    ValueObject* effects;
+
+    MultiList* effects;
 
     double* original;
     double* applied;
