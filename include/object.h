@@ -93,6 +93,14 @@ private:
 
 };
 
+struct String : public ValueObject
+{
+    String(const std::string& value);
+    String();
+
+    const std::string value;
+};
+
 struct List : public ValueObject
 {
     List(const std::vector<ValueObject*>& objects = {});

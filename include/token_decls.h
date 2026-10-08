@@ -9,6 +9,7 @@ struct Identifier;
 struct Value;
 struct Constant;
 struct Boolean;
+struct String;
 struct VariableDef;
 struct VariableRef;
 struct InputDef;

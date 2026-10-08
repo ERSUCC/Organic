@@ -125,7 +125,7 @@ private:
 
 struct Sample : public AudioSource
 {
-    Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* length);
+    Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ResourceLocator* resource, ValueObject* length);
     ~Sample();
 
 protected:
@@ -133,7 +133,8 @@ protected:
     void compute() override;
 
 private:
-    ValueObject* resource;
+    ResourceLocator* resource;
+
     ValueObject* length;
 
     size_t index;
@@ -153,7 +154,7 @@ private:
 
 struct Grain : public Sync
 {
-    Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const size_t length);
+    Grain(ResourceLocator* resource, ValueObject* shape, ShapeCoordinator* coordinator, const size_t length);
     ~Grain();
 
     void apply(double* buffer);
@@ -167,7 +168,10 @@ private:
     size_t clampLength(const size_t max) const;
     size_t randomIndex(const size_t max) const;
 
-    ValueObject* resource;
+    double clampPosition(const double position) const;
+
+    ResourceLocator* resource;
+
     ValueObject* shape;
 
     ShapeCoordinator* coordinator;
@@ -217,7 +221,7 @@ private:
 
 struct Granulate : public AudioSource
 {
-    Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, Lambda* shape);
+    Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ResourceLocator* resource, ValueObject* grains, ValueObject* length, Lambda* shape);
     ~Granulate();
 
 protected:
@@ -225,7 +229,8 @@ protected:
     void compute() override;
 
 private:
-    ValueObject* resource;
+    ResourceLocator* resource;
+
     ValueObject* grains;
     ValueObject* length;
 

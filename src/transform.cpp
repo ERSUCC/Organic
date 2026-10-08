@@ -64,6 +64,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Boolean* token)
     return new Engine::Value(token->value ? 1 : 0);
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::String* token)
+{
+    return new Engine::String(token->str);
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::VariableDef* token)
 {
     setVariable(token, token->value->transform(this));
@@ -240,26 +245,12 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Noise* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 {
-    const Parser::Argument* file = token->arguments->findArgument("file");
-    const Parser::String* str = dynamic_cast<const Parser::String*>(file->value.get());
-
-    const Path path = Path::beside(Path::formatPath(str->str), sourcePath);
-
-    Engine::Resource* resource = new Engine::Resource(path, file->location);
-
-    return new Engine::Sample(ARG("volume"), ARG("pan"), ARG("effects"), resource, ARG("length"));
+    return new Engine::Sample(ARG("volume"), ARG("pan"), ARG("effects"), new Engine::ResourceLocator(sourcePath, ARG("file")), ARG("length"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 {
-    const Parser::Argument* file = token->arguments->findArgument("sample");
-    const Parser::String* str = dynamic_cast<const Parser::String*>(file->value.get());
-
-    const Path path = Path::beside(Path::formatPath(str->str), sourcePath);
-
-    Engine::Resource* resource = new Engine::Resource(path, file->location);
-
-    return new Engine::Granulate(ARG("volume"), ARG("pan"), ARG("effects"), resource, ARG("grains"), ARG("length"), FILL_ARG("shape", { "position" }));
+    return new Engine::Granulate(ARG("volume"), ARG("pan"), ARG("effects"), new Engine::ResourceLocator(sourcePath, ARG("sample")), ARG("grains"), ARG("length"), FILL_ARG("shape", { "position" }));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Group* token)

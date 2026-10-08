@@ -74,6 +74,12 @@ void ValueObject::update()
 
 void ValueObject::compute() {}
 
+String::String(const std::string& value) :
+    value(value) {}
+
+String::String() :
+    value("") {}
+
 List::List(const std::vector<ValueObject*>& objects) :
     objects(objects) {}
 

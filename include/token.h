@@ -235,6 +235,8 @@ struct String : public Token
 {
     String(const SourceLocation& location, const std::string& str);
 
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+
     const std::string str;
 };
 

@@ -272,7 +272,7 @@ void Noise::compute()
     }
 }
 
-Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* length) :
+Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ResourceLocator* resource, ValueObject* length) :
     AudioSource(volume, pan, effects), resource(resource), length(length) {}
 
 Sample::~Sample()
@@ -344,7 +344,7 @@ void ShapeCoordinator::setValue(const double value)
     this->value = value;
 }
 
-Grain::Grain(ValueObject* resource, ValueObject* shape, ShapeCoordinator* coordinator, const size_t length) :
+Grain::Grain(ResourceLocator* resource, ValueObject* shape, ShapeCoordinator* coordinator, const size_t length) :
     resource(resource), shape(shape), coordinator(coordinator), length(length) {}
 
 Grain::~Grain()
@@ -360,13 +360,16 @@ void Grain::apply(double* buffer)
 
     const size_t clamped = clampLength(resourceLeaf->length);
 
-    coordinator->setValue((double)(currentIndex - startIndex) / clamped);
-
-    const double shapeValue = shape->getValue();
-
-    for (size_t i = 0; i < utils->channels; i++)
+    if (currentIndex < resourceLeaf->length)
     {
-        buffer[i] += resourceLeaf->samples[currentIndex++] * shapeValue;
+        coordinator->setValue(clampPosition((double)(currentIndex - startIndex) / clamped));
+
+        const double shapeValue = shape->getValue();
+
+        for (size_t i = 0; i < utils->channels; i++)
+        {
+            buffer[i] += resourceLeaf->samples[currentIndex++] * shapeValue;
+        }
     }
 
     if (currentIndex >= startIndex + clamped)
@@ -409,6 +412,16 @@ size_t Grain::clampLength(const size_t max) const
 size_t Grain::randomIndex(const size_t max) const
 {
     return (std::uniform_int_distribution<size_t>(0, max)(utils->rng) / utils->channels) * utils->channels;
+}
+
+double Grain::clampPosition(const double position) const
+{
+    if (position > 1)
+    {
+        return 1;
+    }
+
+    return position;
 }
 
 GrainNode::GrainNode(Grain* grain, GrainNode* prev, GrainNode* next) :
@@ -505,7 +518,7 @@ size_t GrainList::getTotalLength() const
     return totalLength;
 }
 
-Granulate::Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* resource, ValueObject* grains, ValueObject* length, Lambda* shape) :
+Granulate::Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ResourceLocator* resource, ValueObject* grains, ValueObject* length, Lambda* shape) :
     AudioSource(volume, pan, effects), resource(resource), grains(grains), length(length), shape(shape) {}
 
 Granulate::~Granulate()
@@ -533,13 +546,13 @@ void Granulate::init()
 
 void Granulate::compute()
 {
-    volume->start(startTime);
-    pan->start(startTime);
-    effects->start(startTime);
-    resource->start(startTime);
-    grains->start(startTime);
-    length->start(startTime);
-    shape->start(startTime);
+    volume->update();
+    pan->update();
+    effects->update();
+    resource->update();
+    grains->update();
+    length->update();
+    shape->update();
 
     memset(effectBuffer, 0, sizeof(double) * utils->channels);
 
