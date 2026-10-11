@@ -1,0 +1,7 @@
+note-length = 100
+
+mod-amount = repeat(value: lfo(from: 0, to: 1, length: 10000))
+mod-freq = repeat(value: random(from: 50, to: 100, length: note-length))
+mod = amplitude(source: square(volume: mod-amount, frequency: mod-freq))
+
+square(volume: repeat(value: sweep(from: 0.5, to: 0, length: note-length)), frequency: c4 * (1 + mod))
