@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION=0.1.0
+VERSION=0.2.0
 
 cmake -B build -DORGANIC_VERSION=$VERSION
 cmake --build build --config Release

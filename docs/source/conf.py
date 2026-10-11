@@ -6,8 +6,8 @@ sys.path.append(str(Path("ext").resolve()))
 project = "Organic"
 copyright = "2026, Isaac Brown"
 author = "Isaac Brown"
-version = "0.1.0"
-release = "0.1.0"
+version = "0.2.0"
+release = "0.2.0"
 
 nitpicky = True
 

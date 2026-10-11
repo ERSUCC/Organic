@@ -1,6 +1,6 @@
 @echo off
 
-set version=0.1.0
+set version=0.2.0
 
 cmake -B build -DORGANIC_VERSION=%version% || exit /b 1
 cmake --build build --config Release || exit /b 1

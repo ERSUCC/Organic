@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION=0.1.0
+VERSION=0.2.0
 
 cmake -B build -DORGANIC_VERSION=$VERSION
 cmake --build build --config Release
@@ -24,6 +24,6 @@ mkdir -p $TMP_ROOT/DEBIAN
 
 sed s/{{version}}/$VERSION/ dist/linux/control > $TMP_ROOT/DEBIAN/control
 
-dpkg-deb --build $TMP_ROOT install/organic_0.1.0_amd64.deb
+dpkg-deb --build $TMP_ROOT install/organic_${VERSION}_amd64.deb
 
 rm -rf $TMP_ROOT
