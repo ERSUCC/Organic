@@ -209,6 +209,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Logarithm* token)
     return new Engine::Logarithm(ARG("value"), ARG("base"));
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::Amplitude* token)
+{
+    return new Engine::Amplitude(ARG("source"));
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyAudioSource* token)
 {
     return new Engine::AudioSource();

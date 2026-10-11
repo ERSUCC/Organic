@@ -409,6 +409,17 @@ These functions are used to automate the values of other parameters, and can typ
       :organic:mono:`1` or less than or equal to :organic:mono:`0`, the function will return :organic:mono:`0`. If
       :organic:code:`base` is specified, the function will also stop when :organic:code:`base` stops.
 
+.. organic:function:: amplitude
+   :return: number
+
+   .. organic:input:: source
+      :type: audio source
+
+   Returns the amplitude of :organic:code:`source`, or in other words, the shape of its waveform over time. If the
+   program output is in stereo, returns the average amplitude across all channels. Stops when :organic:code:`source`
+   stops. This function does not produce any audio on its own, but it does not prevent :organic:code:`source` from
+   producing audio if it is used elsewhere as a normal audio source.
+
 -------------
 Audio Sources
 -------------

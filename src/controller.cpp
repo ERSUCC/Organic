@@ -1314,3 +1314,42 @@ void If::compute()
         stop(condition->getStopTime());
     }
 }
+
+Amplitude::Amplitude(ValueObject* source) :
+    source(source)
+{
+    buffer = (double*)malloc(sizeof(double) * utils->channels);
+}
+
+Amplitude::~Amplitude()
+{
+    delete source;
+
+    free(buffer);
+}
+
+double Amplitude::getValue() const
+{
+    double average = 0;
+
+    for (unsigned int i = 0; i < utils->channels; i++)
+    {
+        average += buffer[i];
+    }
+
+    return average / utils->channels;
+}
+
+void Amplitude::init()
+{
+    source->start(startTime);
+}
+
+void Amplitude::compute()
+{
+    source->update();
+
+    memset(buffer, 0, sizeof(double) * utils->channels);
+
+    source->getLeafAs<AudioSource>()->fillBuffer(buffer);
+}

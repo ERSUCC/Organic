@@ -251,6 +251,11 @@ void TypeResolver::resolveTypes(const Logarithm* token)
     resolveArgumentTypes(token->arguments, "base", new NumberType(), new Value(token->location, 10));
 }
 
+void TypeResolver::resolveTypes(const Amplitude* token)
+{
+    resolveArgumentTypes(token->arguments, "source", new AudioSourceType());
+}
+
 void TypeResolver::resolveTypes(const Sine* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));

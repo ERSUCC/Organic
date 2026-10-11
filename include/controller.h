@@ -2,9 +2,11 @@
 
 #include <random>
 #include <stddef.h>
+#include <stdlib.h>
 #include <unordered_set>
 #include <vector>
 
+#include "audiosource.h"
 #include "constants.h"
 #include "object.h"
 
@@ -522,6 +524,24 @@ private:
     ValueObject* condition;
     ValueObject* trueValue;
     ValueObject* falseValue;
+
+};
+
+struct Amplitude : public ValueObject
+{
+    Amplitude(ValueObject* source);
+    ~Amplitude();
+
+    double getValue() const override;
+
+protected:
+    void init() override;
+    void compute() override;
+
+private:
+    ValueObject* source;
+
+    double* buffer;
 
 };
 

@@ -40,6 +40,7 @@ struct Round;
 struct Absolute;
 struct Modulo;
 struct Logarithm;
+struct Amplitude;
 struct EmptyAudioSource;
 struct Sine;
 struct Square;
