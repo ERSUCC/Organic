@@ -837,7 +837,7 @@ void Repeat::compute()
     {
         const double repeatsValue = repeats->getValue();
 
-        if (repeatsValue == 0 || ++times < repeatsValue)
+        if (repeats->enabled && (repeatsValue == 0 || ++times < repeatsValue))
         {
             repeat(value->getStopTime());
         }
