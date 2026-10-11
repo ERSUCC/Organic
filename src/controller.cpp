@@ -653,6 +653,11 @@ ValueObject* Sequence::getLeaf()
     return controllers->getLeafAs<List>()->objects[current]->getLeaf();
 }
 
+void Sequence::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    controllers->getLeaves(leaves);
+}
+
 void Sequence::init()
 {
     controllers->start(startTime);
@@ -804,6 +809,11 @@ ValueObject* Repeat::getLeaf()
     return value->getLeaf();
 }
 
+void Repeat::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    value->getLeaves(leaves);
+}
+
 void Repeat::init()
 {
     value->start(startTime);
@@ -866,6 +876,11 @@ ValueObject* Hold::getLeaf()
     }
 
     return value;
+}
+
+void Hold::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    value->getLeaves(leaves);
 }
 
 void Hold::init()
@@ -1197,6 +1212,11 @@ ValueObject* Trigger::getLeaf()
     return value->getLeaf();
 }
 
+void Trigger::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    value->getLeaves(leaves);
+}
+
 void Trigger::init()
 {
     condition->start(startTime);
@@ -1268,6 +1288,12 @@ ValueObject* If::getLeaf()
     }
 
     return trueValue->getLeaf();
+}
+
+void If::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    trueValue->getLeaves(leaves);
+    falseValue->getLeaves(leaves);
 }
 
 void If::init()

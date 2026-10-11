@@ -94,6 +94,8 @@ struct TokenTransformer
     Engine::Program* transform(const Parser::Program* token);
 
 private:
+    const Parser::SharedToken findArgument(const Parser::ArgumentList* arguments, const std::string& name) const;
+
     Engine::ValueObject* transformArgument(const Parser::ArgumentList* arguments, const std::string& name);
 
     Engine::Lambda* fillArgument(const Parser::ArgumentList* arguments, const std::string& name, const std::vector<std::string>& inputs);

@@ -1,5 +1,6 @@
 #include "../include/transform.h"
 
+#define TOKEN(name) findArgument(token->arguments, name)
 #define ARG(name) transformArgument(token->arguments, name)
 #define FILL_ARG(name, inputs) fillArgument(token->arguments, name, inputs)
 
@@ -245,12 +246,20 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Noise* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 {
-    return new Engine::Sample(ARG("volume"), ARG("pan"), ARG("effects"), new Engine::ResourceLocator(sourcePath, ARG("file")), ARG("length"));
+    Engine::ResourceLocator* locator = new Engine::ResourceLocator(ARG("file"));
+
+    locator->loadResources(TOKEN("file")->location);
+
+    return new Engine::Sample(ARG("volume"), ARG("pan"), ARG("effects"), locator, ARG("length"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 {
-    return new Engine::Granulate(ARG("volume"), ARG("pan"), ARG("effects"), new Engine::ResourceLocator(sourcePath, ARG("sample")), ARG("grains"), ARG("length"), FILL_ARG("shape", { "position" }));
+    Engine::ResourceLocator* locator = new Engine::ResourceLocator(ARG("sample"));
+
+    locator->loadResources(TOKEN("sample")->location);
+
+    return new Engine::Granulate(ARG("volume"), ARG("pan"), ARG("effects"), locator, ARG("grains"), ARG("length"), FILL_ARG("shape", { "position" }));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Group* token)
@@ -380,17 +389,22 @@ Engine::Program* TokenTransformer::transform(const Parser::Program* token)
     return new Engine::Program(allVariables, sources);
 }
 
-Engine::ValueObject* TokenTransformer::transformArgument(const Parser::ArgumentList* arguments, const std::string& name)
+const Parser::SharedToken TokenTransformer::findArgument(const Parser::ArgumentList* arguments, const std::string& name) const
 {
     for (const Parser::Argument* argument : arguments->arguments)
     {
         if (argument->name == name)
         {
-            return argument->value->transform(this);
+            return argument->value;
         }
     }
 
     return nullptr;
+}
+
+Engine::ValueObject* TokenTransformer::transformArgument(const Parser::ArgumentList* arguments, const std::string& name)
+{
+    return findArgument(arguments, name)->transform(this);
 }
 
 Engine::Lambda* TokenTransformer::fillArgument(const Parser::ArgumentList* arguments, const std::string& name, const std::vector<std::string>& inputs)

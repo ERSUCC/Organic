@@ -96,8 +96,8 @@ Resource::~Resource()
     free(samples);
 }
 
-ResourceLocator::ResourceLocator(const Path& sourcePath, ValueObject* object) :
-    sourcePath(sourcePath), object(object) {}
+ResourceLocator::ResourceLocator(ValueObject* object) :
+    object(object) {}
 
 ResourceLocator::~ResourceLocator()
 {
@@ -116,7 +116,31 @@ ValueObject* ResourceLocator::getLeaf()
         return nullptr;
     }
 
-    return resources.at(currentPath);
+    return resources.at(object->getLeafAs<String>());
+}
+
+void ResourceLocator::loadResources(const SourceLocation& location)
+{
+    std::unordered_set<ValueObject*> leaves;
+
+    object->getLeaves(leaves);
+
+    for (ValueObject* object : leaves)
+    {
+        String* path = static_cast<String*>(object);
+
+        if (path->value.empty())
+        {
+            continue;
+        }
+
+        if (!resources.count(path))
+        {
+            const Path resolved = Path::beside(Path::formatPath(path->value), location.source->path());
+
+            resources[path] = new Resource(resolved, location);
+        }
+    }
 }
 
 void ResourceLocator::init()
@@ -128,22 +152,8 @@ void ResourceLocator::compute()
 {
     object->update();
 
-    String* pathString = object->getLeafAs<String>();
-
-    if (pathString->value.empty())
+    if (!object->enabled)
     {
-        return;
-    }
-
-    if (pathString != currentPath)
-    {
-        currentPath = pathString;
-
-        if (!resources.count(currentPath))
-        {
-            const Path path = Path::beside(Path::formatPath(currentPath->value), sourcePath);
-
-            resources[currentPath] = new Resource(path, SourceLocation(new NamedSourceProvider(sourcePath, ""), 0, 0));
-        }
+        stop(object->getStopTime());
     }
 }

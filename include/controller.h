@@ -315,6 +315,8 @@ struct Sequence : public ValueObject
 
     ValueObject* getLeaf() override;
 
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
+
 protected:
     void init() override;
     void reinit() override;
@@ -344,6 +346,8 @@ struct Repeat : public ValueObject
 
     ValueObject* getLeaf() override;
 
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
+
 protected:
     void init() override;
     void reinit() override;
@@ -365,6 +369,8 @@ struct Hold : public ValueObject
     double getValue() const override;
 
     ValueObject* getLeaf() override;
+
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
 
 protected:
     void init() override;
@@ -483,6 +489,8 @@ struct Trigger : public ValueObject
 
     ValueObject* getLeaf() override;
 
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
+
 protected:
     void init() override;
     void compute() override;
@@ -503,6 +511,8 @@ struct If : public ValueObject
     double getValue() const override;
 
     ValueObject* getLeaf() override;
+
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
 
 protected:
     void init() override;

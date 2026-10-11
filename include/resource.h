@@ -8,6 +8,7 @@
 #include "exception.h"
 #include "object.h"
 #include "path.h"
+#include "source.h"
 
 namespace Engine {
 
@@ -24,21 +25,19 @@ struct Resource : public ValueObject
 
 struct ResourceLocator : public ValueObject
 {
-    ResourceLocator(const Path& sourcePath, ValueObject* object);
+    ResourceLocator(ValueObject* object);
     ~ResourceLocator();
 
     ValueObject* getLeaf() override;
+
+    void loadResources(const SourceLocation& location);
 
 protected:
     void init() override;
     void compute() override;
 
 private:
-    const Path sourcePath;
-
     ValueObject* object;
-
-    String* currentPath = nullptr;
 
     std::unordered_map<String*, Resource*> resources;
 

@@ -62,6 +62,11 @@ ValueObject* ValueObject::getLeaf()
     return this;
 }
 
+void ValueObject::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    leaves.insert(this);
+}
+
 void ValueObject::update()
 {
     if (lastUpdate != utils->time)
@@ -91,6 +96,14 @@ List::~List()
     }
 }
 
+void List::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    for (ValueObject* object : objects)
+    {
+        object->getLeaves(leaves);
+    }
+}
+
 MultiList::MultiList(ValueObject* object) :
     object(object) {}
 
@@ -102,6 +115,11 @@ MultiList::~MultiList()
 ValueObject* MultiList::getLeaf()
 {
     return object->getLeaf();
+}
+
+void MultiList::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    object->getLeaves(leaves);
 }
 
 void MultiList::init()
@@ -161,6 +179,11 @@ ValueObject* Variable::getLeaf()
     return value->getLeaf();
 }
 
+void Variable::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    value->getLeaves(leaves);
+}
+
 void Variable::init()
 {
     value->start(startTime);
@@ -192,6 +215,11 @@ double Lambda::getValue() const
     }
 
     return value->getValue();
+}
+
+void Lambda::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    value->getLeaves(leaves);
 }
 
 void Lambda::setInput(const std::string& name, ValueObject* value)

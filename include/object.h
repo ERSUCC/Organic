@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <typeindex>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -83,6 +84,8 @@ struct ValueObject : public Sync
         return Defaults::get<T>();
     }
 
+    virtual void getLeaves(std::unordered_set<ValueObject*>& leaves);
+
     void update();
 
 protected:
@@ -106,6 +109,8 @@ struct List : public ValueObject
     List(const std::vector<ValueObject*>& objects = {});
     ~List();
 
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
+
     const std::vector<ValueObject*> objects;
 };
 
@@ -115,6 +120,8 @@ struct MultiList : public ValueObject
     ~MultiList();
 
     ValueObject* getLeaf() override;
+
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
 
 protected:
     void init() override;
@@ -135,6 +142,8 @@ struct Variable : public ValueObject
 
     ValueObject* getLeaf() override;
 
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
+
     ValueObject* value;
 
 protected:
@@ -149,6 +158,8 @@ struct Lambda : public ValueObject
     ~Lambda();
 
     double getValue() const override;
+
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
 
     void setInput(const std::string& name, ValueObject* value);
 
