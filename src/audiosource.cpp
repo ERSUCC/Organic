@@ -59,9 +59,9 @@ void Phase::compute()
     {
         phase += delta;
 
-        if (phase > utils->twoPi)
+        if (phase > Utils::twoPi)
         {
-            phase -= utils->twoPi;
+            phase -= Utils::twoPi;
         }
 
         lastUpdate = utils->time;
@@ -102,7 +102,7 @@ void Oscillator::compute()
         return;
     }
 
-    phase->setDelta(utils->twoPi * frequencyValue / utils->sampleRate);
+    phase->setDelta(Utils::twoPi * frequencyValue / utils->sampleRate);
     phase->update();
 
     const double volumeValue = volume->getValue();
@@ -142,7 +142,7 @@ Square::Square(ValueObject* volume, ValueObject* pan, ValueObject* effects, Valu
 
 double Square::getValue() const
 {
-    const double phaseNorm = phase->getValue() / utils->twoPi;
+    const double phaseNorm = phase->getValue() / Utils::twoPi;
     const double spread = frequency->getValue() / utils->sampleRate;
 
     if (phaseNorm < spread)
@@ -186,7 +186,7 @@ Saw::Saw(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObjec
 
 double Saw::getValue() const
 {
-    const double phaseNorm = phase->getValue() / utils->twoPi;
+    const double phaseNorm = phase->getValue() / Utils::twoPi;
     const double spread = frequency->getValue() / utils->sampleRate;
 
     if (phaseNorm < spread)
@@ -211,7 +211,7 @@ Triangle::Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, 
 
 double Triangle::getValue() const
 {
-    return 2 * asin(sin(phase->getValue())) / utils->pi;
+    return 2 * asin(sin(phase->getValue())) / Utils::pi;
 }
 
 CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, Lambda* waveform) :

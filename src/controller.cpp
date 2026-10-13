@@ -346,7 +346,7 @@ double Min::getValue() const
         return 0;
     }
 
-    double min = utils->infinity;
+    double min = Utils::infinity;
 
     for (const ValueObject* object : values->getLeafAs<List>()->objects)
     {
@@ -403,7 +403,7 @@ double Max::getValue() const
         return 0;
     }
 
-    double max = -utils->infinity;
+    double max = -Utils::infinity;
 
     for (const ValueObject* object : values->getLeafAs<List>()->objects)
     {
@@ -968,7 +968,7 @@ double LFO::getValue() const
     const double toValue = to->getValue();
     const double lengthValue = length->getValue();
 
-    return fromValue + (toValue - fromValue) * (-cos(utils->twoPi * (utils->time - startTime) / lengthValue) / 2 + 0.5);
+    return fromValue + (toValue - fromValue) * (-cos(Utils::twoPi * (utils->time - startTime) / lengthValue) / 2 + 0.5);
 }
 
 void LFO::init()

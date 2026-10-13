@@ -456,17 +456,17 @@ const Token* Tokenizer::tokenizeIdentifier()
 
     if (name == "pi")
     {
-        return new Value(location, utils->pi);
+        return new Value(location, Utils::pi);
     }
 
     if (name == "tau")
     {
-        return new Value(location, utils->twoPi);
+        return new Value(location, Utils::twoPi);
     }
 
     if (name == "e")
     {
-        return new Value(location, utils->e);
+        return new Value(location, Utils::e);
     }
 
     double base = 0;

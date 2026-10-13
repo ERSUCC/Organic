@@ -43,16 +43,16 @@ struct Utils
 
     void setSeed(const std::optional<size_t>& seed);
 
+    static constexpr double pi = M_PI;
+    static constexpr double twoPi = M_PI * 2;
+    static constexpr double e = M_E;
+    static constexpr double infinity = std::numeric_limits<double>::infinity();
+
     unsigned int channels;
     unsigned int sampleRate;
     unsigned int bufferLength;
 
     size_t seed;
-
-    const double pi = M_PI;
-    const double twoPi = M_PI * 2;
-    const double e = M_E;
-    const double infinity = std::numeric_limits<double>::infinity();
 
     double time = 0;
     double timeStep;

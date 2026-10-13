@@ -264,7 +264,7 @@ void LowPass::apply(ValueObject* source, double* buffer)
     double* raw = histories.at(source)->raw;
     double* filtered = histories.at(source)->filtered;
 
-    const double omega = tan(utils->pi * threshold->getValue() / utils->sampleRate);
+    const double omega = tan(Utils::pi * threshold->getValue() / utils->sampleRate);
     const double omega2 = omega * omega;
     const double c = 1 + sqrt(2) * omega + omega2;
     const double a = omega2 / c;
@@ -327,7 +327,7 @@ DelayLine::DelayLine(const size_t length)
 
     const Utils* utils = Utils::get();
 
-    const double omega = tan(utils->pi * 5000 / utils->sampleRate);
+    const double omega = tan(Utils::pi * 5000 / utils->sampleRate);
     const double omega2 = omega * omega;
     const double c = 1 + sqrt(2) * omega + omega2;
 
