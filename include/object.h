@@ -11,38 +11,6 @@
 
 namespace Engine {
 
-struct Sync
-{
-    Sync();
-
-    void start(const double time);
-    void repeat(const double time);
-    void stop(const double time);
-
-    inline double getStartTime() const
-    {
-        return startTime;
-    }
-
-    inline double getStopTime() const
-    {
-        return stopTime;
-    }
-
-    bool enabled = false;
-
-protected:
-    virtual void init();
-    virtual void reinit();
-
-    Utils* utils;
-
-    double startTime = 0;
-    double repeatTime = 0;
-    double stopTime = 0;
-
-};
-
 struct ValueObject;
 
 struct Defaults
@@ -66,9 +34,26 @@ private:
 
 };
 
-struct ValueObject : public Sync
+struct ValueObject
 {
+    ValueObject();
+
     virtual ~ValueObject();
+
+    void start(const double time);
+    void repeat(const double time);
+    void stop(const double time);
+    void update();
+
+    inline double getStartTime() const
+    {
+        return startTime;
+    }
+
+    inline double getStopTime() const
+    {
+        return stopTime;
+    }
 
     virtual double getValue() const;
 
@@ -86,10 +71,18 @@ struct ValueObject : public Sync
 
     virtual void getLeaves(std::unordered_set<ValueObject*>& leaves);
 
-    void update();
+    bool enabled = false;
 
 protected:
+    virtual void init();
+    virtual void reinit();
     virtual void compute();
+
+    Utils* utils;
+
+    double startTime = 0;
+    double repeatTime = 0;
+    double stopTime = 0;
 
 private:
     double lastUpdate = -1;

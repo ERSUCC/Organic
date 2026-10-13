@@ -152,7 +152,7 @@ private:
 
 };
 
-struct Grain : public Sync
+struct Grain : public ValueObject
 {
     Grain(ResourceLocator* resource, ValueObject* shape, ShapeCoordinator* coordinator, const size_t length);
     ~Grain();
@@ -198,7 +198,7 @@ struct GrainNode
     bool active = true;
 };
 
-struct GrainList : public Sync
+struct GrainList : public ValueObject
 {
     GrainList();
     ~GrainList();

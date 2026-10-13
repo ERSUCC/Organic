@@ -2,10 +2,20 @@
 
 using namespace Engine;
 
-Sync::Sync() :
+void Defaults::deinit()
+{
+    for (const std::pair<std::type_index, ValueObject*>& pair : objects)
+    {
+        delete pair.second;
+    }
+}
+
+ValueObject::ValueObject() :
     utils(Utils::get()) {}
 
-void Sync::start(double time)
+ValueObject::~ValueObject() {}
+
+void ValueObject::start(double time)
 {
     if (!enabled)
     {
@@ -18,14 +28,14 @@ void Sync::start(double time)
     }
 }
 
-void Sync::repeat(double time)
+void ValueObject::repeat(double time)
 {
     repeatTime = time;
 
     reinit();
 }
 
-void Sync::stop(const double time)
+void ValueObject::stop(const double time)
 {
     if (enabled)
     {
@@ -34,18 +44,15 @@ void Sync::stop(const double time)
     }
 }
 
-void Sync::init() {}
-void Sync::reinit() {}
-
-void Defaults::deinit()
+void ValueObject::update()
 {
-    for (const std::pair<std::type_index, ValueObject*>& pair : objects)
+    if (lastUpdate != utils->time)
     {
-        delete pair.second;
+        lastUpdate = utils->time;
+
+        compute();
     }
 }
-
-ValueObject::~ValueObject() {}
 
 double ValueObject::getValue() const
 {
@@ -67,16 +74,8 @@ void ValueObject::getLeaves(std::unordered_set<ValueObject*>& leaves)
     leaves.insert(this);
 }
 
-void ValueObject::update()
-{
-    if (lastUpdate != utils->time)
-    {
-        lastUpdate = utils->time;
-
-        compute();
-    }
-}
-
+void ValueObject::init() {}
+void ValueObject::reinit() {}
 void ValueObject::compute() {}
 
 String::String(const std::string& value) :
