@@ -1,0 +1,129 @@
+name: Package Releases
+
+on: [ push, workflow_dispatch ]
+
+jobs:
+  linux:
+    name: Package Linux Releases
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ~4.4.2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libasound2-dev libsndfile1-dev libsamplerate0-dev rpm
+
+      - name: Build RtAudio
+        run: |
+          git clone https://github.com/thestk/rtaudio
+          cd rtaudio
+          cmake -B build
+          cd build
+          sudo make install
+
+      - name: Package DEB
+        run: bash dist/linux/package-deb.sh
+
+      - name: Package RPM
+        run: bash dist/linux/package-rpm.sh
+
+      - name: Upload DEB Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: install/*.deb
+          archive: false
+
+      - name: Upload RPM Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: install/*.rpm
+          archive: false
+
+  mac:
+    name: Package Mac Release
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ~4.4.2
+
+      - name: Install Dependencies
+        run: brew install -y libsndfile libsamplerate
+
+      - name: Build RtAudio
+        run: |
+          git clone https://github.com/thestk/rtaudio
+          cd rtaudio
+          cmake -B build
+          cd build
+          sudo make install
+
+      - name: Package
+        run: bash dist/mac/package.sh
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: install/*.pkg
+          archive: false
+
+  windows:
+    name: Package Windows Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ~4.4.2
+
+      - name: Install libsndfile
+        run: |
+          curl -L https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2-win64.zip -o libsndfile.zip
+          mkdir "C:/Program Files/libsndfile"
+          tar -xf libsndfile.zip --strip-components=1 -C "C:/Program Files/libsndfile"
+
+      - name: Install libsamplerate
+        run: |
+          curl -L https://github.com/libsndfile/libsamplerate/releases/download/0.2.2/libsamplerate-0.2.2-win64.zip -o libsamplerate.zip
+          mkdir "C:/Program Files/libsamplerate"
+          tar -xf libsamplerate.zip --strip-components=1 -C "C:/Program Files/libsamplerate"
+
+      - name: Build RtAudio
+        run: |
+          git clone https://github.com/thestk/rtaudio
+          cd rtaudio
+          cmake -B build -DCMAKE_INSTALL_PREFIX="C:/Program Files/RtAudio"
+          cmake --build build --config Release
+          cmake --install build
+
+      - name: Install WiX
+        run: dotnet tool install --global wix --version 5.0.2
+
+      - name: Package
+        run: dist/windows/package.bat
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: install/*.msi
+          archive: false

@@ -118,8 +118,8 @@ if (WIN32)
     # avoid ridiculous regex to match paths with any case
     cmake_policy(VERSION 4.3)
 
-    install(TARGETS organic RUNTIME_DEPENDENCIES PRE_EXCLUDE_REGEXES "api-ms-*" "ext-ms-*" "azure*" "hvsi*" "pdm*" "wpax*"
-                                                 POST_EXCLUDE_REGEXES "C:/WINDOWS/system32/*"
+    install(TARGETS organic RUNTIME_DEPENDENCIES PRE_EXCLUDE_REGEXES "api-ms-*" "ext-ms-*" "azure*" "hvsi*" "pdm*" "wpax*" "wtd*"
+                                                 POST_EXCLUDE_REGEXES "C:/Windows/system32/*" "C:/WINDOWS/system32/*"
                                                  DIRECTORIES "C:/Program Files/RtAudio/bin" "C:/Program Files/libsndfile/bin" "C:/Program Files/libsamplerate/bin")
 elseif (APPLE)
     add_executable(unify dist/mac/unify.cpp)
