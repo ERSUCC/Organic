@@ -26,5 +26,5 @@ cp -r share/licenses/organic %{buildroot}%{_defaultlicensedir}
 %files
 %{_bindir}/organic
 %{_libdir}/organic
-%license LICENSE.txt
-%license NOTICE.txt
+%license %{_defaultlicensedir}/organic/LICENSE.txt
+%license %{_defaultlicensedir}/organic/NOTICE.txt
