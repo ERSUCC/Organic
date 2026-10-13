@@ -1,9 +1,9 @@
 #include <string.h>
 
-#include "../include/exception.h"
-#include "../include/flags.h"
-#include "../include/organic.h"
-#include "../include/utils.h"
+#include "exception.h"
+#include "flags.h"
+#include "organic.h"
+#include "utils.h"
 
 int main(int argc, char** argv)
 {

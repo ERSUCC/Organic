@@ -1,4 +1,4 @@
-#include "../include/controller.h"
+#include "controller.h"
 
 using namespace Engine;
 

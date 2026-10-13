@@ -1,4 +1,4 @@
-#include "../include/object.h"
+#include "object.h"
 
 using namespace Engine;
 

@@ -1,4 +1,4 @@
-#include "../include/test_tokenizer.h"
+#include "test_tokenizer.h"
 
 void TestTokenizer::run(TestTracker* tracker)
 {

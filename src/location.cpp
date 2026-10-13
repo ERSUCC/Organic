@@ -1,4 +1,4 @@
-#include "../include/location.h"
+#include "location.h"
 
 SourceLocation::SourceLocation(const SourceProvider* source, const size_t start, const size_t end) :
     source(source), start(start), end(end), line(source->line(start)), character(source->character(start)) {}

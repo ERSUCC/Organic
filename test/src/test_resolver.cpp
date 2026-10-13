@@ -1,4 +1,4 @@
-#include "../include/test_resolver.h"
+#include "test_resolver.h"
 
 void TestResolver::run(TestTracker* tracker)
 {

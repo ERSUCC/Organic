@@ -1,4 +1,4 @@
-#include "../include/tokenize.h"
+#include "tokenize.h"
 
 using namespace Parser;
 

@@ -1,4 +1,4 @@
-#include "../include/exception.h"
+#include "exception.h"
 
 OrganicException::OrganicException(const std::string& preamble, const std::string& message) :
     message(message), error(preamble + message) {}

@@ -1,4 +1,4 @@
-#include "../include/test_value.h"
+#include "test_value.h"
 
 void TestValue::run(TestTracker* tracker)
 {

@@ -33,6 +33,8 @@ if (NOT WIN32)
     target_compile_options(organic_lib PRIVATE -O3)
 endif ()
 
+target_include_directories(organic_lib PUBLIC include)
+
 # link dependencies
 
 set(BUILD_SHARED_LIBS True)
@@ -107,7 +109,7 @@ if (ORGANIC_BUILD_TESTS)
     target_compile_definitions(organic_test PRIVATE ORGANIC_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
                                                     ORGANIC_TEST_DIR="${CMAKE_SOURCE_DIR}/test/files")
 
-    target_include_directories(organic_test PRIVATE include test/include)
+    target_include_directories(organic_test PRIVATE test/include)
 
     target_link_libraries(organic_test organic_lib)
 endif ()

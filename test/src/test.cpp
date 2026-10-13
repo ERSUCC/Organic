@@ -1,4 +1,4 @@
-#include "../include/test.h"
+#include "test.h"
 
 Test::Test(TestTracker* tracker) :
     tracker(tracker) {}

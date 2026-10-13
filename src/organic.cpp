@@ -1,4 +1,4 @@
-#include "../include/organic.h"
+#include "organic.h"
 
 Organic::Organic(const ProgramOptions& options) :
     options(options)

@@ -1,4 +1,4 @@
-#include "../include/otest.h"
+#include "otest.h"
 
 TOMLValue* TOMLValue::read(std::istringstream& stream)
 {

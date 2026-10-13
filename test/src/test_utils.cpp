@@ -1,4 +1,4 @@
-#include "../include/test_utils.h"
+#include "test_utils.h"
 
 void TestUtils::printSuccess(const std::string& text, const size_t indents)
 {

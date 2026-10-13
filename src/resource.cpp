@@ -1,4 +1,4 @@
-#include "../include/resource.h"
+#include "resource.h"
 
 using namespace Engine;
 

@@ -1,4 +1,4 @@
-#include "../include/effect.h"
+#include "effect.h"
 
 using namespace Engine;
 

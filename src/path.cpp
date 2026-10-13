@@ -1,4 +1,4 @@
-#include "../include/path.h"
+#include "path.h"
 
 const Path Path::relative(const std::filesystem::path& path, const std::filesystem::path& base)
 {

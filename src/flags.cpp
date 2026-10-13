@@ -1,4 +1,4 @@
-#include "../include/flags.h"
+#include "flags.h"
 
 ProgramOptions FlagParser::parseFlags(char** flags, const size_t length)
 {

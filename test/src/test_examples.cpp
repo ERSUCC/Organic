@@ -1,4 +1,4 @@
-#include "../include/test_examples.h"
+#include "test_examples.h"
 
 void TestExamples::run(TestTracker* tracker)
 {

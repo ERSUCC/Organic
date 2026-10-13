@@ -1,13 +1,13 @@
 #include <stddef.h>
 #include <string>
 
-#include "../include/test_examples.h"
-#include "../include/test_parser.h"
-#include "../include/test_resolver.h"
-#include "../include/test_tokenizer.h"
-#include "../include/test_utils.h"
-#include "../include/test_value.h"
-#include "../include/engine/test_controllers.h"
+#include "test_examples.h"
+#include "test_parser.h"
+#include "test_resolver.h"
+#include "test_tokenizer.h"
+#include "test_utils.h"
+#include "test_value.h"
+#include "engine/test_controllers.h"
 
 int main(int argc, char** argv)
 {

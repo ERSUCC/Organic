@@ -1,4 +1,4 @@
-#include "../include/resolve.h"
+#include "resolve.h"
 
 using namespace Parser;
 

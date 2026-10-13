@@ -1,4 +1,4 @@
-#include "../include/test_parser.h"
+#include "test_parser.h"
 
 void TestParser::run(TestTracker* tracker)
 {

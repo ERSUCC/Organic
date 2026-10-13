@@ -1,4 +1,4 @@
-#include "../include/source.h"
+#include "source.h"
 
 SourceProvider::SourceProvider(const std::string& source) :
     source(source)

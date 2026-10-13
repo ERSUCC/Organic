@@ -1,4 +1,4 @@
-#include "../include/audiosource.h"
+#include "audiosource.h"
 
 using namespace Engine;
 
