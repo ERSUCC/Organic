@@ -79,7 +79,14 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::VariableDef* toke
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::VariableRef* token)
 {
-    return new Engine::Variable(currentVariables[token->definition]);
+    Engine::ValueObject* value = currentVariables[token->definition];
+
+    if (const Engine::Value* valueConst = dynamic_cast<Engine::Value*>(value))
+    {
+        return new Engine::Value(valueConst->value);
+    }
+
+    return new Engine::Variable(value);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::InputRef* token)
@@ -324,27 +331,47 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::AddAlias* token)
 {
-    return new Engine::ValueAdd(ARG("a"), ARG("b"));
+    return foldAlias<Engine::ValueAdd>(ARG("a"), ARG("b"), [](const double a, const double b)
+    {
+        return a + b;
+    });
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::SubtractAlias* token)
 {
-    return new Engine::ValueSubtract(ARG("a"), ARG("b"));
+    return foldAlias<Engine::ValueSubtract>(ARG("a"), ARG("b"), [](const double a, const double b)
+    {
+        return a - b;
+    });
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::MultiplyAlias* token)
 {
-    return new Engine::ValueMultiply(ARG("a"), ARG("b"));
+    return foldAlias<Engine::ValueMultiply>(ARG("a"), ARG("b"), [](const double a, const double b)
+    {
+        return a * b;
+    });
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::DivideAlias* token)
 {
-    return new Engine::ValueDivide(ARG("a"), ARG("b"));
+    return foldAlias<Engine::ValueDivide>(ARG("a"), ARG("b"), [](const double a, const double b)
+    {
+        if (b == 0)
+        {
+            return 0.0;
+        }
+
+        return a / b;
+    });
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::PowerAlias* token)
 {
-    return new Engine::ValuePower(ARG("a"), ARG("b"));
+    return foldAlias<Engine::ValuePower>(ARG("a"), ARG("b"), [](const double a, const double b)
+    {
+        return pow(a, b);
+    });
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::EqualAlias* token)

@@ -23,9 +23,7 @@ struct Value : public ValueObject
 
     double getValue() const override;
 
-private:
     const double value;
-
 };
 
 struct ValueChar : public ValueObject

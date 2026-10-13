@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <stddef.h>
 #include <string>
 #include <unordered_map>
@@ -102,6 +103,24 @@ private:
     Engine::Lambda* fillArgument(const Parser::ArgumentList* arguments, const std::string& name, const std::vector<std::string>& inputs);
 
     void setVariable(const Parser::Identifier* name, Engine::ValueObject* value);
+
+    template <typename T> Engine::ValueObject* foldAlias(Engine::ValueObject* a, Engine::ValueObject* b, const std::function<double(const double, const double)>& op) const
+    {
+        const Engine::Value* value1 = dynamic_cast<Engine::Value*>(a);
+        const Engine::Value* value2 = dynamic_cast<Engine::Value*>(b);
+
+        if (value1 && value2)
+        {
+            Engine::Value* folded = new Engine::Value(op(value1->value, value2->value));
+
+            delete a;
+            delete b;
+
+            return folded;
+        }
+
+        return new T(a, b);
+    }
 
     const Path sourcePath;
 
