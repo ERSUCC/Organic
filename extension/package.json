@@ -2,10 +2,11 @@
   "name": "organic",
   "displayName": "Organic",
   "description": "Syntax highlighting for Organic",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "ERSUCC",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.85.0",
+    "node": "~24.15.0"
   },
   "license": "See LICENSE.txt",
   "categories": [
@@ -59,11 +60,43 @@
       "embeddedLanguages": {
         "meta.embedded.section.organic": "organic"
       }
-    }]
+    }],
+    "commands": [{
+      "command": "organic.run",
+      "title": "Run Program",
+      "icon": "$(debug-start)"
+    }, {
+      "command": "organic.stop",
+      "title": "Stop Program",
+      "icon": "$(debug-stop)"
+    }],
+    "menus": {
+      "editor/title": [{
+        "command": "organic.run",
+        "group": "navigation",
+        "when": "editorLangId == organic"
+      }, {
+        "command": "organic.stop",
+        "group": "navigation",
+        "when": "editorLangId == organic"
+      }]
+    }
   },
   "repository": {
   	"type": "git",
   	"url": "https://github.com/ERSUCC/Organic"
   },
-  "icon": "./icons/icon-full.png"
+  "icon": "./icons/icon-full.png",
+  "main": "./out/src/extension.js",
+  "scripts": {
+    "vscode:prepublish": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "~7.0.2",
+    "@types/vscode": "~1.85.0",
+    "@types/node": "~26.6.5"
+  },
+  "allowScripts": {
+    "node@24.15.0": true
+  }
 }
