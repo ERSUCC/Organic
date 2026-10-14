@@ -1,13 +1,11 @@
 #pragma once
 
-#include <algorithm>
 #include <chrono>
+#include <condition_variable>
 #include <cstdlib>
 #include <functional>
-#include <limits.h>
+#include <mutex>
 #include <string>
-#include <thread>
-#include <unordered_set>
 #include <vector>
 
 #include <RtAudio.h>
@@ -30,6 +28,7 @@ struct Organic
     ~Organic();
 
     void start();
+    void stop();
 
 private:
     void startPlayback();
@@ -39,10 +38,17 @@ private:
 
     void audioError(const std::string& message) const;
 
+    void handleInterrupt(Organic* organic);
+
     const ProgramOptions options;
 
     Utils* utils;
 
     Engine::Program* program;
+
+    std::condition_variable signal;
+    std::mutex lock;
+
+    bool running = true;
 
 };

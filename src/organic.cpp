@@ -74,6 +74,15 @@ void Organic::start()
     }
 }
 
+void Organic::stop()
+{
+    std::unique_lock unique(lock);
+
+    running = false;
+
+    signal.notify_one();
+}
+
 void Organic::startPlayback()
 {
     RtAudio audio(RtAudio::Api::UNSPECIFIED, std::bind(&Organic::audioError, this, std::placeholders::_2));
@@ -123,17 +132,26 @@ void Organic::startPlayback()
         throw OrganicAudioException(audio.getErrorText());
     }
 
+    handleInterrupt(this);
+
+    std::unique_lock unique(lock);
+
     if (options.time.has_value())
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds((long long)options.time.value()));
+        std::cv_status status;
+
+        do
+        {
+            status = signal.wait_for(unique, std::chrono::milliseconds((long long)options.time.value()));
+        } while (running && status != std::cv_status::timeout);
     }
 
     else
     {
-        while (true)
+        do
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(LLONG_MAX));
-        }
+            signal.wait(unique);
+        } while (running);
     }
 
     if (audio.isStreamRunning())
@@ -217,3 +235,55 @@ void Organic::audioError(const std::string& message) const
 {
     throw OrganicAudioException(message);
 }
+
+#ifdef _WIN32
+
+#include <Windows.h>
+
+Organic* instance = nullptr;
+
+BOOL WINAPI handler(DWORD control)
+{
+    if (control == CTRL_C_EVENT && instance)
+    {
+        instance->stop();
+
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+void Organic::handleInterrupt(Organic* organic)
+{
+    instance = organic;
+
+    SetConsoleCtrlHandler(&handler, true);
+}
+
+#else
+
+#include <signal.h>
+
+Organic* instance = nullptr;
+
+void handler(int sig)
+{
+    if (instance)
+    {
+        instance->stop();
+    }
+}
+
+void Organic::handleInterrupt(Organic* organic)
+{
+    instance = organic;
+
+    struct sigaction action = { 0 };
+
+    action.sa_handler = &handler;
+
+    sigaction(SIGINT, &action, nullptr);
+}
+
+#endif
