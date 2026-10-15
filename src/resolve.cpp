@@ -66,7 +66,11 @@ void TypeResolver::resolveTypes(const List* token)
 
         if (!token->values[0]->type()->checkType(context, value->type().get()))
         {
-            throw OrganicParseException("All elements in a list must have the same type.", value->location);
+            std::string type = value->type()->plural();
+
+            type[0] = toupper(type[0]);
+
+            throw OrganicParseException(type + " are not allowed in a list of " + token->values[0]->type()->plural() + ".", value->location);
         }
     }
 }

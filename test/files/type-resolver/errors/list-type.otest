@@ -1,7 +1,7 @@
 name = "Mismatched types in list"
 line = 2
 character = 13
-error = 'All elements in a list must have the same type.'
+error = "Strings are not allowed in a list of numbers."
 
 ---
 
@@ -12,8 +12,39 @@ test = [ 1, "test", 3 ]
 name = "Mismatched types in nested list"
 line = 2
 character = 23
-error = 'All elements in a list must have the same type.'
+error = "Lists of strings are not allowed in a list of lists of numbers."
 
 ---
 
 test = [ [ 1, 2, 3 ], [ "test", "test1", "test2" ] ]
+
+---
+
+name = "Mismatched variable types in list"
+line = 3
+character = 17
+error = "Sequence order constants are not allowed in a list of numbers."
+
+---
+
+test = forward
+test2 = [ 1, 2, forward, 4, 5 ]
+
+---
+
+name = "Mismatched function call types in list"
+line = 8
+character = 5
+error = "Numbers are not allowed in a list of effects."
+
+---
+
+test() = {
+    1
+}
+
+sine(frequency: 440, effects: [
+    low-pass(threshold: 1000),
+    test(),
+    reverb(length: 10000)
+])
