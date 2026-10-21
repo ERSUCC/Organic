@@ -5,21 +5,19 @@
 #define FILL_ARG(name, inputs) fillArgument(token->arguments, name, inputs)
 
 LambdaContext::LambdaContext(LambdaContext* parent, const std::vector<std::string>& inputs, std::vector<Engine::ValueObject*>& variables) :
-    parent(parent)
+    parent(parent), inputs(new Engine::InputMap())
 {
     for (const std::string& input : inputs)
     {
-        fillables[input] = new Engine::Variable(Engine::Defaults::get<Engine::ValueObject>());
-
-        variables.push_back(fillables[input]);
+        variables.push_back(this->inputs->addInput(input)->value);
     }
 }
 
-Engine::Variable* LambdaContext::findFillable(const std::string& name)
+Engine::Fillable* LambdaContext::findFillable(const std::string& name)
 {
-    if (fillables.count(name))
+    if (inputs->contains(name))
     {
-        return fillables[name];
+        return inputs->getInput(name);
     }
 
     if (parent)
@@ -47,7 +45,7 @@ TokenTransformer::~TokenTransformer()
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Fillable* token)
 {
-    return new Engine::Variable(context->findFillable(token->name));
+    return context->findFillable(token->name);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Value* token)
@@ -86,12 +84,12 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::VariableRef* toke
         return new Engine::Value(valueConst->value);
     }
 
-    return new Engine::Variable(value);
+    return new Engine::Variable(value, false);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::InputRef* token)
 {
-    return new Engine::Variable(currentVariables[token->definition]);
+    return new Engine::Variable(currentVariables[token->definition], true);
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::List* token)
@@ -173,27 +171,27 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::If* token)
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::All* token)
 {
-    return new Engine::All(ARG("values"));
+    return new Engine::All(new Engine::MultiList(ARG("values")));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Any* token)
 {
-    return new Engine::Any(ARG("values"));
+    return new Engine::Any(new Engine::MultiList(ARG("values")));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::None* token)
 {
-    return new Engine::None(ARG("values"));
+    return new Engine::None(new Engine::MultiList(ARG("values")));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Min* token)
 {
-    return new Engine::Min(ARG("values"));
+    return new Engine::Min(new Engine::MultiList(ARG("values")));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Max* token)
 {
-    return new Engine::Max(ARG("values"));
+    return new Engine::Max(new Engine::MultiList(ARG("values")));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Round* token)
@@ -221,6 +219,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Amplitude* token)
     return new Engine::Amplitude(ARG("source"));
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::Map* token)
+{
+    return new Engine::Map(new Engine::MultiList(ARG("values")), FILL_ARG("template", { "value" }));
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyAudioSource* token)
 {
     return new Engine::AudioSource();
@@ -228,32 +231,32 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyAudioSource*
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sine* token)
 {
-    return new Engine::Sine(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"));
+    return new Engine::Sine(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), ARG("frequency"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Square* token)
 {
-    return new Engine::Square(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"));
+    return new Engine::Square(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), ARG("frequency"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Triangle* token)
 {
-    return new Engine::Triangle(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"));
+    return new Engine::Triangle(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), ARG("frequency"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Saw* token)
 {
-    return new Engine::Saw(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"));
+    return new Engine::Saw(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), ARG("frequency"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Oscillator* token)
 {
-    return new Engine::CustomOscillator(ARG("volume"), ARG("pan"), ARG("effects"), ARG("frequency"), FILL_ARG("waveform", { "phase" }));
+    return new Engine::CustomOscillator(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), ARG("frequency"), FILL_ARG("waveform", { "phase" }));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Noise* token)
 {
-    return new Engine::Noise(ARG("volume"), ARG("pan"), ARG("effects"));
+    return new Engine::Noise(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
@@ -262,7 +265,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 
     locator->loadResources(TOKEN("file")->location);
 
-    return new Engine::Sample(ARG("volume"), ARG("pan"), ARG("effects"), locator, ARG("length"));
+    return new Engine::Sample(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), locator, ARG("length"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
@@ -271,12 +274,12 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 
     locator->loadResources(TOKEN("sample")->location);
 
-    return new Engine::Granulate(ARG("volume"), ARG("pan"), ARG("effects"), locator, ARG("grains"), ARG("length"), FILL_ARG("shape", { "position" }));
+    return new Engine::Granulate(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), locator, ARG("grains"), ARG("length"), FILL_ARG("shape", { "position" }));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Group* token)
 {
-    return new Engine::Group(ARG("volume"), ARG("pan"), ARG("effects"), ARG("sources"));
+    return new Engine::Group(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), new Engine::MultiList(ARG("sources")));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyEffect* token)
@@ -286,7 +289,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyEffect* toke
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::EffectGroup* token)
 {
-    return new Engine::EffectGroup(ARG("mix"), ARG("effects"));
+    return new Engine::EffectGroup(ARG("mix"), new Engine::MultiList(ARG("effects")));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Delay* token)
@@ -443,7 +446,7 @@ Engine::Lambda* TokenTransformer::fillArgument(const Parser::ArgumentList* argum
 {
     context = new LambdaContext(context, inputs, allVariables);
 
-    Engine::Lambda* argument = new Engine::Lambda(context->fillables, transformArgument(arguments, name));
+    Engine::Lambda* argument = new Engine::Lambda(context->inputs, transformArgument(arguments, name));
 
     const LambdaContext* current = context;
 

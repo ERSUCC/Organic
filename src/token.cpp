@@ -261,7 +261,7 @@ void FunctionDef::resolveTypes(TypeResolver* visitor) const
 }
 
 Fillable::Fillable(const SourceLocation& location, const std::string& name) :
-    Token(location, new FillableType(name)), name(name) {}
+    Token(location, new FillableType(this, name)), name(name) {}
 
 Engine::ValueObject* Fillable::transform(TokenTransformer* visitor) const
 {
@@ -691,6 +691,24 @@ void Amplitude::resolveTypes(TypeResolver* visitor) const
 }
 
 Engine::ValueObject* Amplitude::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
+Map::Map(const SourceLocation& location, ArgumentList* arguments) :
+    Call(location, arguments) {}
+
+const SharedType Map::type() const
+{
+    return SharedType(new ListType(argumentType("template")));
+}
+
+void Map::resolveTypes(TypeResolver* visitor) const
+{
+    visitor->resolveTypes(this);
+}
+
+Engine::ValueObject* Map::transform(TokenTransformer* visitor) const
 {
     return visitor->transform(this);
 }

@@ -3,13 +3,14 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <utility>
 
 #include "location.h"
 
 namespace Parser {
 
+struct Token;
 struct Type;
+struct FillableType;
 
 typedef std::unique_ptr<const Type> UniqueType;
 typedef std::shared_ptr<const Type> SharedType;
@@ -31,17 +32,20 @@ enum struct TypeConstant
 };
 
 typedef std::unordered_map<std::string, SharedType> FillTypes;
+typedef std::unordered_map<const Token*, SharedType> FillTokens;
 
 struct FillContext
 {
-    FillContext(FillContext* parent, const FillTypes& types);
+    FillContext(FillContext* parent, FillTokens& tokenTypes, const FillTypes& types);
 
-    const SharedType findType(const std::string& name) const;
+    const SharedType findType(const FillableType* fillable) const;
 
     FillContext* parent;
 
 private:
     const FillTypes types;
+
+    FillTokens& tokenTypes;
 
 };
 
@@ -130,7 +134,9 @@ struct ListType : public Type
 
 struct FillableType : public Type
 {
-    FillableType(const std::string& input);
+    FillableType(const Token* token, const std::string& input);
+
+    const Token* token;
 
     const std::string input;
 };

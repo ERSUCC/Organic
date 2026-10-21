@@ -1,0 +1,9 @@
+shift-length = 1000
+
+shift(base: 0) = {
+    repeat(value: random(from: base - 10, to: base + 10, length: shift-length, type: linear))
+}
+
+group(sources: map(values: [ c2, c3, g3, c4 ], template: saw(volume: 0.3, frequency: shift(base: |value|), effects: [
+    comb(delay: repeat(value: random(from: 5, to: 10, length: shift-length, type: linear)), feedback: 0.95)
+])))

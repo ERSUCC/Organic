@@ -14,7 +14,7 @@ oscillator(frequency: 440, waveform: 1 + |phase| - 42)
 
 ---
 
-name = "fillable value in nested built-in function call"
+name = "Fillable value in nested built-in function call"
 
 ---
 
@@ -22,7 +22,7 @@ oscillator(frequency: 440, waveform: repeat(value: |phase|))
 
 ---
 
-name = "fillable value in nested user function call"
+name = "Fillable value in nested user function call"
 
 ---
 
@@ -34,7 +34,7 @@ oscillator(frequency: 440, waveform: get-wave(phase: |phase|))
 
 ---
 
-name = "fillable value in nested function call with expression"
+name = "Fillable value in nested function call with expression"
 
 ---
 
@@ -43,3 +43,19 @@ get-wave(phase: 0) = {
 }
 
 oscillator(frequency: 440, waveform: get-wave(phase: |phase| / pi - 1))
+
+---
+
+name = "Multiple fillable values"
+
+---
+
+map(values: [ c1, c2, c3 ], template: oscillator(frequency: |value|, waveform: |phase|))
+
+---
+
+name = "Multiple fillable values in same context"
+
+---
+
+map(values: [ -1, 0, 1 ], template: oscillator(frequency: a4, waveform: |phase| + |value|))

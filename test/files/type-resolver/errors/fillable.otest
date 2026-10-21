@@ -24,7 +24,7 @@ sine(frequency: |phase|)
 
 ---
 
-name = "fillable value with incorrect type"
+name = "Independent fillable value with incorrect type"
 line = 2
 character = 69
 error = 'Expected a sequence order constant for input "order", but received a number.'
@@ -32,3 +32,14 @@ error = 'Expected a sequence order constant for input "order", but received a nu
 ---
 
 oscillator(frequency: 440, waveform: sequence(values: [ 0 ], order: |phase|))
+
+---
+
+name = "Dependent fillable value with incorrect type"
+line = 2
+character = 66
+error = 'Expected a number for input "frequency", but received a string.'
+
+---
+
+map(values: [ "one", "two", "three" ], template: sine(frequency: |value|))

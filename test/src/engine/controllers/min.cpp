@@ -4,16 +4,16 @@ void TestControllers::testMin()
 {
     beginTest("Min", true);
 
-    expectConstant(new Min(new List({ new Value(0) })), 0);
-    expectConstant(new Min(new List({ new Value(5) })), 5);
-    expectConstant(new Min(new List({ new Value(-5) })), -5);
-    expectConstant(new Min(new List({ new Value(0), new Value(0), new Value(0) })), 0);
-    expectConstant(new Min(new List({ new Value(5), new Value(5), new Value(5) })), 5);
-    expectConstant(new Min(new List({ new Value(0), new Value(3), new Value(5) })), 0);
-    expectConstant(new Min(new List({ new Value(0), new Value(-3), new Value(-5) })), -5);
-    expectConstant(new Min(new List({ new Value(5), new Value(0), new Value(3) })), 0);
+    expectConstant(new Min(new MultiList(new List({ new Value(0) }))), 0);
+    expectConstant(new Min(new MultiList(new List({ new Value(5) }))), 5);
+    expectConstant(new Min(new MultiList(new List({ new Value(-5) }))), -5);
+    expectConstant(new Min(new MultiList(new List({ new Value(0), new Value(0), new Value(0) }))), 0);
+    expectConstant(new Min(new MultiList(new List({ new Value(5), new Value(5), new Value(5) }))), 5);
+    expectConstant(new Min(new MultiList(new List({ new Value(0), new Value(3), new Value(5) }))), 0);
+    expectConstant(new Min(new MultiList(new List({ new Value(0), new Value(-3), new Value(-5) }))), -5);
+    expectConstant(new Min(new MultiList(new List({ new Value(5), new Value(0), new Value(3) }))), 0);
 
-    expectValues(new Min(new List({ new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(2.5) })),
+    expectValues(new Min(new MultiList(new List({ new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(2.5) }))),
     {
         TimeValue(0, 0),
         TimeValue(250, 1.25),

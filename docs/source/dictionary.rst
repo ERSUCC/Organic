@@ -420,6 +420,20 @@ These functions are used to automate the values of other parameters, and can typ
    stops. This function does not produce any audio on its own, but it does not prevent :organic:code:`source` from
    producing audio if it is used elsewhere as a normal audio source.
 
+.. organic:function:: map
+   :return: type of :organic:code:`template`
+
+   .. organic:input:: values
+      :type: list of anything
+
+   .. organic:input:: template
+      :type: anything
+      :fillable: value ~ type of :organic:code:`values`
+
+   Returns a list that contains a copy of :organic:code:`template` for each value in :organic:code:`values`. The
+   fillable value :organic:code:`value` can be used in :organic:code:`template` to access the value from
+   :organic:code:`values` that corresponds to that copy. Stops when :organic:code:`values` stops.
+
 -------------
 Audio Sources
 -------------

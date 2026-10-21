@@ -2,6 +2,11 @@
 
 using namespace Engine;
 
+ValueObject* Time::clone() const
+{
+    return new Time();
+}
+
 double Time::getValue() const
 {
     return utils->time;
@@ -9,6 +14,11 @@ double Time::getValue() const
 
 Value::Value(const double value) :
     value(value) {}
+
+ValueObject* Value::clone() const
+{
+    return new Value(value);
+}
 
 double Value::getValue() const
 {
@@ -18,8 +28,18 @@ double Value::getValue() const
 ValueChar::ValueChar(const unsigned char value) :
     value(value) {}
 
+ValueObject* ValueChar::clone() const
+{
+    return new ValueChar(value);
+}
+
 ValueNegate::ValueNegate(ValueObject* value) :
     value(value) {}
+
+ValueObject* ValueNegate::clone() const
+{
+    return new ValueNegate(value->clone());
+}
 
 ValueNegate::~ValueNegate()
 {
@@ -95,6 +115,11 @@ void ValueCombination::compute()
 ValueAdd::ValueAdd(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
+ValueObject* ValueAdd::clone() const
+{
+    return new ValueAdd(value1->clone(), value2->clone());
+}
+
 double ValueAdd::getValueInternal(const double value1, const double value2) const
 {
     return value1 + value2;
@@ -102,6 +127,11 @@ double ValueAdd::getValueInternal(const double value1, const double value2) cons
 
 ValueSubtract::ValueSubtract(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
+
+ValueObject* ValueSubtract::clone() const
+{
+    return new ValueSubtract(value1->clone(), value2->clone());
+}
 
 double ValueSubtract::getValueInternal(const double value1, const double value2) const
 {
@@ -111,6 +141,11 @@ double ValueSubtract::getValueInternal(const double value1, const double value2)
 ValueMultiply::ValueMultiply(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
+ValueObject* ValueMultiply::clone() const
+{
+    return new ValueMultiply(value1->clone(), value2->clone());
+}
+
 double ValueMultiply::getValueInternal(const double value1, const double value2) const
 {
     return value1 * value2;
@@ -118,6 +153,11 @@ double ValueMultiply::getValueInternal(const double value1, const double value2)
 
 ValueDivide::ValueDivide(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
+
+ValueObject* ValueDivide::clone() const
+{
+    return new ValueDivide(value1->clone(), value2->clone());
+}
 
 double ValueDivide::getValueInternal(const double value1, const double value2) const
 {
@@ -127,6 +167,11 @@ double ValueDivide::getValueInternal(const double value1, const double value2) c
 ValuePower::ValuePower(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
+ValueObject* ValuePower::clone() const
+{
+    return new ValuePower(value1->clone(), value2->clone());
+}
+
 double ValuePower::getValueInternal(const double value1, const double value2) const
 {
     return pow(value1, value2);
@@ -134,6 +179,11 @@ double ValuePower::getValueInternal(const double value1, const double value2) co
 
 ValueEquals::ValueEquals(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
+
+ValueObject* ValueEquals::clone() const
+{
+    return new ValueEquals(value1->clone(), value2->clone());
+}
 
 double ValueEquals::getValueInternal(const double value1, const double value2) const
 {
@@ -143,6 +193,11 @@ double ValueEquals::getValueInternal(const double value1, const double value2) c
 ValueLess::ValueLess(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
+ValueObject* ValueLess::clone() const
+{
+    return new ValueLess(value1->clone(), value2->clone());
+}
+
 double ValueLess::getValueInternal(const double value1, const double value2) const
 {
     return value1 < value2;
@@ -150,6 +205,11 @@ double ValueLess::getValueInternal(const double value1, const double value2) con
 
 ValueGreater::ValueGreater(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
+
+ValueObject* ValueGreater::clone() const
+{
+    return new ValueGreater(value1->clone(), value2->clone());
+}
 
 double ValueGreater::getValueInternal(const double value1, const double value2) const
 {
@@ -159,6 +219,11 @@ double ValueGreater::getValueInternal(const double value1, const double value2) 
 ValueLessEqual::ValueLessEqual(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
+ValueObject* ValueLessEqual::clone() const
+{
+    return new ValueLessEqual(value1->clone(), value2->clone());
+}
+
 double ValueLessEqual::getValueInternal(const double value1, const double value2) const
 {
     return value1 <= value2;
@@ -167,17 +232,27 @@ double ValueLessEqual::getValueInternal(const double value1, const double value2
 ValueGreaterEqual::ValueGreaterEqual(ValueObject* value1, ValueObject* value2) :
     ValueCombination(value1, value2) {}
 
+ValueObject* ValueGreaterEqual::clone() const
+{
+    return new ValueGreaterEqual(value1->clone(), value2->clone());
+}
+
 double ValueGreaterEqual::getValueInternal(const double value1, const double value2) const
 {
     return value1 >= value2;
 }
 
-All::All(ValueObject* values) :
-    values(new MultiList(values)) {}
+All::All(MultiList* values) :
+    values(values) {}
 
 All::~All()
 {
     delete values;
+}
+
+ValueObject* All::clone() const
+{
+    return new All(values->cloneAs<MultiList>());
 }
 
 double All::getValue() const
@@ -225,12 +300,17 @@ void All::compute()
     }
 }
 
-Any::Any(ValueObject* values) :
-    values(new MultiList(values)) {}
+Any::Any(MultiList* values) :
+    values(values) {}
 
 Any::~Any()
 {
     delete values;
+}
+
+ValueObject* Any::clone() const
+{
+    return new Any(values->cloneAs<MultiList>());
 }
 
 double Any::getValue() const
@@ -278,12 +358,17 @@ void Any::compute()
     }
 }
 
-None::None(ValueObject* values) :
-    values(new MultiList(values)) {}
+None::None(MultiList* values) :
+    values(values) {}
 
 None::~None()
 {
     delete values;
+}
+
+ValueObject* None::clone() const
+{
+    return new None(values->cloneAs<MultiList>());
 }
 
 double None::getValue() const
@@ -331,12 +416,17 @@ void None::compute()
     }
 }
 
-Min::Min(ValueObject* values) :
-    values(new MultiList(values)) {}
+Min::Min(MultiList* values) :
+    values(values) {}
 
 Min::~Min()
 {
     delete values;
+}
+
+ValueObject* Min::clone() const
+{
+    return new Min(values->cloneAs<MultiList>());
 }
 
 double Min::getValue() const
@@ -388,12 +478,17 @@ void Min::compute()
     }
 }
 
-Max::Max(ValueObject* values) :
-    values(new MultiList(values)) {}
+Max::Max(MultiList* values) :
+    values(values) {}
 
 Max::~Max()
 {
     delete values;
+}
+
+ValueObject* Max::clone() const
+{
+    return new Max(values->cloneAs<MultiList>());
 }
 
 double Max::getValue() const
@@ -455,6 +550,11 @@ Round::~Round()
     delete direction;
 }
 
+ValueObject* Round::clone() const
+{
+    return new Round(value->clone(), step->clone(), direction->clone());
+}
+
 double Round::getValue() const
 {
     if (!enabled)
@@ -512,6 +612,11 @@ Absolute::~Absolute()
     delete value;
 }
 
+ValueObject* Absolute::clone() const
+{
+    return new Absolute(value->clone());
+}
+
 double Absolute::getValue() const
 {
     if (!enabled)
@@ -544,6 +649,11 @@ Modulo::~Modulo()
 {
     delete value;
     delete divisor;
+}
+
+ValueObject* Modulo::clone() const
+{
+    return new Modulo(value->clone(), divisor->clone());
 }
 
 double Modulo::getValue() const
@@ -589,6 +699,11 @@ Logarithm::~Logarithm()
     delete base;
 }
 
+ValueObject* Logarithm::clone() const
+{
+    return new Logarithm(value->clone(), base->clone());
+}
+
 double Logarithm::getValue() const
 {
     if (!enabled)
@@ -631,6 +746,11 @@ Sequence::~Sequence()
 {
     delete controllers;
     delete order;
+}
+
+ValueObject* Sequence::clone() const
+{
+    return new Sequence(controllers->clone(), order->clone());
 }
 
 double Sequence::getValue() const
@@ -789,6 +909,11 @@ Repeat::~Repeat()
     delete repeats;
 }
 
+ValueObject* Repeat::clone() const
+{
+    return new Repeat(value->clone(), repeats->clone());
+}
+
 double Repeat::getValue() const
 {
     if (!enabled)
@@ -858,6 +983,11 @@ Hold::~Hold()
     delete length;
 }
 
+ValueObject* Hold::clone() const
+{
+    return new Hold(value->clone(), length->clone());
+}
+
 double Hold::getValue() const
 {
     if (!enabled)
@@ -875,7 +1005,7 @@ ValueObject* Hold::getLeaf()
         return nullptr;
     }
 
-    return value;
+    return value->getLeaf();
 }
 
 void Hold::getLeaves(std::unordered_set<ValueObject*>& leaves)
@@ -910,6 +1040,11 @@ Sweep::~Sweep()
     delete from;
     delete to;
     delete length;
+}
+
+ValueObject* Sweep::clone() const
+{
+    return new Sweep(from->clone(), to->clone(), length->clone());
 }
 
 double Sweep::getValue() const
@@ -957,6 +1092,11 @@ LFO::~LFO()
     delete length;
 }
 
+ValueObject* LFO::clone() const
+{
+    return new LFO(from->clone(), to->clone(), length->clone());
+}
+
 double LFO::getValue() const
 {
     if (!enabled)
@@ -1002,6 +1142,11 @@ Envelope::~Envelope()
     delete attack;
     delete sustain;
     delete release;
+}
+
+ValueObject* Envelope::clone() const
+{
+    return new Envelope(from->clone(), to->clone(), attack->clone(), sustain->clone(), release->clone());
 }
 
 double Envelope::getValue() const
@@ -1072,6 +1217,11 @@ Random::~Random()
     delete type;
 }
 
+ValueObject* Random::clone() const
+{
+    return new Random(from->clone(), to->clone(), length->clone(), type->clone());
+}
+
 double Random::getValue() const
 {
     if (!enabled)
@@ -1140,6 +1290,11 @@ Limit::~Limit()
     delete max;
 }
 
+ValueObject* Limit::clone() const
+{
+    return new Limit(value->clone(), min->clone(), max->clone());
+}
+
 double Limit::getValue() const
 {
     if (!enabled)
@@ -1190,6 +1345,11 @@ Trigger::~Trigger()
 {
     delete condition;
     delete value;
+}
+
+ValueObject* Trigger::clone() const
+{
+    return new Trigger(condition->clone(), value->clone());
 }
 
 double Trigger::getValue() const
@@ -1265,6 +1425,11 @@ If::~If()
     delete falseValue;
 }
 
+ValueObject* If::clone() const
+{
+    return new If(condition->clone(), trueValue->clone(), falseValue->clone());
+}
+
 double If::getValue() const
 {
     if (condition->getValue() == 0)
@@ -1328,6 +1493,11 @@ Amplitude::~Amplitude()
     free(buffer);
 }
 
+ValueObject* Amplitude::clone() const
+{
+    return new Amplitude(source->clone());
+}
+
 double Amplitude::getValue() const
 {
     double average = 0;
@@ -1352,4 +1522,70 @@ void Amplitude::compute()
     memset(buffer, 0, sizeof(double) * utils->channels);
 
     source->getLeafAs<AudioSource>()->fillBuffer(buffer);
+}
+
+Map::Map(MultiList* values, Lambda* function) :
+    values(values), function(function) {}
+
+Map::~Map()
+{
+    delete values;
+    delete function;
+
+    for (const std::pair<List*, List*>& pair : mapped)
+    {
+        delete pair.second;
+    }
+}
+
+ValueObject* Map::clone() const
+{
+    return new Map(values->cloneAs<MultiList>(), function->cloneAs<Lambda>());
+}
+
+ValueObject* Map::getLeaf()
+{
+    return mapped.at(currentList);
+}
+
+void Map::getLeaves(std::unordered_set<ValueObject*>& leaves)
+{
+    leaves.insert(mapped.at(currentList));
+}
+
+void Map::init()
+{
+    values->start(startTime);
+    function->start(startTime);
+
+    update();
+}
+
+void Map::compute()
+{
+    values->update();
+    function->update();
+
+    if (!values->enabled)
+    {
+        stop(values->getStopTime());
+
+        return;
+    }
+
+    currentList = values->getLeafAs<List>();
+
+    if (!mapped.count(currentList))
+    {
+        std::vector<ValueObject*> newValues;
+
+        for (ValueObject* value : currentList->objects)
+        {
+            function->setInput("value", value);
+
+            newValues.push_back(function->clone());
+        }
+
+        mapped[currentList] = new List(newValues);
+    }
 }

@@ -2,19 +2,28 @@
 
 using namespace Parser;
 
-FillContext::FillContext(FillContext* parent, const FillTypes& types) :
-    parent(parent), types(types) {}
+FillContext::FillContext(FillContext* parent, FillTokens& tokenTypes, const FillTypes& types) :
+    parent(parent), tokenTypes(tokenTypes), types(types) {}
 
-const SharedType FillContext::findType(const std::string& name) const
+const SharedType FillContext::findType(const FillableType* fillable) const
 {
-    if (types.count(name))
+    if (types.count(fillable->input))
     {
-        return types.at(name);
+        SharedType type = types.at(fillable->input);
+
+        tokenTypes[fillable->token] = type;
+
+        return type;
+    }
+
+    if (tokenTypes.count(fillable->token))
+    {
+        return tokenTypes.at(fillable->token);
     }
 
     if (parent)
     {
-        return parent->findType(name);
+        return parent->findType(fillable);
     }
 
     return SharedType(nullptr);
@@ -52,7 +61,7 @@ bool Type::checkType(const FillContext* context, const Type* actual) const
         return false;
     }
 
-    if (const SharedType type = context->findType(dynamic_cast<const FillableType*>(actual)->input))
+    if (const SharedType type = context->findType(dynamic_cast<const FillableType*>(actual)))
     {
         return base == type->base;
     }
@@ -111,5 +120,5 @@ bool ListType::checkType(const FillContext* context, const Type* actual) const
     return subType->checkType(context, dynamic_cast<const ListType*>(actual)->subType.get());
 }
 
-FillableType::FillableType(const std::string& input) :
-    Type(TypeConstant::Fillable, "a fillable", "fillables"), input(input) {}
+FillableType::FillableType(const Token* token, const std::string& input) :
+    Type(TypeConstant::Fillable, "a fillable", "fillables"), token(token), input(input) {}

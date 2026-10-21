@@ -109,6 +109,11 @@ ResourceLocator::~ResourceLocator()
     }
 }
 
+ValueObject* ResourceLocator::clone() const
+{
+    return new ResourceLocator(object->clone());
+}
+
 ValueObject* ResourceLocator::getLeaf()
 {
     if (!enabled)
