@@ -28,6 +28,8 @@ struct ResourceLocator : public ValueObject
     ResourceLocator(ValueObject* object);
     ~ResourceLocator();
 
+    ValueObject* clone() const override;
+
     ValueObject* getLeaf() override;
 
     void loadResources(const SourceLocation& location);

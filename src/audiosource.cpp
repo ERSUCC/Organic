@@ -2,14 +2,14 @@
 
 using namespace Engine;
 
-AudioSource::AudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
-    volume(volume), pan(pan), effects(new MultiList(effects))
+AudioSource::AudioSource(ValueObject* volume, ValueObject* pan, MultiList* effects) :
+    volume(volume), pan(pan), effects(effects)
 {
     effectBuffer = (double*)malloc(sizeof(double) * utils->channels);
 }
 
 AudioSource::AudioSource() :
-    AudioSource(new ValueObject(), new ValueObject(), new ValueObject()) {}
+    AudioSource(new ValueObject(), new ValueObject(), new MultiList(new ValueObject())) {}
 
 AudioSource::~AudioSource()
 {
@@ -18,6 +18,11 @@ AudioSource::~AudioSource()
     delete effects;
 
     free(effectBuffer);
+}
+
+ValueObject* AudioSource::clone() const
+{
+    return new AudioSource(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()));
 }
 
 void AudioSource::fillBuffer(double* buffer)
@@ -68,7 +73,7 @@ void Phase::compute()
     }
 }
 
-Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
+Oscillator::Oscillator(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency) :
     AudioSource(volume, pan, effects), frequency(frequency), phase(new Phase()) {}
 
 Oscillator::~Oscillator()
@@ -129,16 +134,26 @@ void Oscillator::compute()
     }
 }
 
-Sine::Sine(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
+Sine::Sine(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
+
+ValueObject* Sine::clone() const
+{
+    return new Sine(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()), frequency->clone());
+}
 
 double Sine::getValue() const
 {
     return sin(phase->getValue());
 }
 
-Square::Square(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
+Square::Square(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
+
+ValueObject* Square::clone() const
+{
+    return new Square(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()), frequency->clone());
+}
 
 double Square::getValue() const
 {
@@ -181,8 +196,13 @@ double Square::getValue() const
     return -1;
 }
 
-Saw::Saw(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
+Saw::Saw(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
+
+ValueObject* Saw::clone() const
+{
+    return new Saw(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()), frequency->clone());
+}
 
 double Saw::getValue() const
 {
@@ -206,16 +226,26 @@ double Saw::getValue() const
     return phaseNorm * 2 - 1;
 }
 
-Triangle::Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency) :
+Triangle::Triangle(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency) :
     Oscillator(volume, pan, effects, frequency) {}
+
+ValueObject* Triangle::clone() const
+{
+    return new Triangle(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()), frequency->clone());
+}
 
 double Triangle::getValue() const
 {
     return 2 * asin(sin(phase->getValue())) / Utils::pi;
 }
 
-CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, Lambda* waveform) :
+CustomOscillator::CustomOscillator(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency, Lambda* waveform) :
     Oscillator(volume, pan, effects, frequency), waveform(waveform) {}
+
+ValueObject* CustomOscillator::clone() const
+{
+    return new CustomOscillator(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()), frequency->clone(), static_cast<Lambda*>(waveform->clone()));
+}
 
 CustomOscillator::~CustomOscillator()
 {
@@ -241,8 +271,13 @@ void CustomOscillator::init()
     waveform->setInput("phase", phase);
 }
 
-Noise::Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects) :
+Noise::Noise(ValueObject* volume, ValueObject* pan, MultiList* effects) :
     AudioSource(volume, pan, effects) {}
+
+ValueObject* Noise::clone() const
+{
+    return new Noise(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()));
+}
 
 void Noise::init()
 {
@@ -272,13 +307,18 @@ void Noise::compute()
     }
 }
 
-Sample::Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ResourceLocator* resource, ValueObject* length) :
+Sample::Sample(ValueObject* volume, ValueObject* pan, MultiList* effects, ResourceLocator* resource, ValueObject* length) :
     AudioSource(volume, pan, effects), resource(resource), length(length) {}
 
 Sample::~Sample()
 {
     delete resource;
     delete length;
+}
+
+ValueObject* Sample::clone() const
+{
+    return new Sample(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()), static_cast<ResourceLocator*>(resource->clone()), length->clone());
 }
 
 void Sample::init()
@@ -518,7 +558,7 @@ size_t GrainList::getTotalLength() const
     return totalLength;
 }
 
-Granulate::Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ResourceLocator* resource, ValueObject* grains, ValueObject* length, Lambda* shape) :
+Granulate::Granulate(ValueObject* volume, ValueObject* pan, MultiList* effects, ResourceLocator* resource, ValueObject* grains, ValueObject* length, Lambda* shape) :
     AudioSource(volume, pan, effects), resource(resource), grains(grains), length(length), shape(shape) {}
 
 Granulate::~Granulate()
@@ -529,6 +569,11 @@ Granulate::~Granulate()
     delete shape;
     delete coordinator;
     delete grainList;
+}
+
+ValueObject* Granulate::clone() const
+{
+    return new Granulate(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()), static_cast<ResourceLocator*>(resource->clone()), grains->clone(), length->clone(), static_cast<Lambda*>(shape->clone()));
 }
 
 void Granulate::init()
@@ -591,12 +636,17 @@ void Granulate::compute()
     }
 }
 
-Group::Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources) :
-    AudioSource(volume, pan, effects), sources(new MultiList(sources)) {}
+Group::Group(ValueObject* volume, ValueObject* pan, MultiList* effects, MultiList* sources) :
+    AudioSource(volume, pan, effects), sources(sources) {}
 
 Group::~Group()
 {
     delete sources;
+}
+
+ValueObject* Group::clone() const
+{
+    return new Group(volume->clone(), pan->clone(), static_cast<MultiList*>(effects->clone()), static_cast<MultiList*>(sources->clone()));
 }
 
 void Group::init()

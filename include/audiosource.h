@@ -15,9 +15,11 @@ namespace Engine {
 
 struct AudioSource : public ValueObject
 {
-    AudioSource(ValueObject* volume, ValueObject* pan, ValueObject* effects);
+    AudioSource(ValueObject* volume, ValueObject* pan, MultiList* effects);
     AudioSource();
     ~AudioSource();
+
+    ValueObject* clone() const override;
 
     void fillBuffer(double* buffer);
 
@@ -51,7 +53,7 @@ private:
 
 struct Oscillator : public AudioSource
 {
-    Oscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
+    Oscillator(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency);
     ~Oscillator();
 
 protected:
@@ -69,36 +71,46 @@ private:
 
 struct Sine : public Oscillator
 {
-    Sine(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
+    Sine(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency);
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 };
 
 struct Square : public Oscillator
 {
-    Square(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
+    Square(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency);
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 };
 
 struct Saw : public Oscillator
 {
-    Saw(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
+    Saw(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency);
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 };
 
 struct Triangle : public Oscillator
 {
-    Triangle(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency);
+    Triangle(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency);
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 };
 
 struct CustomOscillator : public Oscillator
 {
-    CustomOscillator(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* frequency, Lambda* waveform);
+    CustomOscillator(ValueObject* volume, ValueObject* pan, MultiList* effects, ValueObject* frequency, Lambda* waveform);
     ~CustomOscillator();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -112,7 +124,9 @@ private:
 
 struct Noise : public AudioSource
 {
-    Noise(ValueObject* volume, ValueObject* pan, ValueObject* effects);
+    Noise(ValueObject* volume, ValueObject* pan, MultiList* effects);
+
+    ValueObject* clone() const override;
 
 protected:
     void init() override;
@@ -125,8 +139,10 @@ private:
 
 struct Sample : public AudioSource
 {
-    Sample(ValueObject* volume, ValueObject* pan, ValueObject* effects, ResourceLocator* resource, ValueObject* length);
+    Sample(ValueObject* volume, ValueObject* pan, MultiList* effects, ResourceLocator* resource, ValueObject* length);
     ~Sample();
+
+    ValueObject* clone() const override;
 
 protected:
     void init() override;
@@ -221,8 +237,10 @@ private:
 
 struct Granulate : public AudioSource
 {
-    Granulate(ValueObject* volume, ValueObject* pan, ValueObject* effects, ResourceLocator* resource, ValueObject* grains, ValueObject* length, Lambda* shape);
+    Granulate(ValueObject* volume, ValueObject* pan, MultiList* effects, ResourceLocator* resource, ValueObject* grains, ValueObject* length, Lambda* shape);
     ~Granulate();
+
+    ValueObject* clone() const override;
 
 protected:
     void init() override;
@@ -244,8 +262,10 @@ private:
 
 struct Group : public AudioSource
 {
-    Group(ValueObject* volume, ValueObject* pan, ValueObject* effects, ValueObject* sources);
+    Group(ValueObject* volume, ValueObject* pan, MultiList* effects, MultiList* sources);
     ~Group();
+
+    ValueObject* clone() const override;
 
 protected:
     void init() override;

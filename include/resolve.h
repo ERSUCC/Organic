@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <string>
+#include <unordered_map>
 
 #include "constants.h"
 #include "token.h"
@@ -41,6 +42,7 @@ struct TypeResolver
     void resolveTypes(const Modulo* token);
     void resolveTypes(const Logarithm* token);
     void resolveTypes(const Amplitude* token);
+    void resolveTypes(const Map* token);
     void resolveTypes(const Sine* token);
     void resolveTypes(const Square* token);
     void resolveTypes(const Triangle* token);
@@ -65,6 +67,8 @@ private:
     void resolveArgumentTypes(ArgumentList* arguments, const std::string& name, const Type* expectedType, const Token* defaultValue = nullptr, const FillTypes& types = {});
 
     FillContext* context = new FillContext(nullptr, {});
+
+    std::unordered_map<const Token*, SharedType> fillableTypes;
 
 };
 

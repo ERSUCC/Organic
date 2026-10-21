@@ -20,11 +20,11 @@ struct LambdaContext
 {
     LambdaContext(LambdaContext* parent, const std::vector<std::string>& inputs, std::vector<Engine::ValueObject*>& variables);
 
-    Engine::Variable* findFillable(const std::string& input);
+    Engine::Fillable* findFillable(const std::string& input);
 
     LambdaContext* parent;
 
-    std::unordered_map<std::string, Engine::Variable*> fillables;
+    Engine::InputMap* inputs;
 };
 
 struct TokenTransformer
@@ -64,6 +64,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::Modulo* token);
     Engine::ValueObject* transform(const Parser::Logarithm* token);
     Engine::ValueObject* transform(const Parser::Amplitude* token);
+    Engine::ValueObject* transform(const Parser::Map* token);
     Engine::ValueObject* transform(const Parser::EmptyAudioSource* token);
     Engine::ValueObject* transform(const Parser::Sine* token);
     Engine::ValueObject* transform(const Parser::Square* token);

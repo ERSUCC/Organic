@@ -380,11 +380,9 @@ struct Call : public Token
     Call(const SourceLocation& location, ArgumentList* arguments, const Type* type = new NoneType());
     ~Call();
 
-    ArgumentList* arguments;
-
-protected:
     const SharedType argumentType(const std::string& name) const;
 
+    ArgumentList* arguments;
 };
 
 struct Time : public Call
@@ -580,6 +578,17 @@ struct Logarithm : public Call
 struct Amplitude : public Call
 {
     Amplitude(const SourceLocation& location, ArgumentList* arguments);
+
+    void resolveTypes(TypeResolver* visitor) const override;
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
+
+struct Map : public Call
+{
+    Map(const SourceLocation& location, ArgumentList* arguments);
+
+    const SharedType type() const override;
 
     void resolveTypes(TypeResolver* visitor) const override;
 

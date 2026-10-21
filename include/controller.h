@@ -14,12 +14,16 @@ namespace Engine {
 
 struct Time : public ValueObject
 {
+    ValueObject* clone() const override;
+
     double getValue() const override;
 };
 
 struct Value : public ValueObject
 {
     Value(const double value);
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -30,6 +34,8 @@ struct ValueChar : public ValueObject
 {
     ValueChar(const unsigned char value = 0);
 
+    ValueObject* clone() const override;
+
     const unsigned char value;
 };
 
@@ -37,6 +43,8 @@ struct ValueNegate : public ValueObject
 {
     ValueNegate(ValueObject* value);
     ~ValueNegate();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -62,7 +70,6 @@ protected:
 
     virtual double getValueInternal(const double value1, const double value2) const = 0;
 
-private:
     ValueObject* value1;
     ValueObject* value2;
 
@@ -71,6 +78,8 @@ private:
 struct ValueAdd : public ValueCombination
 {
     ValueAdd(ValueObject* value1, ValueObject* value2);
+
+    ValueObject* clone() const override;
 
 protected:
     double getValueInternal(const double value1, const double value2) const override;
@@ -81,6 +90,8 @@ struct ValueSubtract : public ValueCombination
 {
     ValueSubtract(ValueObject* value1, ValueObject* value2);
 
+    ValueObject* clone() const override;
+
 protected:
     double getValueInternal(const double value1, const double value2) const override;
 
@@ -89,6 +100,8 @@ protected:
 struct ValueMultiply : public ValueCombination
 {
     ValueMultiply(ValueObject* value1, ValueObject* value2);
+
+    ValueObject* clone() const override;
 
 protected:
     double getValueInternal(const double value1, const double value2) const override;
@@ -99,6 +112,8 @@ struct ValueDivide : public ValueCombination
 {
     ValueDivide(ValueObject* value1, ValueObject* value2);
 
+    ValueObject* clone() const override;
+
 protected:
     double getValueInternal(const double value1, const double value2) const override;
 
@@ -107,6 +122,8 @@ protected:
 struct ValuePower : public ValueCombination
 {
     ValuePower(ValueObject* value1, ValueObject* value2);
+
+    ValueObject* clone() const override;
 
 protected:
     double getValueInternal(const double value1, const double value2) const override;
@@ -117,6 +134,8 @@ struct ValueEquals : public ValueCombination
 {
     ValueEquals(ValueObject* value1, ValueObject* value2);
 
+    ValueObject* clone() const override;
+
 protected:
     double getValueInternal(const double value1, const double value2) const override;
 
@@ -125,6 +144,8 @@ protected:
 struct ValueLess : public ValueCombination
 {
     ValueLess(ValueObject* value1, ValueObject* value2);
+
+    ValueObject* clone() const override;
 
 protected:
     double getValueInternal(const double value1, const double value2) const override;
@@ -135,6 +156,8 @@ struct ValueGreater : public ValueCombination
 {
     ValueGreater(ValueObject* value1, ValueObject* value2);
 
+    ValueObject* clone() const override;
+
 protected:
     double getValueInternal(const double value1, const double value2) const override;
 
@@ -143,6 +166,8 @@ protected:
 struct ValueLessEqual : public ValueCombination
 {
     ValueLessEqual(ValueObject* value1, ValueObject* value2);
+
+    ValueObject* clone() const override;
 
 protected:
     double getValueInternal(const double value1, const double value2) const override;
@@ -153,6 +178,8 @@ struct ValueGreaterEqual : public ValueCombination
 {
     ValueGreaterEqual(ValueObject* value1, ValueObject* value2);
 
+    ValueObject* clone() const override;
+
 protected:
     double getValueInternal(const double value1, const double value2) const override;
 
@@ -160,8 +187,10 @@ protected:
 
 struct All : public ValueObject
 {
-    All(ValueObject* values);
+    All(MultiList* values);
     ~All();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -176,8 +205,10 @@ private:
 
 struct Any : public ValueObject
 {
-    Any(ValueObject* values);
+    Any(MultiList* values);
     ~Any();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -192,8 +223,10 @@ private:
 
 struct None : public ValueObject
 {
-    None(ValueObject* values);
+    None(MultiList* values);
     ~None();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -208,8 +241,10 @@ private:
 
 struct Min : public ValueObject
 {
-    Min(ValueObject* values);
+    Min(MultiList* values);
     ~Min();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -224,8 +259,10 @@ private:
 
 struct Max : public ValueObject
 {
-    Max(ValueObject* values);
+    Max(MultiList* values);
     ~Max();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -242,6 +279,8 @@ struct Round : public ValueObject
 {
     Round(ValueObject* value, ValueObject* step, ValueObject* direction);
     ~Round();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -261,6 +300,8 @@ struct Absolute : public ValueObject
     Absolute(ValueObject* value);
     ~Absolute();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
 
 protected:
@@ -276,6 +317,8 @@ struct Modulo : public ValueObject
 {
     Modulo(ValueObject* value, ValueObject* divisor);
     ~Modulo();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -294,6 +337,8 @@ struct Logarithm : public ValueObject
     Logarithm(ValueObject* value, ValueObject* base);
     ~Logarithm();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
 
 protected:
@@ -310,6 +355,8 @@ struct Sequence : public ValueObject
 {
     Sequence(ValueObject* controllers, ValueObject* order);
     ~Sequence();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -342,6 +389,8 @@ struct Repeat : public ValueObject
     Repeat(ValueObject* value, ValueObject* repeats);
     ~Repeat();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
 
     ValueObject* getLeaf() override;
@@ -366,6 +415,8 @@ struct Hold : public ValueObject
     Hold(ValueObject* value, ValueObject* length);
     ~Hold();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
 
     ValueObject* getLeaf() override;
@@ -387,6 +438,8 @@ struct Sweep : public ValueObject
     Sweep(ValueObject* from, ValueObject* to, ValueObject* length);
     ~Sweep();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
 
 protected:
@@ -405,6 +458,8 @@ struct LFO : public ValueObject
     LFO(ValueObject* from, ValueObject* to, ValueObject* length);
     ~LFO();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
 
 protected:
@@ -422,6 +477,8 @@ struct Envelope : public ValueObject
 {
     Envelope(ValueObject* from, ValueObject* to, ValueObject* attack, ValueObject* sustain, ValueObject* release);
     ~Envelope();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -442,6 +499,8 @@ struct Random : public ValueObject
 {
     Random(ValueObject* from, ValueObject* to, ValueObject* length, ValueObject* type);
     ~Random();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -467,6 +526,8 @@ struct Limit : public ValueObject
     Limit(ValueObject* value, ValueObject* min, ValueObject* max);
     ~Limit();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
 
 protected:
@@ -484,6 +545,8 @@ struct Trigger : public ValueObject
 {
     Trigger(ValueObject* condition, ValueObject* value);
     ~Trigger();
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -508,6 +571,8 @@ struct If : public ValueObject
     If(ValueObject* condition, ValueObject* trueValue, ValueObject* falseValue);
     ~If();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
 
     ValueObject* getLeaf() override;
@@ -530,6 +595,8 @@ struct Amplitude : public ValueObject
     Amplitude(ValueObject* source);
     ~Amplitude();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
 
 protected:
@@ -540,6 +607,31 @@ private:
     ValueObject* source;
 
     double* buffer;
+
+};
+
+struct Map : public ValueObject
+{
+    Map(MultiList* values, Lambda* function);
+    ~Map();
+
+    ValueObject* clone() const override;
+
+    ValueObject* getLeaf() override;
+
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
+
+protected:
+    void init() override;
+    void compute() override;
+
+private:
+    MultiList* values;
+
+    Lambda* function;
+
+    List* currentList = nullptr;
+    List* mapped = nullptr;
 
 };
 

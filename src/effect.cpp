@@ -2,10 +2,15 @@
 
 using namespace Engine;
 
+ValueObject* Effect::clone() const
+{
+    return new Effect();
+}
+
 void Effect::apply(ValueObject* source, double* buffer) {}
 
-EffectGroup::EffectGroup(ValueObject* mix, ValueObject* effects) :
-    mix(mix), effects(new MultiList(effects))
+EffectGroup::EffectGroup(ValueObject* mix, MultiList* effects) :
+    mix(mix), effects(effects)
 {
     original = (double*)malloc(sizeof(double) * utils->channels);
     applied = (double*)malloc(sizeof(double) * utils->channels);
@@ -18,6 +23,11 @@ EffectGroup::~EffectGroup()
 
     free(original);
     free(applied);
+}
+
+ValueObject* EffectGroup::clone() const
+{
+    return new EffectGroup(mix->clone(), static_cast<MultiList*>(effects->clone()));
 }
 
 void EffectGroup::apply(ValueObject* source, double* buffer)
@@ -66,6 +76,11 @@ Delay::~Delay()
     delete mix;
     delete delay;
     delete feedback;
+}
+
+ValueObject* Delay::clone() const
+{
+    return new Delay(mix->clone(), delay->clone(), feedback->clone());
 }
 
 void Delay::apply(ValueObject* source, double* buffer)
@@ -125,6 +140,11 @@ Comb::~Comb()
     delete feedback;
 }
 
+ValueObject* Comb::clone() const
+{
+    return new Comb(mix->clone(), delay->clone(), feedback->clone());
+}
+
 void Comb::apply(ValueObject* source, double* buffer)
 {
     std::queue<double>& delayBuffer = delayBuffers[source];
@@ -180,6 +200,11 @@ AllPass::~AllPass()
     delete mix;
     delete delay;
     delete feedback;
+}
+
+ValueObject* AllPass::clone() const
+{
+    return new AllPass(mix->clone(), delay->clone(), feedback->clone());
 }
 
 void AllPass::apply(ValueObject* source, double* buffer)
@@ -252,6 +277,11 @@ LowPass::~LowPass()
     {
         delete pair.second;
     }
+}
+
+ValueObject* LowPass::clone() const
+{
+    return new LowPass(threshold->clone());
 }
 
 void LowPass::apply(ValueObject* source, double* buffer)
@@ -442,6 +472,11 @@ Reverb::~Reverb()
     {
         delete pair.second;
     }
+}
+
+ValueObject* Reverb::clone() const
+{
+    return new Reverb(mix->clone(), length->clone());
 }
 
 void Reverb::apply(ValueObject* source, double* buffer)

@@ -111,5 +111,5 @@ bool ListType::checkType(const FillContext* context, const Type* actual) const
     return subType->checkType(context, dynamic_cast<const ListType*>(actual)->subType.get());
 }
 
-FillableType::FillableType(const std::string& input) :
-    Type(TypeConstant::Fillable, "a fillable", "fillables"), input(input) {}
+FillableType::FillableType(const Token* token, const std::string& input) :
+    Type(TypeConstant::Fillable, "a fillable", "fillables"), token(token), input(input) {}

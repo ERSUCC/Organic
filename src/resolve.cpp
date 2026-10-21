@@ -260,6 +260,12 @@ void TypeResolver::resolveTypes(const Amplitude* token)
     resolveArgumentTypes(token->arguments, "source", new AudioSourceType());
 }
 
+void TypeResolver::resolveTypes(const Map* token)
+{
+    resolveArgumentTypes(token->arguments, "values", new ListType(new AnyType()));
+    resolveArgumentTypes(token->arguments, "function", new AnyType(), nullptr, { { "value", ((const ListType*)token->argumentType("values").get())->subType } });
+}
+
 void TypeResolver::resolveTypes(const Sine* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
@@ -483,7 +489,24 @@ void TypeResolver::resolveArgumentTypes(ArgumentList* arguments, const std::stri
                 throw OrganicParseException("Expected " + expectedType->singular() + " for input \"" + name + "\", but received " + type->singular() + ".", argument->value->location);
             }
 
-            throw OrganicParseException("There is no fillable value available with the name \"" + fillable->input + "\".", argument->value->location);
+            if (!fillableTypes.count(fillable->token))
+            {
+                throw OrganicParseException("There is no fillable value available with the name \"" + fillable->input + "\".", argument->value->location);
+            }
+
+            const SharedType fillableType = fillableTypes[fillable->token];
+
+            if (!expectedType->checkType(context, fillableType.get()))
+            {
+                throw OrganicParseException("Expected " + expectedType->singular() + " for input \"" + name + "\", but received " + fillableType->singular() + ".", argument->value->location);
+            }
+        }
+
+        const FillableType* fillable = dynamic_cast<const FillableType*>(argumentType.get());
+
+        if (fillable && !fillableTypes.count(fillable->token))
+        {
+            fillableTypes[fillable->token] = context->findType(fillable->input);
         }
 
         FillContext* current = context;

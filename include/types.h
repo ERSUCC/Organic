@@ -9,6 +9,7 @@
 
 namespace Parser {
 
+struct Token;
 struct Type;
 
 typedef std::unique_ptr<const Type> UniqueType;
@@ -130,7 +131,9 @@ struct ListType : public Type
 
 struct FillableType : public Type
 {
-    FillableType(const std::string& input);
+    FillableType(const Token* token, const std::string& input);
+
+    const Token* token;
 
     const std::string input;
 };

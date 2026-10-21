@@ -4,14 +4,14 @@ void TestControllers::testAll()
 {
     beginTest("All", true);
 
-    expectConstant(new All(new List({ new Value(0) })), 0);
-    expectConstant(new All(new List({ new Value(5) })), 1);
-    expectConstant(new All(new List({ new Value(0), new Value(0), new Value(0) })), 0);
-    expectConstant(new All(new List({ new Value(0), new Value(0), new Value(5) })), 0);
-    expectConstant(new All(new List({ new Value(5), new Value(0), new Value(0) })), 0);
-    expectConstant(new All(new List({ new Value(5), new Value(5), new Value(5) })), 1);
+    expectConstant(new All(new MultiList(new List({ new Value(0) }))), 0);
+    expectConstant(new All(new MultiList(new List({ new Value(5) }))), 1);
+    expectConstant(new All(new MultiList(new List({ new Value(0), new Value(0), new Value(0) }))), 0);
+    expectConstant(new All(new MultiList(new List({ new Value(0), new Value(0), new Value(5) }))), 0);
+    expectConstant(new All(new MultiList(new List({ new Value(5), new Value(0), new Value(0) }))), 0);
+    expectConstant(new All(new MultiList(new List({ new Value(5), new Value(5), new Value(5) }))), 1);
 
-    expectValues(new All(new List({ new Value(5), new ValueGreaterEqual(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(2.5)) })),
+    expectValues(new All(new MultiList(new List({ new Value(5), new ValueGreaterEqual(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(2.5)) }))),
     {
         TimeValue(0, 0),
         TimeValue(250, 0),
@@ -20,7 +20,7 @@ void TestControllers::testAll()
         TimeValue(1000, 0)
     });
 
-    expectValues(new All(new List({ new ValueGreaterEqual(new Sweep(new Value(5), new Value(0), new Value(1000)), new Value(2.5)), new ValueGreaterEqual(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(2.5)) })),
+    expectValues(new All(new MultiList(new List({ new ValueGreaterEqual(new Sweep(new Value(5), new Value(0), new Value(1000)), new Value(2.5)), new ValueGreaterEqual(new Sweep(new Value(0), new Value(5), new Value(1000)), new Value(2.5)) }))),
     {
         TimeValue(0, 0),
         TimeValue(250, 0),

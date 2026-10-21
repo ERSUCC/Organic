@@ -13,13 +13,17 @@ namespace Engine {
 
 struct Effect : public ValueObject
 {
+    ValueObject* clone() const override;
+
     virtual void apply(ValueObject* source, double* buffer);
 };
 
 struct EffectGroup : public Effect
 {
-    EffectGroup(ValueObject* mix, ValueObject* effects);
+    EffectGroup(ValueObject* mix, MultiList* effects);
     ~EffectGroup();
+
+    ValueObject* clone() const override;
 
     void apply(ValueObject* source, double* buffer) override;
 
@@ -42,6 +46,8 @@ struct Delay : public Effect
     Delay(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
     ~Delay();
 
+    ValueObject* clone() const override;
+
     void apply(ValueObject* source, double* buffer) override;
 
 protected:
@@ -62,6 +68,8 @@ struct Comb : public Effect
     Comb(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
     ~Comb();
 
+    ValueObject* clone() const override;
+
     void apply(ValueObject* source, double* buffer) override;
 
 protected:
@@ -81,6 +89,8 @@ struct AllPass : public Effect
 {
     AllPass(ValueObject* mix, ValueObject* delay, ValueObject* feedback);
     ~AllPass();
+
+    ValueObject* clone() const override;
 
     void apply(ValueObject* source, double* buffer) override;
 
@@ -110,6 +120,8 @@ struct LowPass : public Effect
 {
     LowPass(ValueObject* threshold);
     ~LowPass();
+
+    ValueObject* clone() const override;
 
     void apply(ValueObject* source, double* buffer) override;
 
@@ -205,6 +217,8 @@ struct Reverb : public Effect
 {
     Reverb(ValueObject* mix, ValueObject* length);
     ~Reverb();
+
+    ValueObject* clone() const override;
 
     void apply(ValueObject* source, double* buffer) override;
 

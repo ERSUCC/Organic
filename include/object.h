@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <string>
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
@@ -39,6 +40,8 @@ struct ValueObject
     ValueObject();
 
     virtual ~ValueObject();
+
+    virtual ValueObject* clone() const;
 
     void start(const double time);
     void repeat(const double time);
@@ -94,6 +97,8 @@ struct String : public ValueObject
     String(const std::string& value);
     String();
 
+    ValueObject* clone() const override;
+
     const std::string value;
 };
 
@@ -101,6 +106,8 @@ struct List : public ValueObject
 {
     List(const std::vector<ValueObject*>& objects = {});
     ~List();
+
+    ValueObject* clone() const override;
 
     void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
 
@@ -111,6 +118,8 @@ struct MultiList : public ValueObject
 {
     MultiList(ValueObject* object);
     ~MultiList();
+
+    ValueObject* clone() const override;
 
     ValueObject* getLeaf() override;
 
@@ -129,7 +138,34 @@ private:
 
 struct Variable : public ValueObject
 {
-    Variable(ValueObject* value);
+    Variable(ValueObject* value, const bool unique);
+
+    ValueObject* clone() const override;
+
+    double getValue() const override;
+
+    ValueObject* getLeaf() override;
+
+    void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
+
+protected:
+    void init() override;
+    void compute() override;
+
+private:
+    ValueObject* value;
+
+    const bool unique;
+
+};
+
+struct InputMap;
+
+struct Fillable : public ValueObject
+{
+    Fillable(InputMap* inputs, const std::string& input, ValueObject* value);
+
+    ValueObject* clone() const override;
 
     double getValue() const override;
 
@@ -143,14 +179,50 @@ protected:
     void init() override;
     void compute() override;
 
+private:
+    InputMap* inputs;
+
+    const std::string input;
+
+};
+
+struct InputMap
+{
+    InputMap(const std::unordered_map<std::string, Engine::Fillable*>& inputs = {});
+
+    InputMap* clone();
+
+    inline bool contains(const std::string& input) const
+    {
+        return inputs.count(input);
+    }
+
+    inline Fillable* getInput(const std::string& input) const
+    {
+        return inputs.at(input);
+    }
+
+    Fillable* addInput(const std::string& input);
+    Fillable* cloneInput(const std::string& input, ValueObject* value);
+
+    void setInput(const std::string& input, ValueObject* value);
+
+private:
+    std::unordered_map<std::string, Engine::Fillable*> inputs;
+    std::unordered_map<std::string, Engine::Fillable*> cloned;
+
 };
 
 struct Lambda : public ValueObject
 {
-    Lambda(const std::unordered_map<std::string, Variable*>& inputs, ValueObject* value);
+    Lambda(InputMap* inputs, ValueObject* value);
     ~Lambda();
 
+    ValueObject* clone() const override;
+
     double getValue() const override;
+
+    ValueObject* getLeaf() override;
 
     void getLeaves(std::unordered_set<ValueObject*>& leaves) override;
 
@@ -161,7 +233,7 @@ protected:
     void compute() override;
 
 private:
-    const std::unordered_map<std::string, Variable*> inputs;
+    InputMap* inputs;
 
     ValueObject* value;
 
