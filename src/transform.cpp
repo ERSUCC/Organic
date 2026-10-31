@@ -265,7 +265,7 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Sample* token)
 
     locator->loadResources(TOKEN("file")->location);
 
-    return new Engine::Sample(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), locator, ARG("length"));
+    return new Engine::Sample(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), locator, ARG("start"), ARG("length"));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)

@@ -307,18 +307,19 @@ void Noise::compute()
     }
 }
 
-Sample::Sample(ValueObject* volume, ValueObject* pan, MultiList* effects, ResourceLocator* resource, ValueObject* length) :
-    AudioSource(volume, pan, effects), resource(resource), length(length) {}
+Sample::Sample(ValueObject* volume, ValueObject* pan, MultiList* effects, ResourceLocator* resource, ValueObject* start, ValueObject* length) :
+    AudioSource(volume, pan, effects), resource(resource), start(start), length(length) {}
 
 Sample::~Sample()
 {
     delete resource;
+    delete start;
     delete length;
 }
 
 ValueObject* Sample::clone() const
 {
-    return new Sample(volume->clone(), pan->clone(), effects->cloneAs<MultiList>(), resource->cloneAs<ResourceLocator>(), length->clone());
+    return new Sample(volume->clone(), pan->clone(), effects->cloneAs<MultiList>(), resource->cloneAs<ResourceLocator>(), start->clone(), length->clone());
 }
 
 void Sample::init()
@@ -327,9 +328,10 @@ void Sample::init()
     pan->start(startTime);
     effects->start(startTime);
     resource->start(startTime);
+    start->start(startTime);
     length->start(startTime);
 
-    index = 0;
+    offset = 0;
 }
 
 void Sample::compute()
@@ -338,12 +340,15 @@ void Sample::compute()
     pan->update();
     effects->update();
     resource->update();
+    start->update();
     length->update();
 
     const double volumeValue = volume->getValue();
     const double panValue = pan->getValue();
 
     const Resource* resourceLeaf = resource->getLeafAs<Resource>();
+
+    const size_t index = offset + (size_t)(start->getValue() * utils->sampleRate * utils->channels / 1000.0) % resourceLeaf->length;
 
     if (index < resourceLeaf->length)
     {
@@ -359,16 +364,16 @@ void Sample::compute()
         }
     }
 
-    index += utils->channels;
+    offset += utils->channels;
 
     const double lengthValue = length->getValue();
 
-    if (lengthValue == 0 && index >= resourceLeaf->length)
+    if (lengthValue == 0 && index + utils->channels >= resourceLeaf->length)
     {
         stop(startTime + 1000.0 * (resourceLeaf->length / utils->channels) / utils->sampleRate);
     }
 
-    else if (lengthValue > 0 && 1000.0 * (index / utils->channels) / utils->sampleRate >= lengthValue)
+    else if (lengthValue > 0 && 1000.0 * (offset / utils->channels) / utils->sampleRate >= lengthValue)
     {
         stop(startTime + lengthValue);
     }

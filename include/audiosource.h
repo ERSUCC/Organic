@@ -139,7 +139,7 @@ private:
 
 struct Sample : public AudioSource
 {
-    Sample(ValueObject* volume, ValueObject* pan, MultiList* effects, ResourceLocator* resource, ValueObject* length);
+    Sample(ValueObject* volume, ValueObject* pan, MultiList* effects, ResourceLocator* resource, ValueObject* start, ValueObject* length);
     ~Sample();
 
     ValueObject* clone() const override;
@@ -151,9 +151,10 @@ protected:
 private:
     ResourceLocator* resource;
 
+    ValueObject* start;
     ValueObject* length;
 
-    size_t index;
+    size_t offset;
 
 };
 
