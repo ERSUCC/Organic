@@ -1,4 +1,4 @@
-squeeze(phase: 0) = {
+squeeze(phase: number) = {
     top = repeat(value: random(from: 2, to: 6, length: 200, type: linear))
     mult = repeat(value: lfo(from: 1, to: top, length: 800 / top))
 

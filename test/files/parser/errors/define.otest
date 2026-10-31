@@ -55,45 +55,67 @@ test(volume) = {}
 
 name = "Define closed after second input"
 line = 2
-character = 26
+character = 31
 error = 'Expected ":" after an input name, but received ")".'
 
 ---
 
-test(volume: 1, frequency) = {}
+test(volume: number, frequency) = {}
+
+---
+
+name = "Define closed after first colon"
+line = 2
+character = 14
+error = 'Expected a type name after ":", but received ")".'
+
+---
+
+test(volume: ) = {}
+
+---
+
+name = "Define closed after second colon"
+line = 2
+character = 33
+error = 'Expected a type name after ":", but received ")".'
+
+---
+
+test(volume: number, frequency: ) = {}
 
 ---
 
 name = "Define closed after first comma"
 line = 2
-character = 17
+character = 22
 error = 'Expected an input name after ",", but received ")".'
 
 ---
 
-test(volume: 1, ) = {}
+test(volume: number, ) = {}
 
 ---
 
 name = "Define closed after second comma"
 line = 2
-character = 33
+character = 41
 error = 'Expected an input name after ",", but received ")".'
 
 ---
 
-test(volume: 1, frequency: 440, ) = {}
+test(volume: number, frequency: number, ) = {}
 
 ---
 
 name = "First define input specified twice"
 line = 2
-character = 15
+character = 20
 error = 'Input "test" specified more than once for function "func".'
 
 ---
 
-func(test: 0, test: 1) = {
+func(test: number, test: number) = {
     2
 }
 
@@ -101,12 +123,12 @@ func(test: 0, test: 1) = {
 
 name = "Second define input specified twice"
 line = 2
-character = 25
+character = 35
 error = 'Input "test1" specified more than once for function "func".'
 
 ---
 
-func(test: 0, test1: 1, test1: 1) = {
+func(test: number, test1: number, test1: number) = {
     2
 }
 
@@ -119,7 +141,29 @@ error = 'Expected an input name after "(", but received "|test|".'
 
 ---
 
-func(|test|: 0) = {}
+func(|test|: number) = {}
+
+---
+
+name = "Value as define input type"
+line = 2
+character = 12
+error = 'Expected a type name after ":", but received "0".'
+
+---
+
+func(test: 0) = {}
+
+---
+
+name = "Multiple elements in define input list type"
+line = 2
+character = 19
+error = 'Expected "]" after a list type name, but received ",".'
+
+---
+
+func(test: [number, 2, 3]) = {}
 
 ---
 

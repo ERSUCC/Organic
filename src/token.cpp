@@ -145,6 +145,9 @@ const Token* GreaterEqual::makeAlias(const Token* left, const Token* right) cons
     return new GreaterEqualAlias(left, right);
 }
 
+TypeName::TypeName(const SourceLocation& location, const Type* repType) :
+    Token(location, new Parser::TypeNameType()), repType(repType) {}
+
 Identifier::Identifier(const SourceLocation& location) :
     Token(location) {}
 
@@ -211,17 +214,12 @@ Engine::ValueObject* VariableRef::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
-InputDef::InputDef(const SourceLocation& location, const SharedToken& defaultValue) :
-    Identifier(location), defaultValue(defaultValue) {}
+InputDef::InputDef(const SourceLocation& location, const SharedType& inputType) :
+    Identifier(location), inputType(inputType) {}
 
 const SharedType InputDef::type() const
 {
-    return defaultValue->type();
-}
-
-void InputDef::resolveTypes(TypeResolver* visitor) const
-{
-    visitor->resolveTypes(this);
+    return inputType;
 }
 
 InputRef::InputRef(const SourceLocation& location, const InputDef* definition) :

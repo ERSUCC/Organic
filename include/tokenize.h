@@ -1,7 +1,9 @@
 #pragma once
 
+#include <functional>
 #include <stddef.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "constants.h"

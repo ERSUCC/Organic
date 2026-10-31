@@ -33,6 +33,6 @@ error = 'Expected a number for input "frequency", but received a list of numbers
 
 ---
 
-func(test: [ 1, 2, 3 ]) = {
+func(test: [number]) = {
     sine(frequency: test)
 }

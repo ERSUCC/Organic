@@ -34,7 +34,7 @@ error = 'A variable already exists with the name "test".'
 
 test = 0
 
-func(test: 1) = {}
+func(test: number) = {}
 
 ---
 
@@ -58,7 +58,7 @@ error = 'An input already exists with the name "test".'
 
 ---
 
-func(test: 0) = {
+func(test: number) = {
     test = 1
 }
 
@@ -71,8 +71,8 @@ error = 'An input already exists with the name "test".'
 
 ---
 
-func(test: 0) = {
-    func2(test2: 1) = {
+func(test: number) = {
+    func2(test2: number) = {
         test = 2
     }
 }
@@ -86,8 +86,8 @@ error = 'An input already exists with the name "test".'
 
 ---
 
-func(test: 0) = {
-    func2(test: 1) = {}
+func(test: number) = {
+    func2(test: number) = {}
 }
 
 ---
@@ -99,7 +99,7 @@ error = 'An input already exists with the name "test".'
 
 ---
 
-func(test: 0) = {
+func(test: number) = {
     test() = {}
 }
 
@@ -123,7 +123,7 @@ error = 'A function already exists with the name "time".'
 
 ---
 
-test(time: 0) = {}
+test(time: number) = {}
 
 ---
 
@@ -175,7 +175,7 @@ error = 'A function already exists with the name "test".'
 
 test() = {}
 
-func(test: 0) = {}
+func(test: number) = {}
 
 ---
 

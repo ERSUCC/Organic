@@ -1,6 +1,6 @@
 from pygments.lexer import bygroups, include, RegexLexer, words
 from pygments.style import Style
-from pygments.token import Comment, Literal, Name, Operator, Punctuation, String, Whitespace
+from pygments.token import Comment, Keyword, Literal, Name, Operator, Punctuation, String, Whitespace
 
 class OrganicLexer(RegexLexer):
     name = "Organic"
@@ -34,6 +34,12 @@ class OrganicLexer(RegexLexer):
                 "stay", "linear",
                 "nearest", "up", "down"
             ), r"\b", r"\b"), Literal),
+            (words((
+                "anything",
+                "sequence-order", "random-type", "round-direction",
+                "number", "boolean", "string",
+                "audio-source", "effect"
+            ), r"\b", r"\b"), Keyword.Type),
             (r"[a-g][sf]?\d", Literal),
             (identifier, Name.Variable),
             (r"-?(\d+\.)?\d+", Literal)
@@ -52,5 +58,6 @@ class OrganicStyle(Style):
         Literal: "#e08f3e",
         Name.Function: "#279af1",
         Name.Variable: "#e06c9f",
-        Operator: "#c46dec"
+        Operator: "#c46dec",
+        Keyword.Type: "#2ebfa5"
     }

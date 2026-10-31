@@ -2,6 +2,34 @@
 
 using namespace Parser;
 
+#define CALL(func, ...) [](const SourceLocation& location) { return new func(location, __VA_ARGS__); }
+
+static std::unordered_map<std::string, std::function<const Token* (const SourceLocation&)>> constants =
+{
+    { "anything", CALL(TypeName, new AnyType()) },
+    { "number", CALL(TypeName, new NumberType()) },
+    { "boolean", CALL(TypeName, new BooleanType()) },
+    { "sequence-order", CALL(TypeName, new SequenceOrderType()) },
+    { "random-type", CALL(TypeName, new RandomTypeType()) },
+    { "round-direction", CALL(TypeName, new RoundDirectionType()) },
+    { "string", CALL(TypeName, new StringType()) },
+    { "audio-source", CALL(TypeName, new AudioSourceType()) },
+    { "effect", CALL(TypeName, new EffectType()) },
+    { "forward", CALL(Constant, new SequenceOrderType(), Constants::Sequence::Forward) },
+    { "backward", CALL(Constant, new SequenceOrderType(), Constants::Sequence::Backward) },
+    { "shuffle", CALL(Constant, new SequenceOrderType(), Constants::Sequence::Shuffle) },
+    { "stay", CALL(Constant, new RandomTypeType(), Constants::Random::Stay) },
+    { "linear", CALL(Constant, new RandomTypeType(), Constants::Random::Linear) },
+    { "nearest", CALL(Constant, new RoundDirectionType(), Constants::Round::Nearest) },
+    { "up", CALL(Constant, new RoundDirectionType(), Constants::Round::Up) },
+    { "down", CALL(Constant, new RoundDirectionType(), Constants::Round::Down) },
+    { "true", CALL(Boolean, true) },
+    { "false", CALL(Boolean, false) },
+    { "pi", CALL(Value, Utils::pi) },
+    { "tau", CALL(Value, Utils::twoPi) },
+    { "e", CALL(Value, Utils::e) }
+};
+
 OrganicTokenException::OrganicTokenException(const Token* token, const std::string& expected) :
     OrganicParseException(getMessage(token, expected), token->location) {}
 
@@ -404,69 +432,9 @@ const Token* Tokenizer::tokenizeIdentifier()
 
     const SourceLocation location(source, start, current);
 
-    if (name == "forward")
+    if (constants.count(name))
     {
-        return new Constant(location, new SequenceOrderType(), Constants::Sequence::Forward);
-    }
-
-    if (name == "backward")
-    {
-        return new Constant(location, new SequenceOrderType(), Constants::Sequence::Backward);
-    }
-
-    if (name == "shuffle")
-    {
-        return new Constant(location, new SequenceOrderType(), Constants::Sequence::Shuffle);
-    }
-
-    if (name == "stay")
-    {
-        return new Constant(location, new RandomTypeType(), Constants::Random::Stay);
-    }
-
-    if (name == "linear")
-    {
-        return new Constant(location, new RandomTypeType(), Constants::Random::Linear);
-    }
-
-    if (name == "nearest")
-    {
-        return new Constant(location, new RoundDirectionType(), Constants::Round::Nearest);
-    }
-
-    if (name == "up")
-    {
-        return new Constant(location, new RoundDirectionType(), Constants::Round::Up);
-    }
-
-    if (name == "down")
-    {
-        return new Constant(location, new RoundDirectionType(), Constants::Round::Down);
-    }
-
-    if (name == "true")
-    {
-        return new Boolean(location, true);
-    }
-
-    if (name == "false")
-    {
-        return new Boolean(location, false);
-    }
-
-    if (name == "pi")
-    {
-        return new Value(location, Utils::pi);
-    }
-
-    if (name == "tau")
-    {
-        return new Value(location, Utils::twoPi);
-    }
-
-    if (name == "e")
-    {
-        return new Value(location, Utils::e);
+        return constants.at(name)(location);
     }
 
     double base = 0;

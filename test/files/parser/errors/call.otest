@@ -31,6 +31,28 @@ sine(volume: 1, frequency)
 
 ---
 
+name = "Call closed after first colon"
+line = 2
+character = 14
+error = 'Expected a value after ":", but received ")".'
+
+---
+
+sine(volume: )
+
+---
+
+name = "Call closed after second colon"
+line = 2
+character = 28
+error = 'Expected a value after ":", but received ")".'
+
+---
+
+sine(volume: 1, frequency: )
+
+---
+
 name = "Call closed after first comma"
 line = 2
 character = 17

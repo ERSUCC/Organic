@@ -1,6 +1,6 @@
 note-length = repeat(value: random(from: 50, to: 2000, length: 5000, type: linear))
 
-random-freq(max-freq: 0) = {
+random-freq(max-freq: number) = {
     repeat(value: random(from: 0, to: max-freq, length: note-length, type: linear))
 }
 

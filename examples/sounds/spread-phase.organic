@@ -5,7 +5,7 @@ note-attack = note-length / 4
 
 spread = repeat(value: lfo(from: 1, to: 5, length: phase-length))
 
-spread-saw(volume: 1, frequency: 0) = {
+spread-saw(volume: number, frequency: number) = {
     max-vol = repeat(value: envelope(to: volume / 3, attack: note-attack, release: note-length - note-attack))
 
     group(volume: max-vol, sources: [

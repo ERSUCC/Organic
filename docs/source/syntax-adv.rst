@@ -126,6 +126,34 @@ input, with which you can specify a list of effects that you would like to apply
 an integral type, so they must be created using built-in functions like :organic:code:function:`delay` and
 :organic:code:function:`reverb`.
 
+##########
+Type Names
+##########
+
+When creating your own functions, you can indicate the expected type of each input's value using type names. Like the
+constants described above, type names are reserved names that have a special meaning in the language. But unlike
+constants, type names cannot be used as values; they are only meaningful when defining the inputs for a new function.
+The basic types can be indicated with the following type names:
+
+.. code-block::
+
+   anything
+   number
+   boolean
+   sequence-order
+   random-type
+   round-direction
+   string
+   audio-source
+   effect
+
+You can also indicate a list with values of a particular type by surrounding the type name with square brackets, like
+so:
+
+.. code-block::
+
+   [number]
+
 #########
 Variables
 #########
@@ -152,7 +180,7 @@ Functions
 Functions in Organic are primarily used to create and configure objects of the :organic:mono:`2` complex types named in
 the :ref:`types` section above. Because Organic is a declarative language, neither built-in functions nor user-defined
 functions can have side effects; they simply construct and return a value based on the inputs to the function. In
-Organic, all function arguments must be named, but they can appear in any order.
+Organic, all function inputs must be named, but they can appear in any order.
 
 All functions in Organic return a value, which can optionally be assigned to a variable or used as the input to a
 function. Any function that returns an audio source can also be used directly in the global scope, in which case the
@@ -165,9 +193,9 @@ Function Definitions
 Function definitions can occur anywhere in an Organic program, including within another function definition. Like
 variables, user-defined functions can only be used in the scope where they are defined, and they can only be used after
 they are defined. Names of user-defined functions follow the same rules as variable names, and function names cannot
-conflict with variable names. All arguments in a function definition must provide default values, which allows Organic
-to determine the type of each argument. The last instruction in a function body serves as its return value, and any
-prior instructions in the function body other than variable and function definitions will be ignored.
+conflict with variable names. All inputs in a function definition must indicate an expected type with a type name. The
+last instruction in a function body serves as its return value, and any prior instructions in the function body other
+than variable and function definitions will be ignored.
 
 ########
 Comments
