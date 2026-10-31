@@ -28,7 +28,8 @@ enum struct TypeConstant
     AudioSource,
     Effect,
     List,
-    Fillable
+    Fillable,
+    TypeName
 };
 
 typedef std::unordered_map<std::string, SharedType> FillTypes;
@@ -139,6 +140,11 @@ struct FillableType : public Type
     const Token* token;
 
     const std::string input;
+};
+
+struct TypeNameType : public Type
+{
+    TypeNameType();
 };
 
 }

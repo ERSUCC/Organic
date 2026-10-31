@@ -122,3 +122,6 @@ bool ListType::checkType(const FillContext* context, const Type* actual) const
 
 FillableType::FillableType(const Token* token, const std::string& input) :
     Type(TypeConstant::Fillable, "a fillable", "fillables"), token(token), input(input) {}
+
+TypeNameType::TypeNameType() :
+    Type(TypeConstant::TypeName, "a type name", "type names") {}

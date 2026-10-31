@@ -2,7 +2,7 @@ swell-attack = 2000
 swell-decay = 500
 swell-length = swell-attack + swell-decay
 
-swell(period: 0, frequency: 0) = {
+swell(period: number, frequency: number) = {
     offset = random(from: period, to: period * 2, length: period * 2)
     gap = random(from: period - swell-length, to: period * 2 - swell-length, length: period * 2)
 

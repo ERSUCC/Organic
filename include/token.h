@@ -199,6 +199,13 @@ struct GreaterEqual : public BooleanOperator
     virtual const Token* makeAlias(const Token* left, const Token* right) const override;
 };
 
+struct TypeName : public Token
+{
+    TypeName(const SourceLocation& location, const Type* repType);
+
+    const SharedType repType;
+};
+
 struct Identifier : public Token
 {
     Identifier(const SourceLocation& location);
@@ -265,13 +272,13 @@ struct VariableRef : public Identifier
 
 struct InputDef : public Identifier
 {
-    InputDef(const SourceLocation& location, const SharedToken& defaultValue);
+    InputDef(const SourceLocation& location, const SharedType& inputType);
 
     const SharedType type() const override;
 
-    void resolveTypes(TypeResolver* visitor) const override;
+private:
+    const SharedType inputType;
 
-    const SharedToken defaultValue;
 };
 
 struct InputRef : public Identifier

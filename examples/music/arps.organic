@@ -1,7 +1,7 @@
 note-length = 50
 cycle-length = 6000
 
-fifth(factor: 0) = {
+fifth(factor: number) = {
     base = repeat(value: sequence(values: [
         hold(value: af2, length: cycle-length),
         hold(value: ef1, length: cycle-length),
@@ -15,7 +15,7 @@ fifth(factor: 0) = {
 pluck = repeat(value: sweep(from: 1, to: sweep(from: 0.85, to: 0, length: note-length * 10), length: note-length))
 
 square(volume: pluck, frequency: repeat(value: sequence(values: [
-    fifth(),
+    fifth(factor: 0),
     fifth(factor: 1),
     fifth(factor: 2),
     fifth(factor: 3),

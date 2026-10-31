@@ -16,7 +16,6 @@ struct TypeResolver
     ~TypeResolver();
 
     void resolveTypes(const VariableDef* token);
-    void resolveTypes(const InputDef* token);
     void resolveTypes(const FunctionDef* token);
     void resolveTypes(const List* token);
     void resolveTypes(const ParenthesizedExpression* token);

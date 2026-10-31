@@ -434,6 +434,11 @@ const void Parser::parseAssign()
         throw OrganicParseException("Cannot assign a value to a fillable value.", token->location);
     }
 
+    if (const TypeName* token = tokens->peek<TypeName>())
+    {
+        throw OrganicParseException("Cannot assign a value to a type name.", token->location);
+    }
+
     const UniqueToken<Identifier> name = tokens->take<Identifier>();
 
     tokens->drop();
@@ -494,7 +499,7 @@ const void Parser::parseDefine()
 
             tokens->expect<Colon>("\":\" after an input name");
 
-            inputs.emplace_back(new InputDef(input->location, SharedToken(parseExpression(" after \":\""))));
+            inputs.emplace_back(new InputDef(input->location, parseTypeName()));
         } while (tokens->peek<Comma>());
 
         tokens->expect<CloseParenthesis>("\",\" or \")\"");
@@ -688,6 +693,11 @@ UniqueToken<> Parser::parseTerm(const std::string& errorContext)
         return UniqueToken<>(value);
     }
 
+    if (const TypeName* typeName = tokens->peek<TypeName>())
+    {
+        throw OrganicParseException("Expected a value" + errorContext + ", but received a type name.", typeName->location);
+    }
+
     throw OrganicTokenException(tokens->peek(), "a value" + errorContext);
 }
 
@@ -768,6 +778,26 @@ UniqueToken<Argument> Parser::parseArgument(const std::string& errorContext)
     tokens->expect<Colon>("\":\" after an input name");
 
     return UniqueToken<Argument>(new Argument(name->location, name->string(), SharedToken(parseExpression(" after \":\""))));
+}
+
+const SharedType Parser::parseTypeName()
+{
+    if (const TypeName* typeName = tokens->peek<TypeName>())
+    {
+        const SharedType type = typeName->repType;
+
+        tokens->drop();
+
+        return type;
+    }
+
+    tokens->expect<OpenSquareBracket>("a type name after \":\"");
+
+    const SharedType type = tokens->require<TypeName>("a type name after \"[\"")->repType;
+
+    tokens->expect<CloseSquareBracket>("\"]\" after a list type name");
+
+    return SharedType(new ListType(type));
 }
 
 }

@@ -88,6 +88,8 @@ private:
     UniqueToken<Call> parseCall();
     UniqueToken<Argument> parseArgument(const std::string& errorContext);
 
+    const SharedType parseTypeName();
+
     const SourceProvider* source;
 
     ParserContext* context;

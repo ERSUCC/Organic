@@ -19,11 +19,6 @@ void TypeResolver::resolveTypes(const VariableDef* token)
     token->value->resolveTypes(this);
 }
 
-void TypeResolver::resolveTypes(const InputDef* token)
-{
-    token->defaultValue->resolveTypes(this);
-}
-
 void TypeResolver::resolveTypes(const FunctionDef* token)
 {
     if (token->program->instructions.empty())
@@ -415,7 +410,7 @@ void TypeResolver::resolveTypes(const CallUser* token)
 {
     for (const InputDef* input : token->function->inputs)
     {
-        resolveArgumentTypes(token->arguments, input->string(), input->type(), input->defaultValue, {});
+        resolveArgumentTypes(token->arguments, input->string(), input->type(), nullptr, {});
     }
 
     token->arguments->check();

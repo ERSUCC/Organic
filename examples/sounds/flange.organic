@@ -1,4 +1,4 @@
-sweep-down(start: 0) = {
+sweep-down(start: number) = {
     decay-length = 250
 
     decay = repeat(value: -logarithm(value: sweep(from: 0, to: 1, length: decay-length)))

@@ -1,6 +1,6 @@
 shift-length = 1000
 
-shift(base: 0) = {
+shift(base: number) = {
     repeat(value: random(from: base - 10, to: base + 10, length: shift-length, type: linear))
 }
 

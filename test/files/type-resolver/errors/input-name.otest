@@ -11,51 +11,51 @@ sine(frequency: 440, squiggle: 0)
 
 name = "Invalid input name in user function"
 line = 6
-character = 6
+character = 16
 error = 'Invalid input name "test" for function "func".'
 
 ---
 
-func(input: 0) = {
+func(input: number) = {
     input
 }
 
-func(test: 1)
+func(input: 0, test: 1)
 
 ---
 
 name = "Input name from surrounding function for sibling function"
 line = 7
-character = 11
+character = 20
 error = 'Invalid input name "input" for function "func1".'
 
 ---
 
-func(input: 0) = {
-    func1(test: 1) = {
+func(input: number) = {
+    func1(test: number) = {
         test
     }
 
-    func1(input: 2)
+    func1(test: 1, input: 2)
 }
 
 ---
 
 name = "Input name from surrounding function for distant scope"
 line = 9
-character = 18
+character = 28
 error = 'Invalid input name "foo" for function "func".'
 
 ---
 
-func(input: 0) = {
+func(input: number) = {
     input
 }
 
-func1(test: 1) = {
-    func2(whee: 2) = {
-        func3(foo: 3) = {
-            func(foo: 4)
+func1(test: number) = {
+    func2(whee: number) = {
+        func3(foo: number) = {
+            func(input: 0, foo: 4)
         }
     }
 }
@@ -64,21 +64,21 @@ func1(test: 1) = {
 
 name = "Input name from distant scope for surrounding function"
 line = 12
-character = 15
+character = 23
 error = 'Invalid input name "input" for function "func3".'
 
 ---
 
-func(input: 0) = {
+func(input: number) = {
     input
 }
 
-func1(test: 1) = {
-    func2(whee: 2) = {
-        func3(foo: 3) = {
+func1(test: number) = {
+    func2(whee: number) = {
+        func3(foo: number) = {
             foo
         }
 
-        func3(input: 4)
+        func3(foo: 3, input: 4)
     }
 }

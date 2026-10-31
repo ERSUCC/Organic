@@ -1,12 +1,12 @@
 name = "Basic defines"
 tokens = [
     'test', '(', ')', '=', '{', '}',
-    'test', '(', 'input', ')', '=', '{', '}',
-    'test', '(', 'input', ')', '=', '{', 'sine', '(', 'volume', ':', 'input', ')', '}'
+    'test', '(', 'input', ':', 'anything', ')', '=', '{', '}',
+    'test', '(', 'input', ':', 'number', ')', '=', '{', 'sine', '(', 'volume', ':', 'input', ')', '}'
 ]
 
 ---
 
 test() = {}
-test(input) = {}
-test(input) = { sine(volume: input) }
+test(input: anything) = {}
+test(input: number) = { sine(volume: input) }

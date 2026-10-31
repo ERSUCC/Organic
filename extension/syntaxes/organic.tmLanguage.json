@@ -13,6 +13,8 @@
   }, {
     "include": "#language-constant"
   }, {
+    "include": "#type-name"
+  }, {
     "include": "#variable"
   }],
 	"repository": {
@@ -70,6 +72,12 @@
         "match": "\\b(true|false)\\b"
       }]
 		},
+    "type-name": {
+      "patterns": [{
+        "name": "support.class.organic",
+        "match": "\\b(anything|sequence-order|random-type|round-direction|number|boolean|string|audio-source|effect)\\b"
+      }]
+    },
 		"variable": {
 			"patterns": [{
         "name": "variable.parameter.organic",

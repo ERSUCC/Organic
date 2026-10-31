@@ -69,7 +69,10 @@ class OrganicInput(ObjectDescription):
   def add_target_and_index(self, _, signature, signode):
     signode["ids"].append(f"input-{signature}")
 
-class OrganicFunctionHighlight(SphinxRole):
+class OrganicHighlight(SphinxRole):
+  def __init__(self, token_type):
+    self.token_type = token_type
+
   def run(self):
     node = literal(classes = [
       "code",
@@ -79,21 +82,7 @@ class OrganicFunctionHighlight(SphinxRole):
       "highlight-organic"
     ])
 
-    node.append(inline(text = self.text, classes = [ "nf" ]))
-
-    return [ node ], []
-
-class OrganicCommentHighlight(SphinxRole):
-  def run(self):
-    node = literal(classes = [
-      "code",
-      "highlight",
-      "organic-code",
-      "organic",
-      "highlight-organic"
-    ])
-
-    node.append(inline(text = self.text, classes = [ "c" ]))
+    node.append(inline(text = self.text, classes = [ self.token_type ]))
 
     return [ node ], []
 
@@ -131,8 +120,8 @@ class OrganicDomain(Domain):
 
   roles = {
     "mono": OrganicMono(),
-    "code:function": OrganicFunctionHighlight(),
-    "code:comment": OrganicCommentHighlight(),
+    "code:function": OrganicHighlight("nf"),
+    "code:comment": OrganicHighlight("c"),
     "match": OrganicMatch(),
     "match:item": OrganicMatchItem()
   }

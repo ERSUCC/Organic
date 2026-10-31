@@ -1,0 +1,52 @@
+name = "Assign type name to variable"
+line = 2
+character = 8
+error = 'Expected a value after "=", but received a type name.'
+
+---
+
+test = number
+
+---
+
+name = "Type name as first element of list"
+line = 2
+character = 10
+error = 'Expected a value after "[", but received a type name.'
+
+---
+
+test = [ number ]
+
+---
+
+name = "Type name as second element of list"
+line = 2
+character = 13
+error = 'Expected a value after ",", but received a type name.'
+
+---
+
+test = [ 1, number ]
+
+---
+
+name = "Type name as call input"
+line = 2
+character = 17
+error = 'Expected a value after ":", but received a type name.'
+
+---
+
+sine(frequency: number)
+
+---
+
+name = "Type name as generic call input"
+line = 2
+character = 29
+error = 'Expected a value after ":", but received a type name.'
+
+---
+
+sine(frequency: hold(value: number, length: 1000))

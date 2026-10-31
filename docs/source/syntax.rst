@@ -242,7 +242,7 @@ an input for the ending frequency, you can make your code much simpler:
 
 .. code-block::
 
-   create-sine(end: 220) = {
+   create-sine(end: number) = {
       sine(frequency: repeat(value: sweep(from: 220, to: end, length: 1000)))
    }
 
@@ -251,13 +251,12 @@ an input for the ending frequency, you can make your code much simpler:
    create-sine(end: 550)
 
 The above example creates a new function named :organic:code:function:`create-sine`. It has one input named
-:organic:code:`end`, whose default value is :organic:code:`220` if no value is provided when the function gets used. The
-code to be run when the function is used goes inside the curly brackets, :organic:code:`{` and :organic:code:`}`. In
-this example, the function only has one line of code, which uses the :organic:code:function:`sine` function to create a
-sine wave. Once the function is created, you can use it as many times as you would like, only using the name of the
-function instead of typing out all the code inside of it each time. In the above example,
-:organic:code:function:`create-sine` is used three times, each of which runs the code inside the function, creating a
-total of three new sine waves.
+:organic:code:`end`, whose value must be a :organic:code:`number`. The code to be run when the function is used goes
+inside the curly brackets, :organic:code:`{` and :organic:code:`}`. In this example, the function only has one line of
+code, which uses the :organic:code:function:`sine` function to create a sine wave. Once the function is created, you can
+use it as many times as you would like, only using the name of the function instead of typing out all the code inside of
+it each time. In the above example, :organic:code:function:`create-sine` is used three times, each of which runs the
+code inside the function, creating a total of three new sine waves.
 
 ###############
 Fillable Values
@@ -272,7 +271,7 @@ values at the right times. This is achieved with a fillable value, which might l
 
 .. code-block::
 
-   custom-saw(phase: 0) = {
+   custom-saw(phase: number) = {
       phase / pi - 1
    }
 

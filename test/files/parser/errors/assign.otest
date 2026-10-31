@@ -64,6 +64,17 @@ error = 'Cannot assign a value to a list.'
 
 ---
 
+name = "Assign to type name"
+line = 2
+character = 1
+error = 'Cannot assign a value to a type name.'
+
+---
+
+number = 0
+
+---
+
 name = "Incomplete assign"
 line = 4
 character = 1
