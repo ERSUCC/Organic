@@ -117,7 +117,7 @@ These functions are used to automate the values of other parameters, and can typ
    Returns the time in milliseconds since the start of the program.
 
 .. organic:function:: hold
-   :return: type of :organic:code:`value`
+   :return: :organic:match:`value`
 
    .. organic:input:: value
       :type: anything
@@ -158,7 +158,7 @@ These functions are used to automate the values of other parameters, and can typ
    :organic:code:`length` milliseconds. Stops after reaching :organic:code:`to`.
 
 .. organic:function:: sequence
-   :return: type of :organic:code:`values`
+   :return: :organic:match:item:`values`
 
    .. organic:input:: values
       :type: list of anything
@@ -213,7 +213,7 @@ These functions are used to automate the values of other parameters, and can typ
       :organic:code:`release`.
 
 .. organic:function:: repeat
-   :return: type of :organic:code:`value`
+   :return: :organic:match:`value`
 
    .. organic:input:: value
       :type: anything
@@ -271,7 +271,7 @@ These functions are used to automate the values of other parameters, and can typ
    stops.
 
 .. organic:function:: trigger
-   :return: type of :organic:code:`value`
+   :return: :organic:match:`value`
 
    .. organic:input:: value
       :type: anything
@@ -283,7 +283,7 @@ These functions are used to automate the values of other parameters, and can typ
    :organic:code:`value` until it stops. Stops when :organic:code:`value` stops.
 
 .. organic:function:: if
-   :return: type of :organic:code:`if-true`
+   :return: :organic:match:`if-true`
 
    .. organic:input:: condition
       :type: boolean
@@ -292,7 +292,7 @@ These functions are used to automate the values of other parameters, and can typ
       :type: anything
 
    .. organic:input:: if-false
-      :type: type of :organic:code:`if-true`
+      :type: :organic:match:`if-true`
 
    Returns :organic:code:`if-true` if :organic:code:`condition` evaluates to :organic:code:`true`, otherwise returns
    :organic:code:`if-false`. :organic:code:`if-true` and :organic:code:`if-false` can be of any type, as long as they
@@ -421,14 +421,14 @@ These functions are used to automate the values of other parameters, and can typ
    producing audio if it is used elsewhere as a normal audio source.
 
 .. organic:function:: map
-   :return: type of :organic:code:`template`
+   :return: :organic:match:`template`
 
    .. organic:input:: values
       :type: list of anything
 
    .. organic:input:: template
       :type: anything
-      :fillable: value ~ type of :organic:code:`values`
+      :fillable: value ~ :organic:match:item:`values`
 
    Returns a list that contains a copy of :organic:code:`template` for each value in :organic:code:`values`. The
    fillable value :organic:code:`value` can be used in :organic:code:`template` to access the value from

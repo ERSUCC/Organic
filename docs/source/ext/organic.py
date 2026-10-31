@@ -1,5 +1,3 @@
-from typing import AbstractSet, Any
-
 from docutils.nodes import emphasis, inline, literal, Text
 from docutils.parsers.rst.directives import unchanged, unchanged_required
 
@@ -103,6 +101,24 @@ class OrganicMono(SphinxRole):
   def run(self):
     return [ inline(text = self.text, classes = [ "mono" ]) ], []
 
+class OrganicMatch(SphinxRole):
+  def run(self):
+    node = inline()
+
+    node.append(inline(text = "type of ", classes = [ "mono" ]))
+    node.append(emphasis(text = self.text, classes = [ "mono" ]))
+
+    return [ node ], []
+
+class OrganicMatchItem(SphinxRole):
+  def run(self):
+    node = inline()
+
+    node.append(inline(text = "type of item in ", classes = [ "mono" ]))
+    node.append(emphasis(text = self.text, classes = [ "mono" ]))
+
+    return [ node ], []
+
 class OrganicDomain(Domain):
   name = "organic"
   label = "Organic"
@@ -116,7 +132,9 @@ class OrganicDomain(Domain):
   roles = {
     "mono": OrganicMono(),
     "code:function": OrganicFunctionHighlight(),
-    "code:comment": OrganicCommentHighlight()
+    "code:comment": OrganicCommentHighlight(),
+    "match": OrganicMatch(),
+    "match:item": OrganicMatchItem()
   }
 
   def get_full_qualified_name(self, node):
