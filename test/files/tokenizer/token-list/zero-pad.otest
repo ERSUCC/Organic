@@ -1,0 +1,41 @@
+name = "Leading zeros in zero integer"
+tokens = [
+    '0000'
+]
+
+---
+
+0000
+
+---
+
+name = "Leading zeros in non-zero integer"
+tokens = [
+    '0001'
+]
+
+---
+
+0001
+
+---
+
+name = "Leading and trailing zeros in zero decimal"
+tokens = [
+    '0000.0000'
+]
+
+---
+
+0000.0000
+
+---
+
+name = "Leading and trailing zeros in non-zero decimal"
+tokens = [
+    '0001.1000'
+]
+
+---
+
+0001.1000

@@ -22,16 +22,19 @@ Numbers
 -------
 
 All numbers in Organic are internally represented as double-precision floating point numbers. Numbers can be written as
-integers or decimals, both with an optional preceding minus sign for negation. Organic does not support scientific
-notation or any other alternative formats for notating numeric values. For example, the following values are all valid
-numbers:
+integers or decimals, both with an optional preceding minus sign for negation. Excess leading and trailing zeros are
+ignored, but at least one zero is required before the decimal point for decimal numbers less than :organic:mono:`1`.
+Organic does not support scientific notation or any other alternative formats for notating numeric values. For example,
+the following values are all valid numbers:
 
 .. code-block::
 
    42
    -61
+   005
    1234.5678
    -0.001
+   5.000
 
 Organic supports the following arithmetic operators, all used as infix operators:
 
