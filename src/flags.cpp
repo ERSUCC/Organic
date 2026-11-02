@@ -145,7 +145,7 @@ ProgramOptions FlagParser::getOptions()
         }
     }
 
-    if (!strncmp(flags.front().c_str(), "--", 2))
+    if (flags.empty() || !strncmp(flags.front().c_str(), "--", 2))
     {
         throw OrganicArgumentException("No program file specified.");
     }
