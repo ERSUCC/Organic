@@ -17,18 +17,14 @@ jobs:
         with:
           cmakeVersion: ~4.4.2
 
-      - name: Install ALSA
-        run: |
-          sudo apt update
-          sudo apt install -y libasound2-dev
-
       - name: Install Dependencies
-        run: sudo apt install -y libsndfile1-dev libsamplerate0-dev
+        run: sudo apt install -y libasound2-dev libsndfile1-dev libsamplerate0-dev
 
       - name: Build RtAudio
         run: |
           git clone https://github.com/thestk/rtaudio
           cd rtaudio
+          git checkout --force 34a9b0d
           cmake -B build
           cd build
           sudo make install

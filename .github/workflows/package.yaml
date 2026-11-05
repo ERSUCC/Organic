@@ -26,6 +26,7 @@ jobs:
         run: |
           git clone https://github.com/thestk/rtaudio
           cd rtaudio
+          git checkout --force 34a9b0d
           cmake -B build
           cd build
           sudo make install
@@ -69,6 +70,7 @@ jobs:
         run: |
           git clone https://github.com/thestk/rtaudio
           cd rtaudio
+          git checkout --force 34a9b0d
           cmake -B build
           cd build
           sudo make install
@@ -112,6 +114,7 @@ jobs:
         run: |
           git clone https://github.com/thestk/rtaudio
           cd rtaudio
+          git checkout --force 34a9b0d
           cmake -B build -DCMAKE_INSTALL_PREFIX="C:/Program Files/RtAudio"
           cmake --build build --config Release
           cmake --install build
