@@ -563,6 +563,19 @@ Engine::ValueObject* If::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
+Not::Not(const SourceLocation& location, ArgumentList* arguments) :
+    Call(location, arguments, new BooleanType()) {}
+
+void Not::resolveTypes(TypeResolver* visitor) const
+{
+    visitor->resolveTypes(this);
+}
+
+Engine::ValueObject* Not::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
 All::All(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new BooleanType()) {}
 

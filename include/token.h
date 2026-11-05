@@ -501,6 +501,15 @@ struct If : public Call
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
+struct Not : public Call
+{
+    Not(const SourceLocation& location, ArgumentList* arguments);
+
+    void resolveTypes(TypeResolver* visitor) const override;
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
+
 struct All : public Call
 {
     All(const SourceLocation& location, ArgumentList* arguments);

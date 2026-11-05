@@ -54,6 +54,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::Limit* token);
     Engine::ValueObject* transform(const Parser::Trigger* token);
     Engine::ValueObject* transform(const Parser::If* token);
+    Engine::ValueObject* transform(const Parser::Not* token);
     Engine::ValueObject* transform(const Parser::All* token);
     Engine::ValueObject* transform(const Parser::Any* token);
     Engine::ValueObject* transform(const Parser::None* token);

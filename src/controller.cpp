@@ -242,6 +242,49 @@ double ValueGreaterEqual::getValueInternal(const double value1, const double val
     return value1 >= value2;
 }
 
+Not::Not(ValueObject* value) :
+    value(value) {}
+
+Not::~Not()
+{
+    delete value;
+}
+
+ValueObject* Not::clone() const
+{
+    return new Not(value->clone());
+}
+
+double Not::getValue() const
+{
+    if (!enabled)
+    {
+        return 0;
+    }
+
+    if (value->getValue() == 0)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+void Not::init()
+{
+    value->start(startTime);
+}
+
+void Not::compute()
+{
+    value->update();
+
+    if (!value->enabled)
+    {
+        stop(value->getStopTime());
+    }
+}
+
 All::All(MultiList* values) :
     values(values) {}
 

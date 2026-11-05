@@ -298,6 +298,15 @@ These functions are used to automate the values of other parameters, and can typ
    :organic:code:`if-false`. :organic:code:`if-true` and :organic:code:`if-false` can be of any type, as long as they
    are both of the same type. Stops when :organic:code:`condition` stops.
 
+.. organic:function:: not
+   :return: boolean
+
+   .. organic:input:: value
+      :type: boolean
+
+   Returns :organic:code:`true` if :organic:code:`value` evaluates to :organic:code:`false`, otherwise returns
+   :organic:code:`false`. Stops when :organic:code:`value` stops.
+
 .. organic:function:: all
    :return: boolean
 

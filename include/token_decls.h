@@ -31,6 +31,7 @@ struct Random;
 struct Limit;
 struct Trigger;
 struct If;
+struct Not;
 struct All;
 struct Any;
 struct None;

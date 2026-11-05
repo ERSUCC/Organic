@@ -31,6 +31,7 @@ struct TypeResolver
     void resolveTypes(const Limit* token);
     void resolveTypes(const Trigger* token);
     void resolveTypes(const If* token);
+    void resolveTypes(const Not* token);
     void resolveTypes(const All* token);
     void resolveTypes(const Any* token);
     void resolveTypes(const None* token);

@@ -185,6 +185,13 @@ void TypeResolver::resolveTypes(const If* token)
     token->arguments->check();
 }
 
+void TypeResolver::resolveTypes(const Not* token)
+{
+    resolveArgumentTypes(token->arguments, "value", new BooleanType());
+
+    token->arguments->check();
+}
+
 void TypeResolver::resolveTypes(const All* token)
 {
     resolveArgumentTypes(token->arguments, "values", new ListType(new BooleanType()));

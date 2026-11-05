@@ -18,6 +18,7 @@ static std::unordered_map<std::string, std::function<UniqueToken<Call> (const So
     { "limit", CALL(Limit) },
     { "trigger", CALL(Trigger) },
     { "if", CALL(If) },
+    { "not", CALL(Not) },
     { "all", CALL(All) },
     { "any", CALL(Any) },
     { "none", CALL(None) },

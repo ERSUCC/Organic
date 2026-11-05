@@ -69,6 +69,7 @@ private:
     void testLimit();
     void testTrigger();
     void testIf();
+    void testNot();
     void testAll();
     void testAny();
     void testNone();

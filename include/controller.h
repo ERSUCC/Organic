@@ -187,6 +187,24 @@ protected:
 
 };
 
+struct Not : public ValueObject
+{
+    Not(ValueObject* value);
+    ~Not();
+
+    ValueObject* clone() const override;
+
+    double getValue() const override;
+
+protected:
+    void init() override;
+    void compute() override;
+
+private:
+    ValueObject* value;
+
+};
+
 struct All : public ValueObject
 {
     All(MultiList* values);

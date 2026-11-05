@@ -45,6 +45,7 @@ void TestControllers::test()
     testLimit();
     testTrigger();
     testIf();
+    testNot();
     testAll();
     testAny();
     testNone();

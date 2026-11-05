@@ -95,6 +95,7 @@ if (ORGANIC_BUILD_TESTS)
                                 test/src/engine/controllers/multiply.cpp
                                 test/src/engine/controllers/negate.cpp
                                 test/src/engine/controllers/none.cpp
+                                test/src/engine/controllers/not.cpp
                                 test/src/engine/controllers/power.cpp
                                 test/src/engine/controllers/random.cpp
                                 test/src/engine/controllers/repeat.cpp

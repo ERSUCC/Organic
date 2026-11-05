@@ -169,6 +169,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::If* token)
     return new Engine::If(ARG("condition"), ARG("is-true"), ARG("is-false"));
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::Not* token)
+{
+    return new Engine::Not(ARG("value"));
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::All* token)
 {
     return new Engine::All(new Engine::MultiList(ARG("values")));
