@@ -131,6 +131,8 @@ void TypeResolver::resolveTypes(const Envelope* token)
     resolveArgumentTypes(token->arguments, "from", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "to", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "sustain", new NumberType(), new Value(token->location, 0));
+
+    token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Repeat* token)
@@ -255,17 +257,23 @@ void TypeResolver::resolveTypes(const Logarithm* token)
 {
     resolveArgumentTypes(token->arguments, "value", new NumberType());
     resolveArgumentTypes(token->arguments, "base", new NumberType(), new Value(token->location, 10));
+
+    token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Amplitude* token)
 {
     resolveArgumentTypes(token->arguments, "source", new AudioSourceType());
+
+    token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Map* token)
 {
     resolveArgumentTypes(token->arguments, "values", new ListType(new AnyType()));
     resolveArgumentTypes(token->arguments, "template", new AnyType(), nullptr, { { "value", ((const ListType*)token->argumentType("values").get())->subType } });
+
+    token->arguments->check();
 }
 
 void TypeResolver::resolveTypes(const Sine* token)
