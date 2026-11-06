@@ -56,7 +56,8 @@ Organic::Organic(const ProgramOptions& options) :
 Organic::~Organic()
 {
     delete program;
-    delete utils;
+
+    Utils::deinit();
 
     Engine::Defaults::deinit();
 }

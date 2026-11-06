@@ -12,6 +12,15 @@ Utils* Utils::get()
     return instance;
 }
 
+void Utils::deinit()
+{
+    static Utils* instance;
+
+    delete instance;
+
+    instance = nullptr;
+}
+
 void Utils::printUsage()
 {
     std::cout << "Usage: organic [--version] [--info] [--time <num>] [--fast-forward <num>] [--export <path>] [--channels <num>]\n";

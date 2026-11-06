@@ -47,6 +47,6 @@ struct Path
 private:
     Path(const std::filesystem::path& path);
 
-    const std::filesystem::path path;
+    std::filesystem::path path;
 
 };

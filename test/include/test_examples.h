@@ -1,18 +1,14 @@
 #pragma once
 
-#include <stddef.h>
+#include <filesystem>
+#include <time.h>
 
 #include "exception.h"
-#include "parse.h"
+#include "flags.h"
+#include "organic.h"
 #include "path.h"
-#include "program.h"
-#include "resolve.h"
-#include "source.h"
 #include "test.h"
 #include "test_utils.h"
-#include "token.h"
-#include "transform.h"
-#include "utils.h"
 
 struct TestExamples : public Test
 {
@@ -25,7 +21,5 @@ private:
     TestExamples(TestTracker* tracker);
 
     void expectSuccess(const Path& path);
-
-    Utils* utils;
 
 };

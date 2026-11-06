@@ -32,6 +32,8 @@ struct Utils
 {
     static Utils* get();
 
+    static void deinit();
+
     static void printUsage();
     static void printVersion();
     static void printInfo();

@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     {
         TestUtils::printError(e.what());
 
-        delete utils;
+        Utils::deinit();
 
         Engine::Defaults::deinit();
 
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     {
         TestUtils::printSuccess("\nAll tests passed.");
 
-        delete utils;
+        Utils::deinit();
 
         Engine::Defaults::deinit();
 
@@ -67,7 +67,7 @@ int main(int argc, char** argv)
         TestUtils::printError("\n" + std::to_string(failures) + " failing tests.");
     }
 
-    delete utils;
+    Utils::deinit();
 
     Engine::Defaults::deinit();
 

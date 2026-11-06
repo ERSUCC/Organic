@@ -28,6 +28,7 @@ jobs:
           cmake -B build
           cd build
           sudo make install
+          sudo ldconfig /usr/local/lib
 
       - name: Build
         run: |

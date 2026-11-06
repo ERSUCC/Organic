@@ -20,55 +20,28 @@ void TestExamples::test()
 }
 
 TestExamples::TestExamples(TestTracker* tracker) :
-    Test(tracker), utils(Utils::get()) {}
+    Test(tracker) {}
 
 void TestExamples::expectSuccess(const Path& path)
 {
     beginTest(path.stem(), true);
 
-    const FileProvider* source = FileProvider::create(path);
-
-    if (!source)
-    {
-        fail("Could not read \"" + path.string() + "\".");
-
-        endTest();
-
-        return;
-    }
-
-    const Parser::Program* program = nullptr;
-
-    TokenTransformer* transformer = new TokenTransformer(path);
-
-    Parser::TypeResolver* resolver = new Parser::TypeResolver();
+    const Path tempPath = Path::relative(std::filesystem::temp_directory_path() / ("organic-" + std::to_string(time(nullptr)) + ".wav"));
 
     try
     {
-        program = Parser::Parser::parseSource(source);
+        ProgramOptions options;
 
-        program->resolveTypes(resolver);
+        options.programPath = path;
+        options.exportPath = tempPath;
+        options.time = 60000;
+        options.seed = 0;
 
-        Engine::Program* engProgram = program->transform(transformer);
+        Organic* organic = new Organic(options);
 
-        utils->time = 0;
+        organic->start();
 
-        const size_t steps = utils->sampleRate * 10;
-
-        double* samples = (double*)malloc(sizeof(double) * steps * utils->channels);
-
-        engProgram->start(0);
-
-        for (size_t i = 0; i < steps; i++)
-        {
-            utils->time = i * utils->timeStep;
-
-            engProgram->processAudioSources(samples + i * utils->channels);
-        }
-
-        free(samples);
-
-        delete engProgram;
+        delete organic;
     }
 
     catch (const OrganicException& e)
@@ -76,10 +49,7 @@ void TestExamples::expectSuccess(const Path& path)
         failWithError(e);
     }
 
-    delete transformer;
-    delete resolver;
-    delete program;
-    delete source;
+    std::filesystem::remove(tempPath.string());
 
     endTest();
 }

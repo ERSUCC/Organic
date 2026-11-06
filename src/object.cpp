@@ -8,6 +8,8 @@ void Defaults::deinit()
     {
         delete pair.second;
     }
+
+    objects.clear();
 }
 
 ValueObject::ValueObject() :
