@@ -229,11 +229,6 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Map* token)
     return new Engine::Map(new Engine::MultiList(ARG("values")), FILL_ARG("template", { "value" }));
 }
 
-Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyAudioSource* token)
-{
-    return new Engine::AudioSource();
-}
-
 Engine::ValueObject* TokenTransformer::transform(const Parser::Sine* token)
 {
     return new Engine::Sine(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), ARG("frequency"));
@@ -285,11 +280,6 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
 Engine::ValueObject* TokenTransformer::transform(const Parser::Group* token)
 {
     return new Engine::Group(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), new Engine::MultiList(ARG("sources")));
-}
-
-Engine::ValueObject* TokenTransformer::transform(const Parser::EmptyEffect* token)
-{
-    return new Engine::Effect();
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::EffectGroup* token)

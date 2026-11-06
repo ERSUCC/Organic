@@ -66,7 +66,6 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::Logarithm* token);
     Engine::ValueObject* transform(const Parser::Amplitude* token);
     Engine::ValueObject* transform(const Parser::Map* token);
-    Engine::ValueObject* transform(const Parser::EmptyAudioSource* token);
     Engine::ValueObject* transform(const Parser::Sine* token);
     Engine::ValueObject* transform(const Parser::Square* token);
     Engine::ValueObject* transform(const Parser::Triangle* token);
@@ -76,7 +75,6 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::Sample* token);
     Engine::ValueObject* transform(const Parser::Granulate* token);
     Engine::ValueObject* transform(const Parser::Group* token);
-    Engine::ValueObject* transform(const Parser::EmptyEffect* token);
     Engine::ValueObject* transform(const Parser::EffectGroup* token);
     Engine::ValueObject* transform(const Parser::Delay* token);
     Engine::ValueObject* transform(const Parser::Comb* token);

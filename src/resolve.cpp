@@ -281,7 +281,7 @@ void TypeResolver::resolveTypes(const Sine* token)
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
 
     token->arguments->check();
 }
@@ -291,7 +291,7 @@ void TypeResolver::resolveTypes(const Square* token)
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
 
     token->arguments->check();
 }
@@ -301,7 +301,7 @@ void TypeResolver::resolveTypes(const Triangle* token)
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
 
     token->arguments->check();
 }
@@ -311,7 +311,7 @@ void TypeResolver::resolveTypes(const Saw* token)
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
 
     token->arguments->check();
 }
@@ -322,7 +322,7 @@ void TypeResolver::resolveTypes(const Oscillator* token)
     resolveArgumentTypes(token->arguments, "frequency", new NumberType());
     resolveArgumentTypes(token->arguments, "waveform", new NumberType(), nullptr, { { "phase", SharedType(new NumberType()) } });
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
 
     token->arguments->check();
 }
@@ -331,7 +331,7 @@ void TypeResolver::resolveTypes(const Noise* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
 
     token->arguments->check();
 }
@@ -341,7 +341,7 @@ void TypeResolver::resolveTypes(const Sample* token)
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "file", new StringType());
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
     resolveArgumentTypes(token->arguments, "start", new NumberType(), new Value(token->location, 0));
     resolveArgumentTypes(token->arguments, "length", new NumberType(), new Value(token->location, 0));
 
@@ -356,7 +356,7 @@ void TypeResolver::resolveTypes(const Granulate* token)
     resolveArgumentTypes(token->arguments, "grains", new NumberType());
     resolveArgumentTypes(token->arguments, "shape", new NumberType(), new Value(token->location, 1), { { "position", SharedType(new NumberType()) } });
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
 
     token->arguments->check();
 }
@@ -366,7 +366,7 @@ void TypeResolver::resolveTypes(const Group* token)
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
     resolveArgumentTypes(token->arguments, "sources", new ListType(new AudioSourceType()));
     resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
-    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, { new EmptyEffect(token->location) }));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
 
     token->arguments->check();
 }

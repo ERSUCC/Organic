@@ -727,14 +727,6 @@ Engine::ValueObject* Map::transform(TokenTransformer* visitor) const
 AudioSource::AudioSource(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new AudioSourceType()) {}
 
-EmptyAudioSource::EmptyAudioSource(const SourceLocation& location) :
-    AudioSource(location, new ArgumentList(location, {}, "")) {}
-
-Engine::ValueObject* EmptyAudioSource::transform(TokenTransformer* visitor) const
-{
-    return visitor->transform(this);
-}
-
 Sine::Sine(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 
@@ -854,14 +846,6 @@ Engine::ValueObject* Group::transform(TokenTransformer* visitor) const
 
 Effect::Effect(const SourceLocation& location, ArgumentList* arguments) :
     Call(location, arguments, new EffectType()) {}
-
-EmptyEffect::EmptyEffect(const SourceLocation& location) :
-    Effect(location, new ArgumentList(location, {}, "")) {}
-
-Engine::ValueObject* EmptyEffect::transform(TokenTransformer* visitor) const
-{
-    return visitor->transform(this);
-}
 
 EffectGroup::EffectGroup(const SourceLocation& location, ArgumentList* arguments) :
     Effect(location, arguments) {}

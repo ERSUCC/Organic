@@ -616,13 +616,6 @@ struct AudioSource : public Call
     AudioSource(const SourceLocation& location, ArgumentList* arguments);
 };
 
-struct EmptyAudioSource : public AudioSource
-{
-    EmptyAudioSource(const SourceLocation& location);
-
-    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
-};
-
 struct Sine : public AudioSource
 {
     Sine(const SourceLocation& location, ArgumentList* arguments);
@@ -707,13 +700,6 @@ struct Group : public AudioSource
 struct Effect : public Call
 {
     Effect(const SourceLocation& location, ArgumentList* arguments);
-};
-
-struct EmptyEffect : public Effect
-{
-    EmptyEffect(const SourceLocation& location);
-
-    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
 struct EffectGroup : public Effect
