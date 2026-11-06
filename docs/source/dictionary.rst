@@ -905,6 +905,17 @@ source regardless of the function that created it or the values of its inputs.
       Use this input to control the ratio of echoes to original audio. A value of :organic:mono:`0` would result in only
       the original audio being played, and a value of :organic:mono:`1` would result in only the echoes being played.
 
+.. organic:function:: decimate
+   :return: effect
+
+   .. organic:input:: samples
+      :type: number
+
+   Reduces the audio resolution of the target audio source by holding samples past their original length, skipping the
+   samples in between. The input :organic:code:`samples` specifies how many samples should be skipped while holding an
+   earlier sample. For example, if :organic:code:`samples` evaluates to :organic:mono:`4`, the target audio source will
+   output every 4th sample, each held for a duration of :organic:mono:`4` samples.
+
 .. organic:function:: effect-group
    :return: effect
 

@@ -83,6 +83,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::AllPass* token);
     Engine::ValueObject* transform(const Parser::LowPass* token);
     Engine::ValueObject* transform(const Parser::Reverb* token);
+    Engine::ValueObject* transform(const Parser::Decimate* token);
     Engine::ValueObject* transform(const Parser::CallUser* token);
     Engine::ValueObject* transform(const Parser::AddAlias* token);
     Engine::ValueObject* transform(const Parser::SubtractAlias* token);

@@ -44,7 +44,8 @@ static std::unordered_map<std::string, std::function<UniqueToken<Call> (const So
     { "comb", CALL(Comb) },
     { "all-pass", CALL(AllPass) },
     { "low-pass", CALL(LowPass) },
-    { "reverb", CALL(Reverb) }
+    { "reverb", CALL(Reverb) },
+    { "decimate", CALL(Decimate) }
 };
 
 ParserContext::ParserContext(ParserContext* parent, const ContextType& type, const std::string& name, const std::vector<UniqueToken<InputDef>>& inputs) :

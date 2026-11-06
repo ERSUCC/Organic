@@ -413,6 +413,13 @@ void TypeResolver::resolveTypes(const Reverb* token)
     token->arguments->check();
 }
 
+void TypeResolver::resolveTypes(const Decimate* token)
+{
+    resolveArgumentTypes(token->arguments, "samples", new NumberType());
+
+    token->arguments->check();
+}
+
 void TypeResolver::resolveTypes(const CallUser* token)
 {
     for (const InputDef* input : token->function->inputs)

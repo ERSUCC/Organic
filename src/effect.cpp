@@ -500,3 +500,67 @@ void Reverb::compute()
     mix->update();
     length->update();
 }
+
+Decimate::Decimate(ValueObject* samples) :
+    samples(samples) {}
+
+Decimate::~Decimate()
+{
+    delete samples;
+
+    for (const std::pair<ValueObject*, double*>& pair : values)
+    {
+        free(pair.second);
+    }
+}
+
+ValueObject* Decimate::clone() const
+{
+    return new Decimate(samples->clone());
+}
+
+void Decimate::apply(ValueObject* source, double* buffer)
+{
+    if (!values.count(source))
+    {
+        double* stored = (double*)malloc(sizeof(double) * utils->channels);
+
+        values[source] = stored;
+
+        for (size_t i = 0; i < utils->channels; i++)
+        {
+            stored[i] = buffer[i];
+        }
+    }
+
+    double* stored = values.at(source);
+
+    if (offset >= samples->getValue())
+    {
+        for (size_t i = 0; i < utils->channels; i++)
+        {
+            stored[i] = buffer[i];
+        }
+
+        offset = 0;
+    }
+
+    for (size_t i = 0; i < utils->channels; i++)
+    {
+        buffer[i] = stored[i];
+    }
+
+    offset++;
+}
+
+void Decimate::init()
+{
+    samples->start(startTime);
+
+    offset = 0;
+}
+
+void Decimate::compute()
+{
+    samples->update();
+}

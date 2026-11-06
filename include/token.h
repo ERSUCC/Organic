@@ -770,6 +770,15 @@ struct Reverb : public Effect
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
+struct Decimate : public Effect
+{
+    Decimate(const SourceLocation& location, ArgumentList* arguments);
+
+    void resolveTypes(TypeResolver* visitor) const override;
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
+
 struct CallUser : public Call
 {
     CallUser(const SourceLocation& location, ArgumentList* arguments, const FunctionDef* function);

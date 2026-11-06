@@ -322,6 +322,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Reverb* token)
     return new Engine::Reverb(ARG("mix"), ARG("length"));
 }
 
+Engine::ValueObject* TokenTransformer::transform(const Parser::Decimate* token)
+{
+    return new Engine::Decimate(ARG("samples"));
+}
+
 Engine::ValueObject* TokenTransformer::transform(const Parser::CallUser* token)
 {
     for (const Parser::InputDef* input : token->function->inputs)

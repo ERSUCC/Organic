@@ -941,6 +941,19 @@ Engine::ValueObject* Reverb::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
+Decimate::Decimate(const SourceLocation& location, ArgumentList* arguments) :
+    Effect(location, arguments) {}
+
+void Decimate::resolveTypes(TypeResolver* visitor) const
+{
+    visitor->resolveTypes(this);
+}
+
+Engine::ValueObject* Decimate::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
 CallUser::CallUser(const SourceLocation& location, ArgumentList* arguments, const FunctionDef* function) :
     Call(location, arguments), function(function) {}
 

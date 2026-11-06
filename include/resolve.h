@@ -58,6 +58,7 @@ struct TypeResolver
     void resolveTypes(const AllPass* token);
     void resolveTypes(const LowPass* token);
     void resolveTypes(const Reverb* token);
+    void resolveTypes(const Decimate* token);
     void resolveTypes(const CallUser* token);
     void resolveTypes(const CallAlias* token);
     void resolveTypes(const Program* token);

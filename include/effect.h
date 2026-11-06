@@ -1,9 +1,10 @@
 #pragma once
 
-#include <cstring>
 #include <queue>
 #include <random>
 #include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unordered_map>
 #include <utility>
 
@@ -231,6 +232,28 @@ private:
     ValueObject* length;
 
     std::unordered_map<ValueObject*, DelayMatrix*> matrices;
+
+};
+
+struct Decimate : public Effect
+{
+    Decimate(ValueObject* samples);
+    ~Decimate();
+
+    ValueObject* clone() const override;
+
+    void apply(ValueObject* source, double* buffer) override;
+
+protected:
+    void init() override;
+    void compute() override;
+
+private:
+    ValueObject* samples;
+
+    std::unordered_map<ValueObject*, double*> values;
+
+    size_t offset;
 
 };
 

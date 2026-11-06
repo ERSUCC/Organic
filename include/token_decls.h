@@ -60,6 +60,7 @@ struct Comb;
 struct AllPass;
 struct LowPass;
 struct Reverb;
+struct Decimate;
 struct CallUser;
 struct CallAlias;
 struct AddAlias;
