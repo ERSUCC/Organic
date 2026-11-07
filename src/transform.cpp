@@ -28,8 +28,8 @@ Engine::Fillable* LambdaContext::findFillable(const std::string& name)
     return nullptr;
 }
 
-TokenTransformer::TokenTransformer(const Path& sourcePath) :
-    sourcePath(sourcePath) {}
+TokenTransformer::TokenTransformer(const Path& sourcePath, Engine::InputManager* inputManager) :
+    sourcePath(sourcePath), inputManager(inputManager) {}
 
 TokenTransformer::~TokenTransformer()
 {
@@ -275,6 +275,11 @@ Engine::ValueObject* TokenTransformer::transform(const Parser::Granulate* token)
     locator->loadResources(TOKEN("sample")->location);
 
     return new Engine::Granulate(ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")), locator, ARG("grains"), ARG("length"), FILL_ARG("shape", { "position" }));
+}
+
+Engine::ValueObject* TokenTransformer::transform(const Parser::Input* token)
+{
+    return new Engine::Input(inputManager, ARG("volume"), ARG("pan"), new Engine::MultiList(ARG("effects")));
 }
 
 Engine::ValueObject* TokenTransformer::transform(const Parser::Group* token)

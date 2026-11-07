@@ -8,6 +8,7 @@
 #include <string>
 
 #include "effect.h"
+#include "input.h"
 #include "object.h"
 #include "resource.h"
 
@@ -258,6 +259,21 @@ private:
     ShapeCoordinator* coordinator = new ShapeCoordinator();
 
     GrainList* grainList = new GrainList();
+
+};
+
+struct Input : public AudioSource
+{
+    Input(InputManager* manager, ValueObject* volume, ValueObject* pan, MultiList* effects);
+
+    ValueObject* clone() const override;
+
+protected:
+    void init() override;
+    void compute() override;
+
+private:
+    InputManager* manager;
 
 };
 

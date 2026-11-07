@@ -51,6 +51,7 @@ struct TypeResolver
     void resolveTypes(const Noise* token);
     void resolveTypes(const Sample* token);
     void resolveTypes(const Granulate* token);
+    void resolveTypes(const Input* token);
     void resolveTypes(const Group* token);
     void resolveTypes(const EffectGroup* token);
     void resolveTypes(const Delay* token);

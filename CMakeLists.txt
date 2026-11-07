@@ -12,6 +12,7 @@ add_library(organic_lib STATIC src/audiosource.cpp
                                src/effect.cpp
                                src/exception.cpp
                                src/flags.cpp
+                               src/input.cpp
                                src/location.cpp
                                src/object.cpp
                                src/organic.cpp
@@ -48,8 +49,9 @@ elseif (APPLE)
     target_include_directories(organic_lib PUBLIC /opt/homebrew/include /usr/local/include/rtaudio)
     target_link_directories(organic_lib PUBLIC /opt/homebrew/lib /usr/local/lib)
 else ()
-    target_include_directories(organic_lib PUBLIC /usr/local/include/rtaudio)
+    target_include_directories(organic_lib PUBLIC /usr/local/include/rtaudio /usr/include/pipewire-0.3 /usr/include/spa-0.2)
     target_link_directories(organic_lib PUBLIC /usr/local/lib64)
+    target_link_libraries(organic_lib pipewire-0.3)
 endif ()
 
 target_link_libraries(organic_lib rtaudio sndfile samplerate)

@@ -641,6 +641,48 @@ void Granulate::compute()
     }
 }
 
+Input::Input(InputManager* manager, ValueObject* volume, ValueObject* pan, MultiList* effects) :
+    AudioSource(volume, pan, effects), manager(manager)
+{
+    manager->activate();
+}
+
+ValueObject* Input::clone() const
+{
+    return new Input(manager, volume->clone(), pan->clone(), effects->cloneAs<MultiList>());
+}
+
+void Input::init()
+{
+    volume->start(startTime);
+    pan->start(startTime);
+    effects->start(startTime);
+}
+
+void Input::compute()
+{
+    volume->update();
+    pan->update();
+    effects->update();
+
+    manager->readInput(effectBuffer);
+
+    const double volumeValue = volume->getValue();
+
+    for (size_t i = 0; i < utils->channels; i++)
+    {
+        effectBuffer[i] *= volumeValue;
+    }
+
+    const double panValue = pan->getValue();
+
+    if (utils->channels == 2)
+    {
+        effectBuffer[0] = effectBuffer[0] * (1 - panValue) / 2;
+        effectBuffer[1] = effectBuffer[1] * (1 + panValue) / 2;
+    }
+}
+
 Group::Group(ValueObject* volume, ValueObject* pan, MultiList* effects, MultiList* sources) :
     AudioSource(volume, pan, effects), sources(sources) {}
 

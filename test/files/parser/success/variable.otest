@@ -14,11 +14,11 @@ name = "Use variable as user function input"
 
 test = 1
 
-func(input: number) = {
-    input
+func(value: number) = {
+    value
 }
 
-func(input: test)
+func(value: test)
 
 ---
 

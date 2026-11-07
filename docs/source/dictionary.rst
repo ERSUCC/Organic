@@ -752,6 +752,37 @@ These functions are used to create various sources of audio, such as oscillating
       Use this input to apply audio effects to the generated audio. Effects will be applied in the order they are
       specified in this input.
 
+.. organic:function:: input
+   :return: audio source
+
+   Plays back the audio from an input source (for example, a microphone) in real time. Uses the default input source
+   selected in the system audio settings.
+
+   **Optional Inputs**
+
+   .. organic:input:: volume
+      :type: number
+      :default: :organic:code:`1`
+
+      Use this input to increase or decrease the volume of the input audio. Any number greater than or equal to
+      :organic:mono:`0` is valid, but extremely high volume values can be dangerous or otherwise undesirable.
+
+   .. organic:input:: pan
+      :type: number
+      :default: :organic:code:`0`
+
+      Use this input to control the stereo balance of the input audio. Valid values are in the range from
+      :organic:mono:`-1` to :organic:mono:`1`, where :organic:mono:`-1` sends all output to the left speaker and
+      :organic:mono:`1` sends all output to the right speaker. If :option:`--mono` is specified, this input has no
+      effect.
+
+   .. organic:input:: effects
+      :type: list of effect
+      :default: :organic:code:`[]`
+
+      Use this input to apply audio effects to the input audio. Effects will be applied in the order they are specified
+      in this input.
+
 .. organic:function:: group
    :return: audio source
 

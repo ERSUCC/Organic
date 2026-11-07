@@ -34,7 +34,7 @@ void TestValue::expectValue(const OTest* info)
 
     Parser::TypeResolver* resolver = new Parser::TypeResolver();
 
-    TokenTransformer* transformer = new TokenTransformer(source->path());
+    TokenTransformer* transformer = new TokenTransformer(source->path(), inputManager);
 
     try
     {
@@ -84,4 +84,4 @@ void TestValue::expectValue(const OTest* info)
 }
 
 TestValue::TestValue(TestTracker* tracker) :
-    Test(tracker) {}
+    Test(tracker), inputManager(new Engine::InputManager()) {}

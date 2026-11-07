@@ -51,6 +51,7 @@ struct Oscillator;
 struct Noise;
 struct Sample;
 struct Granulate;
+struct Input;
 struct Group;
 struct EffectGroup;
 struct Delay;

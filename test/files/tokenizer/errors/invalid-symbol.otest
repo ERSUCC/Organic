@@ -126,4 +126,4 @@ error = 'Unrecognized symbol "$".'
 
 ---
 
-test(input: $)
+test(value: $)

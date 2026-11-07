@@ -3,6 +3,7 @@
 #include <limits>
 
 #include "exception.h"
+#include "input.h"
 #include "otest.h"
 #include "parse.h"
 #include "path.h"
@@ -24,5 +25,7 @@ private:
     TestValue(TestTracker* tracker);
 
     void expectValue(const OTest* info);
+
+    Engine::InputManager* inputManager;
 
 };

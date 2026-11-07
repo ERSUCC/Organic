@@ -688,6 +688,15 @@ struct Granulate : public AudioSource
     Engine::ValueObject* transform(TokenTransformer* visitor) const override;
 };
 
+struct Input : public AudioSource
+{
+    Input(const SourceLocation& location, ArgumentList* arguments);
+
+    void resolveTypes(TypeResolver* visitor) const override;
+
+    Engine::ValueObject* transform(TokenTransformer* visitor) const override;
+};
+
 struct Group : public AudioSource
 {
     Group(const SourceLocation& location, ArgumentList* arguments);

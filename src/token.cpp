@@ -831,6 +831,19 @@ Engine::ValueObject* Granulate::transform(TokenTransformer* visitor) const
     return visitor->transform(this);
 }
 
+Input::Input(const SourceLocation& location, ArgumentList* arguments) :
+    AudioSource(location, arguments) {}
+
+void Input::resolveTypes(TypeResolver* visitor) const
+{
+    visitor->resolveTypes(this);
+}
+
+Engine::ValueObject* Input::transform(TokenTransformer* visitor) const
+{
+    return visitor->transform(this);
+}
+
 Group::Group(const SourceLocation& location, ArgumentList* arguments) :
     AudioSource(location, arguments) {}
 

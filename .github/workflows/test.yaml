@@ -18,13 +18,15 @@ jobs:
           cmakeVersion: ~4.4.2
 
       - name: Install Dependencies
-        run: sudo apt install -y libasound2-dev libsndfile1-dev libsamplerate0-dev
+        run: |
+          sudo apt update
+          sudo apt install -y libasound2-dev libpipewire-0.3-dev libsndfile1-dev libsamplerate0-dev
 
       - name: Build RtAudio
         run: |
-          git clone https://github.com/thestk/rtaudio
+          git clone https://github.com/ERSUCC/rtaudio
           cd rtaudio
-          git checkout --force 34a9b0d
+          git checkout --force ee572da
           cmake -B build
           cd build
           sudo make install

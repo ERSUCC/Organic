@@ -16,27 +16,27 @@ error = 'Invalid input name "test" for function "func".'
 
 ---
 
-func(input: number) = {
-    input
+func(value: number) = {
+    value
 }
 
-func(input: 0, test: 1)
+func(value: 0, test: 1)
 
 ---
 
 name = "Input name from surrounding function for sibling function"
 line = 7
 character = 20
-error = 'Invalid input name "input" for function "func1".'
+error = 'Invalid input name "value" for function "func1".'
 
 ---
 
-func(input: number) = {
+func(value: number) = {
     func1(test: number) = {
         test
     }
 
-    func1(test: 1, input: 2)
+    func1(test: 1, value: 2)
 }
 
 ---
@@ -48,14 +48,14 @@ error = 'Invalid input name "foo" for function "func".'
 
 ---
 
-func(input: number) = {
-    input
+func(value: number) = {
+    value
 }
 
 func1(test: number) = {
     func2(whee: number) = {
         func3(foo: number) = {
-            func(input: 0, foo: 4)
+            func(value: 0, foo: 4)
         }
     }
 }
@@ -65,12 +65,12 @@ func1(test: number) = {
 name = "Input name from distant scope for surrounding function"
 line = 12
 character = 23
-error = 'Invalid input name "input" for function "func3".'
+error = 'Invalid input name "value" for function "func3".'
 
 ---
 
-func(input: number) = {
-    input
+func(value: number) = {
+    value
 }
 
 func1(test: number) = {
@@ -79,6 +79,6 @@ func1(test: number) = {
             foo
         }
 
-        func3(foo: 3, input: 4)
+        func3(foo: 3, value: 4)
     }
 }

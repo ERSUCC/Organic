@@ -1,7 +1,7 @@
 #include "organic.h"
 
 Organic::Organic(const ProgramOptions& options) :
-    options(options)
+    options(options), inputManager(new Engine::InputManager())
 {
     utils = Utils::get();
 
@@ -44,7 +44,7 @@ Organic::Organic(const ProgramOptions& options) :
 
     delete resolver;
 
-    TokenTransformer* transformer = new TokenTransformer(path);
+    TokenTransformer* transformer = new TokenTransformer(path, inputManager);
 
     this->program = program->transform(transformer);
 
@@ -56,6 +56,7 @@ Organic::Organic(const ProgramOptions& options) :
 Organic::~Organic()
 {
     delete program;
+    delete inputManager;
 
     Utils::deinit();
 
@@ -86,7 +87,7 @@ void Organic::stop()
 
 void Organic::startPlayback()
 {
-    RtAudio audio(RtAudio::Api::UNSPECIFIED, std::bind(&Organic::audioError, this, std::placeholders::_2));
+    RtAudio audio(audioApi(), std::bind(&Organic::audioError, this, std::placeholders::_2));
 
     const std::vector<unsigned int>& ids = audio.getDeviceIds();
 
@@ -95,12 +96,23 @@ void Organic::startPlayback()
         throw OrganicAudioException("No available audio devices detected.");
     }
 
-    RtAudio::StreamParameters parameters;
+    RtAudio::StreamParameters outParams;
 
-    parameters.deviceId = audio.getDefaultOutputDevice();
-    parameters.nChannels = utils->channels;
+    outParams.deviceId = audio.getDefaultOutputDevice();
+    outParams.nChannels = utils->channels;
 
-    if (audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT64, utils->sampleRate, &utils->bufferLength, std::bind(&Organic::processAudio, this, std::placeholders::_1, std::placeholders::_3), nullptr))
+    RtAudio::StreamParameters inParams;
+    RtAudio::StreamParameters* inParamsRef = nullptr;
+
+    if (inputManager->active())
+    {
+        inParams.deviceId = audio.getDefaultInputDevice();
+        inParams.nChannels = utils->channels;
+
+        inParamsRef = &inParams;
+    }
+
+    if (audio.openStream(&outParams, inParamsRef, RTAUDIO_FLOAT64, utils->sampleRate, &utils->bufferLength, std::bind(&Organic::processAudio, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)))
     {
         throw OrganicAudioException(audio.getErrorText());
     }
@@ -220,10 +232,15 @@ void Organic::startExport()
     delete file;
 }
 
-int Organic::processAudio(void* output, const unsigned int frames)
+int Organic::processAudio(void* output, void* input, const unsigned int frames)
 {
     for (size_t i = 0; i < frames; i++)
     {
+        if (inputManager->active())
+        {
+            inputManager->processAudio((double*)input + i * utils->channels);
+        }
+
         program->processAudioSources((double*)output + i * utils->channels);
 
         utils->time += utils->timeStep;
@@ -285,6 +302,61 @@ void Organic::handleInterrupt(Organic* organic)
     action.sa_handler = &handler;
 
     sigaction(SIGINT, &action, nullptr);
+}
+
+#endif
+
+#ifdef __linux__
+
+#include <pipewire/pipewire.h>
+
+RtAudio::Api Organic::audioApi() const
+{
+    pw_init(nullptr, nullptr);
+
+    pw_main_loop* loop = pw_main_loop_new(nullptr);
+
+    if (!loop)
+    {
+        pw_deinit();
+
+        return RtAudio::Api::LINUX_ALSA;
+    }
+
+    pw_context* context = pw_context_new(pw_main_loop_get_loop(loop), nullptr, 0);
+
+    if (!context)
+    {
+        pw_main_loop_destroy(loop);
+        pw_deinit();
+
+        return RtAudio::Api::LINUX_ALSA;
+    }
+
+    pw_core* core = pw_context_connect(context, nullptr, 0);
+
+    if (!core)
+    {
+        pw_context_destroy(context);
+        pw_main_loop_destroy(loop);
+        pw_deinit();
+
+        return RtAudio::Api::LINUX_ALSA;
+    }
+
+    pw_core_disconnect(core);
+    pw_context_destroy(context);
+    pw_main_loop_destroy(loop);
+    pw_deinit();
+
+    return RtAudio::Api::LINUX_PIPE;
+}
+
+#else
+
+RtAudio::Api Organic::audioApi() const
+{
+    return RtAudio::Api::UNSPECIFIED;
 }
 
 #endif

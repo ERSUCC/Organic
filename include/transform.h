@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "controller.h"
+#include "input.h"
 #include "object.h"
 #include "path.h"
 #include "program.h"
@@ -29,7 +30,7 @@ struct LambdaContext
 
 struct TokenTransformer
 {
-    TokenTransformer(const Path& sourcePath);
+    TokenTransformer(const Path& sourcePath, Engine::InputManager* inputManager);
     ~TokenTransformer();
 
     Engine::ValueObject* transform(const Parser::Value* token);
@@ -74,6 +75,7 @@ struct TokenTransformer
     Engine::ValueObject* transform(const Parser::Noise* token);
     Engine::ValueObject* transform(const Parser::Sample* token);
     Engine::ValueObject* transform(const Parser::Granulate* token);
+    Engine::ValueObject* transform(const Parser::Input* token);
     Engine::ValueObject* transform(const Parser::Group* token);
     Engine::ValueObject* transform(const Parser::EffectGroup* token);
     Engine::ValueObject* transform(const Parser::Delay* token);
@@ -124,6 +126,8 @@ private:
     }
 
     const Path sourcePath;
+
+    Engine::InputManager* inputManager;
 
     std::unordered_map<const Parser::Identifier*, Engine::ValueObject*> currentVariables;
 
