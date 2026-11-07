@@ -38,6 +38,7 @@ static std::unordered_map<std::string, std::function<UniqueToken<Call> (const So
     { "sample", CALL(Sample) },
     { "oscillator", CALL(Oscillator) },
     { "granulate", CALL(Granulate) },
+    { "input", CALL(Input) },
     { "group", CALL(Group) },
     { "effect-group", CALL(EffectGroup) },
     { "delay", CALL(Delay) },

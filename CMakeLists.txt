@@ -12,6 +12,7 @@ add_library(organic_lib STATIC src/audiosource.cpp
                                src/effect.cpp
                                src/exception.cpp
                                src/flags.cpp
+                               src/input.cpp
                                src/location.cpp
                                src/object.cpp
                                src/organic.cpp

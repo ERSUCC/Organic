@@ -361,6 +361,15 @@ void TypeResolver::resolveTypes(const Granulate* token)
     token->arguments->check();
 }
 
+void TypeResolver::resolveTypes(const Input* token)
+{
+    resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));
+    resolveArgumentTypes(token->arguments, "pan", new NumberType(), new Value(token->location, 0));
+    resolveArgumentTypes(token->arguments, "effects", new ListType(new EffectType()), new List(token->location, {}));
+
+    token->arguments->check();
+}
+
 void TypeResolver::resolveTypes(const Group* token)
 {
     resolveArgumentTypes(token->arguments, "volume", new NumberType(), new Value(token->location, 1));

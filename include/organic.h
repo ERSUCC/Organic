@@ -13,6 +13,7 @@
 
 #include "exception.h"
 #include "flags.h"
+#include "input.h"
 #include "object.h"
 #include "parse.h"
 #include "path.h"
@@ -34,13 +35,15 @@ private:
     void startPlayback();
     void startExport();
 
-    int processAudio(void* output, const unsigned int frames);
+    int processAudio(void* output, void* input, const unsigned int frames);
 
     void audioError(const std::string& message) const;
 
     void handleInterrupt(Organic* organic);
 
     const ProgramOptions options;
+
+    Engine::InputManager* inputManager;
 
     Utils* utils;
 
